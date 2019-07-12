@@ -1,0 +1,7 @@
+# Ignore everything
+*
+
+# Except these files
+!index.js
+!libraries/*.js
+!utils/*.js
