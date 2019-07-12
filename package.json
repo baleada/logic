@@ -1,0 +1,41 @@
+{
+  "name": "@baleada/js",
+  "version": "0.0.0",
+  "description": "JavaScript libraries for the Baleada toolkit",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/baleada/js.git"
+  },
+  "keywords": [
+    "baleada",
+    "JavaScript",
+    "library",
+    "user",
+    "interface",
+    "logic"
+  ],
+  "author": "Alex Vipond",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/baleada/js/issues"
+  },
+  "homepage": "https://gitlab.com/baleada/js#readme",
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.5.0",
+    "@babel/plugin-proposal-private-methods": "^7.4.4",
+    "ava": "^2.2.0",
+    "babel-eslint": "^10.0.2",
+    "eslint": "^6.0.1",
+    "eslint-config-standard": "^13.0.1",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-jest": "^22.7.2",
+    "eslint-plugin-node": "^9.1.0",
+    "eslint-plugin-nuxt": "^0.4.3",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0"
+  }
+}
