@@ -1,23 +1,13 @@
 /*
- * identifiable.js v1.0.0
+ * Identifiable.js v1.0.0
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */
 
 // TODO: dynamically import dependency based on config file
-// import config from '~/assets/js/config/identifiable.config.js'
-// let dependency = config.dependency
-// let IdentifiableDependencyWrapper,
-//     log
-//
-// if (dependency === 'GoTrue') {
-//   let module = import('./identifiable-gotrue.js')
-//   log = module
-// }
-
-import IdentifiableDependencyWrapper from './identifiable-gotrue.js'
+import IdentifiableDependency from '../wrappers/IdentifiableGotrue.js'
 import is from './is.js'
-import capitalize from './capitalize.js'
+import capitalize from '../utils/capitalize.js'
 
 class Identifiable {
   #on
@@ -29,7 +19,7 @@ class Identifiable {
       ...options
     }
 
-    this.#dependency = new IdentifiableDependencyWrapper(options.identifyConfig)
+    this.#dependency = new IdentifiableDependency(options.identifyConfig)
 
     this.#on = {}
     this.responses = {}

@@ -2,6 +2,4 @@
 *
 
 # Except these files
-!index.js
-!libraries/*.js
-!utils/*.js
+!dist

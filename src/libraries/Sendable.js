@@ -5,7 +5,7 @@
  */
 
 import assignPublicMethods from '../utils/assignPublicMethods'
-import SendableDependency from './SendableAxios.js'
+import SendableDependency from '../wrappers/SendableAxios.js'
 
 class Sendable {
   #dependencyOptions

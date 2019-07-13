@@ -4,6 +4,8 @@
   "description": "JavaScript libraries for the Baleada toolkit",
   "main": "index.js",
   "scripts": {
+    "index": "./scripts/generate-index.js"
+    "prepare": "npm run index && npx babel",
     "test": "test"
   },
   "repository": {
@@ -25,8 +27,11 @@
   },
   "homepage": "https://gitlab.com/baleada/js#readme",
   "devDependencies": {
+    "@babel/cli": "^7.5.0",
+    "@babel/core": "^7.5.4",
     "@babel/plugin-proposal-class-properties": "^7.5.0",
     "@babel/plugin-proposal-private-methods": "^7.4.4",
+    "@babel/preset-env": "^7.5.4",
     "ava": "^2.2.0",
     "babel-eslint": "^10.0.2",
     "eslint": "^6.0.1",
@@ -37,5 +42,8 @@
     "eslint-plugin-nuxt": "^0.4.3",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0"
-  }
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.4.4"
+  },
 }

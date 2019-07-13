@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import SearchableDependency from './searchable-lunr.js'
+import SearchableDependency from '../wrappers/SearchableLunr.js'
 import is from './is.js'
 
 class Searchable {
