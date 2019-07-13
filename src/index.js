@@ -9,13 +9,13 @@ import Sendable from './libraries/Sendable.js'
 import Syncable from './libraries/Syncable.js'
 
 export default {
-  Completable
-  Delayable
-  DragDropReorderable
-  Identifiable
-  Navigable
-  Reorderable
-  Searchable
-  Sendable
-  Syncable
+  Completable,
+  Delayable,
+  DragDropReorderable,
+  Identifiable,
+  Navigable,
+  Reorderable,
+  Searchable,
+  Sendable,
+  Syncable,
 }

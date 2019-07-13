@@ -1,17 +1,20 @@
 module.exports = {
   root: true,
   env: {
+    es6: true,
     browser: true,
-    node: true
   },
   parserOptions: {
+    ecmaVersion: 2019,
+    sourceType: 'module',
     parser: 'babel-eslint'
   },
-  extends: [],
-  // add your custom rules here
+  extends: [
+    'plugin:ava/recommended',
+  ],
   rules: {
-    "comma-dangle": "off",
-    "no-console": "off",
-    "arrow-parens": "off",
+    'comma-dangle': 'off',
+    'no-console': 'off',
+    'arrow-parens': 'off',
   }
 }

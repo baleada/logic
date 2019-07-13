@@ -69,7 +69,7 @@ typings/
 .nuxt
 
 # Nuxt generate
-dist
+# dist
 
 # vuepress build output
 .vuepress/dist
@@ -85,3 +85,6 @@ sw.*
 
 # Mac folder files
 .DS_Store
+
+# Published version
+lib
