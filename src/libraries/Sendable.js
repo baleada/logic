@@ -5,10 +5,12 @@
  */
 
 import assignPublicMethods from '../utils/assignPublicMethods'
+import is from '../utils/is'
 import SendableDependency from '../wrappers/SendableAxios.js'
 
 class Sendable {
   #dependencyOptions
+  #onSend
   #onSuccess
   #onError
   #dependency
@@ -16,6 +18,7 @@ class Sendable {
   constructor(request, options) {
     this.request = request
 
+    this.#onSend = options.onSend
     this.#onSuccess = options.onSuccess
     this.#onError = options.onError
     this.#dependency = new SendableDependency(this.request)
@@ -46,18 +49,19 @@ class Sendable {
      */
     function send() {
       this.loading = true
+      if (is.function(this.#onSend)) this.#onSend()
 
       this.#dependency
         .send()
         .then((response) => {
           this.response = response
           this.loading = false
-          if (this.#onSuccess !== undefined) this.#onSuccess(this.response)
+          if (is.function(this.#onSuccess)) this.#onSuccess(this.response)
         })
         .catch((error) => {
           this.response = error
           this.loading = false
-          if (this.#onError !== undefined) this.#onError(this.response)
+          if (is.function(this.#onError)) this.#onError(this.response)
         })
     }
 

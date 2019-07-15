@@ -21,8 +21,6 @@ class Delayable {
   #started
 
   constructor(callback, options) {
-    this.callback = callback
-
     options = {
       delay: 0,
       ...options
@@ -33,6 +31,11 @@ class Delayable {
     this.#parameters = is.array(options.parameters) ? options.parameters : []
 
     // Public properties
+    /**
+     * A shallow copy of the callback passed to the Delayable constructor
+     * @type {Function}
+     */
+    this.callback = callback
     /**
      * The number of times the callback function has been executed
      * @type {Number}
