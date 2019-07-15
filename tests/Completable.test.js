@@ -5,7 +5,7 @@ test.beforeEach(t => {
   t.context.setup = (options = {}) => new Completable('Baleada: a toolkit for building web apps', options)
 })
 
-test('it stores the string', t => {
+test('stores the string', t => {
   const completable = t.context.setup()
 
   t.is(
@@ -14,7 +14,7 @@ test('it stores the string', t => {
   )
 })
 
-test('it sets the string', t => {
+test('sets the string', t => {
   const completable = t.context.setup()
 
   completable.setString('Baleada')
@@ -25,7 +25,7 @@ test('it sets the string', t => {
   )
 })
 
-test('its starting position is the length of the string', t => {
+test('starting position is the length of the string', t => {
   const completable = t.context.setup()
 
   t.is(
@@ -34,7 +34,7 @@ test('its starting position is the length of the string', t => {
   )
 })
 
-test('it sets the position', t => {
+test('sets the position', t => {
   const completable = t.context.setup()
 
   completable.setPosition('Baleada: a toolkit'.length)
@@ -45,7 +45,7 @@ test('it sets the position', t => {
   )
 })
 
-test('it segments the full string by default', t => {
+test('correctly segments when all options are defaults', t => {
   const completable = t.context.setup()
 
   t.is(
@@ -54,7 +54,7 @@ test('it segments the full string by default', t => {
   )
 })
 
-test('it segments FROM the last whitespace before the current position TO the end of the string when segmentsFromDivider is true and other options have default values', t => {
+test('correctly segments when segmentsFromDivider is true AND other options are defaults', t => {
   const completable = t.context.setup({
     segmentsFromDivider: true,
   })
@@ -67,7 +67,7 @@ test('it segments FROM the last whitespace before the current position TO the en
   )
 })
 
-test('it segments FROM the start of the string TO the current position when segmentsToPosition is true and other options have default values', t => {
+test('correctly segments when segmentsToPosition is true AND other options are defaults', t => {
   const completable = t.context.setup({
     segmentsToPosition: true,
   })
@@ -80,7 +80,7 @@ test('it segments FROM the start of the string TO the current position when segm
   )
 })
 
-test('it segments FROM the last whitespace before the current position TO the current position when segmentsFromDivider and segmentsToPosition are true and other options have default values', t => {
+test('correctly segments when segmentsFromDivider and segmentsToPosition are true AND other options are defaults', t => {
   const completable = t.context.setup({
     segmentsFromDivider: true,
     segmentsToPosition: true,
@@ -94,7 +94,7 @@ test('it segments FROM the last whitespace before the current position TO the cu
   )
 })
 
-test('it segments FROM the last colon TO the end of the string when segmentsFromDivider is true AND divider is set to /:/ AND other options have default values', t => {
+test('correctly segments when segmentsFromDivider is true AND divider is set to /:/ AND other options are defaults', t => {
   const completable = t.context.setup({
     divider: /:/,
     segmentsFromDivider: true
@@ -103,5 +103,114 @@ test('it segments FROM the last colon TO the end of the string when segmentsFrom
   t.is(
     completable.segment,
     ' a toolkit for building web apps'
+  )
+})
+
+test('correctly completes the string when all options are defaults', t => {
+  const completable = t.context.setup()
+  completable.complete('Baleada')
+
+  t.is(
+    completable.string,
+    'Baleada'
+  )
+})
+
+test('correctly completes the string when segmentsFromDivider is true AND other options are defaults', t => {
+  const completable = t.context.setup({
+    segmentsFromDivider: true,
+  })
+  completable.complete('applications')
+
+  t.is(
+    completable.string,
+    'Baleada: a toolkit for building web applications'
+  )
+})
+
+test('correctly completes the string when segmentsToPosition is true AND other options are defaults', t => {
+  const completable = t.context.setup({
+    segmentsToPosition: true,
+  })
+  completable.setPosition('Baleada: a toolkit'.length)
+  completable.complete('Buena Baleada: a toolkit')
+
+  t.is(
+    completable.string,
+    'Buena Baleada: a toolkit for building web apps'
+  )
+})
+
+test('correctly completes the string when segmentsFromDivider is true AND segmentsToPosition is true AND other options are defaults', t => {
+  const completable = t.context.setup({
+    segmentsFromDivider: true,
+    segmentsToPosition: true
+  })
+  completable.complete('Baleada')
+
+  t.is(
+    completable.string,
+    'Baleada: a toolkit for building web Baleada'
+  )
+})
+
+test('correctly updates position when all options are defaults', t => {
+  const completable = t.context.setup()
+  completable.complete('Baleada')
+
+  t.is(
+    completable.position,
+    'Baleada'.length
+  )
+})
+
+test('correctly updates position when segmentsFromDivider is true AND other options are defaults', t => {
+  const completable = t.context.setup({
+    segmentsFromDivider: true,
+  })
+  completable.complete('applications')
+
+  t.is(
+    completable.position,
+    'Baleada: a toolkit for building web applications'.length
+  )
+})
+
+test('correctly updates position when segmentsToPosition is true AND other options are defaults', t => {
+  const completable = t.context.setup({
+    segmentsToPosition: true,
+  })
+  completable.setPosition('Baleada: a toolkit'.length)
+  completable.complete('Buena Baleada: a toolkit')
+
+  t.is(
+    completable.position,
+    'Buena Baleada: a toolkit'.length
+  )
+})
+
+test('correctly updates position when segmentsFromDivider is true AND segmentsToPosition is true AND other options are defaults', t => {
+  const completable = t.context.setup({
+    segmentsFromDivider: true,
+    segmentsToPosition: true
+  })
+  completable.complete('Baleada')
+
+  t.is(
+    completable.position,
+    'Baleada: a toolkit for building web Baleada'.length
+  )
+})
+
+test('does not update position when positionsAfterCompletion is false', t => {
+  const completable = t.context.setup({
+    positionsAfterCompletion: false
+  })
+  const originalPosition = completable.position
+  completable.complete('Baleada')
+
+  t.is(
+    completable.position,
+    originalPosition
   )
 })

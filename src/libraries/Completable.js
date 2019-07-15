@@ -27,23 +27,31 @@ class Completable {
   #onComplete
   #onPosition
 
-  constructor(string, options) {
-    options = {
-      // Default settings are designed to support an autocomplete component that replaces the full segment/search term with a completion
-      segmentsFromDivider: false,
-      segmentsToPosition: false,
-      divider: /\s/,
-      positionsAfterCompletion: true,
-      ...options
-    }
-
-    this.#segmentsFromDivider = options.segmentsFromDivider
-    this.#segmentsToPosition = options.segmentsToPosition
-    this.#divider = options.divider
-    // this.#matchDirection = options.matchDirection
-    this.#positionsAfterCompletion = options.positionsAfterCompletion
-    this.#onComplete = options.onComplete
-    this.#onPosition = options.onPosition
+  /**
+   * Completable constructor
+   * @param {String}  string                          The string that will be made completable
+   * @param {Boolean} [segmentsFromDivider=false]     `true` when the Completable instance should start from a divider (for example, the space between words) while extracting a segment, and `false when it should start from the very beginning of the string. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
+   * @param {Boolean} [segmentsToPosition=false]      `true` when the Completable instance should stop at the current position while extracting a segment, and `false` when it should stop at the very end of the string. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
+   * @param {RegExp}  [divider=/s/]                   <p>Tells the Completable instance how segments of the string are divided. Has no effect when <code>segmentsFromDivider</code> is <code>false</code>.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.</p>
+   * @param {Boolean} [positionsAfterCompletion=true] <p><code>true</code> when the Completable instance, after completing the string, should set the current position to the index after the segment's replacement. `false` when it should not change the current position.</p><p>See the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
+   * @param {Function}  [onComplete]                    A function that Completable will call after completing the string. `onComplete` has one paramater: the completed string (String).
+   * @param {Function}  [onPosition]                    A function that Completable will call after completing the string. `onPosition` has one paramater: the new position (Number).
+   */
+  constructor(string, {
+    segmentsFromDivider = false,
+    segmentsToPosition = false,
+    divider = /\s/,
+    positionsAfterCompletion = true,
+    onComplete,
+    onPosition
+  }) {
+    this.#segmentsFromDivider = segmentsFromDivider
+    this.#segmentsToPosition = segmentsToPosition
+    this.#divider = divider
+    // this.#matchDirection = matchDirection
+    this.#positionsAfterCompletion = positionsAfterCompletion
+    this.#onComplete = onComplete
+    this.#onPosition = onPosition
 
     // Public properties
     /**
@@ -60,7 +68,7 @@ class Completable {
     // Public methods
     /**
      * Sets a value for `string`. Takes one argument: the new `string`
-     * @param {[type]} string [description]
+     * @param {String} string [description]
      */
     function setString (string) {
       this.string = string
