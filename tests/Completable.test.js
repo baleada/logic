@@ -93,3 +93,15 @@ test('it segments FROM the last whitespace before the current position TO the cu
     'toolkit'
   )
 })
+
+test('it segments FROM the last colon TO the end of the string when segmentsFromDivider is true AND divider is set to /:/ AND other options have default values', t => {
+  const completable = t.context.setup({
+    divider: /:/,
+    segmentsFromDivider: true
+  })
+
+  t.is(
+    completable.segment,
+    ' a toolkit for building web apps'
+  )
+})

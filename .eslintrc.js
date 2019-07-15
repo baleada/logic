@@ -5,11 +5,11 @@ module.exports = {
     browser: true,
   },
   parserOptions: {
-    ecmaVersion: 2019,
     sourceType: 'module',
     parser: 'babel-eslint'
   },
   extends: [
+    'plugin:nuxt/recommended',
     'plugin:ava/recommended',
   ],
   rules: {

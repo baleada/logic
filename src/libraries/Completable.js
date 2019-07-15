@@ -1,5 +1,5 @@
 /*
- * completable.js v1.0.0
+ * Completable.js v1.0.0
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */
