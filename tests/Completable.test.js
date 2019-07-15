@@ -5,6 +5,7 @@ test.beforeEach(t => {
   t.context.setup = (options = {}) => new Completable('Baleada: a toolkit for building web apps', options)
 })
 
+/* Basic tests */
 test('stores the string', t => {
   const completable = t.context.setup()
 
@@ -45,6 +46,7 @@ test('sets the position', t => {
   )
 })
 
+/* segment tests */
 test('correctly segments when all options are defaults', t => {
   const completable = t.context.setup()
 
@@ -106,6 +108,7 @@ test('correctly segments when segmentsFromDivider is true AND divider is set to 
   )
 })
 
+/* complete tests (string) */
 test('correctly completes the string when all options are defaults', t => {
   const completable = t.context.setup()
   completable.complete('Baleada')
@@ -154,6 +157,7 @@ test('correctly completes the string when segmentsFromDivider is true AND segmen
   )
 })
 
+/* complete tests (position) */
 test('correctly updates position when all options are defaults', t => {
   const completable = t.context.setup()
   completable.complete('Baleada')
