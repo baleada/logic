@@ -7,7 +7,7 @@
 // Libraries
 
 // Utils
-import is from './is.js'
+import is from '../utils/is'
 
 export default class Reorderable {
   #onReorder

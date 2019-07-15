@@ -5,7 +5,8 @@
   "main": "lib/index.js",
   "scripts": {
     "index": "./scripts/build-index.js",
-    "prepare": "npm run index && npx babel",
+    "babelify": "npx babel src --out-dir lib",
+    "prepare": "npm run index && npm run babelify",
     "test": "test"
   },
   "repository": {
@@ -32,6 +33,7 @@
     "@babel/plugin-proposal-class-properties": "^7.5.0",
     "@babel/plugin-proposal-private-methods": "^7.4.4",
     "@babel/preset-env": "^7.5.4",
+    "@babel/runtime-corejs3": "^7.5.4",
     "ava": "^2.2.0",
     "babel-eslint": "^10.0.2",
     "eslint": "^6.0.1",

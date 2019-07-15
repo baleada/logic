@@ -1,6 +1,6 @@
 export default {
   files: [ 'tests/**/*.test.js' ],
-  helpers: [ 'assets/js/**/*.js' ],
+  helpers: [ 'src/**/*.js' ],
   verbose: true,
   babel: {
     testOptions: {

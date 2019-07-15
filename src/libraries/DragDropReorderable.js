@@ -8,7 +8,7 @@
 import { Sortable } from '@shopify/draggable'
 
 // Utils
-import is from './is.js'
+import is from '../utils/is'
 import toNodeList from './to-node-list.js'
 import capitalize from './capitalize.js'
 

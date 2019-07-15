@@ -6,7 +6,7 @@
 
 // TODO: dynamically import dependency based on config file
 import IdentifiableDependency from '../wrappers/IdentifiableGotrue.js'
-import is from './is.js'
+import is from '../utils/is'
 import capitalize from '../utils/capitalize.js'
 
 class Identifiable {

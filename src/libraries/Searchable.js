@@ -5,7 +5,7 @@
  */
 
 import SearchableDependency from '../wrappers/SearchableLunr.js'
-import is from './is.js'
+import is from '../utils/is'
 
 class Searchable {
   #onSearch

@@ -1,11 +1,17 @@
 const presets = [
   [
-    "@babel/env",
+    "@babel/preset-env",
     {
       targets: "> 0.5%, not dead",
-      useBuiltIns: "usage",
+      // useBuiltIns: "usage",
+      // corejs: 3
     },
   ],
-];
+]
 
-module.exports = { presets };
+const plugins = [
+  '@babel/plugin-proposal-class-properties',
+  '@babel/plugin-proposal-private-methods'
+]
+
+module.exports = { presets, plugins };

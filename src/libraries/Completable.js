@@ -5,8 +5,8 @@
  */
 
 // Utils
-import is from './is.js'
-import lastMatch from './last-match.js'
+import is from '../utils/is'
+import lastMatch from '../utils/lastMatch'
 
 class Completable {
   #segmentsFromDivider

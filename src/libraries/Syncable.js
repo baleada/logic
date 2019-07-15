@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import is from './is.js'
+import is from '../utils/is'
 import { parse } from './parse.js'
 
 // TODO: subclass Syncable for each type that requires special treatment
