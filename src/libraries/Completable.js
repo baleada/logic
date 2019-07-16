@@ -1,5 +1,5 @@
 /*
- * Completable.js v1.0.0
+ * Completable.js
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */
@@ -18,6 +18,7 @@ import lastMatch from '../utils/lastMatch'
  * Completable is written in vanilla JS with no dependencies. It powers <nuxt-link to="/docs/tools/composition-functions/useCompletable">`useCompletable`</nuxt-link>.
  */
 class Completable {
+  /* Private properties */
   #segmentsFromDivider
   #segmentsToPosition
   #divider
@@ -35,7 +36,7 @@ class Completable {
    * @param {RegExp}  [divider=/s/]                   <p>Tells the Completable instance how segments of the string are divided. Has no effect when <code>segmentsFromDivider</code> is <code>false</code>.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.</p>
    * @param {Boolean} [positionsAfterCompletion=true] <p><code>true</code> when the Completable instance, after completing the string, should set the current position to the index after the segment's replacement. `false` when it should not change the current position.</p><p>See the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
    * @param {Function}  [onComplete]                    A function that Completable will call after completing the string. `onComplete` has one paramater: the completed string (String).
-   * @param {Function}  [onPosition]                    A function that Completable will call after completing the string. `onPosition` has two parameters: the new position (Number), and the Completable instance (Object).
+   * @param {Function}  [onPosition]                    A function that Completable will call after completing the string. `onPosition` accepts two parameters: the new position (Number), and the Completable instance (Object).
    */
   constructor(string, {
     segmentsFromDivider = false,
@@ -91,7 +92,7 @@ class Completable {
      * @param {String} string The new string
      * @return {Object}       The Completable instance
      */
-    function setString (string) {
+    function setString(string) {
       this.string = string
       return this
     }
@@ -100,7 +101,7 @@ class Completable {
      * @param {Number} position The new `position`
      * @return {Object}       The Completable instance
      */
-    function setPosition (position) {
+    function setPosition(position) {
       this.position = position
       return this
     }
@@ -109,7 +110,7 @@ class Completable {
      * @param {String} completion The completion/replacement.
      * @return {Object}       The Completable instance
      */
-    function complete (completion) {
+    function complete(completion) {
       const textBefore = this.#segmentsFromDivider ? this.string.slice(0, this.position - this.segment.length) : '',
             textAfter = this.#segmentsToPosition ? this.string.slice(this.position) : '',
             string = textBefore + completion + textAfter,
@@ -128,7 +129,7 @@ class Completable {
     }, 'method')
   }
 
-  // Private methods
+  /* Private methods */
   #computeSegmentStartIndex = function() {
     return this.#segmentsFromDivider ? lastMatch(this.string, this.#divider, this.position) + 1 : 0
   }

@@ -13,6 +13,7 @@ import assignEnumerables from '../utils/assignEnumerables'
  * Delayable depends on `[setTimeout](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout)`, `[setInterval](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval)`, `[requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)`, and the `[global Data object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)`, but is otherwise written in vanilla JS. Delayable powers <nuxt-link to="/docs/tools/composition-functions/useDelayable">`useDelayable`</nuxt-link>.
  */
 class Delayable {
+  /* Private properties */
   #delay
   #isInterval
   #parameters
@@ -26,7 +27,7 @@ class Delayable {
       ...options
     }
 
-    // Private properties
+    /* Options */
     this.#delay = options.delay
     this.#parameters = is.array(options.parameters) ? options.parameters : []
 
@@ -35,22 +36,29 @@ class Delayable {
      * A shallow copy of the callback passed to the Delayable constructor
      * @type {Function}
      */
-    this.callback = callback
+    callback = callback
     /**
      * The number of times the callback function has been executed
      * @type {Number}
      */
-    this.executions = 0
+    const executions = 0
     /**
      * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
      * @type {Number}
      */
-    this.timeElapsed = 0
+    const timeElapsed = 0
     /**
      * The time (in milliseconds) that remains until the callback function will be executed
      * @type {Number}
      */
-    this.timeRemaining = this.#delay
+    const timeRemaining = this.#delay
+
+    assignEnumerables(this, {
+      callback,
+      executions,
+      timeElapsed,
+      timeRemaining
+    }, 'property')
 
     /* Public methods */
     /**
@@ -91,10 +99,10 @@ class Delayable {
       cancel,
       timeout,
       interval
-    })
+    }, 'method')
   }
 
-  // Private methods
+  /* Private methods */
   #setTimeout = function () {
     return window.setTimeout(
       () => {

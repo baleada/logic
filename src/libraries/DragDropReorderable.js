@@ -1,5 +1,5 @@
 /*
- * DragDropReorderable.js v1.0.0
+ * DragDropReorderable.js
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */

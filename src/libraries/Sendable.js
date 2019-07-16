@@ -1,5 +1,5 @@
 /*
- * Sendable.js v1.0.0
+ * Sendable.js
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */

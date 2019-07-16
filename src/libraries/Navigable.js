@@ -1,5 +1,5 @@
 /*
- * Navigable.js v1.0.0
+ * Navigable.js
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */
@@ -15,6 +15,7 @@ import is from '../utils/is'
  * Navigable is written in vanilla JS with no dependencies. It powers <nuxt-link to="/docs/tools/composition-functions/useNavigable">`useNavigable`</nuxt-link>.
  */
 class Navigable {
+  /* Private properties */
   #loops
   #startIndex
   #increment
@@ -28,7 +29,7 @@ class Navigable {
    * @param {Boolean} [loops=true]   `true` when the Navigable instance should loop around to the beginning of the array when it navigates past the last item and loop around to the end when it navigates before the first item. `false` when navigating past the last item or before the first item does not change the current index.
    * @param {Number}  [increment=1]  The number of items that will be traversed when the navigable instance is stepping forward through the array
    * @param {Number}  [decrement=1]  The number of items that will be traversed when the navigable instance is stepping backward through the array
-   * @param {Function}  onNavigate    A function that Navigable will call after navigating to a new item. `onNavigate` takes two parameters: the index (Number) of the item that has been navigated to, and the Navigable instance (Object).
+   * @param {Function}  onNavigate    A function that Navigable will call after navigating to a new item. `onNavigate` acceepts two parameters: the index (Number) of the item that has been navigated to, and the Navigable instance (Object).
    */
   constructor(array, {
     startIndex = 0,
@@ -162,7 +163,7 @@ class Navigable {
     }, 'method')
   }
 
-  // Private methods
+  /* Private methods */
   #navigate = function(index) {
     if (is.function(this.#onNavigate)) this.#onNavigate(index, this)
     return this

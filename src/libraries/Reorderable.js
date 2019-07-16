@@ -1,5 +1,5 @@
 /*
- * reorderable.js v1.0.0
+ * Reorderable.js
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */

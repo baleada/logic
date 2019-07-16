@@ -1,5 +1,5 @@
 /*
- * Identifiable.js v1.0.0
+ * Identifiable.js
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */

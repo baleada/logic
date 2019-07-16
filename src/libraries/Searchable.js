@@ -1,5 +1,5 @@
 /*
- * searchable.js v1.0.0
+ * Searchable.js
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */
