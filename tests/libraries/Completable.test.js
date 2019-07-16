@@ -3,7 +3,14 @@ import Completable from '../../src/libraries/Completable'
 import enumerable from '../fixtures/enumerable.json'
 
 test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Completable('Baleada: a toolkit for building web apps', options)
+  t.context.setup = (options = {}) => new Completable(
+    'Baleada: a toolkit for building web apps',
+    {
+      onComplete: (string, instance) => instance.setString(string),
+      onPosition: (position, instance) => instance.setPosition(position),
+      ...options
+    }
+  )
 })
 
 /* Basic */
@@ -48,7 +55,7 @@ test('correctly segments when all options are defaults', t => {
   t.is(instance.segment, instance.string)
 })
 
-test('correctly segments when segmentsFromDivider is true AND other options are defaults', t => {
+test('correctly segments when segmentsFromDivider is true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
   })
@@ -58,7 +65,7 @@ test('correctly segments when segmentsFromDivider is true AND other options are 
   t.is(instance.segment, 'toolkit for building web apps')
 })
 
-test('correctly segments when segmentsToPosition is true AND other options are defaults', t => {
+test('correctly segments when segmentsToPosition is true', t => {
   const instance = t.context.setup({
     segmentsToPosition: true,
   })
@@ -68,7 +75,7 @@ test('correctly segments when segmentsToPosition is true AND other options are d
   t.is(instance.segment, 'Baleada: a toolkit')
 })
 
-test('correctly segments when segmentsFromDivider and segmentsToPosition are true AND other options are defaults', t => {
+test('correctly segments when segmentsFromDivider and segmentsToPosition are true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
     segmentsToPosition: true,
@@ -79,7 +86,7 @@ test('correctly segments when segmentsFromDivider and segmentsToPosition are tru
   t.is(instance.segment, 'toolkit')
 })
 
-test('correctly segments when segmentsFromDivider is true AND divider is set to /:/ AND other options are defaults', t => {
+test('correctly segments when segmentsFromDivider is true AND divider is set to /:/', t => {
   const instance = t.context.setup({
     divider: /:/,
     segmentsFromDivider: true
@@ -96,7 +103,7 @@ test('complete(completion) correctly inserts completion when all options are def
   t.is(instance.string, 'Baleada')
 })
 
-test('complete(completion) correctly inserts completion when segmentsFromDivider is true AND other options are defaults', t => {
+test('complete(completion) correctly inserts completion when segmentsFromDivider is true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
   })
@@ -105,7 +112,7 @@ test('complete(completion) correctly inserts completion when segmentsFromDivider
   t.is(instance.string, 'Baleada: a toolkit for building web applications')
 })
 
-test('complete(completion) correctly inserts completion when segmentsToPosition is true AND other options are defaults', t => {
+test('complete(completion) correctly inserts completion when segmentsToPosition is true', t => {
   const instance = t.context.setup({
     segmentsToPosition: true,
   })
@@ -115,7 +122,7 @@ test('complete(completion) correctly inserts completion when segmentsToPosition 
   t.is(instance.string, 'Buena Baleada: a toolkit for building web apps')
 })
 
-test('complete(completion) correctly inserts completion when segmentsFromDivider is true AND segmentsToPosition is true AND other options are defaults', t => {
+test('complete(completion) correctly inserts completion when segmentsFromDivider is true AND segmentsToPosition is true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
     segmentsToPosition: true
@@ -133,7 +140,7 @@ test('complete(completion) correctly updates position when all options are defau
   t.is(instance.position, 'Baleada'.length)
 })
 
-test('complete(completion) correctly updates position when segmentsFromDivider is true AND other options are defaults', t => {
+test('complete(completion) correctly updates position when segmentsFromDivider is true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
   })
@@ -142,7 +149,7 @@ test('complete(completion) correctly updates position when segmentsFromDivider i
   t.is(instance.position, 'Baleada: a toolkit for building web applications'.length)
 })
 
-test('complete(completion) correctly updates position when segmentsToPosition is true AND other options are defaults', t => {
+test('complete(completion) correctly updates position when segmentsToPosition is true', t => {
   const instance = t.context.setup({
     segmentsToPosition: true,
   })
@@ -152,7 +159,7 @@ test('complete(completion) correctly updates position when segmentsToPosition is
   t.is(instance.position, 'Buena Baleada: a toolkit'.length)
 })
 
-test('complete(completion) correctly updates position when segmentsFromDivider is true AND segmentsToPosition is true AND other options are defaults', t => {
+test('complete(completion) correctly updates position when segmentsFromDivider is true AND segmentsToPosition is true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
     segmentsToPosition: true
@@ -170,4 +177,15 @@ test('complete(completion) does not update position when positionsAfterCompletio
   instance.complete('Baleada')
 
   t.is(instance.position, originalPosition)
+})
+
+/* method chaining */
+test('can method chain', t => {
+  const instance = t.context.setup()
+  const chained = instance
+    .setString('Baleada: a toolkit')
+    .setPosition(instance.string.length)
+    .complete('Baleada: a toolkit for building web apps')
+
+  t.assert(chained instanceof Completable)
 })

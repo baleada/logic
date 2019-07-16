@@ -7,6 +7,13 @@
 import assignEnumerables from '../utils/assignEnumerables'
 import is from '../utils/is'
 
+/**
+ * Navigable is a library that enriches an array by:
+ * - Allowing it to store a current index of the item that has been navigated to
+ * - Giving it the methods necessary to navigate to a different item
+ *
+ * Navigable is written in vanilla JS with no dependencies. It powers <nuxt-link to="/docs/tools/composition-functions/useNavigable">`useNavigable`</nuxt-link>.
+ */
 class Navigable {
   #loops
   #startIndex
@@ -16,12 +23,12 @@ class Navigable {
 
   /**
    * [constructor description]
-   * @param {Array}  array          [description]
-   * @param {Number}  [startIndex=0] [description]
-   * @param {Boolean} [loops=true]   [description]
-   * @param {Number}  [increment=1]  [description]
-   * @param {Number}  [decrement=1]  [description]
-   * @param {Function}  onNavigate     [description]
+   * @param {Array}  array          The array that will be made navigable
+   * @param {Number}  [startIndex=0] The default current index
+   * @param {Boolean} [loops=true]   `true` when the Navigable instance should loop around to the beginning of the array when it navigates past the last item and loop around to the end when it navigates before the first item. `false` when navigating past the last item or before the first item does not change the current index.
+   * @param {Number}  [increment=1]  The number of items that will be traversed when the navigable instance is stepping forward through the array
+   * @param {Number}  [decrement=1]  The number of items that will be traversed when the navigable instance is stepping backward through the array
+   * @param {Function}  onNavigate    A function that Navigable will call after navigating to a new item. `onNavigate` takes two parameters: the index (Number) of the item that has been navigated to, and the Navigable instance (Object).
    */
   constructor(array, {
     startIndex = 0,
@@ -39,12 +46,12 @@ class Navigable {
 
     /* Public properties */
     /**
-     * [array description]
+     * A shallow copy of the `array` passed to the constructor
      * @type {Array}
      */
     array = array
     /**
-     * [currentIndex description]
+     *  The index of the item that has been navigated to
      * @type {Number}
      */
     const currentIndex = this.#startIndex
@@ -56,91 +63,94 @@ class Navigable {
 
     /* Public methods */
     /**
-     * [setArray description]
-     * @param {[type]} array [description]
+     * Sets a value for `array`
+     * @param {Array} array The new array
+     * @return {Object}       The Navigable instance
      */
     function setArray(array) {
       this.array = array
       return this
     }
     /**
-     * [setCurrentIndex description]
-     * @param {Number} index [description]
+     * Sets a value for `currentIndex`
+     * @param {Number} index The new current index
+     * @return {Object}       The Navigable instance
      */
-    function setCurrentIndex(newIndex) {
-      this.currentIndex = newIndex
+    function setCurrentIndex(index) {
+      this.currentIndex = index
       return this
     }
     /**
-     * [goTo description]
-     * @param  {Number} newIndex [description]
+     * Navigates to a specific item
+     * @param  {Number} index The index of the item that should be navigated to
+     * @return {Object}       The Navigable instance
      */
     function goTo(index) {
-      let newIndex
-
       switch (true) {
-        case (newIndex > this.array.length):
-          newIndex = this.array.length
+        case (index > this.array.length):
+          index = this.array.length
           // TODO: decide whether to show warnings or not
-          // console.warn(`Cannot set current index: ${newIndex} is greater than ${this.array.length} (the array's length). Current index has been set to the array's length instead.`)
+          // console.warn(`Cannot set current index: ${index} is greater than ${this.array.length} (the array's length). Current index has been set to the array's length instead.`)
           break
-        case (newIndex < 0):
-          newIndex = 0
+        case (index < 0):
+          index = 0
           // TODO: decide whether to show warnings or not
-          // console.warn(`Cannot set current index: ${newIndex} is less than 0. Current index has been set to 0 instead.` )
+          // console.warn(`Cannot set current index: ${index} is less than 0. Current index has been set to 0 instead.` )
           break
         default:
-          newIndex = newIndex
+          index = index
       }
 
-      return this.#navigate(newIndex)
+      return this.#navigate(index)
     }
     /**
-     * [next description]
+     * Steps forward through the array, increasing `currentIndex` by `increment`
+     * @return {Object}       The Navigable instance
      */
     function next() {
-      let newIndex
+      let index
       const lastIndex = this.array.length - 1
 
       if (this.currentIndex + this.#increment > lastIndex) {
         switch (true) {
           case (this.#loops):
-            newIndex = this.currentIndex + this.#increment
-            while(newIndex > lastIndex) {
-              newIndex -= this.array.length
+            index = this.currentIndex + this.#increment
+            while(index > lastIndex) {
+              index -= this.array.length
             }
             break
           default:
-            newIndex = lastIndex
+            index = lastIndex
         }
       } else {
-        newIndex = this.currentIndex + this.#increment
+        index = this.currentIndex + this.#increment
       }
 
-      return this.goTo(newIndex)
+      return this.goTo(index)
     }
     /**
-     * [prev description]
+     * Steps backward through the array, decreasing `currentIndex` by `decrement`
+     * @return {Object}       The Navigable instance
      */
     function prev() {
-      let newIndex
+      let index
 
       if (this.currentIndex - this.#decrement < 0) {
         switch (true) {
           case (this.#loops):
-            newIndex = this.currentIndex - this.#decrement
-            while(newIndex < 0) {
-              newIndex += this.array.length
+            index = this.currentIndex - this.#decrement
+            while(index < 0) {
+              index += this.array.length
             }
             break
           default:
-            newIndex = 0
+            index = 0
         }
       } else {
-        newIndex = this.currentIndex - this.#decrement
+        index = this.currentIndex - this.#decrement
       }
 
-      return this.goTo(newIndex)
+      return this.goTo(index)
     }
 
     assignEnumerables(this, {
@@ -152,8 +162,9 @@ class Navigable {
     }, 'method')
   }
 
-  #navigate = function(newIndex) {
-    if (is.function(this.#onNavigate)) this.#onNavigate(newIndex)
+  // Private methods
+  #navigate = function(index) {
+    if (is.function(this.#onNavigate)) this.#onNavigate(index, this)
     return this
   }
 }

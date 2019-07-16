@@ -3,13 +3,19 @@ import Navigable from '../../src/libraries/Navigable'
 import enumerable from '../fixtures/enumerable.json'
 
 test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Navigable([
-    'tortilla',
-    'frijoles',
-    'mantequilla',
-    'aguacate',
-    'huevito',
-  ], options)
+  t.context.setup = (options = {}) => new Navigable(
+    [
+      'tortilla',
+      'frijoles',
+      'mantequilla',
+      'aguacate',
+      'huevito',
+    ],
+    {
+      onNavigate: (index, instance) => instance.setCurrentIndex(index),
+      ...options
+    }
+  )
 })
 
 /* Basic */
@@ -64,9 +70,7 @@ test('setCurrentIndex sets the current index', t => {
 
 /* goTo */
 test('goTo(newIndex) sets the current index to the length of the array when newIndex is greater than the length of the array', t => {
-  const instance = t.context.setup({
-    onNavigate: newIndex => instance.setCurrentIndex(newIndex)
-  })
+  const instance = t.context.setup()
 
   instance.goTo(42)
 
@@ -100,7 +104,7 @@ test('next() increments the current index by 1 when increment is default', t => 
 
 test('next() increments the current index by 2 when increment is 2', t => {
   const instance = t.context.setup({
-    increment: 2
+    increment: 2,
   })
 
   instance.next()

@@ -35,7 +35,7 @@ class Completable {
    * @param {RegExp}  [divider=/s/]                   <p>Tells the Completable instance how segments of the string are divided. Has no effect when <code>segmentsFromDivider</code> is <code>false</code>.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.</p>
    * @param {Boolean} [positionsAfterCompletion=true] <p><code>true</code> when the Completable instance, after completing the string, should set the current position to the index after the segment's replacement. `false` when it should not change the current position.</p><p>See the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
    * @param {Function}  [onComplete]                    A function that Completable will call after completing the string. `onComplete` has one paramater: the completed string (String).
-   * @param {Function}  [onPosition]                    A function that Completable will call after completing the string. `onPosition` has one paramater: the new position (Number).
+   * @param {Function}  [onPosition]                    A function that Completable will call after completing the string. `onPosition` has two parameters: the new position (Number), and the Completable instance (Object).
    */
   constructor(string, {
     segmentsFromDivider = false,
@@ -87,8 +87,9 @@ class Completable {
 
     /* Public methods */
     /**
-     * Sets a value for `string`. Takes one argument: the new `string`
-     * @param {String} string [description]
+     * Sets a value for `string`
+     * @param {String} string The new string
+     * @return {Object}       The Completable instance
      */
     function setString (string) {
       this.string = string
@@ -96,7 +97,8 @@ class Completable {
     }
     /**
      * <p>Sets the position from which the Completable instance will start extracting segments.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section and the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
-     * @param {Number} position the new position
+     * @param {Number} position The new `position`
+     * @return {Object}       The Completable instance
      */
     function setPosition (position) {
       this.position = position
@@ -104,7 +106,8 @@ class Completable {
     }
     /**
      * <p>Completes the string, replacing <code>segment</code> with a completion/replacement string, and computes a new position based on the <code>positionsAfterCompletion</code> option. Afterward, <code>complete</code> calls the user-provided <code>onComplete</code> function, passing the new string and the new position.</p><p>Note that <code>complete</code> does not set its <code>string</code> or <code>position</code> to the new values, but the user can do so using <code>setString</code> and <code>setPosition</code>.</p>
-     * @param {String} completion the completion/replacement.
+     * @param {String} completion The completion/replacement.
+     * @return {Object}       The Completable instance
      */
     function complete (completion) {
       const textBefore = this.#segmentsFromDivider ? this.string.slice(0, this.position - this.segment.length) : '',
@@ -112,8 +115,8 @@ class Completable {
             string = textBefore + completion + textAfter,
             position = this.#positionsAfterCompletion ? textBefore.length + completion.length : this.position
 
-      if (is.function(this.#onComplete)) this.#onComplete(string)
-      if (is.function(this.#onPosition)) this.#onPosition(position)
+      if (is.function(this.#onComplete)) this.#onComplete(string, this)
+      if (is.function(this.#onPosition)) this.#onPosition(position, this)
 
       return this
     }
@@ -124,8 +127,6 @@ class Completable {
       complete
     }, 'method')
   }
-
-  // Getters and setters
 
   // Private methods
   #computeSegmentStartIndex = function() {
