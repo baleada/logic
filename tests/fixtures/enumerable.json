@@ -1,0 +1,31 @@
+{
+  "Completable": [
+    "string",
+    "position",
+    "segment",
+    "setString",
+    "setPosition",
+    "complete"
+  ],
+  "Navigable": [
+    "array",
+    "currentIndex",
+    "setArray",
+    "setCurrentIndex",
+    "goTo",
+    "next",
+    "prev"
+  ],
+  "Syncable": [
+    "state",
+    "editableState",
+    "type",
+    "editableStateType",
+    "formattedEditableState",
+    "setState",
+    "setEditableState",
+    "cancel",
+    "write",
+    "erase"
+  ]
+}

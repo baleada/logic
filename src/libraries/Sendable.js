@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import assignPublicMethods from '../utils/assignPublicMethods'
+import assignEnumerables from '../utils/assignEnumerables'
 import is from '../utils/is'
 import SendableDependency from '../wrappers/SendableAxios.js'
 
@@ -23,7 +23,7 @@ class Sendable {
     this.#onError = options.onError
     this.#dependency = new SendableDependency(this.request)
 
-    // Public properties
+    /* Public properties */
     /**
      * `true` when the request has been sent but not yet resolved or rejected, `false` when the request has been resolved or rejected OR when no request has been sent yet
      * @type {Boolean}
@@ -35,7 +35,7 @@ class Sendable {
      */
     this.response = {}
 
-    // Public methods
+    /* Public methods */
     /**
      * [setRequest description]
      * @param {Object} request [description]

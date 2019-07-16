@@ -5,7 +5,7 @@
  */
 
 // Utils
-import assignPublicMethods from '../utils/assignPublicMethods'
+import assignEnumerables from '../utils/assignEnumerables'
 import is from '../utils/is'
 import lastMatch from '../utils/lastMatch'
 
@@ -45,6 +45,7 @@ class Completable {
     onComplete,
     onPosition
   }) {
+    /* Options */
     this.#segmentsFromDivider = segmentsFromDivider
     this.#segmentsToPosition = segmentsToPosition
     this.#divider = divider
@@ -53,25 +54,45 @@ class Completable {
     this.#onComplete = onComplete
     this.#onPosition = onPosition
 
-    // Public properties
+    /* Public properties */
     /**
      * A shallow copy of the string passed to the Completable constructor
      * @type {String}
      */
-    this.string = string
+    string = string
     /**
      * The current index-based position in the `string`. See the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.
      * @type {Number}
      */
-    this.position = this.string.length
+    const position = string.length
 
-    // Public methods
+    assignEnumerables(this, {
+      string,
+      position
+    }, 'property')
+
+    /* Public getters */
+    /**
+     * Segment getter function
+     * @return {String} An extracted segment of `string`. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
+     */
+    function segment() {
+      return this.string.slice(
+        this.#computeSegmentStartIndex(),
+        this.#computeSegmentEndIndex()
+      )
+    }
+
+    assignEnumerables(this, { segment }, 'getter')
+
+    /* Public methods */
     /**
      * Sets a value for `string`. Takes one argument: the new `string`
      * @param {String} string [description]
      */
     function setString (string) {
       this.string = string
+      return this
     }
     /**
      * <p>Sets the position from which the Completable instance will start extracting segments.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section and the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
@@ -79,6 +100,7 @@ class Completable {
      */
     function setPosition (position) {
       this.position = position
+      return this
     }
     /**
      * <p>Completes the string, replacing <code>segment</code> with a completion/replacement string, and computes a new position based on the <code>positionsAfterCompletion</code> option. Afterward, <code>complete</code> calls the user-provided <code>onComplete</code> function, passing the new string and the new position.</p><p>Note that <code>complete</code> does not set its <code>string</code> or <code>position</code> to the new values, but the user can do so using <code>setString</code> and <code>setPosition</code>.</p>
@@ -90,30 +112,20 @@ class Completable {
             string = textBefore + completion + textAfter,
             position = this.#positionsAfterCompletion ? textBefore.length + completion.length : this.position
 
-      this.string = string
-      this.position = position
       if (is.function(this.#onComplete)) this.#onComplete(string)
       if (is.function(this.#onPosition)) this.#onPosition(position)
+
+      return this
     }
 
-    assignPublicMethods(this, {
+    assignEnumerables(this, {
       setString,
       setPosition,
       complete
-    })
+    }, 'method')
   }
 
   // Getters and setters
-  /**
-   * Segment getter function
-   * @return {String} An extracted segment of `string`. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
-   */
-  get segment () {
-    return this.string.slice(
-      this.#computeSegmentStartIndex(),
-      this.#computeSegmentEndIndex()
-    )
-  }
 
   // Private methods
   #computeSegmentStartIndex = function() {

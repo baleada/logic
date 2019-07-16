@@ -7,7 +7,8 @@
     "index": "./scripts/build-index.js",
     "babelify": "npx babel src --out-dir lib",
     "prepare": "npm run index && npm run babelify",
-    "test": "test"
+    "test": "ava",
+    "watch": "ava --watch"
   },
   "repository": {
     "type": "git",

@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import assignPublicMethods from '../utils/assignPublicMethods'
+import assignEnumerables from '../utils/assignEnumerables'
 
 /**
  * Delayable is a library that enriches a function by:
@@ -30,7 +30,7 @@ class Delayable {
     this.#delay = options.delay
     this.#parameters = is.array(options.parameters) ? options.parameters : []
 
-    // Public properties
+    /* Public properties */
     /**
      * A shallow copy of the callback passed to the Delayable constructor
      * @type {Function}
@@ -52,7 +52,7 @@ class Delayable {
      */
     this.timeRemaining = this.#delay
 
-    // Public methods
+    /* Public methods */
     /**
      * Sets the Delayable instance's callback function
      * @param {Function} callback The new callback function
