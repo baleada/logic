@@ -1,9 +1,8 @@
 {
   "Completable": [
-    "string",
     "position",
     "segment",
-    "setString",
+    "set",
     "setPosition",
     "complete"
   ],
