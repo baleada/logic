@@ -1,4 +1,4 @@
-import publics from '../../src/data/publics.json'
+import publics from '../../src/data/publics'
 import is from '../../src/utils/is'
 
 export default function intendedPublicsArePublic(instance, libraryName) {
