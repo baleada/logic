@@ -1,7 +1,6 @@
 import test from 'ava'
 import Completable from '../../src/libraries/Completable'
-import enumerable from '../fixtures/enumerable.json'
-import isExceptMethods from '../helpers/isExceptMethods'
+import intendedPublicsArePublic from '../test-utils/intendedPublicsArePublic'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Completable(
@@ -15,18 +14,20 @@ test.beforeEach(t => {
 })
 
 /* Basic */
-test('enumerables match intended enumerables', t => {
+test('publics match intended publics', t => {
   const options = {}
   const instance = t.context.setup(options)
 
-  t.is(enumerable.Completable.every(key => Object.keys(instance).includes(key)), true)
+  t.is(intendedPublicsArePublic(instance, 'Completable'), true)
 })
 
 test('stores the string', t => {
   const options = {}
   const instance = t.context.setup(options)
 
-  t.assert(isExceptMethods(instance, new Completable('Baleada: a toolkit for building web apps', options)))
+  const expected = new Completable('Baleada: a toolkit for building web apps', options)
+
+  t.deepEqual(instance, expected)
 })
 
 test('set sets the completable instance', t => {
@@ -35,7 +36,9 @@ test('set sets the completable instance', t => {
 
   instance = instance.set('Baleada')
 
-  t.assert(isExceptMethods(instance, new Completable('Baleada', options)))
+  const expected = new Completable('Baleada', options)
+
+  t.deepEqual(instance, expected)
 })
 
 test('initial position is the length of the string', t => {
@@ -109,31 +112,40 @@ test('correctly segments when segmentsFromDivider is true AND divider is set to 
 /* complete(completion) string */
 test('complete(completion) correctly inserts completion when all options are defaults', t => {
   const options = {}
-  const instance = t.context.setup(options)
+  let instance = t.context.setup(options)
+
   instance.complete('Baleada')
 
-  t.assert(isExceptMethods(t.context.completed, new Completable('Baleada', options)))
+  const expected = new Completable('Baleada', options)
+
+  t.deepEqual(t.context.completed, expected)
 })
 
 test('complete(completion) correctly inserts completion when segmentsFromDivider is true', t => {
   const options = {
     segmentsFromDivider: true,
   }
-  const instance = t.context.setup(options)
-  instance.complete('applications')
+  let instance = t.context.setup(options)
 
-  t.assert(isExceptMethods(t.context.completed, new Completable('Baleada: a toolkit for building web applications', options)))
+  instance = instance.complete('applications')
+
+  const expected = new Completable('Baleada: a toolkit for building web applications', options)
+
+  t.deepEqual(t.context.completed, expected)
 })
 
 test('complete(completion) correctly inserts completion when segmentsToPosition is true', t => {
   const options = {
     segmentsToPosition: true,
   }
-  const instance = t.context.setup(options)
-  instance.setPosition('Baleada: a toolkit'.length)
-  instance.complete('Buena Baleada: a toolkit')
+  let instance = t.context.setup(options)
 
-  t.assert(isExceptMethods(t.context.completed, new Completable('Buena Baleada: a toolkit for building web apps', options)))
+  instance.setPosition('Baleada: a toolkit'.length)
+  instance = instance.complete('Buena Baleada: a toolkit')
+
+  const expected = new Completable('Buena Baleada: a toolkit for building web apps', options)
+
+  t.deepEqual(t.context.completed, expected)
 })
 
 test('complete(completion) correctly inserts completion when segmentsFromDivider is true AND segmentsToPosition is true', t => {
@@ -141,10 +153,13 @@ test('complete(completion) correctly inserts completion when segmentsFromDivider
     segmentsFromDivider: true,
     segmentsToPosition: true
   }
-  const instance = t.context.setup(options)
+  let instance = t.context.setup(options)
+
   instance.complete('Baleada')
 
-  t.assert(isExceptMethods(t.context.completed, new Completable('Baleada: a toolkit for building web Baleada', options)))
+  const expected = new Completable('Baleada: a toolkit for building web Baleada', options)
+
+  t.deepEqual(t.context.completed, expected)
 })
 
 /* complete position */

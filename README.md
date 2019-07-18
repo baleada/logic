@@ -5,13 +5,13 @@ JavaScript libraries for the Baleada toolkit
 
 ## API pattern
 
-- Every library is written as a JavaScript class
-- Every class is an Object. Classes do not extend primitives. <!-- TODO: maybe they should -->
-- Every class's constructor accepts two parameters: a piece of state, and an `options` object.
-- Every class has public properties and public methods, and some classes have public getters. All public properties, methods, and getters are enumerable.
-- Every class stores the state from its constructor in a public property.
-- Every class stores options from its constructor in private properties.
-- Every class has public methods that write new values to its public properties. No class writes to its own public properties.
-- Each public method in every class returns the instance of that class. This allows for method chaining.
+- Every library is a JavaScript class.
+- Classes' constructors accepts two parameters: a piece of state, and an `options` object.
+- Classes extend native JavaScript prototypes and native Web APIs.
+- Classes have public properties and public methods, and some classes have public getters.
+- Classes store their constructors' options in private properties.
+- Each class has a public `set` method that allows users to create a new instance of the class using new state and the original options.
+- Each class has public methods that allow users to write new values to public properties. Outside of those methods, classes do not write to their own public properties.
+- Classes' public methods can be chained.
 
-- Every class's name ends in -able or -ible
+- Classes' names ends in -able or -ible

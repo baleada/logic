@@ -7,9 +7,8 @@
     "complete"
   ],
   "Navigable": [
-    "array",
     "currentIndex",
-    "setArray",
+    "set",
     "setCurrentIndex",
     "goTo",
     "next",

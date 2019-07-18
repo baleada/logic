@@ -5,7 +5,6 @@
  */
 
 // Utils
-import assignEnumerables from '../utils/assignEnumerables'
 import is from '../utils/is'
 import lastMatch from '../utils/lastMatch'
 
@@ -59,87 +58,67 @@ class Completable extends String {
 
     /* Public properties */
     /**
-     * A shallow copy of the string passed to the Completable constructor
-     * @type {String}
-     */
-    // string = string
-    /**
      * The current index-based position in the `string`. See the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.
      * @type {Number}
      */
-    const position = string.length
+    this.position = string.length
+  }
 
-    assignEnumerables(this, {
-      string,
-      position
-    }, 'property')
+  /* Public getters */
+  /**
+   * Segment getter function
+   * @return {String} An extracted segment of `string`. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
+   */
+  get segment() {
+    return this.slice(
+      this.#computeSegmentStartIndex(),
+      this.#computeSegmentEndIndex()
+    )
+  }
 
-    /* Public getters */
-    /**
-     * Segment getter function
-     * @return {String} An extracted segment of `string`. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
-     */
-    function segment() {
-      return this.slice(
-        this.#computeSegmentStartIndex(),
-        this.#computeSegmentEndIndex()
-      )
-    }
+  /* Public methods */
+  /**
+   * Constructs a new Completable instance using a new string and the options passed to the original instance
+   * @param {String} string The new string
+   * @return {Object}       The new Completable instance
+   */
+  set(string) {
+    const instance = new Completable(string, {
+      segmentsFromDivider: this.#segmentsFromDivider,
+      segmentsToPosition: this.#segmentsToPosition,
+      divider: this.#divider,
+      // matchDirection: this.#matchDirection,
+      positionsAfterCompletion: this.#positionsAfterCompletion,
+      onComplete: this.#onComplete,
+      onPosition: this.#onPosition,
+    })
 
-    assignEnumerables(this, {
-      segment
-    }, 'getter')
+    return instance
+  }
+  /**
+   * <p>Sets the position from which the Completable instance will start extracting segments.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section and the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
+   * @param {Number} position The new `position`
+   * @return {Object}       The Completable instance
+   */
+  setPosition(position) {
+    this.position = position
+    return this
+  }
+  /**
+   * <p>Completes the string, replacing <code>segment</code> with a completion/replacement string, and computes a new position based on the <code>positionsAfterCompletion</code> option. Afterward, <code>complete</code> calls the user-provided <code>onComplete</code> function, passing the new string and the new position.</p><p>Note that <code>complete</code> does not set its <code>string</code> or <code>position</code> to the new values, but the user can do so using <code>set</code> and <code>setPosition</code>.</p>
+   * @param {String} completion The completion/replacement.
+   * @return {Object}       The Completable instance
+   */
+  complete(completion) {
+    const textBefore = this.#segmentsFromDivider ? this.slice(0, this.position - this.segment.length) : '',
+          textAfter = this.#segmentsToPosition ? this.slice(this.position) : '',
+          string = textBefore + completion + textAfter,
+          position = this.#positionsAfterCompletion ? textBefore.length + completion.length : this.position
 
-    /* Public methods */
-    /**
-     * Constructs a new Completable instance using a new string and the options passed to the original instance
-     * @param {String} string The new string
-     * @return {Object}       The new Completable instance
-     */
-    function set(string) {
-      const instance = new Completable(string, {
-        segmentsFromDivider: this.#segmentsFromDivider,
-        segmentsToPosition: this.#segmentsToPosition,
-        divider: this.#divider,
-        // matchDirection: this.#matchDirection,
-        positionsAfterCompletion: this.#positionsAfterCompletion,
-        onComplete: this.#onComplete,
-        onPosition: this.#onPosition,
-      })
+    if (is.function(this.#onComplete)) this.#onComplete(string, this)
+    if (is.function(this.#onPosition)) this.#onPosition(position, this)
 
-      return instance
-    }
-    /**
-     * <p>Sets the position from which the Completable instance will start extracting segments.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section and the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
-     * @param {Number} position The new `position`
-     * @return {Object}       The Completable instance
-     */
-    function setPosition(position) {
-      this.position = position
-      return this
-    }
-    /**
-     * <p>Completes the string, replacing <code>segment</code> with a completion/replacement string, and computes a new position based on the <code>positionsAfterCompletion</code> option. Afterward, <code>complete</code> calls the user-provided <code>onComplete</code> function, passing the new string and the new position.</p><p>Note that <code>complete</code> does not set its <code>string</code> or <code>position</code> to the new values, but the user can do so using <code>set</code> and <code>setPosition</code>.</p>
-     * @param {String} completion The completion/replacement.
-     * @return {Object}       The Completable instance
-     */
-    function complete(completion) {
-      const textBefore = this.#segmentsFromDivider ? this.slice(0, this.position - this.segment.length) : '',
-            textAfter = this.#segmentsToPosition ? this.slice(this.position) : '',
-            string = textBefore + completion + textAfter,
-            position = this.#positionsAfterCompletion ? textBefore.length + completion.length : this.position
-
-      if (is.function(this.#onComplete)) this.#onComplete(string, this)
-      if (is.function(this.#onPosition)) this.#onPosition(position, this)
-
-      return this
-    }
-
-    assignEnumerables(this, {
-      set,
-      setPosition,
-      complete
-    }, 'method')
+    return this
   }
 
   /* Private methods */

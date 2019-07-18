@@ -1,13 +1,13 @@
 import test from 'ava'
 import Syncable from '../../src/libraries/Syncable'
-import enumerable from '../fixtures/enumerable.json'
+import publics from '../../src/data/publics.json'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Syncable('Baleada: a toolkit for building web apps[]', options)
 })
 
 /* Basic */
-test('enumerables match intended enumerables', t => {
+test('publics match intended publics', t => {
   const instance = t.context.setup()
 
   t.is(
