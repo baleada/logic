@@ -37,24 +37,24 @@ class Completable extends String {
    * @param {Function}  [onComplete]                    A function that Completable will call after completing the string. `onComplete` has one paramater: the completed string (String).
    * @param {Function}  [onPosition]                    A function that Completable will call after completing the string. `onPosition` accepts two parameters: the new position (Number), and the Completable instance (Object).
    */
-  constructor(string, {
-    segmentsFromDivider = false,
-    segmentsToPosition = false,
-    divider = /\s/,
-    positionsAfterCompletion = true,
-    onComplete,
-    onPosition
-  }) {
+  constructor(string, options = {}) {
     super(string)
 
     /* Options */
-    this.#segmentsFromDivider = segmentsFromDivider
-    this.#segmentsToPosition = segmentsToPosition
-    this.#divider = divider
+    options = {
+      segmentsFromDivider: false,
+      segmentsToPosition: false,
+      divider: /\s/,
+      positionsAfterCompletion: true,
+      ...options
+    }
+    this.#segmentsFromDivider = options.segmentsFromDivider
+    this.#segmentsToPosition = options.segmentsToPosition
+    this.#divider = options.divider
     // this.#matchDirection = matchDirection
-    this.#positionsAfterCompletion = positionsAfterCompletion
-    this.#onComplete = onComplete
-    this.#onPosition = onPosition
+    this.#positionsAfterCompletion = options.positionsAfterCompletion
+    this.#onComplete = options.onComplete
+    this.#onPosition = options.onPosition
 
     /* Public properties */
     /**

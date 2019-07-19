@@ -4,7 +4,6 @@
  * Released under the MIT license
  */
 
-import assignEnumerables from '../utils/assignEnumerables'
 import is from '../utils/is'
 import { parse } from '../utils/parse'
 
@@ -43,84 +42,64 @@ class Syncable {
     }
 
     /* Public properties */
-    state = state
-    const editableState = this.#getEditableState()
-
-    assignEnumerables(this, {
-      state,
-      editableState,
-    }, 'property')
-
-    /* Public getters */
-    function type() {
-      return this.#hardCodedType ? this.#hardCodedType.toLowerCase() : this.#getType(this.state)
-    }
-    function editableStateType() {
-      return this.#getType(this.editableState)
-    }
-    function formattedEditableState() {
-      let formattedEditableState
-
-      if (this.#typePairingIsSupported()) {
-        formattedEditableState = (this.editableStateType === 'string' && this.editableState.length > 0)
-          ? this.editableState.trim()
-          : this.editableState
-      } else if (!is.function(parse[this.type])) {
-        throw new Error(`state/editableState type pairing (${this.type} and ${this.editableStateType}) is not supported`)
-      } else {
-        formattedEditableState = parse[this.type](this.editableState)
-      }
-
-      return formattedEditableState
-    }
-
-    assignEnumerables(this, {
-      type,
-      editableStateType,
-      formattedEditableState,
-    }, 'getter')
-
-    /* Public methods */
-    function setState(state) {
-      this.state = state
-      this.setEditableState(this.#getEditableState())
-      return this
-    }
-    function setEditableState(state) {
-      this.editableState = state
-      return this
-    }
-    function cancel() {
-      this.editableState = this.#getEditableState()
-      if (is.function(this.#onCancel)) this.#onCancel()
-      return this
-    }
-    function write() {
-      let newState // state clone that will be edited
-      if (this.type === 'array') newState = this.#writeArray()
-      else if (this.type === 'object') newState = this.#writeObject()
-      else newState = this.formattedEditableState
-
-      return this.#sync(newState)
-    }
-    function erase(options = {}) {
-      const newState = this.#eraseDictionary.hasOwnProperty(this.type)
-        ? this.#eraseDictionary[this.type](options)
-        : null
-
-      return this.#sync(newState)
-    }
-
-    assignEnumerables(this, {
-      setState,
-      setEditableState,
-      cancel,
-      write,
-      erase,
-    }, 'method')
+    this.editableState = this.#getEditableState()
   }
 
-  // Private methods
+  /* Public getters */
+  get type() {
+    return this.#hardCodedType ? this.#hardCodedType.toLowerCase() : this.#getType(this.state)
+  }
+  get editableStateType() {
+    return this.#getType(this.editableState)
+  }
+  get formattedEditableState() {
+    let formattedEditableState
+
+    if (this.#typePairingIsSupported()) {
+      formattedEditableState = (this.editableStateType === 'string' && this.editableState.length > 0)
+        ? this.editableState.trim()
+        : this.editableState
+    } else if (!is.function(parse[this.type])) {
+      throw new Error(`state/editableState type pairing (${this.type} and ${this.editableStateType}) is not supported`)
+    } else {
+      formattedEditableState = parse[this.type](this.editableState)
+    }
+
+    return formattedEditableState
+  }
+
+  /* Public methods */
+  setState(state) {
+    this.state = state
+    this.setEditableState(this.#getEditableState())
+    return this
+  }
+  setEditableState(state) {
+    this.editableState = state
+    return this
+  }
+  cancel() {
+    this.editableState = this.#getEditableState()
+    if (is.function(this.#onCancel)) this.#onCancel()
+    return this
+  }
+  write() {
+    let newState // state clone that will be edited
+    if (this.type === 'array') newState = this.#writeArray()
+    else if (this.type === 'object') newState = this.#writeObject()
+    else newState = this.formattedEditableState
+
+    return this.#sync(newState)
+  }
+  erase(options = {}) {
+    const newState = this.#eraseDictionary.hasOwnProperty(this.type)
+      ? this.#eraseDictionary[this.type](options)
+      : null
+
+    return this.#sync(newState)
+  }
+
+  /* Private methods */
   #getType = function(state) {
     let type,
         i = 0
@@ -138,10 +117,12 @@ class Syncable {
     if (this.#editsRawState) {
       return this.state
     } else if (this.type === 'object') {
-      if (!this.state.hasOwnProperty(this.#currentKey)) {
-        throw new Error('Cannot sync with object when editsRawState is false and object does not have the property indicated by the currentKey option.')
-      } else {
-        return this.state[this.#currentKey]
+      switch (true) {
+        case !this.state.hasOwnProperty(this.#currentKey):
+          throw new Error('Cannot sync with object when editsRawState is false and object does not have the property indicated by the currentKey option.')
+          break
+        default:
+          return this.state[this.#currentKey]
       }
     } else if (this.type === 'array') {
       return ''

@@ -1,12 +1,16 @@
-import publics from '../data/publics.json'
 import is from '../utils/is'
 
 export default function toProvisions(instance) {
-  return publics[instance]
+  const publicProperties = {
+    prototype: Object.getOwnPropertyNames(Object.getPrototypeOf(instance)).slice(1), // don't include constructor
+    instance: Object.getOwnPropertyNames(instance)
+  }
+
+  return publicProperties.instance.concat(publicProperties.prototype) 
     .reduce(
-      (provisions, key) => ({
+      (provisions, property) => ({
         ...provisions,
-        [key]: is.function(instance[key]) ? instance[key].bind(instance) : instance[key]
+        [property]: is.function(instance[property]) ? instance[property].bind(instance) : instance[property]
       }),
       {}
     )

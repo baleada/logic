@@ -1,6 +1,5 @@
 import test from 'ava'
 import Navigable from '../../src/libraries/Navigable'
-import intendedPublicsArePublic from '../test-utils/intendedPublicsArePublic'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Navigable(
@@ -12,20 +11,13 @@ test.beforeEach(t => {
       'huevito',
     ],
     {
-      onNavigate: (index, instance) => instance.setCurrentIndex(index),
+      onNavigate: (index, instance) => instance.setIndex(index),
       ...options
     }
   )
 })
 
 /* Basic */
-test('intended publics are public', t => {
-  const options = {}
-  const instance = t.context.setup(options)
-
-  t.is(intendedPublicsArePublic(instance, 'Navigable'), true)
-})
-
 test('stores the array', t => {
   const options = {}
   const instance = t.context.setup(options)
@@ -45,29 +37,29 @@ test('set sets the array', t => {
   t.deepEqual(instance, expected)
 })
 
-test('initial currentIndex when startIndex is default', t => {
+test('initial index is 0 when initialIndex is default', t => {
   const options = {}
   const instance = t.context.setup(options)
 
-  t.is(instance.currentIndex, 0)
+  t.is(instance.index, 0)
 })
 
-test('initial currentIndex is 42 when startIndex is 42', t => {
+test('initial index is 42 when initialIndex is 42', t => {
   const options = {}
   const instance = t.context.setup({
-    startIndex: 42,
+    initialIndex: 42,
   })
 
-  t.is(instance.currentIndex, 42)
+  t.is(instance.index, 42)
 })
 
-test('setCurrentIndex sets the current index', t => {
+test('setIndex sets the current index', t => {
   const options = {}
   const instance = t.context.setup(options)
 
-  instance.setCurrentIndex(42)
+  instance.setIndex(42)
 
-  t.is(instance.currentIndex, 42)
+  t.is(instance.index, 42)
 })
 
 
@@ -78,7 +70,7 @@ test('goTo(newIndex) navigate to the length of the array when newIndex is greate
 
   instance.goTo(42)
 
-  t.is(instance.currentIndex, instance.length)
+  t.is(instance.index, instance.length)
 })
 
 test('goTo(newIndex) navigates to 0 when newIndex is less than 0', t => {
@@ -87,7 +79,7 @@ test('goTo(newIndex) navigates to 0 when newIndex is less than 0', t => {
 
   instance.goTo(-42)
 
-  t.is(instance.currentIndex, 0)
+  t.is(instance.index, 0)
 })
 
 test('goTo(newIndex) navigates to newIndex', t => {
@@ -96,17 +88,17 @@ test('goTo(newIndex) navigates to newIndex', t => {
 
   instance.goTo(1)
 
-  t.is(instance.currentIndex, 1)
+  t.is(instance.index, 1)
 })
 
 /* next */
 test('next() increments the current index by 1 when increment is default', t => {
   const options = {}
   const instance = t.context.setup(options)
-  
+
   instance.next()
 
-  t.is(instance.currentIndex, 1)
+  t.is(instance.index, 1)
 })
 
 test('next() increments the current index by 2 when increment is 2', t => {
@@ -117,17 +109,17 @@ test('next() increments the current index by 2 when increment is 2', t => {
 
   instance.next()
 
-  t.is(instance.currentIndex, 2)
+  t.is(instance.index, 2)
 })
 
 test('next() loops back through the array by default when the current index is greater than the last index', t => {
   const options = {}
   const instance = t.context.setup(options)
 
-  instance.setCurrentIndex(instance.length - 1)
+  instance.setIndex(instance.length - 1)
   instance.next()
 
-  t.is(instance.currentIndex, 0)
+  t.is(instance.index, 0)
 })
 
 test('next() loops recursively through the array by default until current index is less than or equal to the last index', t => {
@@ -138,7 +130,7 @@ test('next() loops recursively through the array by default until current index 
 
   instance.next()
 
-  t.is(instance.currentIndex, 0)
+  t.is(instance.index, 0)
 })
 
 test('next() stops at the last index when loops is false AND incremented index is greater than the last index', t => {
@@ -147,10 +139,10 @@ test('next() stops at the last index when loops is false AND incremented index i
   }
   const instance = t.context.setup(options)
 
-  instance.setCurrentIndex(instance.length - 1)
+  instance.setIndex(instance.length - 1)
   instance.next()
 
-  t.is(instance.currentIndex, instance.length - 1)
+  t.is(instance.index, instance.length - 1)
 })
 
 
@@ -159,10 +151,10 @@ test('prev() decrements the current index by 1 when decrement is default', t => 
   const options = {}
   const instance = t.context.setup(options)
 
-  instance.setCurrentIndex(1)
+  instance.setIndex(1)
   instance.prev()
 
-  t.is(instance.currentIndex, 0)
+  t.is(instance.index, 0)
 })
 
 test('prev() decrements the current index by 2 when decrement is 2', t => {
@@ -171,10 +163,10 @@ test('prev() decrements the current index by 2 when decrement is 2', t => {
   }
   const instance = t.context.setup(options)
 
-  instance.setCurrentIndex(2)
+  instance.setIndex(2)
   instance.prev()
 
-  t.is(instance.currentIndex, 0)
+  t.is(instance.index, 0)
 })
 
 test('prev() loops back through the array by default when the current index is less than 0', t => {
@@ -183,7 +175,7 @@ test('prev() loops back through the array by default when the current index is l
 
   instance.prev()
 
-  t.is(instance.currentIndex, instance.length - 1)
+  t.is(instance.index, instance.length - 1)
 })
 
 test('prev() loops recursively through the array by default until current index is greater than or equal to 0', t => {
@@ -194,7 +186,7 @@ test('prev() loops recursively through the array by default until current index 
 
   instance.prev()
 
-  t.is(instance.currentIndex, 0)
+  t.is(instance.index, 0)
 })
 
 test('prev() stops at 0 when loops is false AND decremented index is less than 0', t => {
@@ -205,7 +197,7 @@ test('prev() stops at 0 when loops is false AND decremented index is less than 0
 
   instance.prev()
 
-  t.is(instance.currentIndex, 0)
+  t.is(instance.index, 0)
 })
 
 
@@ -215,7 +207,7 @@ test('can method chain', t => {
   const instance = t.context.setup(options)
   const chained = instance
     .set(['Baleada'])
-    .setCurrentIndex(0)
+    .setIndex(0)
     .goTo(42)
     .next()
     .prev()

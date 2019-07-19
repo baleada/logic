@@ -1,12 +1,11 @@
 import test from 'ava'
 import Completable from '../../src/libraries/Completable'
-import intendedPublicsArePublic from '../test-utils/intendedPublicsArePublic'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Completable(
     'Baleada: a toolkit for building web apps',
     {
-      onComplete: (string, instance) => t.context.completed = instance.set(string),
+      onComplete: (string, instance) => t.context.newInstance = instance.set(string),
       onPosition: (position, instance) => instance.setPosition(position),
       ...options
     }
@@ -14,13 +13,6 @@ test.beforeEach(t => {
 })
 
 /* Basic */
-test('publics match intended publics', t => {
-  const options = {}
-  const instance = t.context.setup(options)
-
-  t.is(intendedPublicsArePublic(instance, 'Completable'), true)
-})
-
 test('stores the string', t => {
   const options = {}
   const instance = t.context.setup(options)
@@ -118,7 +110,7 @@ test('complete(completion) correctly inserts completion when all options are def
 
   const expected = new Completable('Baleada', options)
 
-  t.deepEqual(t.context.completed, expected)
+  t.deepEqual(t.context.newInstance, expected)
 })
 
 test('complete(completion) correctly inserts completion when segmentsFromDivider is true', t => {
@@ -131,7 +123,7 @@ test('complete(completion) correctly inserts completion when segmentsFromDivider
 
   const expected = new Completable('Baleada: a toolkit for building web applications', options)
 
-  t.deepEqual(t.context.completed, expected)
+  t.deepEqual(t.context.newInstance, expected)
 })
 
 test('complete(completion) correctly inserts completion when segmentsToPosition is true', t => {
@@ -145,7 +137,7 @@ test('complete(completion) correctly inserts completion when segmentsToPosition 
 
   const expected = new Completable('Buena Baleada: a toolkit for building web apps', options)
 
-  t.deepEqual(t.context.completed, expected)
+  t.deepEqual(t.context.newInstance, expected)
 })
 
 test('complete(completion) correctly inserts completion when segmentsFromDivider is true AND segmentsToPosition is true', t => {
@@ -159,7 +151,7 @@ test('complete(completion) correctly inserts completion when segmentsFromDivider
 
   const expected = new Completable('Baleada: a toolkit for building web Baleada', options)
 
-  t.deepEqual(t.context.completed, expected)
+  t.deepEqual(t.context.newInstance, expected)
 })
 
 /* complete position */

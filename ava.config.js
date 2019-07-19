@@ -1,5 +1,5 @@
 export default {
   files: [ 'tests/**/*.test.js' ],
-  helpers: [ 'src/**/*.js', 'tests/**/*.js' ],
+  helpers: [ 'src/**/*.js', 'tests/test-utils/*.js' ],
   verbose: true,
 }
