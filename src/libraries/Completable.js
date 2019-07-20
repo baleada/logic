@@ -16,7 +16,7 @@ import lastMatch from '../utils/lastMatch'
  *
  * Completable is written in vanilla JS with no dependencies. It powers <nuxt-link to="/docs/tools/composition-functions/useCompletable">`useCompletable`</nuxt-link>.
  */
-class Completable extends String {
+class Completable {
   /* Private properties */
   #segmentsFromDivider
   #segmentsToPosition
@@ -38,8 +38,6 @@ class Completable extends String {
    * @param {Function}  [onPosition]                    A function that Completable will call after completing the string. `onPosition` accepts two parameters: the new position (Number), and the Completable instance (Object).
    */
   constructor(string, options = {}) {
-    super(string)
-
     /* Options */
     options = {
       segmentsFromDivider: false,
@@ -58,6 +56,11 @@ class Completable extends String {
 
     /* Public properties */
     /**
+     * A shallow copy of the string passed to the Completable constructor
+     * @type {String}
+     */
+    this.string = string
+    /**
      * The current index-based position in the `string`. See the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.
      * @type {Number}
      */
@@ -70,7 +73,7 @@ class Completable extends String {
    * @return {String} An extracted segment of `string`. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
    */
   get segment() {
-    return this.slice(
+    return this.string.slice(
       this.#computeSegmentStartIndex(),
       this.#computeSegmentEndIndex()
     )
@@ -78,22 +81,13 @@ class Completable extends String {
 
   /* Public methods */
   /**
-   * Constructs a new Completable instance using a new string and the options passed to the original instance
+   * Sets the Completable instance's string
    * @param {String} string The new string
-   * @return {Object}       The new Completable instance
+   * @return {Object}       The Completable instance
    */
-  set(string) {
-    const instance = new Completable(string, {
-      segmentsFromDivider: this.#segmentsFromDivider,
-      segmentsToPosition: this.#segmentsToPosition,
-      divider: this.#divider,
-      // matchDirection: this.#matchDirection,
-      positionsAfterCompletion: this.#positionsAfterCompletion,
-      onComplete: this.#onComplete,
-      onPosition: this.#onPosition,
-    })
-
-    return instance
+  setString(string) {
+    this.string = string
+    return this
   }
   /**
    * <p>Sets the position from which the Completable instance will start extracting segments.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section and the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
@@ -110,8 +104,8 @@ class Completable extends String {
    * @return {Object}       The Completable instance
    */
   complete(completion) {
-    const textBefore = this.#segmentsFromDivider ? this.slice(0, this.position - this.segment.length) : '',
-          textAfter = this.#segmentsToPosition ? this.slice(this.position) : '',
+    const textBefore = this.#segmentsFromDivider ? this.string.slice(0, this.position - this.segment.length) : '',
+          textAfter = this.#segmentsToPosition ? this.string.slice(this.position) : '',
           string = textBefore + completion + textAfter,
           position = this.#positionsAfterCompletion ? textBefore.length + completion.length : this.position
 
@@ -123,10 +117,10 @@ class Completable extends String {
 
   /* Private methods */
   #computeSegmentStartIndex = function() {
-    return this.#segmentsFromDivider ? lastMatch(this, this.#divider, this.position) + 1 : 0
+    return this.#segmentsFromDivider ? lastMatch(this.string, this.#divider, this.position) + 1 : 0
   }
   #computeSegmentEndIndex = function() {
-    return this.#segmentsToPosition ? this.position : this.length
+    return this.#segmentsToPosition ? this.position : this.string.length
   }
 }
 

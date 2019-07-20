@@ -13,7 +13,7 @@ import is from '../utils/is'
  *
  * Navigable is written in vanilla JS with no dependencies. It powers <nuxt-link to="/docs/tools/composition-functions/useNavigable">`useNavigable`</nuxt-link>.
  */
-class Navigable extends Array {
+class Navigable {
   /* Private properties */
   #loops
   #initialIndex
@@ -31,8 +31,7 @@ class Navigable extends Array {
    * @param {Function}  onNavigate    A function that Navigable will call after navigating to a new item. `onNavigate` acceepts two parameters: the index (Number) of the item that has been navigated to, and the Navigable instance (Object).
    */
   constructor(array, options = {}) {
-    super(...array)
-
+    /* Options */
     options = {
       initialIndex: 0,
       loops: true,
@@ -42,7 +41,6 @@ class Navigable extends Array {
       ...options
     }
 
-    /* Options */
     this.#initialIndex = options.initialIndex
     this.#loops = options.loops
     this.#increment = options.increment
@@ -51,28 +49,26 @@ class Navigable extends Array {
 
     /* Public properties */
     /**
+     * A shallow copy of the array passed to the Navigable constructor
+     * @type {Array}
+     */
+    this.array = array
+    /**
      *  The index of the item that has been navigated to
      * @type {Number}
      */
     this.index = this.#initialIndex
-  }  
+  }
 
   /* Public methods */
   /**
-   * Constructs a new Navigable instance using a new array and the options passed to the original instance
-   * @param {Aray} array The new array
+   * Sets the Navigable instance's array
+   * @param {Array} array The new array
    * @return {Object}       The new Navigable instance
    */
-  set(array) {
-    const instance = new Navigable(array, {
-      loops: this.#loops,
-      initialIndex: this.#initialIndex,
-      increment: this.#increment,
-      decrement: this.#decrement,
-      onNavigate: this.#onNavigate,
-    })
-
-    return instance
+  setArray(array) {
+    this.array = array
+    return this
   }
   /**
    * Sets a value for `index`
@@ -90,10 +86,10 @@ class Navigable extends Array {
    */
   goTo(index) {
     switch (true) {
-      case (index > this.length):
-        index = this.length
+      case (index > this.array.length):
+        index = this.array.length
         // TODO: decide whether to show warnings or not
-        // console.warn(`Cannot set index: ${index} is greater than ${this.length} (the array's length). Index has been set to the array's length instead.`)
+        // console.warn(`Cannot set index: ${index} is greater than ${this.array.length} (the array's length). Index has been set to the array's length instead.`)
         break
       case (index < 0):
         index = 0
@@ -112,14 +108,14 @@ class Navigable extends Array {
    */
   next() {
     let index
-    const lastIndex = this.length - 1
+    const lastIndex = this.array.length - 1
 
     if (this.index + this.#increment > lastIndex) {
       switch (true) {
         case (this.#loops):
           index = this.index + this.#increment
           while(index > lastIndex) {
-            index -= this.length
+            index -= this.array.length
           }
           break
         default:
@@ -143,7 +139,7 @@ class Navigable extends Array {
         case (this.#loops):
           index = this.index - this.#decrement
           while(index < 0) {
-            index += this.length
+            index += this.array.length
           }
           break
         default:

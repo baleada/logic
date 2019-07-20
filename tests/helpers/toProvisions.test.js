@@ -8,7 +8,7 @@ test('provides properties, getters, and methods', t => {
   const value = Object.getOwnPropertyNames(
     toProvisions(instance)
   )
-  const expected = ['position', 'segment', 'set', 'setPosition', 'complete']
+  const expected = ['string', 'position', 'segment', 'setString', 'setPosition', 'complete']
 
   t.assert(expected.every(property => value.includes(property)))
 })

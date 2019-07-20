@@ -5,7 +5,7 @@ test.beforeEach(t => {
   t.context.setup = (options = {}) => new Completable(
     'Baleada: a toolkit for building web apps',
     {
-      onComplete: (string, instance) => t.context.newInstance = instance.set(string),
+      onComplete: (string, instance) => instance.setString(string),
       onPosition: (position, instance) => instance.setPosition(position),
       ...options
     }
@@ -14,35 +14,26 @@ test.beforeEach(t => {
 
 /* Basic */
 test('stores the string', t => {
-  const options = {}
-  const instance = t.context.setup(options)
+  const instance = t.context.setup()
 
-  const expected = new Completable('Baleada: a toolkit for building web apps', options)
-
-  t.deepEqual(instance, expected)
+  t.is(instance.string, 'Baleada: a toolkit for building web apps')
 })
 
-test('set sets the completable instance', t => {
-  const options = {}
-  let instance = t.context.setup(options)
+test('setString sets the string', t => {
+  const instance = t.context.setup()
+  instance.setString('Baleada')
 
-  instance = instance.set('Baleada')
-
-  const expected = new Completable('Baleada', options)
-
-  t.deepEqual(instance, expected)
+  t.is(instance.string, 'Baleada')
 })
 
 test('initial position is the length of the string', t => {
-  const options = {}
-  const instance = t.context.setup(options)
+  const instance = t.context.setup()
 
-  t.is(instance.position, instance.length)
+  t.is(instance.position, instance.string.length)
 })
 
 test('setPosition sets the position', t => {
-  const options = {}
-  const instance = t.context.setup(options)
+  const instance = t.context.setup()
 
   instance.setPosition('Baleada: a toolkit'.length)
 
@@ -51,17 +42,15 @@ test('setPosition sets the position', t => {
 
 /* segment */
 test('correctly segments when all options are defaults', t => {
-  const options = {}
-  const instance = t.context.setup(options)
+  const instance = t.context.setup()
 
-  t.is(instance.segment, instance.slice(0, instance.length))
+  t.is(instance.segment, instance.string)
 })
 
 test('correctly segments when segmentsFromDivider is true', t => {
-  const options = {
+  const instance = t.context.setup({
     segmentsFromDivider: true,
-  }
-  const instance = t.context.setup(options)
+  })
 
   instance.setPosition('Baleada: a toolkit'.length)
 
@@ -69,10 +58,9 @@ test('correctly segments when segmentsFromDivider is true', t => {
 })
 
 test('correctly segments when segmentsToPosition is true', t => {
-  const options = {
+  const instance = t.context.setup({
     segmentsToPosition: true,
-  }
-  const instance = t.context.setup(options)
+  })
 
   instance.setPosition('Baleada: a toolkit'.length)
 
@@ -80,11 +68,10 @@ test('correctly segments when segmentsToPosition is true', t => {
 })
 
 test('correctly segments when segmentsFromDivider and segmentsToPosition are true', t => {
-  const options = {
+  const instance = t.context.setup({
     segmentsFromDivider: true,
     segmentsToPosition: true,
-  }
-  const instance = t.context.setup(options)
+  })
 
   instance.setPosition('Baleada: a toolkit'.length)
 
@@ -92,92 +79,76 @@ test('correctly segments when segmentsFromDivider and segmentsToPosition are tru
 })
 
 test('correctly segments when segmentsFromDivider is true AND divider is set to /:/', t => {
-  const options = {
+  const instance = t.context.setup({
     divider: /:/,
     segmentsFromDivider: true
-  }
-  const instance = t.context.setup(options)
+  })
 
   t.is(instance.segment, ' a toolkit for building web apps')
 })
 
 /* complete(completion) string */
 test('complete(completion) correctly inserts completion when all options are defaults', t => {
-  const options = {}
-  let instance = t.context.setup(options)
+  const instance = t.context.setup()
 
   instance.complete('Baleada')
 
-  const expected = new Completable('Baleada', options)
-
-  t.deepEqual(t.context.newInstance, expected)
+  t.is(instance.string, 'Baleada')
 })
 
 test('complete(completion) correctly inserts completion when segmentsFromDivider is true', t => {
-  const options = {
+  const instance = t.context.setup({
     segmentsFromDivider: true,
-  }
-  let instance = t.context.setup(options)
+  })
 
-  instance = instance.complete('applications')
+  instance.complete('applications')
 
-  const expected = new Completable('Baleada: a toolkit for building web applications', options)
-
-  t.deepEqual(t.context.newInstance, expected)
+  t.is(instance.string, 'Baleada: a toolkit for building web applications')
 })
 
 test('complete(completion) correctly inserts completion when segmentsToPosition is true', t => {
-  const options = {
+  const instance = t.context.setup({
     segmentsToPosition: true,
-  }
-  let instance = t.context.setup(options)
+  })
 
   instance.setPosition('Baleada: a toolkit'.length)
-  instance = instance.complete('Buena Baleada: a toolkit')
+  instance.complete('Buena Baleada: a toolkit')
 
-  const expected = new Completable('Buena Baleada: a toolkit for building web apps', options)
-
-  t.deepEqual(t.context.newInstance, expected)
+  t.is(instance.string, 'Buena Baleada: a toolkit for building web apps')
 })
 
 test('complete(completion) correctly inserts completion when segmentsFromDivider is true AND segmentsToPosition is true', t => {
-  const options = {
+  const instance = t.context.setup({
     segmentsFromDivider: true,
     segmentsToPosition: true
-  }
-  let instance = t.context.setup(options)
+  })
 
   instance.complete('Baleada')
 
-  const expected = new Completable('Baleada: a toolkit for building web Baleada', options)
-
-  t.deepEqual(t.context.newInstance, expected)
+  t.is(instance.string, 'Baleada: a toolkit for building web Baleada')
 })
 
 /* complete position */
 test('complete(completion) correctly updates position when all options are defaults', t => {
-  const options = {}
-  const instance = t.context.setup(options)
+  const instance = t.context.setup()
   instance.complete('Baleada')
 
   t.is(instance.position, 'Baleada'.length)
 })
 
 test('complete(completion) correctly updates position when segmentsFromDivider is true', t => {
-  const options = {
+  const instance = t.context.setup({
     segmentsFromDivider: true,
-  }
-  const instance = t.context.setup(options)
+  })
   instance.complete('applications')
 
   t.is(instance.position, 'Baleada: a toolkit for building web applications'.length)
 })
 
 test('complete(completion) correctly updates position when segmentsToPosition is true', t => {
-  const options = {
+  const instance = t.context.setup({
     segmentsToPosition: true,
-  }
-  const instance = t.context.setup(options)
+  })
   instance.setPosition('Baleada: a toolkit'.length)
   instance.complete('Buena Baleada: a toolkit')
 
@@ -185,21 +156,19 @@ test('complete(completion) correctly updates position when segmentsToPosition is
 })
 
 test('complete(completion) correctly updates position when segmentsFromDivider is true AND segmentsToPosition is true', t => {
-  const options = {
+  const instance = t.context.setup({
     segmentsFromDivider: true,
     segmentsToPosition: true
-  }
-  const instance = t.context.setup(options)
+  })
   instance.complete('Baleada')
 
   t.is(instance.position, 'Baleada: a toolkit for building web Baleada'.length)
 })
 
 test('complete(completion) does not update position when positionsAfterCompletion is false', t => {
-  const options = {
+  const instance = t.context.setup({
     positionsAfterCompletion: false
-  }
-  const instance = t.context.setup(options)
+  })
   const originalPosition = instance.position
   instance.complete('Baleada')
 
@@ -208,21 +177,11 @@ test('complete(completion) does not update position when positionsAfterCompletio
 
 /* method chaining */
 test('can chain its public methods', t => {
-  const options = {}
-  const instance = t.context.setup(options)
+  const instance = t.context.setup()
   const chained = instance
-    .set('Baleada: a toolkit')
-    .setPosition(instance.length)
+    .setString('Baleada: a toolkit')
+    .setPosition(instance.string.length)
     .complete('Baleada: a toolkit for building web apps')
 
   t.assert(chained instanceof Completable)
-})
-
-test('can use its super\'s methods', t => {
-  const options = {}
-  const instance = t.context.setup(options)
-  const chained = instance
-    .toLowerCase()
-
-  t.is(chained, 'baleada: a toolkit for building web apps')
 })
