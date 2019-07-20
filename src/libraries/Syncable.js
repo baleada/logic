@@ -10,6 +10,7 @@ import { parse } from '../utils/parse'
 // TODO: subclass Syncable for each type that requires special treatment?
 
 class Syncable {
+  /* Private properties */
   #intendedTypes
   #editsRawState
   #hardCodedType
@@ -18,10 +19,10 @@ class Syncable {
   #onCancel
   #eraseDictionary
 
-  constructor(state, options) {
+  constructor(state, options = {}) {
     this.#intendedTypes = ['array', 'boolean', 'date', 'file', 'filelist', 'number', 'object', 'string']
 
-    // Merge options with defaults
+    /* Options */
     options = {
       editsRawState: true,
       ...options
@@ -32,6 +33,7 @@ class Syncable {
     this.#currentKey = options.currentKey
     this.#onSync = options.onSync
     this.#onCancel = options.onCancel
+
     this.#eraseDictionary = {
       array: options => this.#eraseArray(options),
       boolean: () => false,
