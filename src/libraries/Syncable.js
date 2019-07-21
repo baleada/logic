@@ -12,7 +12,7 @@ import { parse } from '../utils/parse'
 class Syncable {
   /* Private properties */
   #intendedTypes
-  #editsRawState
+  #editsFullState
   #hardCodedType
   #currentKey
   #onSync
@@ -24,12 +24,12 @@ class Syncable {
 
     /* Options */
     options = {
-      editsRawState: true,
+      editsFullState: true,
       ...options
     }
 
     this.#hardCodedType = options.type
-    this.#editsRawState = options.editsRawState
+    this.#editsFullState = options.editsFullState
     this.#currentKey = options.currentKey
     this.#onSync = options.onSync
     this.#onCancel = options.onCancel
@@ -44,6 +44,7 @@ class Syncable {
     }
 
     /* Public properties */
+    this.state = state
     this.editableState = this.#getEditableState()
   }
 
@@ -116,12 +117,12 @@ class Syncable {
   }
 
   #getEditableState = function() {
-    if (this.#editsRawState) {
+    if (this.#editsFullState) {
       return this.state
     } else if (this.type === 'object') {
       switch (true) {
         case !this.state.hasOwnProperty(this.#currentKey):
-          throw new Error('Cannot sync with object when editsRawState is false and object does not have the property indicated by the currentKey option.')
+          throw new Error('Cannot sync with object when editsFullState is false and object does not have the property indicated by the currentKey option.')
           break
         default:
           return this.state[this.#currentKey]
@@ -129,18 +130,18 @@ class Syncable {
     } else if (this.type === 'array') {
       return ''
     } else {
-      throw new Error('When editsRawState is false, the Syncable state must be an array or an object.')
+      throw new Error('When editsFullState is false, the Syncable state must be an array or an object.')
     }
   }
 
   #typePairingIsSupported = function() {
     return (
       (
-        this.#editsRawState
+        this.#editsFullState
         && this.type === this.editableStateType
       )
       || (
-        !this.#editsRawState
+        !this.#editsFullState
         && ['array', 'object'].includes(this.type)
       )
     )
@@ -152,13 +153,13 @@ class Syncable {
   }
 
   #writeArray = function() {
-    return this.#editsRawState
+    return this.#editsFullState
       ? this.formattedEditableState
       : this.state.concat([this.formattedEditableState])
   }
 
   #writeObject = function() {
-    return this.#editsRawState
+    return this.#editsFullState
       ? this.formattedEditableState
       : { ...this.state, [this.#currentKey]: this.formattedEditableState }
   }
