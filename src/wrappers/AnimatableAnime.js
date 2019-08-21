@@ -33,7 +33,6 @@ class AnimatableAnime {
 
   /* Public methods */
   play() {
-    console.log(this.#elements)
     this.#anime.play(...arguments)
   }
   pause() {
@@ -67,11 +66,9 @@ class AnimatableAnime {
         if (options.hasOwnProperty('onFinishedError')) options.onFinishedError(error)
       })
 
-    console.log(instance)
     return instance
   }
   #animation = function ({ animation = {} }) {
-    console.log(animation)
     return anime({
       targets: this.#elements,
       ...animation
