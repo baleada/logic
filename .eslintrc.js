@@ -15,5 +15,6 @@ module.exports = {
     'comma-dangle': 'off',
     'no-console': 'off',
     'arrow-parens': 'off',
+    'ava/prefer-async-await': 'off',
   }
 }

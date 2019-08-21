@@ -17,6 +17,7 @@ class Syncable {
   #currentKey
   #onSync
   #onCancel
+  #writeDictionary
   #eraseDictionary
 
   constructor(state, options = {}) {
@@ -34,6 +35,10 @@ class Syncable {
     this.#onSync = options.onSync
     this.#onCancel = options.onCancel
 
+    this.#writeDictionary = {
+      array: () => this.#writeArray(),
+      object: () => this.#writeObject(),
+    }
     this.#eraseDictionary = {
       array: options => this.#eraseArray(options),
       boolean: () => false,
@@ -87,10 +92,9 @@ class Syncable {
     return this
   }
   write() {
-    let newState // state clone that will be edited
-    if (this.type === 'array') newState = this.#writeArray()
-    else if (this.type === 'object') newState = this.#writeObject()
-    else newState = this.formattedEditableState
+    const newState = this.#writeDictionary.hasOwnProperty(this.type)
+      ? this.#writeDictionary[this.type]()
+      : this.formattedEditableState
 
     return this.#sync(newState)
   }

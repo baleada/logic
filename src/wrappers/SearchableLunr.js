@@ -1,7 +1,7 @@
 import lunr from 'lunr'
 import is from './is.js'
 
-class SearchableDependency {
+class SearchableLunr {
   #array
   #id
   #isArrayOfStrings
@@ -11,9 +11,9 @@ class SearchableDependency {
   #positionIsIncluded
   #itemIsIncluded
 
-  #dependency
+  #lunr
 
-  constructor (array, options) {
+  constructor (array, options = {}) {
     this.#array = array
     this.#isArrayOfStrings = array.every(item => is.string(item))
 
@@ -23,7 +23,7 @@ class SearchableDependency {
     this.#positionIsIncluded = options.positionIsIncluded
     this.#itemIsIncluded = options.itemIsIncluded
 
-    this.#dependency = this.#lunrConstructor()
+    this.#lunr = this.#lunrConstructor()
   }
 
   // Utils
@@ -65,9 +65,9 @@ class SearchableDependency {
 
   search () {
     return this.#itemIsIncluded
-      ? this.#dependency.search(...arguments).map(match => this.#includeItem(match))
-      : this.#dependency.search(...arguments)
+      ? this.#lunr.search(...arguments).map(match => this.#includeItem(match))
+      : this.#lunr.search(...arguments)
   }
 }
 
-export default SearchableDependency
+export default SearchableLunr

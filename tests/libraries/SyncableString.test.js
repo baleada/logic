@@ -24,16 +24,17 @@ test('editableState is state when editsFullState is true', t => {
 })
 
 test('type is string when all options are defaults', withPage, async (t, page) => {
-  const log = thing => console.log(thing)
-  const evaluation = () => {
-    const instance = window.setup()
-    window.log(instance)
-    return instance.type
-  }
+  const instance = t.context.setup()
 
   await page.exposeFunction('setup', t.context.setup)
-  await page.exposeFunction('log', log)
-  const value = await page.evaluate(evaluation)
+  await page.exposeFunction('instanceType', instance => instance.type())
+
+  const value = await page.evaluate(`(async () => {
+    const instance = await window.setup()
+    return await window.instanceType(instance)
+  })()`)
+
+  console.log(value)
 
   t.is(value, 'string')
 })

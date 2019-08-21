@@ -5,6 +5,7 @@ export default async function withPage(t, run) {
     // headless: false
   })
 	const page = await browser.newPage()
+  await page.on('console', msg => console.log(msg.text()))
 	try {
 		await run(t, page)
 	} finally {

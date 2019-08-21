@@ -4,43 +4,68 @@
  * Released under the MIT license
  */
 
-// Utils
-import assignEnumerables from '../utils/assignEnumerables'
+/* Dependencies */
+import AnimatableDependency from '../wrappers/AnimatableAnime'
+
+/* Utils */
+import is from '../utils/is'
 
 class Animatable {
   /* Private properties */
+  #onPlay
+  #onPause
+  #onRestart
+  #onReverse
+  #onSeek
+  #dependencyOptions
+  #dependency
 
-  constructor(element, {
-    
-  }) {
+  constructor(elements, options = {}) {
     /* Options */
+    this.#onPlay = options.onPlay
+    this.#onPause = options.onPause
+    this.#onRestart = options.onRestart
+    this.#onReverse = options.onReverse
+    this.#onSeek = options.onSeek
 
     /* Public properties */
-    element = element
+    this.elements = elements
 
-    assignEnumerables(this, {
-      element,
-    }, 'property')
+    /* Dependency */
+    this.#dependencyOptions = this.#getDependencyOptions(options)
+    this.#dependency = new AnimatableDependency(this.elements, this.#dependencyOptions)
+  }
 
-    /* Public getters */
+  /* Public getters */
 
-    assignEnumerables(this, {
-
-    }, 'getter')
-
-    /* Public methods */
-    function setElement(element) {
-      this.element = element
-      return this
-    }
-
-    assignEnumerables(this, {
-      setElement,
-    }, 'method')
+  /* Public methods */
+  setElements(elements) {
+    this.elements = elements
+    return this
+  }
+  play() {
+    this.#dependency.play(...arguments)
+    if (is.function(this.#onPlay)) this.#onPlay()
+  }
+  pause() {
+    this.#dependency.pause(...arguments)
+    if (is.function(this.#onPause)) this.#onPause()
+  }
+  restart() {
+    this.#dependency.restart(...arguments)
+    if (is.function(this.#onRestart)) this.#onRestart()
+  }
+  reverse() {
+    this.#dependency.reverse(...arguments)
+    if (is.function(this.#onReverse)) this.#onReverse()
+  }
+  seek() {
+    this.#dependency.seek(...arguments)
+    if (is.function(this.#onSeek)) this.#onSeek()
   }
 
   /* Private methods */
-
+  #getDependencyOptions = ({ onPlay, onPause, onRestart, onReverse, onSeek, ...rest }) => rest
 }
 
 export default Animatable
