@@ -7,28 +7,29 @@ import resolveOptions from '../utils/resolveOptions'
 
 class AnimatableAnime {
   #elements
-  #anime
   #animeApi
+  #anime
 
   constructor(elements, options = {}) {
     this.#elements = elements
 
-    this.#anime = this.#animeConstructor(options)
     this.#animeApi = {
       // anime utils
-      path: this.#anime.path,
-      setDashoffset: this.#anime.setDashoffset,
-      stagger: this.#anime.stagger,
-      penner: this.#anime.penner,
+      path: anime.path,
+      setDashoffset: anime.setDashoffset,
+      stagger: anime.stagger,
+      penner: anime.penner,
 
       // anime helpers
-      remove: this.#anime.remove,
-      get: this.#anime.get,
-      set: this.#anime.set,
-      random: this.#anime.random,
-      // tick: this.#anime.tick, TODO: does this need another prop? https://animejs.com/documentation/#tick
-      running: this.#anime.running,
+      remove: anime.remove,
+      get: anime.get,
+      set: anime.set,
+      random: anime.random,
+      // tick: anime.tick, TODO: does this need another prop? https://animejs.com/documentation/#tick
+      running: anime.running,
     }
+
+    this.#anime = this.#animeConstructor(options)
   }
 
   /* Public methods */
@@ -51,6 +52,7 @@ class AnimatableAnime {
   /* Private methods */
   #animeConstructor = function (options) {
     options = resolveOptions(options, this.#animeApi)
+    if (!options.hasOwnProperty('animation') && !options.hasOwnProperty('timelineChildren')) console.warn('Animatable received neither animation nor timelineChildren options')
 
     const instance = options.hasOwnProperty('timelineChildren')
       ? this.#timeline(options)
