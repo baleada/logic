@@ -5,7 +5,7 @@ import anime from 'animejs'
 import is from '../utils/is'
 import resolveOptions from '../utils/resolveOptions'
 
-class AnimatableAnime {
+export default class AnimatableAnime {
   #elements
   #animeApi
   #anime
@@ -95,5 +95,3 @@ class AnimatableAnime {
     return [childConfig, offset]
   }
 }
-
-export default AnimatableAnime

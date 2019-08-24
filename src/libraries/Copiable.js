@@ -4,43 +4,30 @@
  * Released under the MIT license
  */
 
-// Utils
-import assignEnumerables from '../utils/assignEnumerables'
+/* Dependencies */
 
-class Copiable {
+/* Utils */
+
+export default class Copiable {
   /* Private properties */
 
-  constructor(state, {
-    
-  }) {
+  constructor(state, options = {}) {
     /* Options */
 
     /* Public properties */
-    state = state
+    this.state = state
 
-    assignEnumerables(this, {
-      state,
-    }, 'property')
+    /* Dependency */
+  }
 
-    /* Public getters */
+  /* Public getters */
 
-    assignEnumerables(this, {
-
-    }, 'getter')
-
-    /* Public methods */
-    function setState(state) {
-      this.state = state
-      return this
-    }
-
-    assignEnumerables(this, {
-      setState,
-    }, 'method')
+  /* Public methods */
+  function setState(state) {
+    this.state = state
+    return this
   }
 
   /* Private methods */
 
 }
-
-export default Copiable

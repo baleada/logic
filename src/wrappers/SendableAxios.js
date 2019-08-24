@@ -1,17 +1,15 @@
 import axios from 'axios'
 
-class SendableDependency {
+export default class SendableAxios {
   #request
-  #dependency
+  #axios
 
-  constructor (request, options) {
+  constructor (request) {
     this.#request = request
-    this.#dependency = axios
+    this.#axios = axios
   }
 
   send () {
-    return this.#dependency.request(this.#request)
+    return this.#axios.request(this.#request)
   }
 }
-
-export default SendableDependency
