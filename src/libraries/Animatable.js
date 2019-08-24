@@ -5,7 +5,7 @@
  */
 
 /* Dependencies */
-import AnimatableDependency from '../wrappers/AnimatableAnime'
+import Dependency from '../wrappers/AnimatableAnime'
 
 /* Utils */
 import is from '../utils/is'
@@ -33,7 +33,7 @@ class Animatable {
 
     /* Dependency */
     this.#dependencyOptions = this.#getDependencyOptions(options)
-    this.#dependency = new AnimatableDependency(this.elements, this.#dependencyOptions)
+    this.#dependency = new Dependency(this.elements, this.#dependencyOptions)
   }
 
   /* Public getters */

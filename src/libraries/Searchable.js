@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import SearchableDependency from '../wrappers/SearchableLunr.js'
+import Dependency from '../wrappers/SearchableLunr.js'
 import is from '../utils/is'
 
 class Searchable {
@@ -24,7 +24,7 @@ class Searchable {
 
     this.#onSearch = options.onSearch
     this.#dependencyOptions = this.#getDependencyOptions(options)
-    this.#dependency = new SearchableDependency(this.array, this.#dependencyOptions)
+    this.#dependency = new Dependency(this.array, this.#dependencyOptions)
 
     this.query = options.initialQuery
     this.results = []
