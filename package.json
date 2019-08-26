@@ -4,8 +4,9 @@
   "description": "JavaScript libraries for the Baleada toolkit",
   "main": "lib/index.js",
   "scripts": {
-    "index": "./scripts/build-index.js",
+    "index": "node scripts/buildIndex.js",
     "babelify": "npx babel src --out-dir lib",
+    "browserify": "npm run babelify && node scripts/browserifyLibraries.js",
     "prepare": "npm run index && npm run babelify",
     "test": "ava",
     "watch": "ava --watch"

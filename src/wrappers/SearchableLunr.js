@@ -1,7 +1,7 @@
 import lunr from 'lunr'
-import is from './is.js'
+import is from '../utils/is'
 
-class SearchableLunr {
+export default class SearchableLunr {
   #array
   #id
   #isArrayOfStrings
@@ -69,5 +69,3 @@ class SearchableLunr {
       : this.#lunr.search(...arguments)
   }
 }
-
-export default SearchableLunr

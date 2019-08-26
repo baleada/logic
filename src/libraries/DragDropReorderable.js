@@ -9,8 +9,8 @@ import { Sortable } from '@shopify/draggable'
 
 // Utils
 import is from '../utils/is'
-import toNodeList from './to-node-list.js'
-import capitalize from './capitalize.js'
+import toNodeList from '../utils/toNodeList'
+import capitalize from '../utils/capitalize'
 
 export default class DragDropReorderable {
   #eventNameDictionary

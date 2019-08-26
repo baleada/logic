@@ -4,43 +4,24 @@
  * Released under the MIT license
  */
 
-// Utils
-import assignEnumerables from '../utils/assignEnumerables'
-
-class DragDroppable {
+export default class DragDroppable {
   /* Private properties */
 
-  constructor(element, {
-
-  }) {
+  constructor(element, options = {}) {
     /* Options */
 
     /* Public properties */
-    element = element
+    this.element = element
+  }
 
-    assignEnumerables(this, {
-      element,
-    }, 'property')
+  /* Public getters */
 
-    /* Public getters */
-
-    assignEnumerables(this, {
-      
-    }, 'getter')
-
-    /* Public methods */
-    function setElement(element) {
-      this.element = element
-      return this
-    }
-
-    assignEnumerables(this, {
-      setElement,
-    }, 'method')
+  /* Public methods */
+  setElement(element) {
+    this.element = element
+    return this
   }
 
   /* Private methods */
 
 }
-
-export default DragDroppable
