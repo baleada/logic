@@ -10,7 +10,7 @@ function browserifyLibraries() {
 function browserifyLibrary(library) {
   const name = library.split('.')[0]
   const source = `./lib/libraries/${library}`
-  const output = `./tests/fixtures/${library}`
+  const output = `./tests/fixtures/libraries/${library}`
 
   browserify()
     .add(source, { standalone: name })
