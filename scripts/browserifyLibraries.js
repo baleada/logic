@@ -2,20 +2,23 @@ const fs = require('fs')
 const browserify = require('browserify')
 
 function browserifyLibraries() {
-  const libraries = fs.readdirSync('./lib/libraries')
+  const libraries = fs
+    .readdirSync('./lib/libraries')
+    .map(library => ({
+      name: library.split('.')[0],
+      source: `./lib/libraries/${library}`,
+      output: `./tests/fixtures/libraries/${library}`,
+    }))
+
   libraries.forEach(library => browserifyLibrary(library))
-  console.log(`Successfully browserified ${libraries.length} files.`)
+  console.log(`Successfully browserified ${libraries.length} libraries.`)
 }
 
 function browserifyLibrary(library) {
-  const name = library.split('.')[0]
-  const source = `./lib/libraries/${library}`
-  const output = `./tests/fixtures/libraries/${library}`
-
   browserify()
-    .add(source, { standalone: name })
+    .add(library.source, { standalone: library.name })
     .bundle()
-    .pipe(fs.createWriteStream(output))
+    .pipe(fs.createWriteStream(library.output))
 }
 
 browserifyLibraries()
