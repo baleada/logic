@@ -15,8 +15,7 @@ function browserifyLibraries() {
 }
 
 function browserifyLibrary(library) {
-  browserify()
-    .add(library.source, { standalone: library.name })
+  browserify(library.source, { standalone: library.name })
     .bundle()
     .pipe(fs.createWriteStream(library.output))
 }

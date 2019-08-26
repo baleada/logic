@@ -13,10 +13,6 @@ async function test() {
     type: 'text/javascript'
   })
 
-  await page.evaluate(() => {
-    Syncable = Syncable.default
-  })
-
   const value = await page.evaluate(() => {
     console.log(Syncable)
     const instance = new Syncable('Baleada', {
