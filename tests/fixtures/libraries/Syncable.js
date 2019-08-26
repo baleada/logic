@@ -298,7 +298,7 @@ function () {
       var formattedEditableState;
 
       if (_classPrivateFieldGet(this, _typePairingIsSupported).call(this)) {
-        formattedEditableState = this.editableStateType === 'string' && this.editableState.length > 0 ? this.editableState.trim() : this.editableState;
+        formattedEditableState = this.editableState;
       } else if (!_is.default.function(_parse.parse[this.type])) {
         throw new Error("state/editableState type pairing (".concat(this.type, " and ").concat(this.editableStateType, ") is not supported"));
       } else {

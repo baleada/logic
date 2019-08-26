@@ -64,9 +64,7 @@ class Syncable {
     let formattedEditableState
 
     if (this.#typePairingIsSupported()) {
-      formattedEditableState = (this.editableStateType === 'string' && this.editableState.length > 0)
-        ? this.editableState.trim()
-        : this.editableState
+      formattedEditableState = this.editableState
     } else if (!is.function(parse[this.type])) {
       throw new Error(`state/editableState type pairing (${this.type} and ${this.editableStateType}) is not supported`)
     } else {

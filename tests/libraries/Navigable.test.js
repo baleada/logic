@@ -18,7 +18,7 @@ test('stores the array', t => {
   t.deepEqual(instance.array, ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'])
 })
 
-test('set sets the array', t => {
+test('setArray sets the array', t => {
   const instance = t.context.setup()
   instance.setArray(['Baleada'])
 
@@ -82,7 +82,7 @@ test('next() increments the current index by 1 when increment is default', t => 
   t.is(instance.index, 1)
 })
 
-test('next() increments the current index by 2 when increment is 2', t => {
+test('next() increments the current index by increment when increment is not default', t => {
   const instance = t.context.setup({
     increment: 2,
   })
@@ -133,7 +133,7 @@ test('prev() decrements the current index by 1 when decrement is default', t => 
   t.is(instance.index, 0)
 })
 
-test('prev() decrements the current index by 2 when decrement is 2', t => {
+test('prev() decrements the current index by decrement when decrement is not default', t => {
   const instance = t.context.setup({
     decrement: 2
   })
