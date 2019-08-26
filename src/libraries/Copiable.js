@@ -23,7 +23,7 @@ export default class Copiable {
   /* Public getters */
 
   /* Public methods */
-  function setState(state) {
+  setState(state) {
     this.state = state
     return this
   }
