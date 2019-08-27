@@ -1,5 +1,5 @@
 {
-  "name": "@baleada/js",
+  "name": "@baleada/logic",
   "version": "0.0.0",
   "description": "JavaScript libraries for the Baleada toolkit",
   "main": "lib/index.js",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/baleada/js.git"
+    "url": "git+https://gitlab.com/baleada/logic.git"
   },
   "keywords": [
     "baleada",
@@ -24,9 +24,9 @@
   "author": "Alex Vipond",
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/baleada/js/issues"
+    "url": "https://gitlab.com/baleada/logic/issues"
   },
-  "homepage": "https://gitlab.com/baleada/js#readme",
+  "homepage": "https://gitlab.com/baleada/logic#readme",
   "devDependencies": {
     "@babel/cli": "^7.5.0",
     "@babel/core": "^7.5.4",
