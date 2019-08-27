@@ -20,15 +20,6 @@ test('correctly gets editableStateType', withPage, 'Syncable', async (t, page) =
   t.is(value, 'number')
 })
 
-test('correctly gets formattedEditableState', withPage, 'Syncable', async (t, page) => {
-  const value = await page.evaluate(() => {
-    const instance = new Syncable(42)
-    return instance.formattedEditableState
-  })
-
-  t.is(value, 42)
-})
-
 /* Methods */
 test('write() emits new state through onSync', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {

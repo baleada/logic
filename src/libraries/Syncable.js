@@ -5,7 +5,6 @@
  */
 
 import is from '../utils/is'
-import { parse } from '../utils/parse'
 
 // TODO: subclass Syncable for each type that requires special treatment?
 
@@ -14,7 +13,7 @@ class Syncable {
   #intendedTypes
   #editsFullState
   #hardCodedType
-  #currentKey
+  #editableKey
   #onSync
   #onCancel
   #writeDictionary
@@ -31,13 +30,13 @@ class Syncable {
 
     this.#hardCodedType = options.type
     this.#editsFullState = options.editsFullState
-    this.#currentKey = options.currentKey
+    this.#editableKey = options.editableKey
     this.#onSync = options.onSync
     this.#onCancel = options.onCancel
 
     this.#writeDictionary = {
       array: () => this.#writeArray(),
-      object: () => this.#writeObject(),
+      object: options => this.#writeObject(options),
     }
     this.#eraseDictionary = {
       array: options => this.#eraseArray(options),
@@ -60,19 +59,20 @@ class Syncable {
   get editableStateType() {
     return this.#getType(this.editableState)
   }
-  get formattedEditableState() {
-    let formattedEditableState
-
-    if (this.#typePairingIsSupported()) {
-      formattedEditableState = this.editableState
-    } else if (!is.function(parse[this.type])) {
-      throw new Error(`state/editableState type pairing (${this.type} and ${this.editableStateType}) is not supported`)
-    } else {
-      formattedEditableState = parse[this.type](this.editableState)
-    }
-
-    return formattedEditableState
-  }
+  // TODO: It's important to check type pairing but it's overly complex here
+  // get formattedEditableState() {
+  //   let formattedEditableState
+  //
+  //   if (this.#typePairingIsSupported()) {
+  //     formattedEditableState = this.editableState
+  //   } else if (!is.function(parse[this.type])) {
+  //     throw new Error(`state/editableState type pairing (${this.type} and ${this.editableStateType}) is not supported`)
+  //   } else {
+  //     formattedEditableState = parse[this.type](this.editableState)
+  //   }
+  //
+  //   return formattedEditableState
+  // }
 
   /* Public methods */
   setState(state) {
@@ -89,10 +89,10 @@ class Syncable {
     if (is.function(this.#onCancel)) this.#onCancel()
     return this
   }
-  write() {
+  write(options = {}) {
     const newState = this.#writeDictionary.hasOwnProperty(this.type)
-      ? this.#writeDictionary[this.type]()
-      : this.formattedEditableState
+      ? this.#writeDictionary[this.type](options)
+      : this.editableState
 
     return this.#sync(newState)
   }
@@ -122,15 +122,17 @@ class Syncable {
       return this.state
     } else if (this.type === 'object') {
       switch (true) {
-        case !this.state.hasOwnProperty(this.#currentKey):
-          throw new Error('Cannot sync with object when editsFullState is false and object does not have the property indicated by the currentKey option.')
+        case !this.state.hasOwnProperty(this.#editableKey):
+          // TODO: something less drastic than an error
+          throw new Error('Cannot sync with object when editsFullState is false and object does not have the property indicated by the editableKey option.')
           break
         default:
-          return this.state[this.#currentKey]
+          return this.state[this.#editableKey]
       }
     } else if (this.type === 'array') {
       return ''
     } else {
+      // TODO: something less drastic than an error
       throw new Error('When editsFullState is false, the Syncable state must be an array or an object.')
     }
   }
@@ -152,13 +154,14 @@ class Syncable {
   }
   #writeArray = function() {
     return this.#editsFullState
-      ? this.formattedEditableState
-      : this.state.concat([this.formattedEditableState])
+      ? this.editableState
+      : this.state.concat([this.editableState])
   }
-  #writeObject = function() {
+  #writeObject = function(options) {
+    const key = options.hasOwnProperty('key') ? options.key : this.#editableKey
     return this.#editsFullState
-      ? this.formattedEditableState
-      : { ...this.state, [this.#currentKey]: this.formattedEditableState }
+      ? this.editableState
+      : { ...this.state, [key]: this.editableState }
   }
   #eraseArray = function(options) {
     let newState = this.state // clone state

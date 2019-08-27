@@ -8,8 +8,6 @@ exports.default = void 0;
 
 var _is = _interopRequireDefault(require("../utils/is"));
 
-var _parse = require("../utils/parse");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { keys.push.apply(keys, Object.getOwnPropertySymbols(object)); } if (enumerableOnly) keys = keys.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); return keys; }
@@ -55,7 +53,7 @@ function () {
       value: void 0
     });
 
-    _currentKey.set(this, {
+    _editableKey.set(this, {
       writable: true,
       value: void 0
     });
@@ -103,16 +101,18 @@ function () {
           return this.state;
         } else if (this.type === 'object') {
           switch (true) {
-            case !this.state.hasOwnProperty(_classPrivateFieldGet(this, _currentKey)):
-              throw new Error('Cannot sync with object when editsFullState is false and object does not have the property indicated by the currentKey option.');
+            case !this.state.hasOwnProperty(_classPrivateFieldGet(this, _editableKey)):
+              // TODO: something less drastic than an error
+              throw new Error('Cannot sync with object when editsFullState is false and object does not have the property indicated by the editableKey option.');
               break;
 
             default:
-              return this.state[_classPrivateFieldGet(this, _currentKey)];
+              return this.state[_classPrivateFieldGet(this, _editableKey)];
           }
         } else if (this.type === 'array') {
           return '';
         } else {
+          // TODO: something less drastic than an error
           throw new Error('When editsFullState is false, the Syncable state must be an array or an object.');
         }
       }
@@ -136,14 +136,15 @@ function () {
     _writeArray.set(this, {
       writable: true,
       value: function value() {
-        return _classPrivateFieldGet(this, _editsFullState) ? this.formattedEditableState : this.state.concat([this.formattedEditableState]);
+        return _classPrivateFieldGet(this, _editsFullState) ? this.editableState : this.state.concat([this.editableState]);
       }
     });
 
     _writeObject.set(this, {
       writable: true,
-      value: function value() {
-        return _classPrivateFieldGet(this, _editsFullState) ? this.formattedEditableState : _objectSpread({}, this.state, _defineProperty({}, _classPrivateFieldGet(this, _currentKey), this.formattedEditableState));
+      value: function value(options) {
+        var key = options.hasOwnProperty('key') ? options.key : _classPrivateFieldGet(this, _editableKey);
+        return _classPrivateFieldGet(this, _editsFullState) ? this.editableState : _objectSpread({}, this.state, _defineProperty({}, key, this.editableState));
       }
     });
 
@@ -201,7 +202,7 @@ function () {
 
     _classPrivateFieldSet(this, _editsFullState, _options.editsFullState);
 
-    _classPrivateFieldSet(this, _currentKey, _options.currentKey);
+    _classPrivateFieldSet(this, _editableKey, _options.editableKey);
 
     _classPrivateFieldSet(this, _onSync, _options.onSync);
 
@@ -211,8 +212,8 @@ function () {
       array: function array() {
         return _classPrivateFieldGet(_this, _writeArray).call(_this);
       },
-      object: function object() {
-        return _classPrivateFieldGet(_this, _writeObject).call(_this);
+      object: function object(options) {
+        return _classPrivateFieldGet(_this, _writeObject).call(_this, options);
       }
     });
 
@@ -247,6 +248,20 @@ function () {
 
   _createClass(Syncable, [{
     key: "setState",
+    // TODO: It's important to check type pairing but it's overly complex here
+    // get formattedEditableState() {
+    //   let formattedEditableState
+    //
+    //   if (this.#typePairingIsSupported()) {
+    //     formattedEditableState = this.editableState
+    //   } else if (!is.function(parse[this.type])) {
+    //     throw new Error(`state/editableState type pairing (${this.type} and ${this.editableStateType}) is not supported`)
+    //   } else {
+    //     formattedEditableState = parse[this.type](this.editableState)
+    //   }
+    //
+    //   return formattedEditableState
+    // }
 
     /* Public methods */
     value: function setState(state) {
@@ -270,7 +285,8 @@ function () {
   }, {
     key: "write",
     value: function write() {
-      var newState = _classPrivateFieldGet(this, _writeDictionary).hasOwnProperty(this.type) ? _classPrivateFieldGet(this, _writeDictionary)[this.type]() : this.formattedEditableState;
+      var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var newState = _classPrivateFieldGet(this, _writeDictionary).hasOwnProperty(this.type) ? _classPrivateFieldGet(this, _writeDictionary)[this.type](options) : this.editableState;
       return _classPrivateFieldGet(this, _sync).call(this, newState);
     }
   }, {
@@ -292,21 +308,6 @@ function () {
     get: function get() {
       return _classPrivateFieldGet(this, _getType).call(this, this.editableState);
     }
-  }, {
-    key: "formattedEditableState",
-    get: function get() {
-      var formattedEditableState;
-
-      if (_classPrivateFieldGet(this, _typePairingIsSupported).call(this)) {
-        formattedEditableState = this.editableState;
-      } else if (!_is.default.function(_parse.parse[this.type])) {
-        throw new Error("state/editableState type pairing (".concat(this.type, " and ").concat(this.editableStateType, ") is not supported"));
-      } else {
-        formattedEditableState = _parse.parse[this.type](this.editableState);
-      }
-
-      return formattedEditableState;
-    }
   }]);
 
   return Syncable;
@@ -318,7 +319,7 @@ var _editsFullState = new WeakMap();
 
 var _hardCodedType = new WeakMap();
 
-var _currentKey = new WeakMap();
+var _editableKey = new WeakMap();
 
 var _onSync = new WeakMap();
 
@@ -346,7 +347,7 @@ var _eraseObject = new WeakMap();
 
 var _default = Syncable;
 exports.default = _default;
-},{"../utils/is":2,"../utils/parse":3}],2:[function(require,module,exports){
+},{"../utils/is":2}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -439,30 +440,5 @@ var is = {
 };
 var _default = is;
 exports.default = _default;
-},{}],3:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.parse = void 0;
-// TODO: why include these?
-// import parseCSV from './parse-csv.js'
-// import parseXLSX from './parse-xlsx.js'
-var parse = {
-  date: function date(a) {
-    return new Date(a);
-  },
-  json: function json(a) {
-    return JSON.parse(a);
-  },
-  number: function number(a) {
-    return Number(a);
-  },
-  string: function string(a) {
-    return JSON.stringify(a);
-  }
-};
-exports.parse = parse;
 },{}]},{},[1])(1)
 });
