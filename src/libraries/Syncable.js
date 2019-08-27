@@ -59,7 +59,7 @@ class Syncable {
   get editableStateType() {
     return this.#getType(this.editableState)
   }
-  // TODO: It's important to check type pairing but it's overly complex here
+  // TODO: It's important to validate type pairing but it's overly complex to add another public property for it
   // get formattedEditableState() {
   //   let formattedEditableState
   //

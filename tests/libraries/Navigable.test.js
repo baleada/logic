@@ -2,12 +2,10 @@ import test from 'ava'
 import Navigable from '../../src/libraries/Navigable'
 
 test.beforeEach(t => {
+  t.context.state = ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito']
   t.context.setup = (options = {}) => new Navigable(
-    ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'],
-    {
-      onNavigate: (index, instance) => instance.setIndex(index),
-      ...options
-    }
+    t.context.state,
+    options
   )
 })
 
@@ -25,151 +23,158 @@ test('setArray sets the array', t => {
   t.deepEqual(instance.array, ['Baleada'])
 })
 
-test('initial index is 0 when initialIndex is default', t => {
-  const instance = t.context.setup()
-
-  t.is(instance.index, 0)
-})
-
-test('initial index is 42 when initialIndex is 42', t => {
-  const instance = t.context.setup({
-    initialIndex: 42,
-  })
-
-  t.is(instance.index, 42)
-})
-
-test('setIndex sets the current index', t => {
-  const instance = t.context.setup()
-
-  instance.setIndex(42)
-
-  t.is(instance.index, 42)
-})
-
 
 /* goTo */
-test('goTo(newIndex) navigate to the length of the array when newIndex is greater than the length of the array', t => {
-  const instance = t.context.setup()
+test('goTo(newLocation) navigate to the length of the array when newLocation is greater than the length of the array', t => {
+  let location = 0
+  const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation
+  })
 
   instance.goTo(42)
 
-  t.is(instance.index, instance.array.length)
+  t.is(location, instance.array.length)
 })
 
-test('goTo(newIndex) navigates to 0 when newIndex is less than 0', t => {
-  const instance = t.context.setup()
+test('goTo(newLocation) navigates to 0 when newLocation is less than 0', t => {
+  let location = 0
+  const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation
+  })
 
   instance.goTo(-42)
 
-  t.is(instance.index, 0)
+  t.is(location, 0)
 })
 
-test('goTo(newIndex) navigates to newIndex', t => {
-  const instance = t.context.setup()
+test('goTo(newLocation) navigates to newLocation', t => {
+  let location = 0
+  const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation
+  })
 
   instance.goTo(1)
 
-  t.is(instance.index, 1)
+  t.is(location, 1)
 })
 
 /* next */
-test('next() increments the current index by 1 when increment is default', t => {
-  const instance = t.context.setup()
+test('next(location) increments the current location by 1 when increment is default', t => {
+  let location = 0
+  const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation
+  })
 
-  instance.next()
+  instance.next(location)
 
-  t.is(instance.index, 1)
+  t.is(location, 1)
 })
 
-test('next() increments the current index by increment when increment is not default', t => {
+test('next(location) increments the current location by increment when increment is not default', t => {
+  let location = 0
   const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation,
     increment: 2,
   })
 
-  instance.next()
+  instance.next(location)
 
-  t.is(instance.index, 2)
+  t.is(location, 2)
 })
 
-test('next() loops back through the array by default when the current index is greater than the last index', t => {
-  const instance = t.context.setup()
-
-  instance.setIndex(instance.array.length - 1)
-  instance.next()
-
-  t.is(instance.index, 0)
-})
-
-test('next() loops recursively through the array by default until current index is less than or equal to the last index', t => {
+test('next(location) loops back through the array by default when the current location is greater than the last location', t => {
+  let location = t.context.state.length - 1
   const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation
+  })
+
+  instance.next(location)
+
+  t.is(location, 0)
+})
+
+test('next(location) loops recursively through the array by default until current location is less than or equal to the last location', t => {
+  let location = 0
+  const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation,
     increment: 15
   })
 
-  instance.next()
+  instance.next(location)
 
-  t.is(instance.index, 0)
+  t.is(location, 0)
 })
 
-test('next() stops at the last index when loops is false AND incremented index is greater than the last index', t => {
+test('next(location) stops at the last location when loops is false AND incremented location is greater than the last location', t => {
+  let location = t.context.state.length - 1
   const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation,
     loops: false
   })
 
-  instance.setIndex(instance.array.length - 1)
-  instance.next()
+  instance.next(location)
 
-  t.is(instance.index, instance.array.length - 1)
+  t.is(location, instance.array.length - 1)
 })
 
 
 /* prev */
-test('prev() decrements the current index by 1 when decrement is default', t => {
-  const instance = t.context.setup()
+test('prev(location) decrements the current location by 1 when decrement is default', t => {
+  let location = 1
+  const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation
+  })
 
-  instance.setIndex(1)
-  instance.prev()
+  instance.prev(location)
 
-  t.is(instance.index, 0)
+  t.is(location, 0)
 })
 
-test('prev() decrements the current index by decrement when decrement is not default', t => {
+test('prev(location) decrements the current location by decrement when decrement is not default', t => {
+  let location = 2
   const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation,
     decrement: 2
   })
 
-  instance.setIndex(2)
-  instance.prev()
+  instance.prev(location)
 
-  t.is(instance.index, 0)
+  t.is(location, 0)
 })
 
-test('prev() loops back through the array by default when the current index is less than 0', t => {
-  const instance = t.context.setup()
-
-  instance.prev()
-
-  t.is(instance.index, instance.array.length - 1)
-})
-
-test('prev() loops recursively through the array by default until current index is greater than or equal to 0', t => {
+test('prev(location) loops back through the array by default when the current location is less than 0', t => {
+  let location = 0
   const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation
+  })
+
+  instance.prev(location)
+
+  t.is(location, instance.array.length - 1)
+})
+
+test('prev(location) loops recursively through the array by default until current location is greater than or equal to 0', t => {
+  let location = 0
+  const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation,
     decrement: 15
   })
 
-  instance.prev()
+  instance.prev(location)
 
-  t.is(instance.index, 0)
+  t.is(location, 0)
 })
 
-test('prev() stops at 0 when loops is false AND decremented index is less than 0', t => {
+test('prev(location) stops at 0 when loops is false AND decremented location is less than 0', t => {
+  let location = 0
   const instance = t.context.setup({
+    onNavigate: newLocation => location = newLocation,
     loops: false
   })
 
-  instance.prev()
+  instance.prev(location)
 
-  t.is(instance.index, 0)
+  t.is(location, 0)
 })
 
 
@@ -178,10 +183,9 @@ test('can method chain', t => {
   const instance = t.context.setup()
   const chained = instance
     .setArray(['Baleada'])
-    .setIndex(0)
     .goTo(42)
-    .next()
-    .prev()
+    .next(42)
+    .prev(42)
 
   t.assert(chained instanceof Navigable)
 })

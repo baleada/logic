@@ -16,7 +16,6 @@ import is from '../utils/is'
 class Navigable {
   /* Private properties */
   #loops
-  #initialIndex
   #increment
   #decrement
   #onNavigate
@@ -24,16 +23,15 @@ class Navigable {
   /**
    * Constructs a Navigable instance
    * @param {Array}  array          The array that will be made navigable
-   * @param {Number}  [initialIndex=0] The default index
-   * @param {Boolean} [loops=true]   `true` when the Navigable instance should loop around to the beginning of the array when it navigates past the last item and loop around to the end when it navigates before the first item. `false` when navigating past the last item or before the first item does not change the index.
+   * @param {Number}  [initialLocation=0] The default location
+   * @param {Boolean} [loops=true]   `true` when the Navigable instance should loop around to the beginning of the array when it navigates past the last item and loop around to the end when it navigates before the first item. `false` when navigating past the last item or before the first item does not change the location.
    * @param {Number}  [increment=1]  The number of items that will be traversed when the navigable instance is stepping forward through the array
    * @param {Number}  [decrement=1]  The number of items that will be traversed when the navigable instance is stepping backward through the array
-   * @param {Function}  onNavigate    A function that Navigable will call after navigating to a new item. `onNavigate` acceepts two parameters: the index (Number) of the item that has been navigated to, and the Navigable instance (Object).
+   * @param {Function}  onNavigate    A function that Navigable will call after navigating to a new item. `onNavigate` acceepts two parameters: the index-based location (Number) of the item that has been navigated to, and the Navigable instance (Object).
    */
   constructor(array, options = {}) {
     /* Options */
     options = {
-      initialIndex: 0,
       loops: true,
       increment: 1,
       decrement: 1,
@@ -41,7 +39,6 @@ class Navigable {
       ...options
     }
 
-    this.#initialIndex = options.initialIndex
     this.#loops = options.loops
     this.#increment = options.increment
     this.#decrement = options.decrement
@@ -53,11 +50,6 @@ class Navigable {
      * @type {Array}
      */
     this.array = array
-    /**
-     *  The index of the item that has been navigated to
-     * @type {Number}
-     */
-    this.index = this.#initialIndex
   }
 
   /* Public methods */
@@ -71,90 +63,83 @@ class Navigable {
     return this
   }
   /**
-   * Sets a value for `index`
-   * @param {Number} index The new index
-   * @return {Object}       The Navigable instance
-   */
-  setIndex(index) {
-    this.index = index
-    return this
-  }
-  /**
    * Navigates to a specific item
-   * @param  {Number} index The index of the item that should be navigated to
+   * @param  {Number} newLocation The index-based location of the item that should be navigated to
    * @return {Object}       The Navigable instance
    */
-  goTo(index) {
+  goTo(newLocation) {
     switch (true) {
-      case (index > this.array.length):
-        index = this.array.length
+      case (newLocation > this.array.length):
+        newLocation = this.array.length
         // TODO: decide whether to show warnings or not
-        // console.warn(`Cannot set index: ${index} is greater than ${this.array.length} (the array's length). Index has been set to the array's length instead.`)
+        // console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
         break
-      case (index < 0):
-        index = 0
+      case (newLocation < 0):
+        newLocation = 0
         // TODO: decide whether to show warnings or not
-        // console.warn(`Cannot set index: ${index} is less than 0. Index has been set to 0 instead.` )
+        // console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
         break
       default:
-        index = index
+        newLocation = newLocation
     }
 
-    return this.#navigate(index)
+    return this.#navigate(newLocation)
   }
   /**
-   * Steps forward through the array, increasing `index` by `increment`
+   * Steps forward through the array, increasing `location` by `increment`
+   * @param  {Number} location The index-based location of the item that should be navigated from
    * @return {Object}       The Navigable instance
    */
-  next() {
-    let index
-    const lastIndex = this.array.length - 1
+  next(location) {
+    let newLocation
+    const lastLocation = this.array.length - 1
 
-    if (this.index + this.#increment > lastIndex) {
+    if (location + this.#increment > lastLocation) {
       switch (true) {
         case (this.#loops):
-          index = this.index + this.#increment
-          while(index > lastIndex) {
-            index -= this.array.length
+          newLocation = location + this.#increment
+          while(newLocation > lastLocation) {
+            newLocation -= this.array.length
           }
           break
         default:
-          index = lastIndex
+          newLocation = lastLocation
       }
     } else {
-      index = this.index + this.#increment
+      newLocation = location + this.#increment
     }
 
-    return this.goTo(index)
+    return this.goTo(newLocation)
   }
   /**
-   * Steps backward through the array, decreasing `index` by `decrement`
+   * Steps backward through the array, decreasing `location` by `decrement`
+   * @param  {Number} location The index-based location of the item that should be navigated from
    * @return {Object}       The Navigable instance
    */
-  prev() {
-    let index
+  prev(location) {
+    let newLocation
 
-    if (this.index - this.#decrement < 0) {
+    if (location - this.#decrement < 0) {
       switch (true) {
         case (this.#loops):
-          index = this.index - this.#decrement
-          while(index < 0) {
-            index += this.array.length
+          newLocation = location - this.#decrement
+          while(newLocation < 0) {
+            newLocation += this.array.length
           }
           break
         default:
-          index = 0
+          newLocation = 0
       }
     } else {
-      index = this.index - this.#decrement
+      newLocation = location - this.#decrement
     }
 
-    return this.goTo(index)
+    return this.goTo(newLocation)
   }
 
   /* Private methods */
-  #navigate = function(index) {
-    if (is.function(this.#onNavigate)) this.#onNavigate(index, this)
+  #navigate = function(newLocation) {
+    if (is.function(this.#onNavigate)) this.#onNavigate(newLocation, this)
     return this
   }
 }

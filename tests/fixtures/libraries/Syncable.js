@@ -248,7 +248,7 @@ function () {
 
   _createClass(Syncable, [{
     key: "setState",
-    // TODO: It's important to check type pairing but it's overly complex here
+    // TODO: It's important to validate type pairing but it's overly complex to add another public property for it
     // get formattedEditableState() {
     //   let formattedEditableState
     //

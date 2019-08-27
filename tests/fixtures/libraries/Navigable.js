@@ -41,11 +41,11 @@ function () {
   /**
    * Constructs a Navigable instance
    * @param {Array}  array          The array that will be made navigable
-   * @param {Number}  [initialIndex=0] The default index
-   * @param {Boolean} [loops=true]   `true` when the Navigable instance should loop around to the beginning of the array when it navigates past the last item and loop around to the end when it navigates before the first item. `false` when navigating past the last item or before the first item does not change the index.
+   * @param {Number}  [initialLocation=0] The default location
+   * @param {Boolean} [loops=true]   `true` when the Navigable instance should loop around to the beginning of the array when it navigates past the last item and loop around to the end when it navigates before the first item. `false` when navigating past the last item or before the first item does not change the location.
    * @param {Number}  [increment=1]  The number of items that will be traversed when the navigable instance is stepping forward through the array
    * @param {Number}  [decrement=1]  The number of items that will be traversed when the navigable instance is stepping backward through the array
-   * @param {Function}  onNavigate    A function that Navigable will call after navigating to a new item. `onNavigate` acceepts two parameters: the index (Number) of the item that has been navigated to, and the Navigable instance (Object).
+   * @param {Function}  onNavigate    A function that Navigable will call after navigating to a new item. `onNavigate` acceepts two parameters: the index-based location (Number) of the item that has been navigated to, and the Navigable instance (Object).
    */
   function Navigable(array) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -53,11 +53,6 @@ function () {
     _classCallCheck(this, Navigable);
 
     _loops.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _initialIndex.set(this, {
       writable: true,
       value: void 0
     });
@@ -79,22 +74,19 @@ function () {
 
     _navigate.set(this, {
       writable: true,
-      value: function value(index) {
-        if (_is.default.function(_classPrivateFieldGet(this, _onNavigate))) _classPrivateFieldGet(this, _onNavigate).call(this, index, this);
+      value: function value(newLocation) {
+        if (_is.default.function(_classPrivateFieldGet(this, _onNavigate))) _classPrivateFieldGet(this, _onNavigate).call(this, newLocation, this);
         return this;
       }
     });
 
     /* Options */
     options = _objectSpread({
-      initialIndex: 0,
       loops: true,
       increment: 1,
       decrement: 1,
       onNavigate: undefined
     }, options);
-
-    _classPrivateFieldSet(this, _initialIndex, options.initialIndex);
 
     _classPrivateFieldSet(this, _loops, options.loops);
 
@@ -112,12 +104,6 @@ function () {
 
 
     this.array = array;
-    /**
-     *  The index of the item that has been navigated to
-     * @type {Number}
-     */
-
-    this.index = _classPrivateFieldGet(this, _initialIndex);
   }
   /* Public methods */
 
@@ -135,105 +121,95 @@ function () {
       return this;
     }
     /**
-     * Sets a value for `index`
-     * @param {Number} index The new index
-     * @return {Object}       The Navigable instance
-     */
-
-  }, {
-    key: "setIndex",
-    value: function setIndex(index) {
-      this.index = index;
-      return this;
-    }
-    /**
      * Navigates to a specific item
-     * @param  {Number} index The index of the item that should be navigated to
+     * @param  {Number} newLocation The index-based location of the item that should be navigated to
      * @return {Object}       The Navigable instance
      */
 
   }, {
     key: "goTo",
-    value: function goTo(index) {
+    value: function goTo(newLocation) {
       switch (true) {
-        case index > this.array.length:
-          index = this.array.length; // TODO: decide whether to show warnings or not
-          // console.warn(`Cannot set index: ${index} is greater than ${this.array.length} (the array's length). Index has been set to the array's length instead.`)
+        case newLocation > this.array.length:
+          newLocation = this.array.length; // TODO: decide whether to show warnings or not
+          // console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
 
           break;
 
-        case index < 0:
-          index = 0; // TODO: decide whether to show warnings or not
-          // console.warn(`Cannot set index: ${index} is less than 0. Index has been set to 0 instead.` )
+        case newLocation < 0:
+          newLocation = 0; // TODO: decide whether to show warnings or not
+          // console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
 
           break;
 
         default:
-          index = index;
+          newLocation = newLocation;
       }
 
-      return _classPrivateFieldGet(this, _navigate).call(this, index);
+      return _classPrivateFieldGet(this, _navigate).call(this, newLocation);
     }
     /**
-     * Steps forward through the array, increasing `index` by `increment`
+     * Steps forward through the array, increasing `location` by `increment`
+     * @param  {Number} location The index-based location of the item that should be navigated from
      * @return {Object}       The Navigable instance
      */
 
   }, {
     key: "next",
-    value: function next() {
-      var index;
-      var lastIndex = this.array.length - 1;
+    value: function next(location) {
+      var newLocation;
+      var lastLocation = this.array.length - 1;
 
-      if (this.index + _classPrivateFieldGet(this, _increment) > lastIndex) {
+      if (location + _classPrivateFieldGet(this, _increment) > lastLocation) {
         switch (true) {
           case _classPrivateFieldGet(this, _loops):
-            index = this.index + _classPrivateFieldGet(this, _increment);
+            newLocation = location + _classPrivateFieldGet(this, _increment);
 
-            while (index > lastIndex) {
-              index -= this.array.length;
+            while (newLocation > lastLocation) {
+              newLocation -= this.array.length;
             }
 
             break;
 
           default:
-            index = lastIndex;
+            newLocation = lastLocation;
         }
       } else {
-        index = this.index + _classPrivateFieldGet(this, _increment);
+        newLocation = location + _classPrivateFieldGet(this, _increment);
       }
 
-      return this.goTo(index);
+      return this.goTo(newLocation);
     }
     /**
-     * Steps backward through the array, decreasing `index` by `decrement`
+     * Steps backward through the array, decreasing `location` by `decrement`
+     * @param  {Number} location The index-based location of the item that should be navigated from
      * @return {Object}       The Navigable instance
      */
 
   }, {
     key: "prev",
-    value: function prev() {
-      var index;
+    value: function prev(location) {
+      var newLocation;
 
-      if (this.index - _classPrivateFieldGet(this, _decrement) < 0) {
+      if (location - _classPrivateFieldGet(this, _decrement) < 0) {
         switch (true) {
           case _classPrivateFieldGet(this, _loops):
-            index = this.index - _classPrivateFieldGet(this, _decrement);
+            newLocation = location - _classPrivateFieldGet(this, _decrement);
 
-            while (index < 0) {
-              index += this.array.length;
+            while (newLocation < 0) {
+              newLocation += this.array.length;
             }
 
             break;
 
           default:
-            index = 0;
+            newLocation = 0;
         }
       } else {
-        index = this.index - _classPrivateFieldGet(this, _decrement);
+        newLocation = location - _classPrivateFieldGet(this, _decrement);
       }
 
-      return this.goTo(index);
+      return this.goTo(newLocation);
     }
     /* Private methods */
 
@@ -243,8 +219,6 @@ function () {
 }();
 
 var _loops = new WeakMap();
-
-var _initialIndex = new WeakMap();
 
 var _increment = new WeakMap();
 
