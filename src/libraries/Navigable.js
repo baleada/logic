@@ -50,7 +50,11 @@ class Navigable {
      * @type {Array}
      */
     this.array = array
+
+    /* Dependency */
   }
+
+  /* Public getters */
 
   /* Public methods */
   /**
