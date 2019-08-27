@@ -117,7 +117,6 @@ class Syncable {
 
     return type
   }
-
   #getEditableState = function() {
     if (this.#editsFullState) {
       return this.state
@@ -135,7 +134,6 @@ class Syncable {
       throw new Error('When editsFullState is false, the Syncable state must be an array or an object.')
     }
   }
-
   #typePairingIsSupported = function() {
     return (
       (
@@ -148,24 +146,20 @@ class Syncable {
       )
     )
   }
-
   #sync = function(newState) {
     if (is.function(this.#onSync)) this.#onSync(newState)
     return this
   }
-
   #writeArray = function() {
     return this.#editsFullState
       ? this.formattedEditableState
       : this.state.concat([this.formattedEditableState])
   }
-
   #writeObject = function() {
     return this.#editsFullState
       ? this.formattedEditableState
       : { ...this.state, [this.#currentKey]: this.formattedEditableState }
   }
-
   #eraseArray = function(options) {
     let newState = this.state // clone state
 
@@ -177,7 +171,6 @@ class Syncable {
 
     return newState
   }
-
   #eraseObject = function(options) {
     let newState = this.state // clone state
 

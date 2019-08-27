@@ -38,3 +38,22 @@ test('type is hardCodedType when type option is hard-coded', t => {
 
   t.is(instance.type, 'not string')
 })
+
+test('cancel() resets editableState', t => {
+  const instance = t.context.setup()
+  instance.setEditableState('not Baleada')
+  instance.cancel()
+
+  t.is(instance.editableState, 'Baleada')
+})
+
+test('cancel() call onCancel', t => {
+  let value
+  const instance = t.context.setup({
+    onCancel: () => value = 'Baleada'
+  })
+  
+  instance.cancel()
+
+  t.is(value, 'Baleada')
+})

@@ -2,7 +2,7 @@ import test from 'ava'
 import Syncable from '../../src/libraries/Syncable'
 
 test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Syncable('Baleada')
+  t.context.setup = (options = {}) => new Syncable(true)
 })
 
 /* Getters */

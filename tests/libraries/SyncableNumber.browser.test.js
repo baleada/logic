@@ -4,55 +4,55 @@ import withPage from '../test-utils/withPage'
 /* Getters */
 test('correctly gets type', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
-    const instance = new Syncable('Baleada')
+    const instance = new Syncable(42)
     return instance.type
   })
 
-  t.is(value, 'string')
+  t.is(value, 'number')
 })
 
 test('correctly gets editableStateType', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
-    const instance = new Syncable('Baleada')
+    const instance = new Syncable(42)
     return instance.editableStateType
   })
 
-  t.is(value, 'string')
+  t.is(value, 'number')
 })
 
 test('correctly gets formattedEditableState', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
-    const instance = new Syncable('Baleada')
+    const instance = new Syncable(42)
     return instance.formattedEditableState
   })
 
-  t.is(value, 'Baleada')
+  t.is(value, 42)
 })
 
 /* Methods */
 test('write() emits new state through onSync', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
     let value
-    const instance = new Syncable('Baleada', { onSync: newState => value = newState })
+    const instance = new Syncable(42, { onSync: newState => value = newState })
 
-    instance.setEditableState('Baleada: a toolkit for building web apps')
+    instance.setEditableState(420)
     instance.write()
 
     return value
   })
 
-  t.is(value, 'Baleada: a toolkit for building web apps')
+  t.is(value, 420)
 })
 
 test('erase() emits empty string through onSync', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
     let value
-    const instance = new Syncable('Baleada', { onSync: newState => value = newState })
+    const instance = new Syncable(42, { onSync: newState => value = newState })
 
     instance.erase()
 
     return value
   })
 
-  t.is(value, '')
+  t.is(value, 0)
 })

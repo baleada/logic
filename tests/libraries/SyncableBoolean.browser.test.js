@@ -4,55 +4,55 @@ import withPage from '../test-utils/withPage'
 /* Getters */
 test('correctly gets type', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
-    const instance = new Syncable('Baleada')
+    const instance = new Syncable(true)
     return instance.type
   })
 
-  t.is(value, 'string')
+  t.is(value, 'boolean')
 })
 
 test('correctly gets editableStateType', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
-    const instance = new Syncable('Baleada')
+    const instance = new Syncable(true)
     return instance.editableStateType
   })
 
-  t.is(value, 'string')
+  t.is(value, 'boolean')
 })
 
 test('correctly gets formattedEditableState', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
-    const instance = new Syncable('Baleada')
+    const instance = new Syncable(true)
     return instance.formattedEditableState
   })
 
-  t.is(value, 'Baleada')
+  t.is(value, true)
 })
 
 /* Methods */
 test('write() emits new state through onSync', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
     let value
-    const instance = new Syncable('Baleada', { onSync: newState => value = newState })
+    const instance = new Syncable(true, { onSync: newState => value = newState })
 
-    instance.setEditableState('Baleada: a toolkit for building web apps')
+    instance.setEditableState(false)
     instance.write()
 
     return value
   })
 
-  t.is(value, 'Baleada: a toolkit for building web apps')
+  t.is(value, false)
 })
 
-test('erase() emits empty string through onSync', withPage, 'Syncable', async (t, page) => {
+test('erase() emits false through onSync', withPage, 'Syncable', async (t, page) => {
   const value = await page.evaluate(() => {
     let value
-    const instance = new Syncable('Baleada', { onSync: newState => value = newState })
+    const instance = new Syncable(true, { onSync: newState => value = newState })
 
     instance.erase()
 
     return value
   })
 
-  t.is(value, '')
+  t.is(value, false)
 })
