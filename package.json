@@ -4,7 +4,7 @@
   "description": "JavaScript libraries that implement UI logic for the Baleada toolkit",
   "main": "lib/index.js",
   "scripts": {
-    "index": "node scripts/buildIndex.js",
+    "index": "node scripts/buildIndices.js",
     "babelify": "npx babel src --out-dir lib",
     "prepare": "npm run index && npm run babelify",
     "browserify": "npm run babelify && node scripts/browserifyLibraries.js",
