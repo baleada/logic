@@ -4,10 +4,11 @@ JavaScript libraries that implement UI logic for the Baleada toolkit
 
 
 ## Purpose
-Expose complex, common UI logic using a predictable, intuitive, unopinionated API.
+
+Provide a predictable, intuitive API for complex, common UI logic.
 
 
-## Rules followed by Baleada libraries
+## Rules followed by Baleada's libraries
 
 - Every library is a JavaScript class.
 - Classes' constructors accepts two parameters: a piece of state, and an `options` object.

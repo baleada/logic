@@ -1,7 +1,7 @@
 {
   "name": "@baleada/logic",
   "version": "0.0.0",
-  "description": "JavaScript libraries for the Baleada toolkit",
+  "description": "JavaScript libraries that implement UI logic for the Baleada toolkit",
   "main": "lib/index.js",
   "scripts": {
     "index": "node scripts/buildIndex.js",
@@ -16,10 +16,10 @@
   },
   "keywords": [
     "baleada",
+    "logic",
     "JavaScript",
     "library",
-    "user interface",
-    "logic composition"
+    "user interface"
   ],
   "author": "Alex Vipond",
   "license": "MIT",
