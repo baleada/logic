@@ -12,60 +12,53 @@ import is from '../utils/is'
 
 class Animatable {
   /* Private properties */
-  #onPlay
-  #onPause
-  #onRestart
-  #onReverse
-  #onSeek
   #dependencyOptions
   #dependency
 
   constructor(elements, options = {}) {
     /* Options */
-    this.#onPlay = options.onPlay
-    this.#onPause = options.onPause
-    this.#onRestart = options.onRestart
-    this.#onReverse = options.onReverse
-    this.#onSeek = options.onSeek
 
     /* Public properties */
     this.elements = elements
 
     /* Dependency */
-    this.#dependencyOptions = this.#getDependencyOptions(options)
+    this.#dependencyOptions = options
     this.#dependency = new Dependency(this.elements, this.#dependencyOptions)
   }
 
   /* Public getters */
+  get animation() {
+    return this.#dependency
+  }
 
   /* Public methods */
   setElements(elements) {
     this.elements = elements
+    this.#dependency = new Dependency(this.elements, this.#dependencyOptions)
     return this
   }
   play() {
     this.#dependency.play(...arguments)
-    if (is.function(this.#onPlay)) this.#onPlay()
+    return this
   }
   pause() {
     this.#dependency.pause(...arguments)
-    if (is.function(this.#onPause)) this.#onPause()
+    return this
   }
   restart() {
     this.#dependency.restart(...arguments)
-    if (is.function(this.#onRestart)) this.#onRestart()
+    return this
   }
   reverse() {
     this.#dependency.reverse(...arguments)
-    if (is.function(this.#onReverse)) this.#onReverse()
+    return this
   }
   seek() {
     this.#dependency.seek(...arguments)
-    if (is.function(this.#onSeek)) this.#onSeek()
+    return this
   }
 
   /* Private methods */
-  #getDependencyOptions = ({ onPlay, onPause, onRestart, onReverse, onSeek, ...rest }) => rest
 }
 
 export default Animatable
