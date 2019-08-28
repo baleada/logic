@@ -1,7 +1,5 @@
-import bindMethods from './bindMethods'
-import toProvisions from './toProvisions'
+import toProvisions from './toProvisions.js'
 
 export default {
-  bindMethods,
-  toProvisions
+  toProvisions,
 }
