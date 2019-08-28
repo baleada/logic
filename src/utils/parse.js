@@ -1,6 +1,5 @@
-// TODO: why include these?
-// import parseCSV from './parse-csv.js'
-// import parseXLSX from './parse-xlsx.js'
+import parseCsv from './parseCsv.js'
+import parseXlsx from './parseXlsx.js'
 
 const parse = {
   date: a => new Date(a),
@@ -11,6 +10,6 @@ const parse = {
 
 export {
   parse,
-  // parseCSV,
-  // parseXLSX,
+  parseCsv,
+  parseXlsx,
 }
