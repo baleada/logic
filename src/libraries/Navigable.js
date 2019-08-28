@@ -14,11 +14,10 @@ import is from '../utils/is'
  * Navigable is written in vanilla JS with no dependencies. It powers <nuxt-link to="/docs/tools/composition-functions/useNavigable">`useNavigable`</nuxt-link>.
  */
 class Navigable {
-  /* Private properties */
   #loops
   #increment
   #decrement
-  #onNavigate
+  #computedLocation
 
   /**
    * Constructs a Navigable instance
@@ -32,17 +31,16 @@ class Navigable {
   constructor(array, options = {}) {
     /* Options */
     options = {
+      initialLocation: 0,
       loops: true,
       increment: 1,
       decrement: 1,
-      onNavigate: undefined,
       ...options
     }
 
     this.#loops = options.loops
     this.#increment = options.increment
     this.#decrement = options.decrement
-    this.#onNavigate = options.onNavigate
 
     /* Public properties */
     /**
@@ -51,10 +49,16 @@ class Navigable {
      */
     this.array = array
 
+    /* Private properties */
+    this.#computedLocation = options.initialLocation
+
     /* Dependency */
   }
 
   /* Public getters */
+  get location() {
+    return this.#computedLocation
+  }
 
   /* Public methods */
   /**
@@ -91,17 +95,16 @@ class Navigable {
   }
   /**
    * Steps forward through the array, increasing `location` by `increment`
-   * @param  {Number} location The index-based location of the item that should be navigated from
    * @return {Object}       The Navigable instance
    */
-  next(location) {
+  next() {
     let newLocation
     const lastLocation = this.array.length - 1
 
-    if (location + this.#increment > lastLocation) {
+    if (this.location + this.#increment > lastLocation) {
       switch (true) {
         case (this.#loops):
-          newLocation = location + this.#increment
+          newLocation = this.location + this.#increment
           while(newLocation > lastLocation) {
             newLocation -= this.array.length
           }
@@ -110,23 +113,22 @@ class Navigable {
           newLocation = lastLocation
       }
     } else {
-      newLocation = location + this.#increment
+      newLocation = this.location + this.#increment
     }
 
     return this.goTo(newLocation)
   }
   /**
    * Steps backward through the array, decreasing `location` by `decrement`
-   * @param  {Number} location The index-based location of the item that should be navigated from
    * @return {Object}       The Navigable instance
    */
-  prev(location) {
+  prev() {
     let newLocation
 
-    if (location - this.#decrement < 0) {
+    if (this.location - this.#decrement < 0) {
       switch (true) {
         case (this.#loops):
-          newLocation = location - this.#decrement
+          newLocation = this.location - this.#decrement
           while(newLocation < 0) {
             newLocation += this.array.length
           }
@@ -135,7 +137,7 @@ class Navigable {
           newLocation = 0
       }
     } else {
-      newLocation = location - this.#decrement
+      newLocation = this.location - this.#decrement
     }
 
     return this.goTo(newLocation)
@@ -143,7 +145,7 @@ class Navigable {
 
   /* Private methods */
   #navigate = function(newLocation) {
-    if (is.function(this.#onNavigate)) this.#onNavigate(newLocation, this)
+    this.#computedLocation = newLocation
     return this
   }
 }
