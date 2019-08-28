@@ -12,25 +12,36 @@ import is from '../utils/is'
 
 export default class Sendable {
   /* Private properties */
-  #onSend
-  #onResolve
-  #onReject
+  #computedSending
+  #computedResponse
+  #computedError
   #dependency
 
   constructor(request, options = {}) {
     /* Options */
-    this.#onSend = options.onSend
-    this.#onResolve = options.onResolve
-    this.#onReject = options.onReject
 
     /* Public properties */
     this.request = request
+
+    /* Private properties */
+    this.#computedSending = false
+    this.#computedResponse = {}
+    this.#computedError = {}
 
     /* Dependency */
     this.#dependency = new Dependency(request)
   }
 
   /* Public getters */
+  get sending() {
+    return this.#computedSending
+  }
+  get response() {
+    return this.#computedResponse
+  }
+  get error() {
+    return this.#computedError
+  }
 
   /* Public methods */
   setRequest(request) {
@@ -38,16 +49,18 @@ export default class Sendable {
     return this
   }
   send() {
-    if (is.function(this.#onSend)) this.#onSend()
+    this.#computedSending = true
 
     this.#dependency
       .send()
       .then((response) => {
-        if (is.function(this.#onResolve)) this.#onResolve(response)
+        this.#computedSending = false
+        this.#computedResponse = response
         return this
       })
       .catch((error) => {
-        if (is.function(this.#onReject)) this.#onReject(error)
+        this.#computedSending = false
+        this.#computedError = error
         return this
       })
   }

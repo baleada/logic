@@ -11,13 +11,15 @@
  * Delayable depends on `[setTimeout](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout)`, `[setInterval](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval)`, `[requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)`, and the `[global Data object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)`, but is otherwise written in vanilla JS. Delayable powers <nuxt-link to="/docs/tools/composition-functions/useDelayable">`useDelayable`</nuxt-link>.
  */
 export default class Delayable {
-  /* Private properties */
   #delay
   #isInterval
   #parameters
   #id
   #tickId
   #started
+  #computedExecutions
+  #computedTimeElapsed
+  #computedTimeRemaining
 
   constructor(callback, options) {
     options = {
@@ -35,21 +37,34 @@ export default class Delayable {
      * @type {Function}
      */
     this.callback = callback
-    /**
-     * The number of times the callback function has been executed
-     * @type {Number}
-     */
-    this.executions = 0
-    /**
-     * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
-     * @type {Number}
-     */
-    this.timeElapsed = 0
-    /**
-     * The time (in milliseconds) that remains until the callback function will be executed
-     * @type {Number}
-     */
-    this.timeRemaining = this.#delay
+
+    /* Private properties */
+    this.#computedExecutions = 0
+    this.#computedTimeElapsed = 0
+    this.#computedTimeRemaining = this.#delay
+  }
+
+  /* Public getters */
+  /**
+   * The number of times the callback function has been executed
+   * @type {Number}
+   */
+  get executions() {
+    return this.#computedExecutions
+  }
+  /**
+   * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
+   * @type {Number}
+   */
+  get timeElapsed() {
+    return this.#computedTimeElapsed
+  }
+  /**
+   * The time (in milliseconds) that remains until the callback function will be executed
+   * @type {Number}
+   */
+  get timeRemaining() {
+    return this.#computedTimeRemaining
   }
 
   /* Public methods */
@@ -67,7 +82,7 @@ export default class Delayable {
     window.clearTimeout(this.#id)
     window.clearInterval(this.#id)
     this.#stopTick()
-    this.executions = 0
+    this.#computedExecutions = 0
   }
   /**
    * Executes the callback function after the period of time specified by <code>delay</code>
@@ -92,8 +107,8 @@ export default class Delayable {
       () => {
         this.callback(...arguments)
         this.#stopTick()
-        this.timeElapsed = this.#delay // Set timeElapsed to delay in case the user has switched tabs (which pauses requestAnimationFrame)
-        this.executions = 1
+        this.#computedTimeElapsed = this.#delay // Set timeElapsed to delay in case the user has switched tabs (which pauses requestAnimationFrame)
+        this.#computedExecutions = 1
       },
       this.#delay,
       ...this.#parameters
@@ -104,8 +119,8 @@ export default class Delayable {
       () => {
         this.callback(...this.#parameters)
         this.#stopTick()
-        this.timeElapsed = 0
-        this.executions++
+        this.#computedTimeElapsed = 0
+        this.#computedExecutions++
         this.#startTick()
       },
       this.#delay,
@@ -113,17 +128,17 @@ export default class Delayable {
   }
   #setTimeElapsed = function () {
     const timeElapsed = Date.now() - this.#started
-    this.timeElapsed = this.#isInterval
-      ? timeElapsed - this.#delay * this.executions
+    this.#computedTimeElapsed = this.#isInterval
+      ? timeElapsed - this.#delay * this.#computedExecutions
       : Math.min(timeElapsed, this.#delay)
   }
   #setTimeRemaining = function () {
-    this.timeRemaining = this.#delay - this.timeElapsed
+    this.#computedTimeRemaining = this.#delay - this.#computedTimeElapsed
   }
   #tick = function () {
     this.#setTimeElapsed()
     this.#setTimeRemaining()
-    if (this.timeElapsed < this.#delay) {
+    if (this.#computedTimeElapsed < this.#delay) {
       this.#stopTick()
       this.#startTick()
     }
@@ -136,9 +151,9 @@ export default class Delayable {
   }
   #setup = function () {
     this.cancel()
-    this.executions = 0
-    this.timeElapsed = 0
-    this.timeRemaining = this.#delay
+    this.#computedExecutions = 0
+    this.#computedTimeElapsed = 0
+    this.#computedTimeRemaining = this.#delay
     this.#started = Date.now()
     this.#startTick()
   }
