@@ -38,23 +38,23 @@ class Animatable {
     return this
   }
   play() {
-    this.#dependency.play(...arguments)
+    this.#dependency.play()
     return this
   }
   pause() {
-    this.#dependency.pause(...arguments)
+    this.#dependency.pause()
     return this
   }
   restart() {
-    this.#dependency.restart(...arguments)
+    this.#dependency.restart()
     return this
   }
   reverse() {
-    this.#dependency.reverse(...arguments)
+    this.#dependency.reverse()
     return this
   }
-  seek() {
-    this.#dependency.seek(...arguments)
+  seek(timestamp) {
+    this.#dependency.seek(timestamp)
     return this
   }
 
