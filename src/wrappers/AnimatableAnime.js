@@ -32,6 +32,10 @@ export default class AnimatableAnime {
     this.#anime = this.#animeConstructor(options)
   }
 
+  get animation() {
+    return this.#anime
+  }
+
   /* Public methods */
   play() {
     this.#anime.play(...arguments)
@@ -56,7 +60,7 @@ export default class AnimatableAnime {
 
     const instance = options.hasOwnProperty('timelineChildren')
       ? this.#timeline(options)
-      : this.#animation(options)
+      : this.#animate(options)
 
     if (options.hasOwnProperty('speed')) instance.speed = options.speed
 
@@ -70,7 +74,7 @@ export default class AnimatableAnime {
 
     return instance
   }
-  #animation = function ({ animation = {} }) {
+  #animate = function ({ animation = {} }) {
     return anime({
       targets: this.#elements,
       ...animation

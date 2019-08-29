@@ -28,7 +28,7 @@ class Animatable {
 
   /* Public getters */
   get animation() {
-    return this.#dependency
+    return this.#dependency.animation
   }
 
   /* Public methods */
