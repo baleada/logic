@@ -12,6 +12,7 @@ export default async function withPage(t, libraryName, run) {
     type: 'text/javascript'
   })
 	await page.evaluate(`${libraryName} = ${libraryName}.default`)
+	await page.evaluate(`console.log('here')`)
 
 	try {
 		await run(t, page)
