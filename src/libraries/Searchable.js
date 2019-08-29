@@ -38,7 +38,7 @@ export default class Searchable {
     return this.#computedResults
   }
   get index() {
-    return this.#dependency
+    return this.#dependency.index
   }
 
   /* Public methods */

@@ -17,6 +17,11 @@ export default class SearchableLunr {
     this.#array = array
     this.#isArrayOfStrings = array.every(item => is.string(item))
 
+    options = {
+      positionIsIncluded: false,
+      itemIsIncluded: false,
+      ...options
+    }
     this.#id = this.#getId(options.id)
     this.#keys = this.#getKeys(options.keys)
     this.#documents = this.#getDocuments()
@@ -24,6 +29,10 @@ export default class SearchableLunr {
     this.#itemIsIncluded = options.itemIsIncluded
 
     this.#lunr = this.#lunrConstructor()
+  }
+
+  get index() {
+    return this.#lunr
   }
 
   /* Public methods */
