@@ -21,7 +21,7 @@ function buildLibraryIndex() {
     `${imported}\n${exported}`
   )
 
-  console.log(`Successfully index ${libraries.length} libraries.`)
+  console.log(`Indexed ${libraries.length} libraries.`)
 }
 
 function buildHelperIndex() {

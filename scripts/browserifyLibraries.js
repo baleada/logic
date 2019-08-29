@@ -11,7 +11,7 @@ function browserifyLibraries() {
     }))
 
   libraries.forEach(library => browserifyLibrary(library))
-  console.log(`Successfully browserified ${libraries.length} libraries.`)
+  console.log(`Browserified ${libraries.length} libraries.`)
 }
 
 function browserifyLibrary(library) {
