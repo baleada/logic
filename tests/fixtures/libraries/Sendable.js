@@ -31,17 +31,17 @@ function () {
 
     _classCallCheck(this, Sendable);
 
-    _onSend.set(this, {
+    _computedSending.set(this, {
       writable: true,
       value: void 0
     });
 
-    _onResolve.set(this, {
+    _computedResponse.set(this, {
       writable: true,
       value: void 0
     });
 
-    _onReject.set(this, {
+    _computedError.set(this, {
       writable: true,
       value: void 0
     });
@@ -52,26 +52,28 @@ function () {
     });
 
     /* Options */
-    _classPrivateFieldSet(this, _onSend, options.onSend);
 
-    _classPrivateFieldSet(this, _onResolve, options.onResolve);
-
-    _classPrivateFieldSet(this, _onReject, options.onReject);
     /* Public properties */
-
-
     this.request = request;
+    /* Private properties */
+
+    _classPrivateFieldSet(this, _computedSending, false);
+
+    _classPrivateFieldSet(this, _computedResponse, {});
+
+    _classPrivateFieldSet(this, _computedError, {});
     /* Dependency */
+
 
     _classPrivateFieldSet(this, _dependency, new _SendableAxios.default(request));
   }
   /* Public getters */
 
-  /* Public methods */
-
 
   _createClass(Sendable, [{
     key: "setRequest",
+
+    /* Public methods */
     value: function setRequest(request) {
       this.request = request;
       return this;
@@ -81,19 +83,40 @@ function () {
     value: function send() {
       var _this = this;
 
-      if (_is.default.function(_classPrivateFieldGet(this, _onSend))) _classPrivateFieldGet(this, _onSend).call(this);
+      _classPrivateFieldSet(this, _computedSending, true);
 
       _classPrivateFieldGet(this, _dependency).send().then(function (response) {
-        if (_is.default.function(_classPrivateFieldGet(_this, _onResolve))) _classPrivateFieldGet(_this, _onResolve).call(_this, response);
+        _classPrivateFieldSet(_this, _computedSending, false);
+
+        _classPrivateFieldSet(_this, _computedResponse, response);
+
         return _this;
       }).catch(function (error) {
-        if (_is.default.function(_classPrivateFieldGet(_this, _onReject))) _classPrivateFieldGet(_this, _onReject).call(_this, error);
+        _classPrivateFieldSet(_this, _computedSending, false);
+
+        _classPrivateFieldSet(_this, _computedError, error);
+
         return _this;
       });
     } // TODO: Support concurrent requests? (axios.all)
 
     /* Private methods */
 
+  }, {
+    key: "sending",
+    get: function get() {
+      return _classPrivateFieldGet(this, _computedSending);
+    }
+  }, {
+    key: "response",
+    get: function get() {
+      return _classPrivateFieldGet(this, _computedResponse);
+    }
+  }, {
+    key: "error",
+    get: function get() {
+      return _classPrivateFieldGet(this, _computedError);
+    }
   }]);
 
   return Sendable;
@@ -101,11 +124,11 @@ function () {
 
 exports.default = Sendable;
 
-var _onSend = new WeakMap();
+var _computedSending = new WeakMap();
 
-var _onResolve = new WeakMap();
+var _computedResponse = new WeakMap();
 
-var _onReject = new WeakMap();
+var _computedError = new WeakMap();
 
 var _dependency = new WeakMap();
 },{"../utils/is":2,"../wrappers/SendableAxios":3}],2:[function(require,module,exports){

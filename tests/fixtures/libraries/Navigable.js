@@ -36,8 +36,6 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 var Navigable =
 /*#__PURE__*/
 function () {
-  /* Private properties */
-
   /**
    * Constructs a Navigable instance
    * @param {Array}  array          The array that will be made navigable
@@ -67,7 +65,7 @@ function () {
       value: void 0
     });
 
-    _onNavigate.set(this, {
+    _computedLocation.set(this, {
       writable: true,
       value: void 0
     });
@@ -75,17 +73,18 @@ function () {
     _navigate.set(this, {
       writable: true,
       value: function value(newLocation) {
-        if (_is.default.function(_classPrivateFieldGet(this, _onNavigate))) _classPrivateFieldGet(this, _onNavigate).call(this, newLocation, this);
+        _classPrivateFieldSet(this, _computedLocation, newLocation);
+
         return this;
       }
     });
 
     /* Options */
     options = _objectSpread({
+      initialLocation: 0,
       loops: true,
       increment: 1,
-      decrement: 1,
-      onNavigate: undefined
+      decrement: 1
     }, options);
 
     _classPrivateFieldSet(this, _loops, options.loops);
@@ -93,8 +92,6 @@ function () {
     _classPrivateFieldSet(this, _increment, options.increment);
 
     _classPrivateFieldSet(this, _decrement, options.decrement);
-
-    _classPrivateFieldSet(this, _onNavigate, options.onNavigate);
     /* Public properties */
 
     /**
@@ -104,18 +101,25 @@ function () {
 
 
     this.array = array;
-  }
-  /* Public methods */
+    /* Private properties */
 
-  /**
-   * Sets the Navigable instance's array
-   * @param {Array} array The new array
-   * @return {Object}       The new Navigable instance
-   */
+    _classPrivateFieldSet(this, _computedLocation, options.initialLocation);
+    /* Dependency */
+
+  }
+  /* Public getters */
 
 
   _createClass(Navigable, [{
     key: "setArray",
+
+    /* Public methods */
+
+    /**
+     * Sets the Navigable instance's array
+     * @param {Array} array The new array
+     * @return {Object}       The new Navigable instance
+     */
     value: function setArray(array) {
       this.array = array;
       return this;
@@ -150,20 +154,19 @@ function () {
     }
     /**
      * Steps forward through the array, increasing `location` by `increment`
-     * @param  {Number} location The index-based location of the item that should be navigated from
      * @return {Object}       The Navigable instance
      */
 
   }, {
     key: "next",
-    value: function next(location) {
+    value: function next() {
       var newLocation;
       var lastLocation = this.array.length - 1;
 
-      if (location + _classPrivateFieldGet(this, _increment) > lastLocation) {
+      if (this.location + _classPrivateFieldGet(this, _increment) > lastLocation) {
         switch (true) {
           case _classPrivateFieldGet(this, _loops):
-            newLocation = location + _classPrivateFieldGet(this, _increment);
+            newLocation = this.location + _classPrivateFieldGet(this, _increment);
 
             while (newLocation > lastLocation) {
               newLocation -= this.array.length;
@@ -175,26 +178,25 @@ function () {
             newLocation = lastLocation;
         }
       } else {
-        newLocation = location + _classPrivateFieldGet(this, _increment);
+        newLocation = this.location + _classPrivateFieldGet(this, _increment);
       }
 
       return this.goTo(newLocation);
     }
     /**
      * Steps backward through the array, decreasing `location` by `decrement`
-     * @param  {Number} location The index-based location of the item that should be navigated from
      * @return {Object}       The Navigable instance
      */
 
   }, {
     key: "prev",
-    value: function prev(location) {
+    value: function prev() {
       var newLocation;
 
-      if (location - _classPrivateFieldGet(this, _decrement) < 0) {
+      if (this.location - _classPrivateFieldGet(this, _decrement) < 0) {
         switch (true) {
           case _classPrivateFieldGet(this, _loops):
-            newLocation = location - _classPrivateFieldGet(this, _decrement);
+            newLocation = this.location - _classPrivateFieldGet(this, _decrement);
 
             while (newLocation < 0) {
               newLocation += this.array.length;
@@ -206,13 +208,18 @@ function () {
             newLocation = 0;
         }
       } else {
-        newLocation = location - _classPrivateFieldGet(this, _decrement);
+        newLocation = this.location - _classPrivateFieldGet(this, _decrement);
       }
 
       return this.goTo(newLocation);
     }
     /* Private methods */
 
+  }, {
+    key: "location",
+    get: function get() {
+      return _classPrivateFieldGet(this, _computedLocation);
+    }
   }]);
 
   return Navigable;
@@ -224,7 +231,7 @@ var _increment = new WeakMap();
 
 var _decrement = new WeakMap();
 
-var _onNavigate = new WeakMap();
+var _computedLocation = new WeakMap();
 
 var _navigate = new WeakMap();
 

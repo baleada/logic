@@ -12,10 +12,6 @@ var _is = _interopRequireDefault(require("../utils/is"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -35,31 +31,6 @@ function () {
 
     _classCallCheck(this, Animatable);
 
-    _onPlay.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _onPause.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _onRestart.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _onReverse.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _onSeek.set(this, {
-      writable: true,
-      value: void 0
-    });
-
     _dependencyOptions.set(this, {
       writable: true,
       value: void 0
@@ -70,118 +41,80 @@ function () {
       value: void 0
     });
 
-    _getDependencyOptions.set(this, {
-      writable: true,
-      value: function value(_ref) {
-        var onPlay = _ref.onPlay,
-            onPause = _ref.onPause,
-            onRestart = _ref.onRestart,
-            onReverse = _ref.onReverse,
-            onSeek = _ref.onSeek,
-            rest = _objectWithoutProperties(_ref, ["onPlay", "onPause", "onRestart", "onReverse", "onSeek"]);
-
-        return rest;
-      }
-    });
-
     /* Options */
-    _classPrivateFieldSet(this, _onPlay, options.onPlay);
 
-    _classPrivateFieldSet(this, _onPause, options.onPause);
-
-    _classPrivateFieldSet(this, _onRestart, options.onRestart);
-
-    _classPrivateFieldSet(this, _onReverse, options.onReverse);
-
-    _classPrivateFieldSet(this, _onSeek, options.onSeek);
     /* Public properties */
-
-
     this.elements = elements;
     /* Dependency */
 
-    _classPrivateFieldSet(this, _dependencyOptions, _classPrivateFieldGet(this, _getDependencyOptions).call(this, options));
+    _classPrivateFieldSet(this, _dependencyOptions, options);
 
     _classPrivateFieldSet(this, _dependency, new _AnimatableAnime.default(this.elements, _classPrivateFieldGet(this, _dependencyOptions)));
   }
   /* Public getters */
 
-  /* Public methods */
-
 
   _createClass(Animatable, [{
     key: "setElements",
+
+    /* Public methods */
     value: function setElements(elements) {
       this.elements = elements;
+
+      _classPrivateFieldSet(this, _dependency, new _AnimatableAnime.default(this.elements, _classPrivateFieldGet(this, _dependencyOptions)));
+
       return this;
     }
   }, {
     key: "play",
     value: function play() {
-      var _classPrivateFieldGet2;
+      _classPrivateFieldGet(this, _dependency).play();
 
-      (_classPrivateFieldGet2 = _classPrivateFieldGet(this, _dependency)).play.apply(_classPrivateFieldGet2, arguments);
-
-      if (_is.default.function(_classPrivateFieldGet(this, _onPlay))) _classPrivateFieldGet(this, _onPlay).call(this);
+      return this;
     }
   }, {
     key: "pause",
     value: function pause() {
-      var _classPrivateFieldGet3;
+      _classPrivateFieldGet(this, _dependency).pause();
 
-      (_classPrivateFieldGet3 = _classPrivateFieldGet(this, _dependency)).pause.apply(_classPrivateFieldGet3, arguments);
-
-      if (_is.default.function(_classPrivateFieldGet(this, _onPause))) _classPrivateFieldGet(this, _onPause).call(this);
+      return this;
     }
   }, {
     key: "restart",
     value: function restart() {
-      var _classPrivateFieldGet4;
+      _classPrivateFieldGet(this, _dependency).restart();
 
-      (_classPrivateFieldGet4 = _classPrivateFieldGet(this, _dependency)).restart.apply(_classPrivateFieldGet4, arguments);
-
-      if (_is.default.function(_classPrivateFieldGet(this, _onRestart))) _classPrivateFieldGet(this, _onRestart).call(this);
+      return this;
     }
   }, {
     key: "reverse",
     value: function reverse() {
-      var _classPrivateFieldGet5;
+      _classPrivateFieldGet(this, _dependency).reverse();
 
-      (_classPrivateFieldGet5 = _classPrivateFieldGet(this, _dependency)).reverse.apply(_classPrivateFieldGet5, arguments);
-
-      if (_is.default.function(_classPrivateFieldGet(this, _onReverse))) _classPrivateFieldGet(this, _onReverse).call(this);
+      return this;
     }
   }, {
     key: "seek",
-    value: function seek() {
-      var _classPrivateFieldGet6;
+    value: function seek(timestamp) {
+      _classPrivateFieldGet(this, _dependency).seek(timestamp);
 
-      (_classPrivateFieldGet6 = _classPrivateFieldGet(this, _dependency)).seek.apply(_classPrivateFieldGet6, arguments);
-
-      if (_is.default.function(_classPrivateFieldGet(this, _onSeek))) _classPrivateFieldGet(this, _onSeek).call(this);
+      return this;
     }
     /* Private methods */
 
+  }, {
+    key: "animation",
+    get: function get() {
+      return _classPrivateFieldGet(this, _dependency).animation;
+    }
   }]);
 
   return Animatable;
 }();
 
-var _onPlay = new WeakMap();
-
-var _onPause = new WeakMap();
-
-var _onRestart = new WeakMap();
-
-var _onReverse = new WeakMap();
-
-var _onSeek = new WeakMap();
-
 var _dependencyOptions = new WeakMap();
 
 var _dependency = new WeakMap();
-
-var _getDependencyOptions = new WeakMap();
 
 var _default = Animatable;
 exports.default = _default;
@@ -369,7 +302,7 @@ function () {
       value: function value(options) {
         options = (0, _resolveOptions.default)(options, _classPrivateFieldGet(this, _animeApi));
         if (!options.hasOwnProperty('animation') && !options.hasOwnProperty('timelineChildren')) console.warn('Animatable received neither animation nor timelineChildren options');
-        var instance = options.hasOwnProperty('timelineChildren') ? _classPrivateFieldGet(this, _timeline).call(this, options) : _classPrivateFieldGet(this, _animation).call(this, options);
+        var instance = options.hasOwnProperty('timelineChildren') ? _classPrivateFieldGet(this, _timeline).call(this, options) : _classPrivateFieldGet(this, _animate).call(this, options);
         if (options.hasOwnProperty('speed')) instance.speed = options.speed;
         instance.finished.then(function (response) {
           if (options.hasOwnProperty('onFinishedSuccess')) options.onFinishedSuccess(response);
@@ -380,7 +313,7 @@ function () {
       }
     });
 
-    _animation.set(this, {
+    _animate.set(this, {
       writable: true,
       value: function value(_ref) {
         var _ref$animation = _ref.animation,
@@ -442,11 +375,11 @@ function () {
 
     _classPrivateFieldSet(this, _anime, _classPrivateFieldGet(this, _animeConstructor).call(this, _options));
   }
-  /* Public methods */
-
 
   _createClass(AnimatableAnime, [{
     key: "play",
+
+    /* Public methods */
     value: function play() {
       var _classPrivateFieldGet2;
 
@@ -482,6 +415,11 @@ function () {
     }
     /* Private methods */
 
+  }, {
+    key: "animation",
+    get: function get() {
+      return _classPrivateFieldGet(this, _anime);
+    }
   }]);
 
   return AnimatableAnime;
@@ -497,7 +435,7 @@ var _anime = new WeakMap();
 
 var _animeConstructor = new WeakMap();
 
-var _animation = new WeakMap();
+var _animate = new WeakMap();
 
 var _timeline = new WeakMap();
 

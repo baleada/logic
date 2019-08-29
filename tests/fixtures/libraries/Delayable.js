@@ -45,7 +45,6 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 var Delayable =
 /*#__PURE__*/
 function () {
-  /* Private properties */
   function Delayable(callback, options) {
     _classCallCheck(this, Delayable);
 
@@ -79,6 +78,21 @@ function () {
       value: void 0
     });
 
+    _computedExecutions.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _computedTimeElapsed.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _computedTimeRemaining.set(this, {
+      writable: true,
+      value: void 0
+    });
+
     _setTimeout.set(this, {
       writable: true,
       value: function value() {
@@ -91,9 +105,10 @@ function () {
 
           _classPrivateFieldGet(_this, _stopTick).call(_this);
 
-          _this.timeElapsed = _classPrivateFieldGet(_this, _delay); // Set timeElapsed to delay in case the user has switched tabs (which pauses requestAnimationFrame)
+          _classPrivateFieldSet(_this, _computedTimeElapsed, _classPrivateFieldGet(_this, _delay)); // Set timeElapsed to delay in case the user has switched tabs (which pauses requestAnimationFrame)
 
-          _this.executions = 1;
+
+          _classPrivateFieldSet(_this, _computedExecutions, 1);
         }, _classPrivateFieldGet(this, _delay)].concat(_toConsumableArray(_classPrivateFieldGet(this, _parameters))));
       }
     });
@@ -104,12 +119,15 @@ function () {
         var _this2 = this;
 
         return window.setInterval(function () {
+          var _this$computedExecuti;
+
           _this2.callback.apply(_this2, _toConsumableArray(_classPrivateFieldGet(_this2, _parameters)));
 
           _classPrivateFieldGet(_this2, _stopTick).call(_this2);
 
-          _this2.timeElapsed = 0;
-          _this2.executions++;
+          _classPrivateFieldSet(_this2, _computedTimeElapsed, 0);
+
+          _classPrivateFieldSet(_this2, _computedExecutions, (_this$computedExecuti = +_classPrivateFieldGet(_this2, _computedExecutions)) + 1), _this$computedExecuti;
 
           _classPrivateFieldGet(_this2, _startTick).call(_this2);
         }, _classPrivateFieldGet(this, _delay));
@@ -121,14 +139,14 @@ function () {
       value: function value() {
         var timeElapsed = Date.now() - _classPrivateFieldGet(this, _started);
 
-        this.timeElapsed = _classPrivateFieldGet(this, _isInterval) ? timeElapsed - _classPrivateFieldGet(this, _delay) * this.executions : Math.min(timeElapsed, _classPrivateFieldGet(this, _delay));
+        _classPrivateFieldSet(this, _computedTimeElapsed, _classPrivateFieldGet(this, _isInterval) ? timeElapsed - _classPrivateFieldGet(this, _delay) * _classPrivateFieldGet(this, _computedExecutions) : Math.min(timeElapsed, _classPrivateFieldGet(this, _delay)));
       }
     });
 
     _setTimeRemaining.set(this, {
       writable: true,
       value: function value() {
-        this.timeRemaining = _classPrivateFieldGet(this, _delay) - this.timeElapsed;
+        _classPrivateFieldSet(this, _computedTimeRemaining, _classPrivateFieldGet(this, _delay) - _classPrivateFieldGet(this, _computedTimeElapsed));
       }
     });
 
@@ -139,7 +157,7 @@ function () {
 
         _classPrivateFieldGet(this, _setTimeRemaining).call(this);
 
-        if (this.timeElapsed < _classPrivateFieldGet(this, _delay)) {
+        if (_classPrivateFieldGet(this, _computedTimeElapsed) < _classPrivateFieldGet(this, _delay)) {
           _classPrivateFieldGet(this, _stopTick).call(this);
 
           _classPrivateFieldGet(this, _startTick).call(this);
@@ -165,9 +183,12 @@ function () {
       writable: true,
       value: function value() {
         this.cancel();
-        this.executions = 0;
-        this.timeElapsed = 0;
-        this.timeRemaining = _classPrivateFieldGet(this, _delay);
+
+        _classPrivateFieldSet(this, _computedExecutions, 0);
+
+        _classPrivateFieldSet(this, _computedTimeElapsed, 0);
+
+        _classPrivateFieldSet(this, _computedTimeRemaining, _classPrivateFieldGet(this, _delay));
 
         _classPrivateFieldSet(this, _started, Date.now());
 
@@ -192,35 +213,31 @@ function () {
 
 
     this.callback = callback;
-    /**
-     * The number of times the callback function has been executed
-     * @type {Number}
-     */
+    /* Private properties */
 
-    this.executions = 0;
-    /**
-     * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
-     * @type {Number}
-     */
+    _classPrivateFieldSet(this, _computedExecutions, 0);
 
-    this.timeElapsed = 0;
-    /**
-     * The time (in milliseconds) that remains until the callback function will be executed
-     * @type {Number}
-     */
+    _classPrivateFieldSet(this, _computedTimeElapsed, 0);
 
-    this.timeRemaining = _classPrivateFieldGet(this, _delay);
+    _classPrivateFieldSet(this, _computedTimeRemaining, _classPrivateFieldGet(this, _delay));
   }
-  /* Public methods */
+  /* Public getters */
 
   /**
-   * Sets the Delayable instance's callback function
-   * @param {Function} callback The new callback function
+   * The number of times the callback function has been executed
+   * @type {Number}
    */
 
 
   _createClass(Delayable, [{
     key: "setCallback",
+
+    /* Public methods */
+
+    /**
+     * Sets the Delayable instance's callback function
+     * @param {Function} callback The new callback function
+     */
     value: function setCallback(callback) {
       this.callback = callback;
     }
@@ -236,7 +253,7 @@ function () {
 
       _classPrivateFieldGet(this, _stopTick).call(this);
 
-      this.executions = 0;
+      _classPrivateFieldSet(this, _computedExecutions, 0);
     }
     /**
      * Executes the callback function after the period of time specified by <code>delay</code>
@@ -266,6 +283,31 @@ function () {
     }
     /* Private methods */
 
+  }, {
+    key: "executions",
+    get: function get() {
+      return _classPrivateFieldGet(this, _computedExecutions);
+    }
+    /**
+     * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
+     * @type {Number}
+     */
+
+  }, {
+    key: "timeElapsed",
+    get: function get() {
+      return _classPrivateFieldGet(this, _computedTimeElapsed);
+    }
+    /**
+     * The time (in milliseconds) that remains until the callback function will be executed
+     * @type {Number}
+     */
+
+  }, {
+    key: "timeRemaining",
+    get: function get() {
+      return _classPrivateFieldGet(this, _computedTimeRemaining);
+    }
   }]);
 
   return Delayable;
@@ -284,6 +326,12 @@ var _id = new WeakMap();
 var _tickId = new WeakMap();
 
 var _started = new WeakMap();
+
+var _computedExecutions = new WeakMap();
+
+var _computedTimeElapsed = new WeakMap();
+
+var _computedTimeRemaining = new WeakMap();
 
 var _setTimeout = new WeakMap();
 

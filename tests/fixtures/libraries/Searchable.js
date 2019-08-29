@@ -8,8 +8,6 @@ exports.default = void 0;
 
 var _SearchableLunr = _interopRequireDefault(require("../wrappers/SearchableLunr.js"));
 
-var _is = _interopRequireDefault(require("../utils/is"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { keys.push.apply(keys, Object.getOwnPropertySymbols(object)); } if (enumerableOnly) keys = keys.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); return keys; }
@@ -17,10 +15,6 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -32,13 +26,16 @@ function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateM
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
+/* Utils */
 var Searchable =
 /*#__PURE__*/
 function () {
-  function Searchable(array, options) {
+  function Searchable(array) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
     _classCallCheck(this, Searchable);
 
-    _onSearch.set(this, {
+    _computedResults.set(this, {
       writable: true,
       value: void 0
     });
@@ -53,65 +50,70 @@ function () {
       value: void 0
     });
 
-    _getDependencyOptions.set(this, {
-      writable: true,
-      value: function value(_ref) {
-        var onSearch = _ref.onSearch,
-            rest = _objectWithoutProperties(_ref, ["onSearch"]);
-
-        return rest;
-      }
-    });
-
-    this.array = array;
+    /* Options */
     options = _objectSpread({
-      initialQuery: '',
       positionIsIncluded: false,
       itemIsIncluded: true
     }, options);
+    /* Public properties */
 
-    _classPrivateFieldSet(this, _onSearch, options.onSearch);
+    this.array = array;
+    /* Private properties */
 
-    _classPrivateFieldSet(this, _dependencyOptions, _classPrivateFieldGet(this, _getDependencyOptions).call(this, options));
+    _classPrivateFieldSet(this, _computedResults, []);
+    /* Dependency */
+
+
+    _classPrivateFieldSet(this, _dependencyOptions, options);
 
     _classPrivateFieldSet(this, _dependency, new _SearchableLunr.default(this.array, _classPrivateFieldGet(this, _dependencyOptions)));
-
-    this.query = options.initialQuery;
-    this.results = [];
-  } // Utils
+  }
+  /* Public getters */
 
 
   _createClass(Searchable, [{
-    key: "setQuery",
-    // TODO what is the use case for resetting array like this
-    // setArray (array) {
-    //   this.array = array
-    // }
-    value: function setQuery(query) {
-      this.query = query;
+    key: "setArray",
+
+    /* Public methods */
+    value: function setArray(array) {
+      this.array = array;
+
+      _classPrivateFieldSet(this, _dependency, new _SearchableLunr.default(this.array, _classPrivateFieldGet(this, _dependencyOptions)));
+
+      return this;
     }
   }, {
     key: "search",
-    value: function search() {
-      this.results = _classPrivateFieldGet(this, _dependency).search(this.query);
-      if (_is.default.function(_classPrivateFieldGet(this, _onSearch))) _classPrivateFieldGet(this, _onSearch).call(this, this.results);
+    value: function search(query) {
+      _classPrivateFieldSet(this, _computedResults, _classPrivateFieldGet(this, _dependency).search(query));
+
+      return this;
+    }
+    /* Private methods */
+
+  }, {
+    key: "results",
+    get: function get() {
+      return _classPrivateFieldGet(this, _computedResults);
+    }
+  }, {
+    key: "index",
+    get: function get() {
+      return _classPrivateFieldGet(this, _dependency).index;
     }
   }]);
 
   return Searchable;
 }();
 
-var _onSearch = new WeakMap();
+exports.default = Searchable;
+
+var _computedResults = new WeakMap();
 
 var _dependencyOptions = new WeakMap();
 
 var _dependency = new WeakMap();
-
-var _getDependencyOptions = new WeakMap();
-
-var _default = Searchable;
-exports.default = _default;
-},{"../utils/is":2,"../wrappers/SearchableLunr.js":3}],2:[function(require,module,exports){
+},{"../wrappers/SearchableLunr.js":3}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -217,6 +219,12 @@ var _lunr2 = _interopRequireDefault(require("lunr"));
 var _is = _interopRequireDefault(require("../utils/is"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { keys.push.apply(keys, Object.getOwnPropertySymbols(object)); } if (enumerableOnly) keys = keys.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -324,6 +332,15 @@ function () {
       }
     });
 
+    _includeItem.set(this, {
+      writable: true,
+      value: function value(match) {
+        return Object.defineProperty(match, 'item', {
+          value: _classPrivateFieldGet(this, _findItem).call(this, match)
+        });
+      }
+    });
+
     _findItem.set(this, {
       writable: true,
       value: function value(match) {
@@ -337,20 +354,16 @@ function () {
       }
     });
 
-    _includeItem.set(this, {
-      writable: true,
-      value: function value(match) {
-        return Object.defineProperty(match, 'item', {
-          value: _classPrivateFieldGet(this, _findItem).call(this, match)
-        });
-      }
-    });
-
     _classPrivateFieldSet(this, _array, array);
 
     _classPrivateFieldSet(this, _isArrayOfStrings, array.every(function (item) {
       return _is.default.string(item);
     }));
+
+    options = _objectSpread({
+      positionIsIncluded: false,
+      itemIsIncluded: false
+    }, options);
 
     _classPrivateFieldSet(this, _id, _classPrivateFieldGet(this, _getId).call(this, options.id));
 
@@ -363,11 +376,12 @@ function () {
     _classPrivateFieldSet(this, _itemIsIncluded, options.itemIsIncluded);
 
     _classPrivateFieldSet(this, _lunr, _classPrivateFieldGet(this, _lunrConstructor).call(this));
-  } // Utils
-
+  }
 
   _createClass(SearchableLunr, [{
     key: "search",
+
+    /* Public methods */
     value: function search() {
       var _classPrivateFieldGet2,
           _this4 = this,
@@ -376,6 +390,13 @@ function () {
       return _classPrivateFieldGet(this, _itemIsIncluded) ? (_classPrivateFieldGet2 = _classPrivateFieldGet(this, _lunr)).search.apply(_classPrivateFieldGet2, arguments).map(function (match) {
         return _classPrivateFieldGet(_this4, _includeItem).call(_this4, match);
       }) : (_classPrivateFieldGet3 = _classPrivateFieldGet(this, _lunr)).search.apply(_classPrivateFieldGet3, arguments);
+    }
+    /* Private methods */
+
+  }, {
+    key: "index",
+    get: function get() {
+      return _classPrivateFieldGet(this, _lunr);
     }
   }]);
 
@@ -408,9 +429,9 @@ var _getKeys = new WeakMap();
 
 var _getDocuments = new WeakMap();
 
-var _findItem = new WeakMap();
-
 var _includeItem = new WeakMap();
+
+var _findItem = new WeakMap();
 },{"../utils/is":2,"lunr":4}],4:[function(require,module,exports){
 /**
  * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.6
