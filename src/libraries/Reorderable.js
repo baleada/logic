@@ -4,40 +4,34 @@
  * Released under the MIT license
  */
 
-// Libraries
+/* Dependencies */
 
-// Utils
+/* Utils */
 import is from '../utils/is'
 
 export default class Reorderable {
   #onReorder
 
-  constructor (array, options) {
-    this.array = array
-
-    // options = {
-    //   ...options
-    // }
-
+  constructor(array, options = {}) {
+    /* Options */
     this.#onReorder = options.onReorder
-  }
 
-  set reorderedArray (newArray) {
-    if (is.function(this.#onReorder)) this.#onReorder(newArray)
-  }
-
-  setArray (array) {
+    /* Public properties */
     this.array = array
+
+    /* Private properties */
+
+    /* Dependency */
   }
 
-  // Adapted from Adam Wathan's Advanced Vue Component Design course
-  reorder (itemIndex, newIndex) {
-    newIndex = (newIndex > this.array.length - 1)
-      ? this.array.length - 1
-      : (newIndex < 0)
-        ? 0
-        : newIndex
+  /* Public getters */
 
+  /* Public methods */
+  setArray(array) {
+    this.array = array
+    return this
+  }
+  reorder(itemIndex, newIndex) { // Adapted from Adam Wathan's Advanced Vue Component Design course
     const itemRemovedArray = [
             ...this.array.slice(0, itemIndex),
             ...this.array.slice(itemIndex + 1, this.array.length)
@@ -48,6 +42,9 @@ export default class Reorderable {
             ...itemRemovedArray.slice(newIndex, itemRemovedArray.length)
           ]
 
-    this.reorderedArray = newArray
+    if (is.function(this.#onReorder)) this.#onReorder(newArray)
+    return this
   }
+
+  /* Private methods */
 }

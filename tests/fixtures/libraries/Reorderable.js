@@ -31,7 +31,9 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 var Reorderable =
 /*#__PURE__*/
 function () {
-  function Reorderable(array, options) {
+  function Reorderable(array) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
     _classCallCheck(this, Reorderable);
 
     _onReorder.set(this, {
@@ -39,32 +41,38 @@ function () {
       value: void 0
     });
 
-    this.array = array; // options = {
-    //   ...options
-    // }
-
+    /* Options */
     _classPrivateFieldSet(this, _onReorder, options.onReorder);
+    /* Public properties */
+
+
+    this.array = array;
+    /* Private properties */
+
+    /* Dependency */
   }
+  /* Public getters */
+
+  /* Public methods */
+
 
   _createClass(Reorderable, [{
     key: "setArray",
     value: function setArray(array) {
       this.array = array;
-    } // Adapted from Adam Wathan's Advanced Vue Component Design course
-
+      return this;
+    }
   }, {
     key: "reorder",
     value: function reorder(itemIndex, newIndex) {
-      newIndex = newIndex > this.array.length - 1 ? this.array.length - 1 : newIndex < 0 ? 0 : newIndex;
+      // Adapted from Adam Wathan's Advanced Vue Component Design course
       var itemRemovedArray = [].concat(_toConsumableArray(this.array.slice(0, itemIndex)), _toConsumableArray(this.array.slice(itemIndex + 1, this.array.length))),
           newArray = [].concat(_toConsumableArray(itemRemovedArray.slice(0, newIndex)), [this.array[itemIndex]], _toConsumableArray(itemRemovedArray.slice(newIndex, itemRemovedArray.length)));
-      this.reorderedArray = newArray;
-    }
-  }, {
-    key: "reorderedArray",
-    set: function set(newArray) {
       if (_is.default.function(_classPrivateFieldGet(this, _onReorder))) _classPrivateFieldGet(this, _onReorder).call(this, newArray);
+      return this;
     }
+    /* Private methods */
+
   }]);
 
   return Reorderable;
