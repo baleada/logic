@@ -24,7 +24,7 @@ test('setArray sets the array', t => {
 
 
 /* goTo */
-test('goTo(newLocation) navigate to the length of the array when newLocation is greater than the length of the array', t => {
+test('goTo(newLocation) navigates to the length of the array when newLocation is greater than the length of the array', t => {
   const instance = t.context.setup()
 
   instance.goTo(42)
