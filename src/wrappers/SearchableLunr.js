@@ -26,7 +26,14 @@ export default class SearchableLunr {
     this.#lunr = this.#lunrConstructor()
   }
 
-  // Utils
+  /* Public methods */
+  search() {
+    return this.#itemIsIncluded
+      ? this.#lunr.search(...arguments).map(match => this.#includeItem(match))
+      : this.#lunr.search(...arguments)
+  }
+
+  /* Private methods */
   #lunrConstructor = function () {
     return lunr(builder => {
       builder.ref(this.#id)
@@ -54,18 +61,12 @@ export default class SearchableLunr {
       ? this.#array.map(string => Object.defineProperty({}, this.#id, { value: string }))
       : this.#array
   }
+  #includeItem = function (match) {
+    return Object.defineProperty(match, 'item', { value: this.#findItem(match) })
+  }
   #findItem = function (match) {
     return this.#isArrayOfStrings
       ? this.#array.find(string => string === match.ref)
       : this.#array.find(object => object[this.#id] === match.ref)
-  }
-  #includeItem = function (match) {
-    return Object.defineProperty(match, 'item', { value: this.#findItem(match) })
-  }
-
-  search () {
-    return this.#itemIsIncluded
-      ? this.#lunr.search(...arguments).map(match => this.#includeItem(match))
-      : this.#lunr.search(...arguments)
   }
 }

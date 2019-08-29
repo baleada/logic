@@ -4,47 +4,53 @@
  * Released under the MIT license
  */
 
+/* Dependencies */
 import Dependency from '../wrappers/SearchableLunr.js'
-import is from '../utils/is'
 
-class Searchable {
-  #onSearch
+/* Utils */
+
+export default class Searchable {
+  #computedResults
   #dependencyOptions
   #dependency
 
-  constructor(array, options) {
-    this.array = array
-
+  constructor(array, options = {}) {
+    /* Options */
     options = {
-      initialQuery: '',
       positionIsIncluded: false,
       itemIsIncluded: true,
       ...options
     }
 
-    this.#onSearch = options.onSearch
-    this.#dependencyOptions = this.#getDependencyOptions(options)
+    /* Public properties */
+    this.array = array
+
+    /* Private properties */
+    this.#computedResults = []
+
+    /* Dependency */
+    this.#dependencyOptions = options
     this.#dependency = new Dependency(this.array, this.#dependencyOptions)
-
-    this.query = options.initialQuery
-    this.results = []
   }
 
-  // Utils
-  #getDependencyOptions = ({ onSearch, ...rest }) => rest
-
-  // TODO what is the use case for resetting array like this
-  // setArray (array) {
-  //   this.array = array
-  // }
-  setQuery (query) {
-    this.query = query
+  /* Public getters */
+  get results() {
+    return this.#computedResults
+  }
+  get index() {
+    return this.#dependency
   }
 
-  search () {
-    this.results = this.#dependency.search(this.query)
-    if (is.function(this.#onSearch)) this.#onSearch(this.results)
+  /* Public methods */
+  setArray(array) {
+    this.array = array
+    this.#dependency = new Dependency(this.array, this.#dependencyOptions)
+    return this
   }
+  search(query) {
+    this.#computedResults = this.#dependency.search(query)
+    return this
+  }
+
+  /* Private methods */
 }
-
-export default Searchable
