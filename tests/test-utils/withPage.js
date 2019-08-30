@@ -11,8 +11,9 @@ export default async function withPage(t, libraryName, run) {
     path: `./tests/fixtures/libraries/${libraryName}.js`,
     type: 'text/javascript'
   })
+	
 	await page.evaluate(`${libraryName} = ${libraryName}.default`)
-	await page.evaluate(`console.log('here')`)
+
 
 	try {
 		await run(t, page)

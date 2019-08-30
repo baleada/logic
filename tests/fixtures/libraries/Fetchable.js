@@ -6,10 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -97,46 +93,21 @@ function () {
       };
 
       return fetch;
-    }(
-    /*#__PURE__*/
-    _asyncToGenerator(
-    /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee() {
-      var response;
-      return regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _classPrivateFieldSet(this, _computedFetching, true);
+    }(function () {
+      var _this = this;
 
-              _context.prev = 1;
-              _context.next = 4;
-              return fetch(this.resource, _classPrivateFieldGet(this, _fetchOptions));
+      _classPrivateFieldSet(this, _computedFetching, true);
 
-            case 4:
-              response = _context.sent;
+      return fetch(this.resource, _classPrivateFieldGet(this, _fetchOptions)).then(function (response) {
+        _classPrivateFieldSet(_this, _computedResponse, response);
 
-              _classPrivateFieldSet(this, _computedResponse, response);
+        return _this;
+      }).catch(function (error) {
+        _classPrivateFieldSet(_this, _computedError, error);
 
-              _context.next = 11;
-              break;
-
-            case 8:
-              _context.prev = 8;
-              _context.t0 = _context["catch"](1);
-
-              _classPrivateFieldSet(this, _computedError, _context.t0);
-
-            case 11:
-              return _context.abrupt("return", this);
-
-            case 12:
-            case "end":
-              return _context.stop();
-          }
-        }
-      }, _callee, this, [[1, 8]]);
-    })))
+        return _this;
+      });
+    })
     /* Private methods */
 
   }, {

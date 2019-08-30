@@ -11,7 +11,7 @@ test('stores the response', withPage, 'Fetchable', async (t, page) => {
 
   console.log(value)
 
-  t.assert(value !== {})
+  t.assert(value.keys.length > 0)
 })
 
 /* Methods */

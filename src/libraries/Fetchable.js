@@ -60,17 +60,18 @@ export default class Fetchable {
     this.resource = resource
     return this
   }
-  async fetch() {
+  fetch() {
     this.#computedFetching = true
 
-    try {
-      const response = await fetch(this.resource, this.#fetchOptions)
-      this.#computedResponse = response
-    } catch(error) {
-      this.#computedError = error
-    }
-
-    return this
+    return fetch(this.resource, this.#fetchOptions)
+      .then(response => {
+        this.#computedResponse = response
+        return this
+      })
+      .catch(error => {
+        this.#computedError = error
+        return this
+      })
   }
 
   /* Private methods */
