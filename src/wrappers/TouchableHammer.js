@@ -8,6 +8,7 @@ export default class TouchableHammer {
   #allowsSelect
   #element
   #intendedTouches
+  #hammerApi
   #hammer
 
   constructor (element, options = {}) {

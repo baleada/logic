@@ -14,10 +14,10 @@ export default class Observable {
   #onIntersect
   #onMutate
   #onResize
-  #intersectionObserverOptions
-  #computedIntersectionObserver
-  #computedMutationObserver
-  #computedResizeObserver
+  #intersectionOptions
+  #computedIntersection
+  #computedMutation
+  #computedResize
 
   constructor(elements, options = {}) {
     /* Options */
@@ -63,23 +63,23 @@ export default class Observable {
   observe(options = {}) {
     this.elements.forEach(element => {
       this.#supportedObserverTypes.forEach(observerType => {
-        if (!is.null(this.[`${observerType}`])) this[`${observerType}`].observe(element, options)
+        if (!is.null(this[`${observerType}`])) this[`${observerType}`].observe(element, options)
       })
     })
   }
   disconnect() {
     this.#supportedObserverTypes.forEach(observerType => {
-      if (!is.null(this.[`${observerType}`])) this[`${observerType}`].disconnect()
+      if (!is.null(this[`${observerType}`])) this[`${observerType}`].disconnect()
     })
   }
   takeRecords() {
     this.#supportedObserverTypes.forEach(observerType => {
-      if (!is.null(this.[`${observerType}`])) this[`${observerType}`].takeRecords()
+      if (!is.null(this[`${observerType}`])) this[`${observerType}`].takeRecords()
     })
   }
   unobserve(element) {
     this.#supportedObserverTypes.forEach(observerType => {
-      if (!is.null(this.[`${observerType}`])) this[`${observerType}`].unobserve(element)
+      if (!is.null(this[`${observerType}`])) this[`${observerType}`].unobserve(element)
     })
   }
 

@@ -9,6 +9,9 @@
 /* Utils */
 
 export default class Touchable {
+  #dependencyOptions
+  #dependency
+
   constructor(element, options = {}) {
     /* Options */
 
@@ -18,7 +21,7 @@ export default class Touchable {
     /* Private properties */
 
     /* Dependency */
-    this.#dependencyOptions = thie.#getDependencyOptions(options)
+    this.#dependencyOptions = options
     this.#dependency = new Dependency(this.element, this.#dependencyOptions)
   }
 
