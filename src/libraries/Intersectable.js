@@ -32,27 +32,27 @@ export default class Observable {
     this.#supportedObserverTypes = ['intersection', 'mutation', 'resize']
 
     /* Dependency */
-    this.#intersectionObserverOptions = this.#getIntersectionObserverOptions(options)
-    this.#computedIntersectionObserver = is.function(this.#onIntersect)
-      ? this.#getIntersectionObserver(this.#intersectionObserverOptions)
-      : undefined
-    this.#computedMutationObserver = is.function(this.#onMutate)
-      ? this.#getMutationObserver()
-      : undefined
-    this.#computedResizeObserver = is.function(this.#onResize)
-      ? this.#getResizeObserver()
-      : undefined
+    this.#intersectionOptions = this.#getIntersectionOptions(options)
+    this.#computedIntersection = is.function(this.#onIntersect)
+      ? this.#getIntersection(this.#intersectionOptions)
+      : null
+    this.#computedMutation = is.function(this.#onMutate)
+      ? this.#getMutation()
+      : null
+    this.#computedResize = is.function(this.#onResize)
+      ? this.#getResize()
+      : null
   }
 
   /* Public getters */
-  get intersectionObserver() {
-    return this.#computedIntersectionObserver
+  get intersection() {
+    return this.#computedIntersection
   }
-  get mutationObserver() {
-    return this.#computedMutationObserver
+  get mutation() {
+    return this.#computedMutation
   }
-  get resizeObserver() {
-    return this.#computedResizeObserver
+  get resize() {
+    return this.#computedResize
   }
 
   /* Public methods */
@@ -63,20 +63,35 @@ export default class Observable {
   observe(options = {}) {
     this.elements.forEach(element => {
       this.#supportedObserverTypes.forEach(observerType => {
-        this[`${observerType}Observer`].observe(element, options)
+        if (!is.null(this.[`${observerType}`])) this[`${observerType}`].observe(element, options)
       })
+    })
+  }
+  disconnect() {
+    this.#supportedObserverTypes.forEach(observerType => {
+      if (!is.null(this.[`${observerType}`])) this[`${observerType}`].disconnect()
+    })
+  }
+  takeRecords() {
+    this.#supportedObserverTypes.forEach(observerType => {
+      if (!is.null(this.[`${observerType}`])) this[`${observerType}`].takeRecords()
+    })
+  }
+  unobserve(element) {
+    this.#supportedObserverTypes.forEach(observerType => {
+      if (!is.null(this.[`${observerType}`])) this[`${observerType}`].unobserve(element)
     })
   }
 
   /* Private methods */
-  #getIntersectionObserverOptions = ({ onIntersect, onMutate, onResize, ...rest }) => rest
-  #getIntersectionObserver = function(options) {
+  #getIntersectionOptions = ({ onIntersect, onMutate, onResize, ...rest }) => rest
+  #getIntersection = function(options) {
     return new IntersectionObserver(this.#onIntersect, options)
   }
-  #getMutationObserver = function() {
+  #getMutation = function() {
     return new MutationObserver(this.#onMutate)
   }
-  #getResizeObserver = function() {
+  #getResize = function() {
     return new ResizeObserver(this.#onResize)
   }
 }

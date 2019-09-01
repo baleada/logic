@@ -31,3 +31,62 @@ Provide a predictable, intuitive API for complex, common UI logic.
 
 #### When do classes have public getters?
 - Affordance
+
+
+## Snippets
+
+### Library
+
+```js
+/*
+ * ${1:Library}.js
+ * (c) 2019 Alex Vipond
+ * Released under the MIT license
+ */
+
+/* Dependencies */
+
+/* Utils */
+
+export default class ${1:Library} {
+  constructor(${2:state}, options = {}) {
+    /* Options */
+
+    /* Public properties */
+    this.${2:state} = ${2:state}
+
+    /* Private properties */
+
+    /* Dependency */
+  }
+
+  /* Public getters */
+
+  /* Public methods */
+  set${3:ProperCaseState}(${2:state}) {
+    this.${2:state} = ${2:state}
+    return this
+  }
+
+  /* Private methods */
+
+}
+```
+
+### getDependencyOptions
+
+```js
+#get${1:Dependency}Options = ({ ${2:options}, ...rest }) => rest
+```
+
+### Node environment test
+
+```js
+
+```
+
+### Browser environment test
+
+```js
+
+```
