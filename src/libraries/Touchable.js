@@ -5,6 +5,7 @@
  */
 
 /* Dependencies */
+import Dependency from '../wrappers/TouchableHammer'
 
 /* Utils */
 

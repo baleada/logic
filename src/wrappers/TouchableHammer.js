@@ -11,23 +11,23 @@ export default class TouchableHammer {
   #hammerApi
   #hammer
 
-  constructor (element, options = {}) {
+  constructor(element, options = {}) {
     this.#allowsSelect = options.allowsSelect
 
     this.#element = element
 
     this.#hammerApi = {
-      direction: {
-        none:	1,
-        left:	2,
-        right:	4,
-        up:	8,
-        down:	16,
-        horizontal:	6,
-        vertical:	24,
+      directions: {
+        none: 1,
+        left: 2,
+        right: 4,
+        up: 8,
+        down: 16,
+        horizontal: 6,
+        vertical: 24,
         all: 30,
       },
-      input: {
+      inputs: {
         start: 1,
         move: 2,
         end: 4,
@@ -50,14 +50,14 @@ export default class TouchableHammer {
     this.#hammer.emit(touchType, data)
   }
   destroy() {
-    this.#hammer.destroy
+    this.#hammer.destroy()
   }
 
   /* Private methods */
-  #hammerConstructor = function(options) {
+  #hammerConstructor = function (options) {
     options = resolveOptions(options, this.#hammerApi)
+    if (this.#allowsSelect) delete Hammer.defaults.cssProps.userSelect
     const instance = new Hammer(this.#element, options)
-    if (this.#allowsSelect) delete this.hammer.defaults.cssProps.userSelect
     return instance
   }
 }
