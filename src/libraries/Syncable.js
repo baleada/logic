@@ -5,15 +5,15 @@
  */
 
 import is from '../utils/is'
-
-// TODO: subclass Syncable for each type that requires special treatment?
+import { hasEveryProperty } from '../utils/hasProperties'
+import warn from '../utils/warn'
+import renameMapKey from '../utils/renameMapKey'
 
 class Syncable {
   /* Private properties */
   #intendedTypes
-  #editsFullState
+  #editsFullArray
   #hardCodedType
-  #editableKey
   #onSync
   #onCancel
   #writeDictionary
@@ -24,13 +24,12 @@ class Syncable {
 
     /* Options */
     options = {
-      editsFullState: true,
+      editsFullArray: true,
       ...options
     }
 
     this.#hardCodedType = options.type
-    this.#editsFullState = options.editsFullState
-    this.#editableKey = options.editableKey
+    this.#editsFullArray = options.editsFullArray
     this.#onSync = options.onSync
     this.#onCancel = options.onCancel
 
@@ -61,20 +60,6 @@ class Syncable {
   get editableStateType () {
     return this.#getType(this.editableState)
   }
-  // TODO: It's important to validate type pairing but it's overly complex to add another public property for it
-  // get formattedEditableState() {
-  //   let formattedEditableState
-  //
-  //   if (this.#typePairingIsSupported()) {
-  //     formattedEditableState = this.editableState
-  //   } else if (!is.function(parse[this.type])) {
-  //     throw new Error(`state/editableState type pairing (${this.type} and ${this.editableStateType}) is not supported`)
-  //   } else {
-  //     formattedEditableState = parse[this.type](this.editableState)
-  //   }
-  //
-  //   return formattedEditableState
-  // }
 
   /* Public methods */
   setState (state) {
@@ -113,52 +98,31 @@ class Syncable {
     if (this.#hardCodedType && this.#hardCodedType !== 'array') {
       return this.#hardCodedType
     } else {
-      let type,
-        i = 0
-      while (type === undefined && i < this.#intendedTypes.length) {
-        if (is[this.#intendedTypes[i]](state)) {
-          type = this.#intendedTypes[i]
-        }
-        i++
-      }
-
-      if (type === undefined) {
-        type = 'unintended'
-      }
-
-      return type
+      return this.#guessType(state)
     }
+  }
+  #guessType = function(state) {
+    let type,
+        i = 0
+    while (type === undefined && i < this.#intendedTypes.length) {
+      if (is[this.#intendedTypes[i]](state)) {
+        type = this.#intendedTypes[i]
+      }
+      i++
+    }
+
+    if (type === undefined) {
+      type = 'unintended'
+    }
+
+    return type
   }
   #getEditableState = function() {
-    if (this.#editsFullState) {
+    if (this.type !== 'array') {
       return this.state
-    } else if (this.type === 'object') {
-      switch (true) {
-        case !this.state.hasOwnProperty(this.#editableKey):
-          // TODO: something less drastic than an error
-          throw new Error('Cannot sync with object when editsFullState is false and object does not have the property indicated by the editableKey option.')
-          break
-        default:
-          return this.state[this.#editableKey]
-      }
-    } else if (this.type === 'array') {
-      return ''
     } else {
-      // TODO: something less drastic than an error
-      throw new Error('When editsFullState is false, the Syncable state must be an array or an object.')
+      return this.#editsFullArray ? this.state : ''
     }
-  }
-  #typePairingIsSupported = function() {
-    return (
-      (
-        this.#editsFullState &&
-        this.type === this.editableStateType
-      ) ||
-      (
-        !this.#editsFullState &&
-        ['array', 'object'].includes(this.type)
-      )
-    )
   }
   #sync = function(newState) {
     if (is.function(this.#onSync)) {
@@ -167,31 +131,76 @@ class Syncable {
     return this
   }
   #writeArray = function() {
-    return this.#editsFullState
+    return this.#editsFullArray
       ? this.editableState
       : this.state.concat([this.editableState])
   }
   #writeMap = function(options) {
-    // TODO: change key name
-    const key = options.hasOwnProperty('key') ? options.key : this.#editableKey
+    warn('hasRequiredOptions', {
+      received: options,
+      required: ['key'],
+      subject: 'Syncable\'s write method',
+      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+    })
+    warn('hasRequiredOptions', {
+      received: options,
+      required: ['value', 'oldKey'],
+      subject: 'Syncable\'s write method',
+      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+    })
 
-    return this.#editsFullState
-      ? this.editableState
-      : new Map([...this.state, [key, this.editableState]])
+    let newState = this.state
+    const key = options.key
+
+    if (hasEveryProperty(options, ['oldKey', 'value'])) {
+      newState = renameMapKey(newState, options.oldKey, key)
+      newState.set(key, options.value)
+    } else if (hasEveryProperty(options, ['oldKey'])) {
+      newState = renameMapKey(newState, options.oldKey, key)
+    } else if (hasEveryProperty(options, ['value'])) {
+      newState.set(key, options.value)
+    }
+
+    return newState
   }
   #writeObject = function(options) {
-    // TODO: change key name
-    const key = options.hasOwnProperty('key') ? options.key : this.#editableKey
-    return this.#editsFullState
-      ? this.editableState
-      : { ...this.state, [key]: this.editableState }
+    warn('hasRequiredOptions', {
+      received: options,
+      required: ['key'],
+      subject: 'Syncable\'s write method',
+      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+    })
+    warn('hasRequiredOptions', {
+      received: options,
+      required: ['value', 'oldKey'],
+      subject: 'Syncable\'s write method',
+      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+    })
+
+    const newState = this.state,
+          key = options.key
+
+    if (hasEveryProperty(options, ['oldKey', 'value'])) {
+      newState[key] = options.value
+      delete newState[options.oldKey]
+    } else if (hasEveryProperty(options, ['oldKey'])) {
+      newState[key] = newState[options.oldKey]
+      delete newState[options.oldKey]
+    } else if (hasEveryProperty(options, ['value'])) {
+      newState[key] = options.value
+    }
+
+    return newState
   }
   #eraseArray = function(options) {
-    let newState = this.state // clone state
+    warn('hasRequiredOptions', {
+      received: options,
+      required: ['value', 'last', 'all'],
+      subject: 'Syncable\'s erase method',
+      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+    })
 
-    if (['value', 'last', 'all'].every(property => !options.hasOwnProperty(property))) {
-      throw new Error('Cannot erase array (erase function options do not have value, last, or all keys)')
-    }
+    let newState = this.state
 
     if (options.hasOwnProperty('value')) {
       newState = this.state.filter(item => item !== options.value)
@@ -206,15 +215,18 @@ class Syncable {
     return newState
   }
   #eraseMap = function(options) {
-    const newState = this.state // clone state
+    warn('hasRequiredOptions', {
+      received: options,
+      required: ['key', 'value', 'last', 'all'],
+      subject: 'Syncable\'s erase method',
+      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+    })
 
-    if (['key', 'value', 'last', 'all'].every(property => !options.hasOwnProperty(property))) {
-      throw new Error('Cannot erase array (options are undefined in erase function)')
-    }
+    const newState = this.state
 
     if (options.hasOwnProperty('value')) {
       const valueIndex = newState.values.findIndex(value => value === options.value),
-        key = newState.keys[valueIndex]
+            key = newState.keys[valueIndex]
       newState.set(key, undefined) // TODO: what's the best null value to use here?
     }
     if (options.hasOwnProperty('key') && is.string(options.key)) {
@@ -230,14 +242,20 @@ class Syncable {
     return newState
   }
   #eraseObject = function(options) {
-    let newState = this.state // clone state
+    warn('hasRequiredOptions', {
+      received: options,
+      required: ['key', 'value', 'last', 'all'],
+      subject: 'Syncable\'s erase method',
+      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+    })
+
+    let newState = this.state
 
     if (['key', 'value', 'last', 'all'].every(property => !options.hasOwnProperty(property))) {
       throw new Error('Cannot erase array (options are undefined in erase function)')
     }
 
     if (options.hasOwnProperty('value')) {
-      // TODO: What's the UI/feature/use case for deleting object values?
       const key = Object.keys(newState).find(key => newState[key] === options.value)
       newState[key] = undefined // TODO: what's the best null value to use here?
     }

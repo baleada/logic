@@ -4,13 +4,14 @@ import anime from 'animejs'
 /* Utils */
 import is from '../utils/is'
 import resolveOptions from '../utils/resolveOptions'
+import warn from '../utils/warn'
 
 export default class AnimatableAnime {
   #elements
   #animeApi
   #anime
 
-  constructor(elements, options = {}) {
+  constructor (elements, options = {}) {
     this.#elements = elements
 
     this.#animeApi = {
@@ -32,55 +33,67 @@ export default class AnimatableAnime {
     this.#anime = this.#animeConstructor(options)
   }
 
-  get animation() {
+  get animation () {
     return this.#anime
   }
 
   /* Public methods */
-  play() {
+  play () {
     this.#anime.play(...arguments)
   }
-  pause() {
+  pause () {
     this.#anime.pause(...arguments)
   }
-  restart() {
+  restart () {
     this.#anime.restart(...arguments)
   }
-  reverse() {
+  reverse () {
     this.#anime.reverse(...arguments)
   }
-  seek() {
+  seek () {
     this.#anime.seek(...arguments)
   }
 
   /* Private methods */
-  #animeConstructor = function (options) {
+  #animeConstructor = function(options) {
     options = resolveOptions(options, this.#animeApi)
-    if (!options.hasOwnProperty('animation') && !options.hasOwnProperty('timelineChildren')) console.warn('Animatable received neither animation nor timelineChildren options')
+
+    warn('hasRequiredOptions', {
+      received: options,
+      required: ['animation', 'timelineChildren'],
+      subject: 'Animatable',
+      docs: 'https://baleada.netlify.com/docs/logic/Animatable',
+    })
 
     const instance = options.hasOwnProperty('timelineChildren')
       ? this.#timeline(options)
       : this.#animate(options)
 
-    if (options.hasOwnProperty('speed')) instance.speed = options.speed
+    if (options.hasOwnProperty('speed')) {
+      instance.speed = options.speed
+    }
 
     instance.finished
       .then((response) => {
-        if (options.hasOwnProperty('onFinishedSuccess')) options.onFinishedSuccess(response)
+        if (options.hasOwnProperty('onFinishedSuccess')) {
+          options.onFinishedSuccess(response)
+        }
       })
       .catch((error) => {
-        if (options.hasOwnProperty('onFinishedError')) options.onFinishedError(error)
+        if (options.hasOwnProperty('onFinishedError')) {
+          options.onFinishedError(error)
+        }
       })
 
     return instance
   }
-  #animate = function ({ animation = {} }) {
+  #animate = function({ animation = {} }) {
     return anime({
       targets: this.#elements,
       ...animation
     })
   }
-  #timeline = function ({ animation = {}, timelineChildren }) {
+  #timeline = function({ animation = {}, timelineChildren }) {
     const instance = anime.timeline({
       targets: this.#elements,
       ...animation
@@ -93,9 +106,9 @@ export default class AnimatableAnime {
 
     return instance
   }
-  #getAddArguments = function (child) {
-    const childConfig = is.array(child) ? child[0] : child
-    const offset = (child[1] === undefined) ? '+=0' : child[1] // As per the anime docs, if no offset is specifed, the animation should start after the previous animation ends.
+  #getAddArguments = function(child) {
+    const childConfig = is.array(child) ? child[0] : child,
+          offset = (child[1] === undefined) ? '+=0' : child[1] // As per the anime docs, if no offset is specifed, the animation should start after the previous animation ends.
     return [childConfig, offset]
   }
 }

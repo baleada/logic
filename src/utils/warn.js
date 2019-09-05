@@ -1,18 +1,28 @@
+import { hasEveryProperty, hasSomeProperties } from './hasProperties'
+
 const dictionary = {
-  hasOptions: {
-    shouldWarn: ({ object, options, every }) => {
+  hasRequiredOptions: {
+    shouldWarn: ({ received, required, every }) => {
       return every
-        ? !options.every(option => object.hasOwnProperty(option))
-        : !options.some(option => object.hasOwnProperty(option))
+        ? !hasEveryProperty(received, required)
+        : !hasSomeProperties(received, required)
     },
-    getWarning: ({ subject, options }) => {
-      return options.length > 1
-        ? `${subject} received neither ${options[0]} ${options.slice(1).map(option => 'nor ' + option)} options.`
-        : `${subject} did not receive ${options[0]} option.`
+    getWarning: ({ subject, required, every, docs }) => {
+      const main = required.length > 1
+              ? `${subject} received neither ${required[0]} ${required.slice(1).map(option => 'nor ' + option)} options.`
+              : `${subject} did not receive ${required[0]} option.`,
+            someOrEvery = required.length > 1
+              ? `${every ? 'All' : 'Some'} of those options are required.`
+              : `This option is required.`,
+            docsLink = `See the docs for more info: ${docs}`
+
+      return `${main} ${someOrEvery} ${docsLink}`
     }
   }
 }
 
-export default function warn(type, args) {
-  if (dictionary[type].shouldWarn(args)) console.warn(dictionary[type].getWarning(args))
+export default function warn (type, args) {
+  if (dictionary[type].shouldWarn(args)) {
+    console.warn(dictionary[type].getWarning(args))
+  }
 }
