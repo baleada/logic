@@ -9,12 +9,14 @@ module.exports = {
     parser: 'babel-eslint'
   },
   extends: [
+    '@nuxtjs',
+    'plugin:nuxt/recommended',
     'plugin:ava/recommended',
   ],
   rules: {
     'comma-dangle': 'off',
     'no-console': 'off',
     'arrow-parens': 'off',
-    'ava/prefer-async-await': 'off',
+    'one-var': 'consecutive',
   }
 }
