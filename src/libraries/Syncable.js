@@ -19,8 +19,8 @@ class Syncable {
   #writeDictionary
   #eraseDictionary
 
-  constructor(state, options = {}) {
-    this.#intendedTypes = ['array', 'boolean', 'date', 'file', 'filelist', 'number', 'object', 'string']
+  constructor (state, options = {}) {
+    this.#intendedTypes = ['array', 'boolean', 'date', 'file', 'filelist', 'map', 'number', 'object', 'string']
 
     /* Options */
     options = {
@@ -36,12 +36,14 @@ class Syncable {
 
     this.#writeDictionary = {
       array: () => this.#writeArray(),
+      map: options => this.#writeMap(options),
       object: options => this.#writeObject(options),
     }
     this.#eraseDictionary = {
       array: options => this.#eraseArray(options),
       boolean: () => false,
       date: () => new Date(),
+      map: () => options => this.#eraseMap(options),
       number: () => 0,
       object: options => this.#eraseObject(options),
       string: () => '',
@@ -86,7 +88,9 @@ class Syncable {
   }
   cancel() {
     this.editableState = this.#getEditableState()
-    if (is.function(this.#onCancel)) this.#onCancel()
+    if (is.function(this.#onCancel)) {
+      this.#onCancel()
+    }
     return this
   }
   write(options = {}) {
@@ -157,6 +161,15 @@ class Syncable {
       ? this.editableState
       : this.state.concat([this.editableState])
   }
+  #writeMap = function(options) {
+    const newState = this.state
+
+    const key = options.hasOwnProperty('key') ? options.key : this.#editableKey
+
+    return this.#editsFullState
+      ? this.editableState
+      : newState.set(key, this.editableState)
+  }
   #writeObject = function(options) {
     const key = options.hasOwnProperty('key') ? options.key : this.#editableKey
     return this.#editsFullState
@@ -171,6 +184,22 @@ class Syncable {
     if (options.hasOwnProperty('value')) newState = this.state.filter(item => item !== options.value)
     if (options.hasOwnProperty('last') && options.last !== false) newState = this.state.slice(0, -1)
     if (options.hasOwnProperty('all') && options.all !== false) newState = []
+
+    return newState
+  }
+  #eraseMap = function(options) {
+    let newState = this.state // clone state
+
+    if (['key', 'value', 'last', 'all'].every(property => !options.hasOwnProperty(property))) throw new Error('Cannot erase array (options are undefined in erase function)')
+
+    if (options.hasOwnProperty('value')) {
+      let valueIndex = newState.values.findIndex(value => value === options.value)
+      let key = newState.keys[valueIndex]
+      newState.set(key, undefined) // TODO: what's the best null value to use here?
+    }
+    if (options.hasOwnProperty('key') && is.string(options.key)) newState.delete(options.key)
+    if (options.hasOwnProperty('last') && options.last !== false) newState.delete(newState.keys.reverse()[0]) // TODO: What's the UI/feature/use case for deleting last key/value?
+    if (options.hasOwnProperty('all') && options.all !== false) newState.clear()
 
     return newState
   }
