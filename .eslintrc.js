@@ -17,6 +17,11 @@ module.exports = {
     'comma-dangle': 'off',
     'no-console': 'off',
     'arrow-parens': 'off',
-    'one-var': 'consecutive',
+    'one-var': ['error', 'consecutive'],
+    'space-before-function-paren': ['error', {
+        'anonymous': 'never',
+        'named': 'always',
+        'asyncArrow': 'always'
+    }],
   }
 }
