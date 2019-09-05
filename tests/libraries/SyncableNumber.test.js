@@ -2,7 +2,10 @@ import test from 'ava'
 import Syncable from '../../src/libraries/Syncable'
 
 test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Syncable(42)
+  t.context.setup = (options = {}) => new Syncable(42, {
+    type: 'number',
+    ...options
+  })
 })
 
 /* Getters */
@@ -12,10 +15,22 @@ test('editableState is state', t => {
   t.is(instance.editableState, instance.state)
 })
 
-test('editableState is state when editsFullState is true', t => {
-  const instance = t.context.setup({
-    editsFullState: true
-  })
+/* Methods */
+test('write() emits new state through onSync', t => {
+  let value
+  const instance = t.context.setup({ onSync: newState => (value = newState) })
 
-  t.is(instance.editableState, instance.state)
+  instance.setEditableState(420)
+  instance.write()
+
+  t.is(value, 420)
+})
+
+test('erase() emits 0 through onSync', t => {
+  let value
+  const instance = t.context.setup({ onSync: newState => (value = newState) })
+
+  instance.erase()
+
+  t.is(value, 0)
 })

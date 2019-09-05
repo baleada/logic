@@ -15,26 +15,11 @@ test('editableState is state', t => {
   t.is(instance.editableState, instance.state)
 })
 
-test('editableState is state when editsFullState is true', t => {
-  const instance = t.context.setup({
-    editsFullState: true
-  })
-
-  t.is(instance.editableState, instance.state)
-})
-
-
-test('type', t => {
-  const instance = t.context.setup()
-  t.is(instance.type, 'string')
-})
-
-
 /* Methods */
 test('write() emits new state through onSync', t => {
   let value
   const instance = t.context.setup({
-    onSync: newState => value = newState
+    onSync: newState => (value = newState)
   })
 
   instance.setEditableState('Baleada: a toolkit for building web apps')
@@ -46,7 +31,7 @@ test('write() emits new state through onSync', t => {
 test('erase() emits empty string through onSync', t => {
   let value
   const instance = t.context.setup({
-    onSync: newState => value = newState
+    onSync: newState => (value = newState)
   })
 
   instance.erase()
