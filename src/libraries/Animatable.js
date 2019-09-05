@@ -10,7 +10,7 @@ import Dependency from '../wrappers/AnimatableAnime'
 /* Utils */
 import is from '../utils/is'
 
-class Animatable {
+export default class Animatable {
   /* Private properties */
   #dependencyOptions
   #dependency
@@ -60,5 +60,3 @@ class Animatable {
 
   /* Private methods */
 }
-
-export default Animatable
