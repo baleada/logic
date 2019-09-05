@@ -23,5 +23,9 @@ module.exports = {
         'named': 'always',
         'asyncArrow': 'always'
     }],
+    'indent': ['error', 2, {
+      'VariableDeclarator': 'first',
+      'MemberExpression': 'off',
+    }]
   }
 }
