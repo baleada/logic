@@ -26,6 +26,9 @@ module.exports = {
     'indent': ['error', 2, {
       'VariableDeclarator': 'first',
       'MemberExpression': 'off',
-    }]
+    }],
+    'no-trailing-spaces': ['error', {
+      'skipBlankLines': true,
+    }],
   }
 }
