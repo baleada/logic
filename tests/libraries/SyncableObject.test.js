@@ -22,33 +22,31 @@ test('editableState is state', t => {
 })
 
 /* Methods */
-test('write({ key, oldKey, value }) emits new state with oldKey deleted and new key set to value through onSync', t => {
+test('write({ key, rename, value }) emits new state with rename deleted and new key set to value through onSync', t => {
   let value
   const instance = t.context.setup({
     onSync: newState => (value = newState)
   })
 
-  const options = {
+  instance.write({
     key: 'newName',
-    oldKey: 'name',
+    rename: 'name',
     value: 'Baleada Logic',
-  }
-  instance.write(options)
+  })
 
   t.deepEqual(value, { newName: 'Baleada Logic', description: 'A toolkit for building web apps' })
 })
 
-test('write({ key, oldKey }) emits new state with oldKey renamed to key through onSync', t => {
+test('write({ key, rename }) emits new state with rename renamed to key through onSync', t => {
   let value
   const instance = t.context.setup({
     onSync: newState => (value = newState)
   })
 
-  const options = {
+  instance.write({
     key: 'newName',
-    oldKey: 'name',
-  }
-  instance.write(options)
+    rename: 'name',
+  })
 
   t.deepEqual(value, { newName: 'Baleada', description: 'A toolkit for building web apps' })
 })
@@ -59,24 +57,12 @@ test('write({ key, value }) emits new state with key set to value through onSync
     onSync: newState => (value = newState)
   })
 
-  const options = {
+  instance.write({
     key: 'newName',
     value: 'Baleada Logic',
-  }
-  instance.write(options)
-
-  t.deepEqual(value, { name: 'Baleada', newName: 'Baleada Logic', description: 'A toolkit for building web apps' })
-})
-
-test('erase({ value }) emits new state with value set to undefined deleted through onSync', t => {
-  let value
-  const instance = t.context.setup({
-    onSync: newState => (value = newState)
   })
 
-  instance.erase({ value: 'A toolkit for building web apps' })
-
-  t.deepEqual(value, { name: 'Baleada', description: undefined })
+  t.deepEqual(value, { name: 'Baleada', newName: 'Baleada Logic', description: 'A toolkit for building web apps' })
 })
 
 test('erase({ key }) emits new state with key deleted through onSync', t => {

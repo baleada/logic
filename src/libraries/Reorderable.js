@@ -12,7 +12,7 @@ import is from '../utils/is'
 export default class Reorderable {
   #onReorder
 
-  constructor(array, options = {}) {
+  constructor (array, options = {}) {
     /* Options */
     this.#onReorder = options.onReorder
 
@@ -27,11 +27,11 @@ export default class Reorderable {
   /* Public getters */
 
   /* Public methods */
-  setArray(array) {
+  setArray (array) {
     this.array = array
     return this
   }
-  reorder(itemIndex, newIndex) { // Adapted from Adam Wathan's Advanced Vue Component Design course
+  reorder (itemIndex, newIndex) { // Adapted from Adam Wathan's Advanced Vue Component Design course
     const itemRemovedArray = [
             ...this.array.slice(0, itemIndex),
             ...this.array.slice(itemIndex + 1, this.array.length)
@@ -42,7 +42,9 @@ export default class Reorderable {
             ...itemRemovedArray.slice(newIndex, itemRemovedArray.length)
           ]
 
-    if (is.function(this.#onReorder)) this.#onReorder(newArray)
+    if (is.function(this.#onReorder)) {
+      this.#onReorder(newArray)
+    }
     return this
   }
 

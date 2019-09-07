@@ -4,10 +4,13 @@
  * Released under the MIT license
  */
 
+/* Utils */
 import is from '../utils/is'
 import { hasEveryProperty } from '../utils/hasProperties'
 import warn from '../utils/warn'
-import renameMapKey from '../utils/renameMapKey'
+
+/* Libraries */
+import Renamable from './Renamable'
 
 class Syncable {
   /* Private properties */
@@ -42,7 +45,7 @@ class Syncable {
       array: options => this.#eraseArray(options),
       boolean: () => false,
       date: () => new Date(),
-      map: () => options => this.#eraseMap(options),
+      map: options => this.#eraseMap(options),
       number: () => 0,
       object: options => this.#eraseObject(options),
       string: () => '',
@@ -144,7 +147,7 @@ class Syncable {
     })
     warn('hasRequiredOptions', {
       received: options,
-      required: ['value', 'oldKey'],
+      required: ['value', 'rename'],
       subject: 'Syncable\'s write method',
       docs: 'https://baleada.netlify.com/docs/logic/Syncable',
     })
@@ -152,11 +155,24 @@ class Syncable {
     let newState = this.state
     const key = options.key
 
-    if (hasEveryProperty(options, ['oldKey', 'value'])) {
-      newState = renameMapKey(newState, options.oldKey, key)
-      newState.set(key, options.value)
-    } else if (hasEveryProperty(options, ['oldKey'])) {
-      newState = renameMapKey(newState, options.oldKey, key)
+    if (hasEveryProperty(options, ['rename', 'value'])) {
+      let renamed
+      const instance = new Renamable(newState, {
+        onRename: r => (renamed = r)
+      })
+      instance.rename(options.rename, key)
+
+      renamed.set(key, options.value)
+
+      newState = renamed
+    } else if (hasEveryProperty(options, ['rename'])) {
+      let renamed
+      const instance = new Renamable(newState, {
+        onRename: r => (renamed = r)
+      })
+      instance.rename(options.rename, key)
+
+      newState = renamed
     } else if (hasEveryProperty(options, ['value'])) {
       newState.set(key, options.value)
     }
@@ -172,7 +188,7 @@ class Syncable {
     })
     warn('hasRequiredOptions', {
       received: options,
-      required: ['value', 'oldKey'],
+      required: ['value', 'rename'],
       subject: 'Syncable\'s write method',
       docs: 'https://baleada.netlify.com/docs/logic/Syncable',
     })
@@ -180,12 +196,12 @@ class Syncable {
     const newState = this.state,
           key = options.key
 
-    if (hasEveryProperty(options, ['oldKey', 'value'])) {
+    if (hasEveryProperty(options, ['rename', 'value'])) {
       newState[key] = options.value
-      delete newState[options.oldKey]
-    } else if (hasEveryProperty(options, ['oldKey'])) {
-      newState[key] = newState[options.oldKey]
-      delete newState[options.oldKey]
+      delete newState[options.rename]
+    } else if (hasEveryProperty(options, ['rename'])) {
+      newState[key] = newState[options.rename]
+      delete newState[options.rename]
     } else if (hasEveryProperty(options, ['value'])) {
       newState[key] = options.value
     }
@@ -217,23 +233,19 @@ class Syncable {
   #eraseMap = function(options) {
     warn('hasRequiredOptions', {
       received: options,
-      required: ['key', 'value', 'last', 'all'],
+      required: ['key', 'last', 'all'],
       subject: 'Syncable\'s erase method',
       docs: 'https://baleada.netlify.com/docs/logic/Syncable',
     })
 
     const newState = this.state
 
-    if (options.hasOwnProperty('value')) {
-      const valueIndex = newState.values.findIndex(value => value === options.value),
-            key = newState.keys[valueIndex]
-      newState.set(key, undefined) // TODO: what's the best null value to use here?
-    }
     if (options.hasOwnProperty('key') && is.string(options.key)) {
       newState.delete(options.key)
     }
     if (options.hasOwnProperty('last') && options.last !== false) {
-      newState.delete(newState.keys.reverse()[0]) // TODO: What's the UI/feature/use case for deleting last key/value?
+      const last = Array.from(newState.keys()).reverse()[0]
+      newState.delete(last) // TODO: What's the UI/feature/use case for deleting last key/value?
     }
     if (options.hasOwnProperty('all') && options.all !== false) {
       newState.clear()
@@ -244,21 +256,13 @@ class Syncable {
   #eraseObject = function(options) {
     warn('hasRequiredOptions', {
       received: options,
-      required: ['key', 'value', 'last', 'all'],
+      required: ['value', 'last', 'all'],
       subject: 'Syncable\'s erase method',
       docs: 'https://baleada.netlify.com/docs/logic/Syncable',
     })
 
     let newState = this.state
 
-    if (['key', 'value', 'last', 'all'].every(property => !options.hasOwnProperty(property))) {
-      throw new Error('Cannot erase array (options are undefined in erase function)')
-    }
-
-    if (options.hasOwnProperty('value')) {
-      const key = Object.keys(newState).find(key => newState[key] === options.value)
-      newState[key] = undefined // TODO: what's the best null value to use here?
-    }
     if (options.hasOwnProperty('key') && is.string(options.key)) {
       delete newState[options.key]
     }
