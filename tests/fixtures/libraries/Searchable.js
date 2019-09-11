@@ -293,10 +293,16 @@ function () {
           builder.ref(_classPrivateFieldGet(_this, _id));
 
           _classPrivateFieldGet(_this, _keys).forEach(function (key) {
-            if (_is.default.string(key)) builder.field(key);else builder.field(key.name, key.attributes);
+            if (_is.default.string(key)) {
+              builder.field(key);
+            } else {
+              builder.field(key.name, key.attributes);
+            }
           });
 
-          if (_classPrivateFieldGet(_this, _positionIsIncluded)) builder.metadataWhitelist = ['position'];
+          if (_classPrivateFieldGet(_this, _positionIsIncluded)) {
+            builder.metadataWhitelist = ['position'];
+          }
 
           _classPrivateFieldGet(_this, _documents).forEach(function (item) {
             builder.add(item);

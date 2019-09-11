@@ -112,13 +112,32 @@ function () {
   return Animatable;
 }();
 
+exports.default = Animatable;
+
 var _dependencyOptions = new WeakMap();
 
 var _dependency = new WeakMap();
+},{"../utils/is":3,"../wrappers/AnimatableAnime":6}],2:[function(require,module,exports){
+"use strict";
 
-var _default = Animatable;
-exports.default = _default;
-},{"../utils/is":2,"../wrappers/AnimatableAnime":4}],2:[function(require,module,exports){
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.hasEveryProperty = hasEveryProperty;
+exports.hasSomeProperties = hasSomeProperties;
+
+function hasEveryProperty(object, properties) {
+  return properties.every(function (property) {
+    return object.hasOwnProperty(property);
+  });
+}
+
+function hasSomeProperties(object, properties) {
+  return properties.some(function (property) {
+    return object.hasOwnProperty(property);
+  });
+}
+},{}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -211,7 +230,7 @@ var is = {
 };
 var _default = is;
 exports.default = _default;
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -234,7 +253,45 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function resolveOptions(rawOptions) {
   return _is.default.function(rawOptions) ? rawOptions.apply(void 0, _toConsumableArray(Array.from(arguments).slice(1))) : rawOptions;
 }
-},{"./is":2}],4:[function(require,module,exports){
+},{"./is":3}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = warn;
+
+var _hasProperties = require("./hasProperties");
+
+var dictionary = {
+  hasRequiredOptions: {
+    shouldWarn: function shouldWarn(_ref) {
+      var received = _ref.received,
+          required = _ref.required,
+          every = _ref.every;
+      return every ? !(0, _hasProperties.hasEveryProperty)(received, required) : !(0, _hasProperties.hasSomeProperties)(received, required);
+    },
+    getWarning: function getWarning(_ref2) {
+      var subject = _ref2.subject,
+          required = _ref2.required,
+          every = _ref2.every,
+          docs = _ref2.docs;
+      var main = required.length > 1 ? "".concat(subject, " received neither ").concat(required[0], " ").concat(required.slice(1).map(function (option) {
+        return 'nor ' + option;
+      }), " options.") : "".concat(subject, " did not receive ").concat(required[0], " option."),
+          someOrEvery = required.length > 1 ? "".concat(every ? 'All' : 'Some', " of those options are required.") : "This option is required.",
+          docsLink = "See the docs for more info: ".concat(docs);
+      return "".concat(main, " ").concat(someOrEvery, " ").concat(docsLink);
+    }
+  }
+};
+
+function warn(type, args) {
+  if (dictionary[type].shouldWarn(args)) {
+    console.warn(dictionary[type].getWarning(args));
+  }
+}
+},{"./hasProperties":2}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -247,6 +304,8 @@ var _animejs = _interopRequireDefault(require("animejs"));
 var _is = _interopRequireDefault(require("../utils/is"));
 
 var _resolveOptions = _interopRequireDefault(require("../utils/resolveOptions"));
+
+var _warn = _interopRequireDefault(require("../utils/warn"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -301,13 +360,26 @@ function () {
       writable: true,
       value: function value(options) {
         options = (0, _resolveOptions.default)(options, _classPrivateFieldGet(this, _animeApi));
-        if (!options.hasOwnProperty('animation') && !options.hasOwnProperty('timelineChildren')) console.warn('Animatable received neither animation nor timelineChildren options');
+        (0, _warn.default)('hasRequiredOptions', {
+          received: options,
+          required: ['animation', 'timelineChildren'],
+          subject: 'Animatable',
+          docs: 'https://baleada.netlify.com/docs/logic/Animatable'
+        });
         var instance = options.hasOwnProperty('timelineChildren') ? _classPrivateFieldGet(this, _timeline).call(this, options) : _classPrivateFieldGet(this, _animate).call(this, options);
-        if (options.hasOwnProperty('speed')) instance.speed = options.speed;
+
+        if (options.hasOwnProperty('speed')) {
+          instance.speed = options.speed;
+        }
+
         instance.finished.then(function (response) {
-          if (options.hasOwnProperty('onFinishedSuccess')) options.onFinishedSuccess(response);
+          if (options.hasOwnProperty('onFinishedSuccess')) {
+            options.onFinishedSuccess(response);
+          }
         }).catch(function (error) {
-          if (options.hasOwnProperty('onFinishedError')) options.onFinishedError(error);
+          if (options.hasOwnProperty('onFinishedError')) {
+            options.onFinishedError(error);
+          }
         });
         return instance;
       }
@@ -349,8 +421,8 @@ function () {
     _getAddArguments.set(this, {
       writable: true,
       value: function value(child) {
-        var childConfig = _is.default.array(child) ? child[0] : child;
-        var offset = child[1] === undefined ? '+=0' : child[1]; // As per the anime docs, if no offset is specifed, the animation should start after the previous animation ends.
+        var childConfig = _is.default.array(child) ? child[0] : child,
+            offset = child[1] === undefined ? '+=0' : child[1]; // As per the anime docs, if no offset is specifed, the animation should start after the previous animation ends.
 
         return [childConfig, offset];
       }
@@ -440,7 +512,7 @@ var _animate = new WeakMap();
 var _timeline = new WeakMap();
 
 var _getAddArguments = new WeakMap();
-},{"../utils/is":2,"../utils/resolveOptions":3,"animejs":5}],5:[function(require,module,exports){
+},{"../utils/is":3,"../utils/resolveOptions":4,"../utils/warn":5,"animejs":7}],7:[function(require,module,exports){
 /*
  * anime.js v3.0.1
  * (c) 2019 Julian Garnier

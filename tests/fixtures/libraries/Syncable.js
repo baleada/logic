@@ -8,6 +8,12 @@ exports.default = void 0;
 
 var _is = _interopRequireDefault(require("../utils/is"));
 
+var _hasProperties = require("../utils/hasProperties");
+
+var _warn = _interopRequireDefault(require("../utils/warn"));
+
+var _Renamable = _interopRequireDefault(require("../subclasses/Renamable"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { keys.push.apply(keys, Object.getOwnPropertySymbols(object)); } if (enumerableOnly) keys = keys.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); return keys; }
@@ -26,7 +32,6 @@ function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateM
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
-// TODO: subclass Syncable for each type that requires special treatment?
 var Syncable =
 /*#__PURE__*/
 function () {
@@ -43,7 +48,7 @@ function () {
       value: void 0
     });
 
-    _editsFullState.set(this, {
+    _editsFullArray.set(this, {
       writable: true,
       value: void 0
     });
@@ -53,17 +58,7 @@ function () {
       value: void 0
     });
 
-    _editableKey.set(this, {
-      writable: true,
-      value: void 0
-    });
-
     _onSync.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _onCancel.set(this, {
       writable: true,
       value: void 0
     });
@@ -81,15 +76,32 @@ function () {
     _getType.set(this, {
       writable: true,
       value: function value(state) {
+        if (_classPrivateFieldGet(this, _hardCodedType) && _classPrivateFieldGet(this, _hardCodedType) !== 'array') {
+          return _classPrivateFieldGet(this, _hardCodedType);
+        } else {
+          return _classPrivateFieldGet(this, _guessType).call(this, state);
+        }
+      }
+    });
+
+    _guessType.set(this, {
+      writable: true,
+      value: function value(state) {
         var type,
             i = 0;
 
         while (type === undefined && i < _classPrivateFieldGet(this, _intendedTypes).length) {
-          if (_is.default[_classPrivateFieldGet(this, _intendedTypes)[i]](state)) type = _classPrivateFieldGet(this, _intendedTypes)[i];
+          if (_is.default[_classPrivateFieldGet(this, _intendedTypes)[i]](state)) {
+            type = _classPrivateFieldGet(this, _intendedTypes)[i];
+          }
+
           i++;
         }
 
-        if (type === undefined) type = 'unintended';
+        if (type === undefined) {
+          type = 'unintended';
+        }
+
         return type;
       }
     });
@@ -97,38 +109,21 @@ function () {
     _getEditableState.set(this, {
       writable: true,
       value: function value() {
-        if (_classPrivateFieldGet(this, _editsFullState)) {
+        if (this.type !== 'array') {
           return this.state;
-        } else if (this.type === 'object') {
-          switch (true) {
-            case !this.state.hasOwnProperty(_classPrivateFieldGet(this, _editableKey)):
-              // TODO: something less drastic than an error
-              throw new Error('Cannot sync with object when editsFullState is false and object does not have the property indicated by the editableKey option.');
-              break;
-
-            default:
-              return this.state[_classPrivateFieldGet(this, _editableKey)];
-          }
-        } else if (this.type === 'array') {
-          return '';
         } else {
-          // TODO: something less drastic than an error
-          throw new Error('When editsFullState is false, the Syncable state must be an array or an object.');
+          return _classPrivateFieldGet(this, _editsFullArray) ? this.state : '';
         }
-      }
-    });
-
-    _typePairingIsSupported.set(this, {
-      writable: true,
-      value: function value() {
-        return _classPrivateFieldGet(this, _editsFullState) && this.type === this.editableStateType || !_classPrivateFieldGet(this, _editsFullState) && ['array', 'object'].includes(this.type);
       }
     });
 
     _sync.set(this, {
       writable: true,
       value: function value(newState) {
-        if (_is.default.function(_classPrivateFieldGet(this, _onSync))) _classPrivateFieldGet(this, _onSync).call(this, newState);
+        if (_is.default.function(_classPrivateFieldGet(this, _onSync))) {
+          _classPrivateFieldGet(this, _onSync).call(this, newState);
+        }
+
         return this;
       }
     });
@@ -136,31 +131,132 @@ function () {
     _writeArray.set(this, {
       writable: true,
       value: function value() {
-        return _classPrivateFieldGet(this, _editsFullState) ? this.editableState : this.state.concat([this.editableState]);
+        return _classPrivateFieldGet(this, _editsFullArray) ? this.editableState : this.state.concat([this.editableState]);
+      }
+    });
+
+    _writeMap.set(this, {
+      writable: true,
+      value: function value(options) {
+        (0, _warn.default)('hasRequiredOptions', {
+          received: options,
+          required: ['key'],
+          subject: 'Syncable\'s write method',
+          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+        });
+        (0, _warn.default)('hasRequiredOptions', {
+          received: options,
+          required: ['value', 'rename'],
+          subject: 'Syncable\'s write method',
+          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+        });
+        var newState = this.state;
+        var key = options.key;
+
+        if ((0, _hasProperties.hasEveryProperty)(options, ['rename', 'value'])) {
+          var renamable = new _Renamable.default(newState);
+          renamable.renameKey(options.rename, key);
+          renamable.set(key, options.value);
+          newState = new Map(renamable);
+        } else if ((0, _hasProperties.hasEveryProperty)(options, ['rename'])) {
+          var _renamable = new _Renamable.default(newState);
+
+          _renamable.renameKey(options.rename, key);
+
+          newState = new Map(_renamable);
+        } else if ((0, _hasProperties.hasEveryProperty)(options, ['value'])) {
+          newState.set(key, options.value);
+        }
+
+        return newState;
       }
     });
 
     _writeObject.set(this, {
       writable: true,
       value: function value(options) {
-        var key = options.hasOwnProperty('key') ? options.key : _classPrivateFieldGet(this, _editableKey);
-        return _classPrivateFieldGet(this, _editsFullState) ? this.editableState : _objectSpread({}, this.state, _defineProperty({}, key, this.editableState));
+        (0, _warn.default)('hasRequiredOptions', {
+          received: options,
+          required: ['key'],
+          subject: 'Syncable\'s write method',
+          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+        });
+        (0, _warn.default)('hasRequiredOptions', {
+          received: options,
+          required: ['value', 'rename'],
+          subject: 'Syncable\'s write method',
+          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+        });
+        var newState = this.state,
+            key = options.key;
+
+        if ((0, _hasProperties.hasEveryProperty)(options, ['rename', 'value'])) {
+          newState[key] = options.value;
+          delete newState[options.rename];
+        } else if ((0, _hasProperties.hasEveryProperty)(options, ['rename'])) {
+          newState[key] = newState[options.rename];
+          delete newState[options.rename];
+        } else if ((0, _hasProperties.hasEveryProperty)(options, ['value'])) {
+          newState[key] = options.value;
+        }
+
+        return newState;
       }
     });
 
     _eraseArray.set(this, {
       writable: true,
       value: function value(options) {
-        var newState = this.state; // clone state
-
-        if (['value', 'last', 'all'].every(function (property) {
-          return !options.hasOwnProperty(property);
-        })) throw new Error('Cannot erase array (erase function options do not have value, last, or all keys)');
-        if (options.hasOwnProperty('value')) newState = this.state.filter(function (item) {
-          return item !== options.value;
+        (0, _warn.default)('hasRequiredOptions', {
+          received: options,
+          required: ['value', 'last', 'all'],
+          subject: 'Syncable\'s erase method',
+          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
         });
-        if (options.hasOwnProperty('last') && options.last !== false) newState = this.state.slice(0, -1);
-        if (options.hasOwnProperty('all') && options.all !== false) newState = [];
+        var newState = this.state;
+
+        if (options.hasOwnProperty('value')) {
+          newState = this.state.filter(function (item) {
+            return item !== options.value;
+          });
+        }
+
+        if (options.hasOwnProperty('last') && options.last !== false) {
+          newState = this.state.slice(0, -1);
+        }
+
+        if (options.hasOwnProperty('all') && options.all !== false) {
+          newState = [];
+        }
+
+        return newState;
+      }
+    });
+
+    _eraseMap.set(this, {
+      writable: true,
+      value: function value(options) {
+        (0, _warn.default)('hasRequiredOptions', {
+          received: options,
+          required: ['key', 'last', 'all'],
+          subject: 'Syncable\'s erase method',
+          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+        });
+        var newState = this.state;
+
+        if (options.hasOwnProperty('key') && _is.default.string(options.key)) {
+          newState.delete(options.key);
+        }
+
+        if (options.hasOwnProperty('last') && options.last !== false) {
+          var last = Array.from(newState.keys()).reverse()[0];
+          newState.delete(last); // TODO: What's the UI/feature/use case for deleting last key/value?
+        }
+
+        if (options.hasOwnProperty('all') && options.all !== false) {
+          newState.clear();
+        }
+
         return newState;
       }
     });
@@ -168,49 +264,50 @@ function () {
     _eraseObject.set(this, {
       writable: true,
       value: function value(options) {
-        var newState = this.state; // clone state
+        (0, _warn.default)('hasRequiredOptions', {
+          received: options,
+          required: ['value', 'last', 'all'],
+          subject: 'Syncable\'s erase method',
+          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+        });
+        var newState = this.state;
 
-        if (['key', 'value', 'last', 'all'].every(function (property) {
-          return !options.hasOwnProperty(property);
-        })) throw new Error('Cannot erase array (options are undefined in erase function)');
-
-        if (options.hasOwnProperty('value')) {
-          // TODO: What's the UI/feature/use case for deleting object values?
-          var key = Object.keys(newState).find(function (key) {
-            return newState[key] === options.value;
-          });
-          newState[key] = undefined; // TODO: what's the best null value to use here?
+        if (options.hasOwnProperty('key') && _is.default.string(options.key)) {
+          delete newState[options.key];
         }
 
-        if (options.hasOwnProperty('key') && _is.default.string(options.key)) delete newState[options.key];
-        if (options.hasOwnProperty('last') && options.last !== false) delete newState[Object.keys(newState).reverse()[0]]; // TODO: What's the UI/feature/use case for deleting last key/value?
+        if (options.hasOwnProperty('last') && options.last !== false) {
+          delete newState[Object.keys(newState).reverse()[0]]; // TODO: What's the UI/feature/use case for deleting last key/value?
+        }
 
-        if (options.hasOwnProperty('all') && options.all !== false) newState = {};
+        if (options.hasOwnProperty('all') && options.all !== false) {
+          newState = {};
+        }
+
         return newState;
       }
     });
 
-    _classPrivateFieldSet(this, _intendedTypes, ['array', 'boolean', 'date', 'file', 'filelist', 'number', 'object', 'string']);
+    _classPrivateFieldSet(this, _intendedTypes, ['array', 'boolean', 'date', 'file', 'filelist', 'map', 'number', 'object', 'string']);
     /* Options */
 
 
     _options = _objectSpread({
-      editsFullState: true
+      editsFullArray: true
     }, _options);
 
     _classPrivateFieldSet(this, _hardCodedType, _options.type);
 
-    _classPrivateFieldSet(this, _editsFullState, _options.editsFullState);
-
-    _classPrivateFieldSet(this, _editableKey, _options.editableKey);
+    _classPrivateFieldSet(this, _editsFullArray, _options.editsFullArray);
 
     _classPrivateFieldSet(this, _onSync, _options.onSync);
-
-    _classPrivateFieldSet(this, _onCancel, _options.onCancel);
 
     _classPrivateFieldSet(this, _writeDictionary, {
       array: function array() {
         return _classPrivateFieldGet(_this, _writeArray).call(_this);
+      },
+      map: function map(options) {
+        return _classPrivateFieldGet(_this, _writeMap).call(_this, options);
       },
       object: function object(options) {
         return _classPrivateFieldGet(_this, _writeObject).call(_this, options);
@@ -226,6 +323,9 @@ function () {
       },
       date: function date() {
         return new Date();
+      },
+      map: function map(options) {
+        return _classPrivateFieldGet(_this, _eraseMap).call(_this, options);
       },
       number: function number() {
         return 0;
@@ -248,20 +348,6 @@ function () {
 
   _createClass(Syncable, [{
     key: "setState",
-    // TODO: It's important to validate type pairing but it's overly complex to add another public property for it
-    // get formattedEditableState() {
-    //   let formattedEditableState
-    //
-    //   if (this.#typePairingIsSupported()) {
-    //     formattedEditableState = this.editableState
-    //   } else if (!is.function(parse[this.type])) {
-    //     throw new Error(`state/editableState type pairing (${this.type} and ${this.editableStateType}) is not supported`)
-    //   } else {
-    //     formattedEditableState = parse[this.type](this.editableState)
-    //   }
-    //
-    //   return formattedEditableState
-    // }
 
     /* Public methods */
     value: function setState(state) {
@@ -279,7 +365,6 @@ function () {
     key: "cancel",
     value: function cancel() {
       this.editableState = _classPrivateFieldGet(this, _getEditableState).call(this);
-      if (_is.default.function(_classPrivateFieldGet(this, _onCancel))) _classPrivateFieldGet(this, _onCancel).call(this);
       return this;
     }
   }, {
@@ -301,7 +386,7 @@ function () {
   }, {
     key: "type",
     get: function get() {
-      return _classPrivateFieldGet(this, _hardCodedType) ? _classPrivateFieldGet(this, _hardCodedType).toLowerCase() : _classPrivateFieldGet(this, _getType).call(this, this.state);
+      return _classPrivateFieldGet(this, _getType).call(this, this.state);
     }
   }, {
     key: "editableStateType",
@@ -315,15 +400,11 @@ function () {
 
 var _intendedTypes = new WeakMap();
 
-var _editsFullState = new WeakMap();
+var _editsFullArray = new WeakMap();
 
 var _hardCodedType = new WeakMap();
 
-var _editableKey = new WeakMap();
-
 var _onSync = new WeakMap();
-
-var _onCancel = new WeakMap();
 
 var _writeDictionary = new WeakMap();
 
@@ -331,23 +412,130 @@ var _eraseDictionary = new WeakMap();
 
 var _getType = new WeakMap();
 
-var _getEditableState = new WeakMap();
+var _guessType = new WeakMap();
 
-var _typePairingIsSupported = new WeakMap();
+var _getEditableState = new WeakMap();
 
 var _sync = new WeakMap();
 
 var _writeArray = new WeakMap();
 
+var _writeMap = new WeakMap();
+
 var _writeObject = new WeakMap();
 
 var _eraseArray = new WeakMap();
+
+var _eraseMap = new WeakMap();
 
 var _eraseObject = new WeakMap();
 
 var _default = Syncable;
 exports.default = _default;
-},{"../utils/is":2}],2:[function(require,module,exports){
+},{"../subclasses/Renamable":2,"../utils/hasProperties":3,"../utils/is":4,"../utils/warn":5}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
+
+function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+/*
+ * Renamable.js
+ * (c) 2019 Alex Vipond
+ * Released under the MIT license
+ */
+var Renamable =
+/*#__PURE__*/
+function (_Map) {
+  _inherits(Renamable, _Map);
+
+  function Renamable() {
+    _classCallCheck(this, Renamable);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(Renamable).apply(this, arguments));
+  }
+
+  _createClass(Renamable, [{
+    key: "renameKey",
+    value: function renameKey(keyToRename, newName) {
+      var _this = this;
+
+      var keys = Array.from(this.keys()),
+          keyToRenameIndex = keys.findIndex(function (key) {
+        return key === keyToRename;
+      }),
+          newKeys = [].concat(_toConsumableArray(keys.slice(0, keyToRenameIndex)), [newName], _toConsumableArray(keys.slice(keyToRenameIndex + 1))),
+          values = Array.from(this.values());
+      keys.forEach(function (key) {
+        return _this.delete(key);
+      });
+      newKeys.forEach(function (key, index) {
+        return _this.set(key, values[index]);
+      });
+      return this;
+    }
+  }]);
+
+  return Renamable;
+}(_wrapNativeSuper(Map));
+
+exports.default = Renamable;
+},{}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.hasEveryProperty = hasEveryProperty;
+exports.hasSomeProperties = hasSomeProperties;
+
+function hasEveryProperty(object, properties) {
+  return properties.every(function (property) {
+    return object.hasOwnProperty(property);
+  });
+}
+
+function hasSomeProperties(object, properties) {
+  return properties.some(function (property) {
+    return object.hasOwnProperty(property);
+  });
+}
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -440,5 +628,43 @@ var is = {
 };
 var _default = is;
 exports.default = _default;
-},{}]},{},[1])(1)
+},{}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = warn;
+
+var _hasProperties = require("./hasProperties");
+
+var dictionary = {
+  hasRequiredOptions: {
+    shouldWarn: function shouldWarn(_ref) {
+      var received = _ref.received,
+          required = _ref.required,
+          every = _ref.every;
+      return every ? !(0, _hasProperties.hasEveryProperty)(received, required) : !(0, _hasProperties.hasSomeProperties)(received, required);
+    },
+    getWarning: function getWarning(_ref2) {
+      var subject = _ref2.subject,
+          required = _ref2.required,
+          every = _ref2.every,
+          docs = _ref2.docs;
+      var main = required.length > 1 ? "".concat(subject, " received neither ").concat(required[0], " ").concat(required.slice(1).map(function (option) {
+        return 'nor ' + option;
+      }), " options.") : "".concat(subject, " did not receive ").concat(required[0], " option."),
+          someOrEvery = required.length > 1 ? "".concat(every ? 'All' : 'Some', " of those options are required.") : "This option is required.",
+          docsLink = "See the docs for more info: ".concat(docs);
+      return "".concat(main, " ").concat(someOrEvery, " ").concat(docsLink);
+    }
+  }
+};
+
+function warn(type, args) {
+  if (dictionary[type].shouldWarn(args)) {
+    console.warn(dictionary[type].getWarning(args));
+  }
+}
+},{"./hasProperties":3}]},{},[1])(1)
 });
