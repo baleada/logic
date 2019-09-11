@@ -10,7 +10,7 @@ import { hasEveryProperty } from '../utils/hasProperties'
 import warn from '../utils/warn'
 
 /* Libraries */
-import Renamable from './Renamable'
+import Renamable from '../subclasses/Renamable'
 
 class Syncable {
   /* Private properties */
@@ -156,21 +156,15 @@ class Syncable {
     const key = options.key
 
     if (hasEveryProperty(options, ['rename', 'value'])) {
-      let renamed
-      const instance = new Renamable(newState, {
-        onRename: r => (renamed = r)
-      })
-      instance.rename(options.rename, key)
+      const renamable = new Renamable(newState),
+            renamed = renamable.renameKey(options.rename, key)
 
       renamed.set(key, options.value)
 
       newState = renamed
     } else if (hasEveryProperty(options, ['rename'])) {
-      let renamed
-      const instance = new Renamable(newState, {
-        onRename: r => (renamed = r)
-      })
-      instance.rename(options.rename, key)
+      const renamable = new Renamable(newState),
+            renamed = renamable.renameKey(options.rename, key)
 
       newState = renamed
     } else if (hasEveryProperty(options, ['value'])) {
