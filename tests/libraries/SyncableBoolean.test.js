@@ -17,20 +17,20 @@ test('editableState is state', t => {
 
 /* Methods */
 test('write() emits new state through onSync', t => {
-  let value
-  const instance = t.context.setup({ onSync: newState => (value = newState) })
+  let result
+  const instance = t.context.setup({ onSync: newState => (result = newState) })
 
   instance.setEditableState(false)
   instance.write()
 
-  t.is(value, false)
+  t.is(result, false)
 })
 
 test('erase() emits false through onSync', t => {
-  let value
-  const instance = t.context.setup({ onSync: newState => (value = newState) })
+  let result
+  const instance = t.context.setup({ onSync: newState => (result = newState) })
 
   instance.erase()
 
-  t.is(value, false)
+  t.is(result, false)
 })
