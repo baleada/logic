@@ -156,17 +156,18 @@ class Syncable {
     const key = options.key
 
     if (hasEveryProperty(options, ['rename', 'value'])) {
-      const renamable = new Renamable(newState),
-            renamed = renamable.renameKey(options.rename, key)
+      const renamable = new Renamable(newState)
 
-      renamed.set(key, options.value)
+      renamable.renameKey(options.rename, key)
+      renamable.set(key, options.value)
 
-      newState = renamed
+      newState = new Map(renamable)
     } else if (hasEveryProperty(options, ['rename'])) {
-      const renamable = new Renamable(newState),
-            renamed = renamable.renameKey(options.rename, key)
+      const renamable = new Renamable(newState)
 
-      newState = renamed
+      renamable.renameKey(options.rename, key)
+
+      newState = new Map(renamable)
     } else if (hasEveryProperty(options, ['value'])) {
       newState.set(key, options.value)
     }

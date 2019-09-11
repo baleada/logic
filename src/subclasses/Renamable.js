@@ -11,8 +11,9 @@ export default class Renamable extends Map {
           newKeys = [...keys.slice(0, keyToRenameIndex), newName, ...keys.slice(keyToRenameIndex + 1)],
           values = Array.from(this.values())
 
-    return new Map([
-      ...newKeys.map((key, index) => [key, values[index]])
-    ])
+    keys.forEach(key => this.delete(key))
+    newKeys.forEach((key, index) => this.set(key, values[index]))
+    
+    return this
   }
 }
