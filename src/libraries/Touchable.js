@@ -13,7 +13,7 @@ export default class Touchable {
   #dependencyOptions
   #dependency
 
-  constructor(element, options = {}) {
+  constructor (element, options = {}) {
     /* Options */
 
     /* Public properties */
@@ -27,25 +27,24 @@ export default class Touchable {
   }
 
   /* Public getters */
-  get manager() {
+  get manager () {
     return this.#dependency.manager
   }
 
   /* Public methods */
-  setElement(element) {
+  setElement (element) {
     this.element = element
     return this
   }
-  listen(touchType, listener) {
-    this.#dependency.listen(touchType, listener)
+  on (touchType, listener) {
+    this.#dependency.on(touchType, listener)
   }
-  touch(touchType, data) {
+  touch (touchType, data) {
     this.#dependency.touch(touchType, data)
   }
-  destroy() {
+  destroy () {
     this.#dependency.destroy()
   }
 
   /* Private methods */
-
 }
