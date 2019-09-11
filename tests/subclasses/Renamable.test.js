@@ -13,9 +13,9 @@ test('renameKey(keyToRename, newName) renames keyToRename to newName', t => {
   t.deepEqual(instance, new Renamable([['uno', 'value'], ['two', 'value']]))
 })
 
-test('rename(...) returns Map', t => {
+test('rename(...) returns Renamable', t => {
   const instance = t.context.setup(),
         renamed = instance.renameKey('one', 'uno')
 
-  t.assert(renamed instanceof Map)
+  t.assert(renamed instanceof Renamable)
 })
