@@ -18,7 +18,6 @@ class Syncable {
   #editsFullArray
   #hardCodedType
   #onSync
-  #onCancel
   #writeDictionary
   #eraseDictionary
 
@@ -34,7 +33,6 @@ class Syncable {
     this.#hardCodedType = options.type
     this.#editsFullArray = options.editsFullArray
     this.#onSync = options.onSync
-    this.#onCancel = options.onCancel
 
     this.#writeDictionary = {
       array: () => this.#writeArray(),
@@ -76,9 +74,6 @@ class Syncable {
   }
   cancel () {
     this.editableState = this.#getEditableState()
-    if (is.function(this.#onCancel)) {
-      this.#onCancel()
-    }
     return this
   }
   write (options = {}) {
