@@ -4,6 +4,9 @@
  * Released under the MIT license
  */
 
+/* Utils */
+import is from '../utils/is'
+
 /**
  * Delayable is a library that enriches a function by:
  * - Giving it the methods necessary to execute itself after a delay or at regular intervals<
@@ -21,7 +24,7 @@ export default class Delayable {
   #computedTimeElapsed
   #computedTimeRemaining
 
-  constructor(callback, options) {
+  constructor (callback, options) {
     options = {
       delay: 0,
       ...options
@@ -49,21 +52,21 @@ export default class Delayable {
    * The number of times the callback function has been executed
    * @type {Number}
    */
-  get executions() {
+  get executions () {
     return this.#computedExecutions
   }
   /**
    * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
    * @type {Number}
    */
-  get timeElapsed() {
+  get timeElapsed () {
     return this.#computedTimeElapsed
   }
   /**
    * The time (in milliseconds) that remains until the callback function will be executed
    * @type {Number}
    */
-  get timeRemaining() {
+  get timeRemaining () {
     return this.#computedTimeRemaining
   }
 
@@ -72,13 +75,13 @@ export default class Delayable {
    * Sets the Delayable instance's callback function
    * @param {Function} callback The new callback function
    */
-  setCallback(callback) {
+  setCallback (callback) {
     this.callback = callback
   }
   /**
    * Cancels the delayed callback function. The function won't be executed, but <code>timeElapsed</code> and <code>timeRemaining</code> will <b>not</b> be reset to their initial values.
    */
-  cancel() {
+  cancel () {
     window.clearTimeout(this.#id)
     window.clearInterval(this.#id)
     this.#stopTick()
@@ -87,7 +90,7 @@ export default class Delayable {
   /**
    * Executes the callback function after the period of time specified by <code>delay</code>
    */
-  timeout() {
+  timeout () {
     this.#isInterval = false
     this.#setup()
     this.#id = this.#setTimeout()
@@ -95,14 +98,14 @@ export default class Delayable {
   /**
    * Repeatedly executes the callback function with a fixed time delay (specified by <code>delay</code>) between each execution
    */
-  interval() {
+  interval () {
     this.#isInterval = true
     this.#setup()
     this.#id = this.#setInterval()
   }
 
   /* Private methods */
-  #setTimeout = function () {
+  #setTimeout = function() {
     return window.setTimeout(
       () => {
         this.callback(...arguments)
@@ -114,7 +117,7 @@ export default class Delayable {
       ...this.#parameters
     )
   }
-  #setInterval = function () {
+  #setInterval = function() {
     return window.setInterval(
       () => {
         this.callback(...this.#parameters)
@@ -126,16 +129,16 @@ export default class Delayable {
       this.#delay,
     )
   }
-  #setTimeElapsed = function () {
+  #setTimeElapsed = function() {
     const timeElapsed = Date.now() - this.#started
     this.#computedTimeElapsed = this.#isInterval
       ? timeElapsed - this.#delay * this.#computedExecutions
       : Math.min(timeElapsed, this.#delay)
   }
-  #setTimeRemaining = function () {
+  #setTimeRemaining = function() {
     this.#computedTimeRemaining = this.#delay - this.#computedTimeElapsed
   }
-  #tick = function () {
+  #tick = function() {
     this.#setTimeElapsed()
     this.#setTimeRemaining()
     if (this.#computedTimeElapsed < this.#delay) {
@@ -143,13 +146,13 @@ export default class Delayable {
       this.#startTick()
     }
   }
-  #startTick = function () {
+  #startTick = function() {
     this.#tickId = window.requestAnimationFrame(this.#tick.bind(this))
   }
-  #stopTick = function () {
+  #stopTick = function() {
     window.cancelAnimationFrame(this.#tickId)
   }
-  #setup = function () {
+  #setup = function() {
     this.cancel()
     this.#computedExecutions = 0
     this.#computedTimeElapsed = 0

@@ -7,6 +7,7 @@
 /* Dependencies */
 
 /* Utils */
+import is from '../utils/is'
 import toNodeList from '../utils/toNodeList'
 
 export default class Observable {
@@ -19,7 +20,7 @@ export default class Observable {
   #computedMutation
   #computedResize
 
-  constructor(elements, options = {}) {
+  constructor (elements, options = {}) {
     /* Options */
     this.#onIntersect = options.onIntersect
     this.#onMutate = options.onMutate
@@ -45,41 +46,49 @@ export default class Observable {
   }
 
   /* Public getters */
-  get intersection() {
+  get intersection () {
     return this.#computedIntersection
   }
-  get mutation() {
+  get mutation () {
     return this.#computedMutation
   }
-  get resize() {
+  get resize () {
     return this.#computedResize
   }
 
   /* Public methods */
-  setElements(elements) {
+  setElements (elements) {
     this.elements = toNodeList(elements)
     return this
   }
-  observe(options = {}) {
+  observe (options = {}) {
     this.elements.forEach(element => {
       this.#supportedObserverTypes.forEach(observerType => {
-        if (!is.null(this[`${observerType}`])) this[`${observerType}`].observe(element, options)
+        if (!is.null(this[`${observerType}`])) {
+          this[`${observerType}`].observe(element, options)
+        }
       })
     })
   }
-  disconnect() {
+  disconnect () {
     this.#supportedObserverTypes.forEach(observerType => {
-      if (!is.null(this[`${observerType}`])) this[`${observerType}`].disconnect()
+      if (!is.null(this[`${observerType}`])) {
+        this[`${observerType}`].disconnect()
+      }
     })
   }
-  takeRecords() {
+  takeRecords () {
     this.#supportedObserverTypes.forEach(observerType => {
-      if (!is.null(this[`${observerType}`])) this[`${observerType}`].takeRecords()
+      if (!is.null(this[`${observerType}`])) {
+        this[`${observerType}`].takeRecords()
+      }
     })
   }
-  unobserve(element) {
+  unobserve (element) {
     this.#supportedObserverTypes.forEach(observerType => {
-      if (!is.null(this[`${observerType}`])) this[`${observerType}`].unobserve(element)
+      if (!is.null(this[`${observerType}`])) {
+        this[`${observerType}`].unobserve(element)
+      }
     })
   }
 
