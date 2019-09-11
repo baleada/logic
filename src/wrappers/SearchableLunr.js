@@ -5,13 +5,12 @@ export default class SearchableLunr {
   #array
   #id
   #isArrayOfStrings
-
   #documents
   #keys
   #positionIsIncluded
   #itemIsIncluded
-
-  #lunr
+  #dependency
+  #lunrInstance
 
   constructor (array, options = {}) {
     this.#array = array
@@ -28,23 +27,24 @@ export default class SearchableLunr {
     this.#positionIsIncluded = options.positionIsIncluded
     this.#itemIsIncluded = options.itemIsIncluded
 
-    this.#lunr = this.#lunrConstructor()
+    this.#dependency = lunr
+    this.#lunrInstance = this.#getLunrInstance()
   }
 
   get index () {
-    return this.#lunr
+    return this.#lunrInstance
   }
 
   /* Public methods */
   search () {
     return this.#itemIsIncluded
-      ? this.#lunr.search(...arguments).map(match => this.#includeItem(match))
-      : this.#lunr.search(...arguments)
+      ? this.#lunrInstance.search(...arguments).map(match => this.#includeItem(match))
+      : this.#lunrInstance.search(...arguments)
   }
 
   /* Private methods */
-  #lunrConstructor = function() {
-    return lunr(builder => {
+  #getLunrInstance = function() {
+    return this.#dependency(builder => {
       builder.ref(this.#id)
       this.#keys.forEach(key => {
         if (is.string(key)) {

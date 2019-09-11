@@ -9,53 +9,55 @@ import warn from '../utils/warn'
 export default class AnimatableAnime {
   #elements
   #animeApi
-  #anime
+  #animeInstance
 
   constructor (elements, options = {}) {
     this.#elements = elements
 
+    this.#dependency = anime
+
     this.#animeApi = {
       // anime utils
-      path: anime.path,
-      setDashoffset: anime.setDashoffset,
-      stagger: anime.stagger,
-      penner: anime.penner,
+      path: this.#dependency.path,
+      setDashoffset: this.#dependency.setDashoffset,
+      stagger: this.#dependency.stagger,
+      penner: this.#dependency.penner,
 
       // anime helpers
-      remove: anime.remove,
-      get: anime.get,
-      set: anime.set,
-      random: anime.random,
-      // tick: anime.tick, TODO: does this need another prop? https://animejs.com/documentation/#tick
-      running: anime.running,
+      remove: this.#dependency.remove,
+      get: this.#dependency.get,
+      set: this.#dependency.set,
+      random: this.#dependency.random,
+      // tick: this.#dependency.tick, TODO: does this need another prop? https://animejs.com/documentation/#tick
+      running: this.#dependency.running,
     }
 
-    this.#anime = this.#animeConstructor(options)
+    this.#animeInstance = this.#getAnimeInstance(options)
   }
 
   get animation () {
-    return this.#anime
+    return this.#animeInstance
   }
 
   /* Public methods */
   play () {
-    this.#anime.play(...arguments)
+    this.#animeInstance.play(...arguments)
   }
   pause () {
-    this.#anime.pause(...arguments)
+    this.#animeInstance.pause(...arguments)
   }
   restart () {
-    this.#anime.restart(...arguments)
+    this.#animeInstance.restart(...arguments)
   }
   reverse () {
-    this.#anime.reverse(...arguments)
+    this.#animeInstance.reverse(...arguments)
   }
   seek () {
-    this.#anime.seek(...arguments)
+    this.#animeInstance.seek(...arguments)
   }
 
   /* Private methods */
-  #animeConstructor = function(options) {
+  #getAnimeInstance = function(options) {
     options = resolveOptions(options, this.#animeApi)
 
     warn('hasRequiredOptions', {
@@ -88,13 +90,13 @@ export default class AnimatableAnime {
     return instance
   }
   #animate = function({ animation = {} }) {
-    return anime({
+    return this.#dependency({
       targets: this.#elements,
       ...animation
     })
   }
   #timeline = function({ animation = {}, timelineChildren }) {
-    const instance = anime.timeline({
+    const instance = this.#dependency.timeline({
       targets: this.#elements,
       ...animation
     })

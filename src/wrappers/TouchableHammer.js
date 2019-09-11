@@ -13,7 +13,7 @@ export default class TouchableHammer {
   #hammerApi
   #dependency
   #hammerOptions
-  #hammer
+  #hammerInstance
 
   constructor (element, options = {}) {
     this.#allowsSelect = options.allowsSelect
@@ -41,20 +41,20 @@ export default class TouchableHammer {
     }
     this.#dependency = Hammer
     this.#hammerOptions = this.#getHammerOptions(options)
-    this.#hammer = this.#hammerConstructor(this.#hammerOptions)
+    this.#hammerInstance = this.#getHammerInstance(this.#hammerOptions)
   }
 
   /* Public getters */
   get manager () {
-    return this.#hammer
+    return this.#hammerInstance
   }
 
   /* Public methods */
   touch (touchType, data) {
-    this.#hammer.emit(touchType, data)
+    this.#hammerInstance.emit(touchType, data)
   }
   destroy () {
-    this.#hammer.destroy()
+    this.#hammerInstance.destroy()
   }
 
   /* Private methods */
@@ -68,7 +68,7 @@ export default class TouchableHammer {
       return hammerOptions
     }, {})
   }
-  #hammerConstructor = function(options) {
+  #getHammerInstance = function(options) {
     options = resolveOptions(options, this.#hammerApi)
 
     if (this.#allowsSelect) {
