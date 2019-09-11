@@ -36,9 +36,6 @@ export default class Touchable {
     this.element = element
     return this
   }
-  on (touchType, listener) {
-    this.#dependency.on(touchType, listener)
-  }
   touch (touchType, data) {
     this.#dependency.touch(touchType, data)
   }
