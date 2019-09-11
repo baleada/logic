@@ -22,7 +22,6 @@ test('setArray sets the array', t => {
   t.deepEqual(instance.array, ['Baleada'])
 })
 
-
 /* search */
 test('search(query) updates results', t => {
   const instance = t.context.setup()
@@ -47,20 +46,17 @@ test('search(query) includes match position in results when positionIsIncluded i
     positionIsIncluded: true
   })
 
-  console.log(instance.index)
-
   instance.search('tortilla')
 
   t.assert(instance.results[0].matchData.metadata.tortilla.id.position.length > 0)
 })
 
-
 /* method chaining */
 test('can method chain', t => {
-  const instance = t.context.setup()
-  const chained = instance
-    .setArray(['Baleada'])
-    .search('Baleada')
+  const instance = t.context.setup(),
+        chained = instance
+          .setArray(['Baleada'])
+          .search('Baleada')
 
   t.assert(chained instanceof Searchable)
 })

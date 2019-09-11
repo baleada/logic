@@ -14,7 +14,7 @@ export default class Searchable {
   #dependencyOptions
   #dependency
 
-  constructor(array, options = {}) {
+  constructor (array, options = {}) {
     /* Options */
     options = {
       positionIsIncluded: false,
@@ -34,20 +34,20 @@ export default class Searchable {
   }
 
   /* Public getters */
-  get results() {
+  get results () {
     return this.#computedResults
   }
-  get index() {
+  get index () {
     return this.#dependency.index
   }
 
   /* Public methods */
-  setArray(array) {
+  setArray (array) {
     this.array = array
     this.#dependency = new Dependency(this.array, this.#dependencyOptions)
     return this
   }
-  search(query) {
+  search (query) {
     this.#computedResults = this.#dependency.search(query)
     return this
   }
