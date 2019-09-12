@@ -18,6 +18,10 @@ const dictionary = {
 
       return `${main} ${someOrEvery} ${docsLink}`
     }
+  },
+  noFallbackAvailable: {
+    shouldWarn: () => true,
+    getWarning: ({ subject }) => `There is no fallback available for ${subject}.`
   }
 }
 
