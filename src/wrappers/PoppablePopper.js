@@ -4,6 +4,11 @@ import Popper from 'popper.js'
 /* Utils */
 
 export default class Library {
+  #reference
+  #popper
+  #dependency
+  #popperInstance
+
   constructor ({ reference, popper }, options = {}) {
     /* Options */
 
@@ -13,7 +18,7 @@ export default class Library {
 
     /* Private properties */
     this.#dependency = Popper
-    this.popperInstance = this.#getPopperInstance(options)
+    this.#popperInstance = this.#getPopperInstance(options)
   }
 
   /* Public getters */

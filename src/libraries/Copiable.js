@@ -22,7 +22,6 @@ export default class Copiable {
       ...options,
     }
     this.#usesFallbacks = options.usesFallbacks
-    this.#onRead = options.onRead
 
     /* Public properties */
     this.string = string
@@ -85,7 +84,7 @@ export default class Copiable {
     }
   }
   #readText = function() {
-    return this.#clipboard.readText()
+    return this.clipboard.readText()
   }
   #writeText = function() {
     return this.clipboard.writeText(this.string)
