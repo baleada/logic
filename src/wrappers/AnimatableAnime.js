@@ -9,6 +9,7 @@ import warn from '../utils/warn'
 export default class AnimatableAnime {
   #elements
   #animeApi
+  #dependency
   #animeInstance
 
   constructor (elements, options = {}) {
