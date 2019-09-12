@@ -26,7 +26,7 @@
   "bugs": {
     "url": "https://gitlab.com/baleada/logic/issues"
   },
-  "homepage": "https://gitlab.com/baleada/logic#readme",
+  "homepage": "https://baleada.netlify.com",
   "devDependencies": {
     "@babel/cli": "^7.5.0",
     "@babel/core": "^7.5.4",
