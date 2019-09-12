@@ -1,4 +1,4 @@
-export default function toNodeList(arrayOfNodes) {
+export default function toNodeList (arrayOfNodes) {
   return arrayOfNodes
     .reduce(
       (fragment, node) => {
