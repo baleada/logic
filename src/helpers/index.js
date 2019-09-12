@@ -1,5 +1,7 @@
+import index from './index.js'
 import toProvisions from './toProvisions.js'
 
-export default {
+export {
+  index,
   toProvisions,
 }

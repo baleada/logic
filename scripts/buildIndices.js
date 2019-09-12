@@ -38,7 +38,7 @@ function buildHelperIndex () {
     `${imported}\n${exported}`
   )
 
-  console.log(`Successfully index ${helpers.length} helpers.`)
+  console.log(`Indexed ${helpers.length} helpers.`)
 }
 
 buildIndices()

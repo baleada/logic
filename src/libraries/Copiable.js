@@ -10,6 +10,7 @@
 import warn from '../utils/warn'
 
 export default class Copiable {
+  #usesFallbacks
   #computedClipboard
   #computedSucceeded
   #computedErrored
