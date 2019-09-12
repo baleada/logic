@@ -15,7 +15,7 @@ export default class Fetchable {
   #computedError
   #fetchOptions
 
-  constructor(resource, options = {}) {
+  constructor (resource, options = {}) {
     /* Options */
 
     /* Public properties */
@@ -31,23 +31,23 @@ export default class Fetchable {
   }
 
   /* Public getters */
-  get fetching() {
+  get fetching () {
     return this.#computedFetching
   }
-  get response() {
+  get response () {
     return this.#computedResponse
   }
-  get responseJson() {
+  get responseJson () {
     try {
       return this.response.json()
     } catch {
       return {}
     }
   }
-  get error() {
+  get error () {
     return this.#computedError
   }
-  get errorJson() {
+  get errorJson () {
     try {
       return this.error.json()
     } catch {
@@ -56,11 +56,11 @@ export default class Fetchable {
   }
 
   /* Public methods */
-  setResource(resource) {
+  setResource (resource) {
     this.resource = resource
     return this
   }
-  fetch() {
+  fetch () {
     this.#computedFetching = true
 
     return fetch(this.resource, this.#fetchOptions)
