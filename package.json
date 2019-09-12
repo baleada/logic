@@ -2,7 +2,7 @@
   "name": "@baleada/logic",
   "version": "0.0.0",
   "description": "UI logic for the Baleada toolkit",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {
     "index": "node scripts/buildIndices.js",
     "babelify": "node scripts/emptyLib.js && npx babel src --out-dir lib",

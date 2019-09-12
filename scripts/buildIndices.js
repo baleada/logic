@@ -9,14 +9,14 @@ function buildLibraryIndex () {
   const libraries = fs
           .readdirSync('./src/libraries')
           .map(library => ({
-            path: `./libraries/${library}`,
+            path: `./lib/libraries/${library}`,
             name: library.split('.')[0],
           })),
         imported = libraries.reduce((imported, library) => `${imported}import ${library.name} from '${library.path}'\n`, ''),
         exported = libraries.reduce((exported, library) => `${exported}  ${library.name},\n`, 'export {\n') + '}'
 
   fs.writeFileSync(
-    './src/index.js',
+    './index.js',
     `${imported}\n${exported}`
   )
 
@@ -27,14 +27,14 @@ function buildHelperIndex () {
   const helpers = fs
           .readdirSync('./src/helpers')
           .map(helper => ({
-            path: `./${helper}`,
+            path: `./lib/helpers/${helper}`,
             name: helper.split('.')[0],
           })),
         imported = helpers.reduce((imported, helper) => `${imported}import ${helper.name} from '${helper.path}'\n`, ''),
         exported = helpers.reduce((exported, helper) => `${exported}  ${helper.name},\n`, 'export {\n') + '}'
 
   fs.writeFileSync(
-    './src/helpers/index.js',
+    './helpers.js',
     `${imported}\n${exported}`
   )
 
