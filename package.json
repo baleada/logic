@@ -1,7 +1,7 @@
 {
   "name": "@baleada/logic",
   "version": "0.0.0",
-  "description": "JavaScript libraries that implement UI logic for the Baleada toolkit",
+  "description": "UI logic for the Baleada toolkit",
   "main": "lib/index.js",
   "scripts": {
     "index": "node scripts/buildIndices.js",

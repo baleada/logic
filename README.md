@@ -1,6 +1,6 @@
 # @baleada/logic
 
-JavaScript libraries that implement UI logic for the Baleada toolkit
+UI logic for the Baleada toolkit
 
 
 ## Purpose
@@ -10,10 +10,11 @@ Provide a predictable, intuitive API for complex, common UI logic.
 
 ## Rules followed by Baleada's libraries
 
+- Logic is implemented by JavaScript libraries
 - Every library is a JavaScript class.
 - Classes' constructors accepts two parameters: a piece of state, and an `options` object.
 - Classes store a shallow copy of their constructors' state in a public property named after the state's type (e.g. `string`, `array`).
-- Classes have one or more public properties, one or more public methods, and one or more public getters.
+- Classes have at least one public property, one public getter, and one public method.
 - Classes store their constructors' options in private properties.
 - Each class has public methods that allow users to write new values to public properties. Those methods follow a naming convention of `set<PropertyName>`. Outside of those methods, classes never write to their own public properties (e.g. by calling `set<PropertyName>` inside another method).
 - Some classes have public methods that mutate the core `<state>` property. When this is the case, the class will accept an `on<Method>` option, where `Method` is the name of the public method that mutates the core `<state>`. Instead of actually mutating `<state>`, the class will shallow copy `<state>`, mutate it, and pass that state as the first argument of any function passed by the user to the `on<Method>` option.
@@ -47,7 +48,7 @@ Provide a predictable, intuitive API for complex, common UI logic.
 /* Utils */
 
 export default class ${1:Library} {
-  constructor(${2:state}, options = {}) {
+  constructor (${2:state}, options = {}) {
     /* Options */
 
     /* Public properties */
@@ -61,13 +62,12 @@ export default class ${1:Library} {
   /* Public getters */
 
   /* Public methods */
-  set${3:ProperCaseState}(${2:state}) {
+  set${3:ProperCaseState} (${2:state}) {
     this.${2:state} = ${2:state}
     return this
   }
 
   /* Private methods */
-
 }
 ```
 
@@ -75,6 +75,13 @@ export default class ${1:Library} {
 
 ```js
 #get${1:Dependency}Options = ({ ${2:options}, ...rest }) => rest
+```
+
+### Private dependency
+
+```js
+this.#dependencyOptions = this.#getDependencyOptions(options)
+this.#dependency = new Dependency(${1:state}, this.#dependencyOptions)
 ```
 
 ### Node environment test
