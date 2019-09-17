@@ -1,10 +1,10 @@
 /* Dependencies */
 import anime from 'animejs'
 
-/* Utils */
-import is from '../utils/is'
-import resolveOptions from '../utils/resolveOptions'
-import warn from '../utils/warn'
+/* Util */
+import is from '../util/is'
+import resolveOptions from '../util/resolveOptions'
+import warn from '../util/warn'
 
 export default class AnimatableAnime {
   #elements
@@ -18,7 +18,7 @@ export default class AnimatableAnime {
     this.#dependency = anime
 
     this.#animeApi = {
-      // anime utils
+      // anime util
       path: this.#dependency.path,
       setDashoffset: this.#dependency.setDashoffset,
       stagger: this.#dependency.stagger,

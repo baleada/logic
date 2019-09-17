@@ -6,8 +6,8 @@
 
 /* Dependencies */
 
-/* Utils */
-import warn from '../utils/warn'
+/* Util */
+import warn from '../util/warn'
 
 export default class Copiable {
   #usesFallbacks

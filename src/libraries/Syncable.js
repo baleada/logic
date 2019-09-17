@@ -4,10 +4,10 @@
  * Released under the MIT license
  */
 
-/* Utils */
-import is from '../utils/is'
-import { hasEveryProperty } from '../utils/hasProperties'
-import warn from '../utils/warn'
+/* Util */
+import is from '../util/is'
+import { hasEveryProperty } from '../util/hasProperties'
+import warn from '../util/warn'
 
 /* Libraries */
 import Renamable from '../subclasses/Renamable'

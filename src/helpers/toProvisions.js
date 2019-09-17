@@ -1,4 +1,4 @@
-import is from '../utils/is'
+import is from '../util/is'
 
 export default function toProvisions(instance) {
   const publicProperties = {

@@ -1,5 +1,5 @@
 import test from 'ava'
-import withPage from '../test-utils/withPage'
+import withPage from '../test-util/withPage'
 
 /* Getters */
 test('stores the response', withPage, 'Fetchable', async (t, page) => {

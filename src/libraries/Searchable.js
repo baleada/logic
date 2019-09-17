@@ -7,7 +7,7 @@
 /* Dependencies */
 import Dependency from '../wrappers/SearchableLunr.js'
 
-/* Utils */
+/* Util */
 
 export default class Searchable {
   #computedResults

@@ -4,8 +4,8 @@
  * Released under the MIT license
  */
 
-/* Utils */
-import is from '../utils/is'
+/* Util */
+import is from '../util/is'
 
 /**
  * Delayable is a library that enriches a function by:

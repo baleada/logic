@@ -7,8 +7,8 @@
 /* Dependencies */
 import Dependency from '../wrappers/AnimatableAnime'
 
-/* Utils */
-import is from '../utils/is'
+/* Util */
+import is from '../util/is'
 
 export default class Animatable {
   /* Private properties */

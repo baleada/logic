@@ -1,7 +1,7 @@
 /* Dependencies */
 import Popper from 'popper.js'
 
-/* Utils */
+/* Util */
 
 export default class Library {
   #reference

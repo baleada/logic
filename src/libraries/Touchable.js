@@ -7,7 +7,7 @@
 /* Dependencies */
 import Dependency from '../wrappers/TouchableHammer'
 
-/* Utils */
+/* Util */
 
 export default class Touchable {
   #dependencyOptions

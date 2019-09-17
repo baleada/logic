@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import is from '../utils/is'
+import is from '../util/is'
 
 /**
  * Navigable is a library that enriches an array by:

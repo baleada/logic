@@ -21,7 +21,11 @@
     "library",
     "user interface"
   ],
-  "author": "Alex Vipond",
+  "author": {
+    "name": "Alex Vipond",
+    "email": "hello@alexvipond.dev",
+    "url": "https://alexvipond.dev"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://gitlab.com/baleada/logic/issues"

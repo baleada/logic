@@ -7,7 +7,7 @@
 /* Dependencies */
 import Dependency from '../wrappers/PoppablePopper'
 
-/* Utils */
+/* Util */
 
 export default class Poppable {
   #dependencyOptions

@@ -6,7 +6,7 @@
 
 /* Dependencies */
 
-/* Utils */
+/* Util */
 
 export default class Fetchable {
   /* Private properties */

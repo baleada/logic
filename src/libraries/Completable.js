@@ -4,9 +4,9 @@
  * Released under the MIT license
  */
 
-// Utils
-import is from '../utils/is'
-import lastMatch from '../utils/lastMatch'
+// Util
+import is from '../util/is'
+import lastMatch from '../util/lastMatch'
 
 /**
  * Completable is a library that enriches a string by:

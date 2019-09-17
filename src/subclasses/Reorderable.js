@@ -4,8 +4,8 @@
  * Released under the MIT license
  */
 
-/* Utils */
-import is from '../utils/is'
+/* Util */
+import is from '../util/is'
 
 export default class Reorderable extends Array {
   reorder (itemsToMoveParam, itemsDestinationParam) {

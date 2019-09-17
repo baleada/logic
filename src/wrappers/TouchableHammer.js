@@ -1,9 +1,9 @@
 /* Dependencies */
 import Hammer from 'hammerjs'
 
-/* Utils */
-import resolveOptions from '../utils/resolveOptions'
-import capitalize from '../utils/capitalize'
+/* Util */
+import resolveOptions from '../util/resolveOptions'
+import capitalize from '../util/capitalize'
 
 export default class TouchableHammer {
   #allowsSelect

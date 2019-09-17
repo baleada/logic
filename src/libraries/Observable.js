@@ -6,9 +6,9 @@
 
 /* Dependencies */
 
-/* Utils */
-import is from '../utils/is'
-import toNodeList from '../utils/toNodeList'
+/* Util */
+import is from '../util/is'
+import toNodeList from '../util/toNodeList'
 
 export default class Observable {
   #supportedObserverTypes
