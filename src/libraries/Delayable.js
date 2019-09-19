@@ -79,9 +79,9 @@ export default class Delayable {
     this.callback = callback
   }
   /**
-   * Cancels the delayed callback function. The function won't be executed, but <code>timeElapsed</code> and <code>timeRemaining</code> will <b>not</b> be reset to their initial values.
+   * Clears the delayed callback function. The function won't be executed, but <code>timeElapsed</code> and <code>timeRemaining</code> will <b>not</b> be reset to their initial values.
    */
-  cancel () {
+  clear () {
     window.clearTimeout(this.#id)
     window.clearInterval(this.#id)
     this.#stopTick()
@@ -153,7 +153,7 @@ export default class Delayable {
     window.cancelAnimationFrame(this.#tickId)
   }
   #setup = function() {
-    this.cancel()
+    this.clear()
     this.#computedExecutions = 0
     this.#computedTimeElapsed = 0
     this.#computedTimeRemaining = this.#delay
