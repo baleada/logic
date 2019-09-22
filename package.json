@@ -61,5 +61,6 @@
     "luxon": "^1.17.1",
     "popper.js": "^1.15.0",
     "pressure": "^2.1.2"
-  }
+  },
+  "sideEffects": "false"
 }

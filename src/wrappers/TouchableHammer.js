@@ -4,12 +4,14 @@ import Hammer from 'hammerjs'
 /* Util */
 import resolveOptions from '../util/resolveOptions'
 import capitalize from '../util/capitalize'
+import is from '../util/is'
 
 export default class TouchableHammer {
   #allowsSelect
+  #blacklist
+  #whitelist
   #callbacks
   #element
-  #intendedTouches
   #hammerApi
   #dependency
   #hammerOptions
@@ -17,6 +19,8 @@ export default class TouchableHammer {
 
   constructor (element, options = {}) {
     this.#allowsSelect = options.allowsSelect
+    this.#blacklist = options.blacklist
+    this.#whitelist = options.whitelist
     this.#callbacks = this.#getCallbacks(options)
 
     this.#element = element
@@ -78,7 +82,19 @@ export default class TouchableHammer {
     const instance = new this.#dependency(this.#element, options),
           events = Object.keys(this.#callbacks).map(callback => callback.slice(2).toLowerCase())
 
-    events.forEach(evt => instance.on(evt, e => this.#callbacks[`on${capitalize(evt)}`](e)))
+    events.forEach(evt => instance.on(evt, e => {
+      let shouldCallback
+      if (is.array(this.#blacklist)) {
+        shouldCallback = !this.#blacklist.some(selector => e.target.matches(selector))
+      }
+      if (is.array(this.#whitelist)) {
+        shouldCallback = this.#whitelist.some(selector => e.target.matches(selector))
+      }
+
+      if (shouldCallback) {
+        this.#callbacks[`on${capitalize(evt)}`](e)
+      }
+    }))
 
     return instance
   }
