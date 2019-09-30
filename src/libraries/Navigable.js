@@ -4,8 +4,6 @@
  * Released under the MIT license
  */
 
-import is from '../util/is'
-
 /**
  * Navigable is a library that enriches an array by:
  * - Allowing it to store a index of the item that has been navigated to
@@ -28,7 +26,7 @@ class Navigable {
    * @param {Number}  [decrement=1]  The number of items that will be traversed when the navigable instance is stepping backward through the array
    * @param {Function}  onNavigate    A function that Navigable will call after navigating to a new item. `onNavigate` acceepts two parameters: the index-based location (Number) of the item that has been navigated to, and the Navigable instance (Object).
    */
-  constructor(array, options = {}) {
+  constructor (array, options = {}) {
     /* Options */
     options = {
       initialLocation: 0,
@@ -56,7 +54,7 @@ class Navigable {
   }
 
   /* Public getters */
-  get location() {
+  get location () {
     return this.#computedLocation
   }
 
@@ -66,7 +64,7 @@ class Navigable {
    * @param {Array} array The new array
    * @return {Object}       The new Navigable instance
    */
-  setArray(array) {
+  setArray (array) {
     this.array = array
     return this
   }
@@ -75,20 +73,18 @@ class Navigable {
    * @param  {Number} newLocation The index-based location of the item that should be navigated to
    * @return {Object}       The Navigable instance
    */
-  goTo(newLocation) {
+  goTo (newLocation) {
     switch (true) {
-      case (newLocation > this.array.length):
-        newLocation = this.array.length
-        // TODO: decide whether to show warnings or not
-        // console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
-        break
-      case (newLocation < 0):
-        newLocation = 0
-        // TODO: decide whether to show warnings or not
-        // console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
-        break
-      default:
-        newLocation = newLocation
+    case (newLocation > this.array.length):
+      newLocation = this.array.length
+      // TODO: decide whether to show warnings or not
+      // console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
+      break
+    case (newLocation < 0):
+      newLocation = 0
+      // TODO: decide whether to show warnings or not
+      // console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
+      break
     }
 
     return this.#navigate(newLocation)
@@ -97,20 +93,20 @@ class Navigable {
    * Steps forward through the array, increasing `location` by `increment`
    * @return {Object}       The Navigable instance
    */
-  next() {
+  next () {
     let newLocation
     const lastLocation = this.array.length - 1
 
     if (this.location + this.#increment > lastLocation) {
       switch (true) {
-        case (this.#loops):
-          newLocation = this.location + this.#increment
-          while(newLocation > lastLocation) {
-            newLocation -= this.array.length
-          }
-          break
-        default:
-          newLocation = lastLocation
+      case (this.#loops):
+        newLocation = this.location + this.#increment
+        while (newLocation > lastLocation) {
+          newLocation -= this.array.length
+        }
+        break
+      default:
+        newLocation = lastLocation
       }
     } else {
       newLocation = this.location + this.#increment
@@ -122,19 +118,19 @@ class Navigable {
    * Steps backward through the array, decreasing `location` by `decrement`
    * @return {Object}       The Navigable instance
    */
-  prev() {
+  prev () {
     let newLocation
 
     if (this.location - this.#decrement < 0) {
       switch (true) {
-        case (this.#loops):
-          newLocation = this.location - this.#decrement
-          while(newLocation < 0) {
-            newLocation += this.array.length
-          }
-          break
-        default:
-          newLocation = 0
+      case (this.#loops):
+        newLocation = this.location - this.#decrement
+        while (newLocation < 0) {
+          newLocation += this.array.length
+        }
+        break
+      default:
+        newLocation = 0
       }
     } else {
       newLocation = this.location - this.#decrement

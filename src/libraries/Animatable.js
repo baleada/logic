@@ -7,15 +7,12 @@
 /* Dependencies */
 import Dependency from '../wrappers/AnimatableAnime'
 
-/* Util */
-import is from '../util/is'
-
 export default class Animatable {
   /* Private properties */
   #dependencyOptions
   #dependency
 
-  constructor(elements, options = {}) {
+  constructor (elements, options = {}) {
     /* Options */
 
     /* Public properties */
@@ -27,33 +24,33 @@ export default class Animatable {
   }
 
   /* Public getters */
-  get animation() {
+  get animation () {
     return this.#dependency.animation
   }
 
   /* Public methods */
-  setElements(elements) {
+  setElements (elements) {
     this.elements = elements
     this.#dependency = new Dependency(this.elements, this.#dependencyOptions)
     return this
   }
-  play() {
+  play () {
     this.#dependency.play()
     return this
   }
-  pause() {
+  pause () {
     this.#dependency.pause()
     return this
   }
-  restart() {
+  restart () {
     this.#dependency.restart()
     return this
   }
-  reverse() {
+  reverse () {
     this.#dependency.reverse()
     return this
   }
-  seek(timestamp) {
+  seek (timestamp) {
     this.#dependency.seek(timestamp)
     return this
   }
