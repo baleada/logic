@@ -9,7 +9,7 @@ const is = {
   symbol: a => typeof a === 'symbol',
   function: a => typeof a === 'function',
   array: a => Array.isArray(a),
-  object: a => Object.prototype.toString.call(a).indexOf('Object') > -1,
+  object: a => typeof a === 'object',
   date: a => a instanceof Date,
   error: a => a instanceof Error,
 

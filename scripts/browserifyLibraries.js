@@ -1,31 +1,31 @@
 const fs = require('fs'),
       browserify = require('browserify')
 
-function browserifyLibraries () {
-  const libraries = fs
-    .readdirSync('./lib/libraries')
-    .map(library => ({
-      name: library.split('.')[0],
-      source: `./lib/libraries/${library}`,
-      output: `./tests/fixtures/libraries/${library}`,
+function browserifyClasses () {
+  const classes = fs
+    .readdirSync('./lib/classes')
+    .map(clss => ({
+      name: clss.split('.')[0],
+      source: `./lib/classes/${clss}`,
+      output: `./tests/fixtures/classes/${clss}`,
     }))
 
   empty()
-  libraries.forEach(library => browserifyLibrary(library))
-  console.log(`Browserified ${libraries.length} libraries.`)
+  classes.forEach(clss => browserifyLibrary(clss))
+  console.log(`Browserified ${classes.length} classes.`)
 }
 
 function empty () {
-  fs.readdirSync('./tests/fixtures/libraries')
-    .forEach(item => fs.unlinkSync(`./tests/fixtures/libraries/${item}`))
+  fs.readdirSync('./tests/fixtures/classes')
+    .forEach(item => fs.unlinkSync(`./tests/fixtures/classes/${item}`))
 
-  console.log('Emptied library fixtures')
+  console.log('Emptied clss fixtures')
 }
 
-function browserifyLibrary (library) {
-  browserify(library.source, { standalone: library.name })
+function browserifyLibrary (clss) {
+  browserify(clss.source, { standalone: clss.name })
     .bundle()
-    .pipe(fs.createWriteStream(library.output))
+    .pipe(fs.createWriteStream(clss.output))
 }
 
-browserifyLibraries()
+browserifyClasses()

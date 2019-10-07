@@ -33,6 +33,8 @@ class Syncable {
     this.#hardCodedType = options.type
     this.#editsFullArray = options.editsFullArray
     this.#onSync = options.onSync
+    this.#onWrite = options.onWrite
+    this.#onErase = options.onErase
 
     this.#writeDictionary = {
       array: () => this.#writeArray(),
@@ -78,14 +80,15 @@ class Syncable {
       ? this.#writeDictionary[this.type](options)
       : this.editableState
 
-    return this.#sync(newState)
+
+    return this.#sync(newState, 'write')
   }
   erase (options = {}) {
     const newState = this.#eraseDictionary.hasOwnProperty(this.type)
       ? this.#eraseDictionary[this.type](options)
       : undefined
 
-    return this.#sync(newState)
+    return this.#sync(newState, 'erase')
   }
 
   /* Private methods */
@@ -119,9 +122,22 @@ class Syncable {
       return this.#editsFullArray ? this.state : ''
     }
   }
-  #sync = function(newState) {
+  #sync = function(newState, syncType) {
     if (is.function(this.#onSync)) {
       this.#onSync(newState, this)
+    }
+
+    switch (syncType) {
+    case 'write':
+      if (is.function(this.#onWrite)) {
+        this.#onWrite(newState, this)
+      }
+      break
+    case 'erase':
+      if (is.function(this.#onErase)) {
+        this.#onErase(newState, this)
+      }
+      break
     }
     return this
   }

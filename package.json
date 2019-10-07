@@ -7,7 +7,7 @@
     "index": "node scripts/buildIndices.js",
     "babelify": "node scripts/emptyLib.js && npx babel src --out-dir lib",
     "prepare": "npm run index && npm run babelify",
-    "browserify": "npm run babelify && node scripts/browserifyLibraries.js",
+    "browserify": "npm run babelify && node scripts/browserifyClasses.js",
     "test": "npm run browserify && ava"
   },
   "repository": {
@@ -18,7 +18,9 @@
     "baleada",
     "logic",
     "user interface",
-    "user interface logic"
+    "user interface logic",
+    "class",
+    "subclass"
   ],
   "author": {
     "name": "Alex Vipond",

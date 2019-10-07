@@ -1,26 +1,26 @@
 const fs = require('fs')
 
 function buildIndices () {
-  buildLibraryIndex()
+  buildClassIndex()
   // buildHelperIndex()
 }
 
-function buildLibraryIndex () {
-  const libraries = fs
-          .readdirSync('./src/libraries')
-          .map(library => ({
-            path: `./libraries/${library}`,
-            name: library.split('.')[0],
+function buildClassIndex () {
+  const classes = fs
+          .readdirSync('./src/classes')
+          .map(clss => ({
+            path: `./classes/${clss}`,
+            name: clss.split('.')[0],
           })),
-        imported = libraries.reduce((imported, library) => `${imported}import ${library.name} from '${library.path}'\n`, ''),
-        exported = libraries.reduce((exported, library) => `${exported}  ${library.name},\n`, 'export {\n') + '}'
+        imported = classes.reduce((imported, clss) => `${imported}import ${clss.name} from '${clss.path}'\n`, ''),
+        exported = classes.reduce((exported, clss) => `${exported}  ${clss.name},\n`, 'export {\n') + '}'
 
   fs.writeFileSync(
     './src/index.js',
     `${imported}\n${exported}`
   )
 
-  console.log(`Indexed ${libraries.length} libraries.`)
+  console.log(`Indexed ${classes.length} classes.`)
 }
 
 // function buildHelperIndex () {
