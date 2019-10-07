@@ -58,9 +58,6 @@ class Syncable {
   get type () {
     return this.#getType(this.state)
   }
-  get editableStateType () {
-    return this.#getType(this.editableState)
-  }
 
   /* Public methods */
   setState (state) {
@@ -86,7 +83,7 @@ class Syncable {
   erase (options = {}) {
     const newState = this.#eraseDictionary.hasOwnProperty(this.type)
       ? this.#eraseDictionary[this.type](options)
-      : null
+      : undefined
 
     return this.#sync(newState)
   }
@@ -124,7 +121,7 @@ class Syncable {
   }
   #sync = function(newState) {
     if (is.function(this.#onSync)) {
-      this.#onSync(newState)
+      this.#onSync(newState, this)
     }
     return this
   }
@@ -201,15 +198,23 @@ class Syncable {
   #eraseArray = function(options) {
     warn('hasRequiredOptions', {
       received: options,
-      required: ['value', 'last', 'all'],
+      required: ['item', 'last', 'all'],
       subject: 'Syncable\'s erase method',
       docs: 'https://baleada.netlify.com/docs/logic/Syncable',
     })
 
+    if (this.#editsFullArray) {
+      options.all = true
+    }
+
     let newState = this.state
 
-    if (options.hasOwnProperty('value')) {
-      newState = this.state.filter(item => item !== options.value)
+    if (options.hasOwnProperty('item')) {
+      if (is.string(options.item)) {
+        const item = options.item
+        options.item = currentItem => currentItem === item
+      }
+      newState = this.state.filter(currentItem => options.item(currentItem))
     }
     if (options.hasOwnProperty('last') && options.last !== false) {
       newState = this.state.slice(0, -1)
