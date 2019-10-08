@@ -4,11 +4,17 @@
  * Released under the MIT license
  */
 
+// Utils
+import callback from '../util/callback'
+
 class Navigable {
   #loops
   #increment
   #decrement
-  #computedLocation
+  #onNavigate
+  #onGoTo
+  #onNext
+  #onPrev
 
   constructor (array, options = {}) {
     /* Options */
@@ -17,25 +23,30 @@ class Navigable {
       loops: true,
       increment: 1,
       decrement: 1,
+      onNavigate: (newLocation, instance) => instance.setLocation(newLocation),
       ...options
     }
 
     this.#loops = options.loops
     this.#increment = options.increment
     this.#decrement = options.decrement
+    this.#onNavigate = options.onNavigate
+    this.#onGoTo = options.onGoTo
+    this.#onNext = options.onNext
+    this.#onPrev = options.onPrev
 
     /* Public properties */
     this.array = array
+    this.location = options.initialLocation
 
     /* Private properties */
-    this.#computedLocation = options.initialLocation
 
     /* Dependency */
   }
 
   /* Public getters */
-  get location () {
-    return this.#computedLocation
+  get item () {
+    return this.array[this.location]
   }
 
   /* Public methods */
@@ -43,7 +54,11 @@ class Navigable {
     this.array = array
     return this
   }
-  goTo (newLocation) {
+  setLocation (location) {
+    this.location = location
+    return this
+  }
+  goTo (newLocation, navigateType) {
     switch (true) {
     case (newLocation > this.array.length):
       newLocation = this.array.length
@@ -57,7 +72,9 @@ class Navigable {
       break
     }
 
-    return this.#navigate(newLocation)
+    navigateType = navigateType || 'goTo'
+
+    return this.#navigate(newLocation, navigateType)
   }
   next () {
     let newLocation
@@ -78,7 +95,7 @@ class Navigable {
       newLocation = this.location + this.#increment
     }
 
-    return this.goTo(newLocation)
+    return this.goTo(newLocation, 'next')
   }
   prev () {
     let newLocation
@@ -98,12 +115,24 @@ class Navigable {
       newLocation = this.location - this.#decrement
     }
 
-    return this.goTo(newLocation)
+    return this.goTo(newLocation, 'prev')
   }
 
   /* Private methods */
-  #navigate = function(newLocation) {
-    this.#computedLocation = newLocation
+  #navigate = function(newLocation, navigateType) {
+    callback(this.#onSync, newLocation, this)
+
+    switch (navigateType) {
+    case 'goTo':
+      callback(this.#onGoTo, newLocation, this)
+      break
+    case 'next':
+      callback(this.#onNext, newLocation, this)
+      break
+    case 'prev':
+      callback(this.#onPrev, newLocation, this)
+      break
+    }
     return this
   }
 }

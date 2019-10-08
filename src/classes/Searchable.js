@@ -8,9 +8,10 @@
 import Dependency from '../wrappers/SearchableLunr.js'
 
 /* Util */
+import callback from '../util/callback'
 
 export default class Searchable {
-  #computedResults
+  #onSearch
   #dependencyOptions
   #dependency
 
@@ -19,14 +20,15 @@ export default class Searchable {
     options = {
       positionIsIncluded: false,
       itemIsIncluded: true,
+      onSearch: (results, instance) => instance.setResults(results),
       ...options
     }
 
+    this.#onSearch = options.onSearch
+
     /* Public properties */
     this.array = array
-
-    /* Private properties */
-    this.#computedResults = []
+    this.results = []
 
     /* Dependency */
     this.#dependencyOptions = options
@@ -34,9 +36,6 @@ export default class Searchable {
   }
 
   /* Public getters */
-  get results () {
-    return this.#computedResults
-  }
   get index () {
     return this.#dependency.index
   }
@@ -48,7 +47,8 @@ export default class Searchable {
     return this
   }
   search (query) {
-    this.#computedResults = this.#dependency.search(query)
+    const results = this.#dependency.search(query)
+    callback(this.#onSearch, results, this)
     return this
   }
 

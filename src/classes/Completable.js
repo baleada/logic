@@ -5,8 +5,8 @@
  */
 
 /* Util */
-import is from '../util/is'
 import lastMatch from '../util/lastMatch'
+import callback from '../util/callback'
 
 class Completable {
   /* Private properties */
@@ -26,6 +26,8 @@ class Completable {
       segmentsToLocation: false,
       divider: /\s/,
       locatesAfterCompletion: true,
+      onComplete: (completedString, instance) => instance.setString(completedString),
+      onLocate: (newLocation, instance) => instance.setLocation(newLocation),
       ...options
     }
     this.#segmentsFromDivider = options.segmentsFromDivider
@@ -61,12 +63,8 @@ class Completable {
           completedString = textBefore + completion + textAfter,
           newLocation = this.#locatesAfterCompletion ? textBefore.length + completion.length : this.location
 
-    if (is.function(this.#onComplete)) {
-      this.#onComplete(completedString, this)
-    }
-    if (is.function(this.#onLocate)) {
-      this.#onLocate(newLocation, this)
-    }
+    callback(this.#onComplete, completedString, this)
+    callback(this.#onLocate, newLocation, this)
 
     return this
   }

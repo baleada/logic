@@ -1,38 +1,12 @@
-# @baleada/logic
+# `@baleada/logic`
 
-UI logic for the Baleada toolkit
+UI logic for the Baleada toolkit.
 
-
-## Purpose
-
-Provide a predictable, intuitive API for complex, common UI logic.
+[See the Baleada docs](https://baleada/netlify.com) for more guidance.
 
 
-## Rules followed by Baleada's libraries
 
-- Logic is implemented by JavaScript libraries
-- Every library is a JavaScript class.
-- Classes' constructors accepts two parameters: a piece of state, and an `options` object.
-- Classes store a shallow copy of their constructors' state in a public property named after the state's type (e.g. `string`, `array`).
-- Classes have at least one public property, one public getter, and one public method.
-- Classes store their constructors' options in private properties.
-- Each class has public methods that allow users to write new values to public properties. Those methods follow a naming convention of `set<PropertyName>`. Outside of those methods, classes never write to their own public properties (e.g. by calling `set<PropertyName>` inside another method).
-- Some classes have public methods that mutate the core `<state>` property. When this is the case, the class will accept an `on<Method>` option, where `Method` is the name of the public method that mutates the core `<state>`. Instead of actually mutating `<state>`, the class will shallow copy `<state>`, mutate it, and pass that state as the first argument of any function passed by the user to the `on<Method>` option.
-- Classes' public methods can be chained (all public methods return `this`, i.e. the instance).
-
-- Classes' names ends in -able or -ible
-- Classes property names, getter names, and method names are camelCased
-
-
-### Open questions
-
-#### When do classes have public properties other than the core `<state>` property?
-
-#### When do classes have public getters?
-- Affordance
-
-
-## Snippets
+<!-- ## Snippets
 
 ### Library
 
@@ -94,4 +68,4 @@ this.#dependency = new Dependency(${1:state}, this.#dependencyOptions)
 
 ```js
 
-```
+``` -->

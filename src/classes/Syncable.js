@@ -8,6 +8,7 @@
 import is from '../util/is'
 import { hasEveryProperty } from '../util/hasProperties'
 import warn from '../util/warn'
+import callback from '../util/callback'
 
 /* Libraries */
 import Renamable from '../subclasses/Renamable'
@@ -18,6 +19,8 @@ class Syncable {
   #editsFullArray
   #hardCodedType
   #onSync
+  #onWrite
+  #onErase
   #writeDictionary
   #eraseDictionary
 
@@ -27,6 +30,7 @@ class Syncable {
     /* Options */
     options = {
       editsFullArray: true,
+      onSync: (newState, instance) => instance.setState(newState),
       ...options
     }
 
@@ -123,20 +127,14 @@ class Syncable {
     }
   }
   #sync = function(newState, syncType) {
-    if (is.function(this.#onSync)) {
-      this.#onSync(newState, this)
-    }
+    callback(this.#onSync, newState, this)
 
     switch (syncType) {
     case 'write':
-      if (is.function(this.#onWrite)) {
-        this.#onWrite(newState, this)
-      }
+      callback(this.#onWrite, newState, this)
       break
     case 'erase':
-      if (is.function(this.#onErase)) {
-        this.#onErase(newState, this)
-      }
+      callback(this.#onErase, newState, this)
       break
     }
     return this
