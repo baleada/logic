@@ -57,4 +57,7 @@ export default class Searchable {
   }
 
   /* Private methods */
+  #getResults = function(matchData) {
+    // TODO: structure results in a more palatable format
+  }
 }

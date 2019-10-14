@@ -16,8 +16,8 @@ export default class Markupable extends String {
     this.#markdownitOptions = options.markdownit
     this.#markdownit = new MarkdownIt(this.#markdownitOptions)
   }
-  
+
   markup () {
-    return this.#markdownit.render(this)
+    return new Markupable(this.#markdownit.render(`${this}`), { markdownit: this.#markdownitOptions })
   }
 }
