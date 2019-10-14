@@ -50,3 +50,21 @@ test('cancel() resets editableState', t => {
 
   t.is(instance.editableState, 'Baleada')
 })
+
+test('typed emitters correctly emit', t => {
+  let onEdit = 0,
+      onWrite = 0,
+      onErase = 0
+
+  const instance = t.context.setup({
+    type: 'string',
+    onEdit: () => (onEdit += 1),
+    onWrite: () => (onWrite += 1),
+    onErase: () => (onErase += 1),
+  })
+
+  instance.write()
+  instance.erase()
+
+  t.deepEqual({ onEdit, onWrite, onErase }, { onEdit: 2, onWrite: 1, onErase: 1 })
+})

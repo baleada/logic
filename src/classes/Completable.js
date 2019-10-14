@@ -6,7 +6,7 @@
 
 /* Util */
 import lastMatch from '../util/lastMatch'
-import callback from '../util/callback'
+import emit from '../util/emit'
 
 class Completable {
   /* Private properties */
@@ -63,8 +63,8 @@ class Completable {
           completedString = textBefore + completion + textAfter,
           newLocation = this.#locatesAfterCompletion ? textBefore.length + completion.length : this.location
 
-    callback(this.#onComplete, completedString, this)
-    callback(this.#onLocate, newLocation, this)
+    emit(this.#onComplete, completedString, this)
+    emit(this.#onLocate, newLocation, this)
 
     return this
   }

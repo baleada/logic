@@ -5,7 +5,7 @@
  */
 
 // Utils
-import callback from '../util/callback'
+import typedEmit from '../util/typedEmit'
 
 class Navigable {
   #loops
@@ -119,20 +119,19 @@ class Navigable {
   }
 
   /* Private methods */
-  #navigate = function(newLocation, navigateType) {
-    callback(this.#onNavigate, newLocation, this)
+  #navigate = function(newLocation, type) {
+    typedEmit(
+      newLocation,
+      type,
+      this,
+      this.#onNavigate,
+      [
+        { type: 'goTo', emitter: this.#onGoTo },
+        { type: 'next', emitter: this.#onNext },
+        { type: 'prev', emitter: this.#onPrev },
+      ]
+    )
 
-    switch (navigateType) {
-    case 'goTo':
-      callback(this.#onGoTo, newLocation, this)
-      break
-    case 'next':
-      callback(this.#onNext, newLocation, this)
-      break
-    case 'prev':
-      callback(this.#onPrev, newLocation, this)
-      break
-    }
     return this
   }
 }

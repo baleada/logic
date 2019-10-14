@@ -8,7 +8,7 @@
 import is from '../util/is'
 import { hasEveryProperty } from '../util/hasProperties'
 import warn from '../util/warn'
-import callback from '../util/callback'
+import typedEmit from '../util/typedEmit'
 
 /* Libraries */
 import Renamable from '../subclasses/Renamable'
@@ -126,17 +126,18 @@ class Editable {
       return this.#editsFullArray ? this.state : ''
     }
   }
-  #edit = function(newState, editType) {
-    callback(this.#onEdit, newState, this)
+  #edit = function(newState, type) {
+    typedEmit(
+      newState,
+      type,
+      this,
+      this.#onEdit,
+      [
+        { type: 'write', emitter: this.#onWrite },
+        { type: 'erase', emitter: this.#onErase },
+      ]
+    )
 
-    switch (editType) {
-    case 'write':
-      callback(this.#onWrite, newState, this)
-      break
-    case 'erase':
-      callback(this.#onErase, newState, this)
-      break
-    }
     return this
   }
   #writeArray = function() {

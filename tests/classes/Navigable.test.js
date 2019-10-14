@@ -22,7 +22,6 @@ test('setArray sets the array', t => {
   t.deepEqual(instance.array, ['Baleada'])
 })
 
-
 /* goTo */
 test('goTo(newLocation) navigates to the length of the array when newLocation is greater than the length of the array', t => {
   const instance = t.context.setup()
@@ -97,7 +96,6 @@ test('next() stops at the last location when loops is false AND incremented loca
   t.is(instance.location, instance.array.length - 1)
 })
 
-
 /* prev */
 test('prev() decrements the current location by 1 when decrement is default', t => {
   const instance = t.context.setup({
@@ -148,15 +146,34 @@ test('prev() stops at 0 when loops is false AND decremented location is less tha
   t.is(instance.location, 0)
 })
 
+test('typed emitters correctly emit', t => {
+  let onNavigate = 0,
+      onGoTo = 0,
+      onNext = 0,
+      onPrev = 0
+
+  const instance = t.context.setup({
+    onNavigate: () => (onNavigate += 1),
+    onGoTo: () => (onGoTo += 1),
+    onNext: () => (onNext += 1),
+    onPrev: () => (onPrev += 1),
+  })
+
+  instance.goTo(0)
+  instance.next()
+  instance.prev()
+
+  t.deepEqual({ onNavigate, onGoTo, onNext, onPrev }, { onNavigate: 3, onGoTo: 1, onNext: 1, onPrev: 1 })
+})
 
 /* method chaining */
 test('can method chain', t => {
-  const instance = t.context.setup()
-  const chained = instance
-    .setArray(['Baleada'])
-    .goTo(42)
-    .next(42)
-    .prev(42)
+  const instance = t.context.setup(),
+        chained = instance
+          .setArray(['Baleada'])
+          .goTo(42)
+          .next(42)
+          .prev(42)
 
   t.assert(chained instanceof Navigable)
 })
