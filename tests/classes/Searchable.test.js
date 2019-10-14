@@ -31,9 +31,9 @@ test('search(query) updates results', t => {
   t.assert(instance.results.length > 0)
 })
 
-test('search(query) includes item in results when itemIsIncluded is true', t => {
+test('search(query) includes item in results when resultsIncludeItem is true', t => {
   const instance = t.context.setup({
-    itemIsIncluded: true
+    resultsIncludeItem: true
   })
 
   instance.search('tortilla')
@@ -41,9 +41,9 @@ test('search(query) includes item in results when itemIsIncluded is true', t => 
   t.assert(instance.results[0].hasOwnProperty('item'))
 })
 
-test('search(query) includes match position in results when positionIsIncluded is true', t => {
+test('search(query) includes match position in results when resultsIncludePosition is true', t => {
   const instance = t.context.setup({
-    positionIsIncluded: true
+    resultsIncludePosition: true
   })
 
   instance.search('tortilla')
@@ -56,6 +56,7 @@ test('can method chain', t => {
   const instance = t.context.setup(),
         chained = instance
           .setArray(['Baleada'])
+          .setResults(['Baleada'])
           .search('Baleada')
 
   t.assert(chained instanceof Searchable)

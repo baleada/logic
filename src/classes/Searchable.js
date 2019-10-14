@@ -8,7 +8,7 @@
 import Dependency from '../wrappers/SearchableLunr.js'
 
 /* Util */
-import callback from '../util/callback'
+import emit from '../util/emit'
 
 export default class Searchable {
   #onSearch
@@ -18,8 +18,8 @@ export default class Searchable {
   constructor (array, options = {}) {
     /* Options */
     options = {
-      positionIsIncluded: false,
-      itemIsIncluded: true,
+      resultsIncludePosition: false,
+      resultsIncludeItem: true,
       onSearch: (results, instance) => instance.setResults(results),
       ...options
     }
@@ -46,9 +46,13 @@ export default class Searchable {
     this.#dependency = new Dependency(this.array, this.#dependencyOptions)
     return this
   }
+  setResults (results) {
+    this.results = results
+    return this
+  }
   search (query) {
     const results = this.#dependency.search(query)
-    callback(this.#onSearch, results, this)
+    emit(this.#onSearch, results, this)
     return this
   }
 

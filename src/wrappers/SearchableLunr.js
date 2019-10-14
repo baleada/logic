@@ -7,8 +7,8 @@ export default class SearchableLunr {
   #isArrayOfStrings
   #documents
   #keys
-  #positionIsIncluded
-  #itemIsIncluded
+  #resultsIncludePosition
+  #resultsIncludeItem
   #dependency
   #lunrInstance
 
@@ -17,15 +17,15 @@ export default class SearchableLunr {
     this.#isArrayOfStrings = array.every(item => is.string(item))
 
     options = {
-      positionIsIncluded: false,
-      itemIsIncluded: false,
+      resultsIncludePosition: false,
+      resultsIncludeItem: false,
       ...options
     }
     this.#id = this.#getId(options.id)
     this.#keys = this.#getKeys(options.keys)
     this.#documents = this.#getDocuments()
-    this.#positionIsIncluded = options.positionIsIncluded
-    this.#itemIsIncluded = options.itemIsIncluded
+    this.#resultsIncludePosition = options.resultsIncludePosition
+    this.#resultsIncludeItem = options.resultsIncludeItem
 
     this.#dependency = lunr
     this.#lunrInstance = this.#getLunrInstance()
@@ -37,7 +37,7 @@ export default class SearchableLunr {
 
   /* Public methods */
   search () {
-    return this.#itemIsIncluded
+    return this.#resultsIncludeItem
       ? this.#lunrInstance.search(...arguments).map(match => this.#includeItem(match))
       : this.#lunrInstance.search(...arguments)
   }
@@ -53,7 +53,7 @@ export default class SearchableLunr {
           builder.field(key.name, key.attributes)
         }
       })
-      if (this.#positionIsIncluded) {
+      if (this.#resultsIncludePosition) {
         builder.metadataWhitelist = ['position']
       }
 
