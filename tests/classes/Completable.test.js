@@ -4,11 +4,7 @@ import Completable from '../../src/classes/Completable'
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Completable(
     'Baleada: a toolkit for building web apps',
-    {
-      onComplete: (string, instance) => instance.setString(string),
-      onPosition: (position, instance) => instance.setPosition(position),
-      ...options
-    }
+    options
   )
 })
 
@@ -26,18 +22,18 @@ test('setString sets the string', t => {
   t.is(instance.string, 'Baleada')
 })
 
-test('initial position is the length of the string', t => {
+test('initial location is the length of the string', t => {
   const instance = t.context.setup()
 
-  t.is(instance.position, instance.string.length)
+  t.is(instance.location, instance.string.length)
 })
 
-test('setPosition sets the position', t => {
+test('setLocation sets the location', t => {
   const instance = t.context.setup()
 
-  instance.setPosition('Baleada: a toolkit'.length)
+  instance.setLocation('Baleada: a toolkit'.length)
 
-  t.is(instance.position, 'Baleada: a toolkit'.length)
+  t.is(instance.location, 'Baleada: a toolkit'.length)
 })
 
 /* segment */
@@ -52,28 +48,28 @@ test('correctly segments when segmentsFromDivider is true', t => {
     segmentsFromDivider: true,
   })
 
-  instance.setPosition('Baleada: a toolkit'.length)
+  instance.setLocation('Baleada: a toolkit'.length)
 
   t.is(instance.segment, 'toolkit for building web apps')
 })
 
-test('correctly segments when segmentsToPosition is true', t => {
+test('correctly segments when segmentsToLocation is true', t => {
   const instance = t.context.setup({
-    segmentsToPosition: true,
+    segmentsToLocation: true,
   })
 
-  instance.setPosition('Baleada: a toolkit'.length)
+  instance.setLocation('Baleada: a toolkit'.length)
 
   t.is(instance.segment, 'Baleada: a toolkit')
 })
 
-test('correctly segments when segmentsFromDivider and segmentsToPosition are true', t => {
+test('correctly segments when segmentsFromDivider and segmentsToLocation are true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
-    segmentsToPosition: true,
+    segmentsToLocation: true,
   })
 
-  instance.setPosition('Baleada: a toolkit'.length)
+  instance.setLocation('Baleada: a toolkit'.length)
 
   t.is(instance.segment, 'toolkit')
 })
@@ -106,21 +102,21 @@ test('complete(completion) correctly inserts completion when segmentsFromDivider
   t.is(instance.string, 'Baleada: a toolkit for building web applications')
 })
 
-test('complete(completion) correctly inserts completion when segmentsToPosition is true', t => {
+test('complete(completion) correctly inserts completion when segmentsToLocation is true', t => {
   const instance = t.context.setup({
-    segmentsToPosition: true,
+    segmentsToLocation: true,
   })
 
-  instance.setPosition('Baleada: a toolkit'.length)
+  instance.setLocation('Baleada: a toolkit'.length)
   instance.complete('Buena Baleada: a toolkit')
 
   t.is(instance.string, 'Buena Baleada: a toolkit for building web apps')
 })
 
-test('complete(completion) correctly inserts completion when segmentsFromDivider is true AND segmentsToPosition is true', t => {
+test('complete(completion) correctly inserts completion when segmentsFromDivider is true AND segmentsToLocation is true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
-    segmentsToPosition: true
+    segmentsToLocation: true
   })
 
   instance.complete('Baleada')
@@ -128,51 +124,51 @@ test('complete(completion) correctly inserts completion when segmentsFromDivider
   t.is(instance.string, 'Baleada: a toolkit for building web Baleada')
 })
 
-/* complete position */
-test('complete(completion) correctly updates position when all options are defaults', t => {
+/* complete location */
+test('complete(completion) correctly updates location when all options are defaults', t => {
   const instance = t.context.setup()
   instance.complete('Baleada')
 
-  t.is(instance.position, 'Baleada'.length)
+  t.is(instance.location, 'Baleada'.length)
 })
 
-test('complete(completion) correctly updates position when segmentsFromDivider is true', t => {
+test('complete(completion) correctly updates location when segmentsFromDivider is true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
   })
   instance.complete('applications')
 
-  t.is(instance.position, 'Baleada: a toolkit for building web applications'.length)
+  t.is(instance.location, 'Baleada: a toolkit for building web applications'.length)
 })
 
-test('complete(completion) correctly updates position when segmentsToPosition is true', t => {
+test('complete(completion) correctly updates location when segmentsToLocation is true', t => {
   const instance = t.context.setup({
-    segmentsToPosition: true,
+    segmentsToLocation: true,
   })
-  instance.setPosition('Baleada: a toolkit'.length)
+  instance.setLocation('Baleada: a toolkit'.length)
   instance.complete('Buena Baleada: a toolkit')
 
-  t.is(instance.position, 'Buena Baleada: a toolkit'.length)
+  t.is(instance.location, 'Buena Baleada: a toolkit'.length)
 })
 
-test('complete(completion) correctly updates position when segmentsFromDivider is true AND segmentsToPosition is true', t => {
+test('complete(completion) correctly updates location when segmentsFromDivider is true AND segmentsToLocation is true', t => {
   const instance = t.context.setup({
     segmentsFromDivider: true,
-    segmentsToPosition: true
+    segmentsToLocation: true
   })
   instance.complete('Baleada')
 
-  t.is(instance.position, 'Baleada: a toolkit for building web Baleada'.length)
+  t.is(instance.location, 'Baleada: a toolkit for building web Baleada'.length)
 })
 
-test('complete(completion) does not update position when positionsAfterCompletion is false', t => {
+test('complete(completion) does not update location when locatesAfterCompletion is false', t => {
   const instance = t.context.setup({
-    positionsAfterCompletion: false
+    locatesAfterCompletion: false
   })
-  const originalPosition = instance.position
+  const originalLocation = instance.location
   instance.complete('Baleada')
 
-  t.is(instance.position, originalPosition)
+  t.is(instance.location, originalLocation)
 })
 
 /* method chaining */
@@ -180,7 +176,7 @@ test('can chain its public methods', t => {
   const instance = t.context.setup()
   const chained = instance
     .setString('Baleada: a toolkit')
-    .setPosition(instance.string.length)
+    .setLocation(instance.string.length)
     .complete('Baleada: a toolkit for building web apps')
 
   t.assert(chained instanceof Completable)
