@@ -1,4 +1,5 @@
 /* Modified from anime.js https://github.com/juliangarnier/anime */
+
 const is = {
   undefined: a => typeof a === 'undefined',
   defined: a => typeof a !== 'undefined',
@@ -26,9 +27,38 @@ const is = {
   hex: a => /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(a),
   rgb: a => /^rgb[^a]/.test(a),
   hsl: a => /^hsl[^a]/.test(a),
-  rgba: a => /^rgba/.test(a),
-  hsla: a => /^hsla/.test(a),
+  rgba: a => a.startsWith('rgba'),
+  hsla: a => a.startsWith('hsla'),
   color: a => (is.hex(a) || is.rgb(a) || is.hsl(a) || is.rgba(a) || is.hsla(a)),
 }
 
 export default is
+
+export const orderedIs = new Map([
+  ['undefined', is.undefined],
+  ['defined', is.defined],
+  ['null', is.null],
+  ['string', is.string],
+  ['number', is.number],
+  ['boolean', is.boolean],
+  ['symbol', is.symbol],
+  ['function', is.function],
+  ['array', is.array],
+  ['object', is.object],
+  ['date', is.date],
+  ['error', is.error],
+  ['file', is.file],
+  ['filelist', is.filelist],
+  ['path', is.path],
+  ['svg', is.svg],
+  ['input', is.input],
+  ['element', is.element],
+  ['node', is.node],
+  ['nodeList', is.nodeList],
+  ['hex', is.hex],
+  ['rgb', is.rgb],
+  ['hsl', is.hsl],
+  ['rgba', is.rgba],
+  ['hsla', is.hsla],
+  ['color', is.color],
+])

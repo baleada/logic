@@ -1,5 +1,5 @@
 import test from 'ava'
-import Completable from '../../src/libraries/Completable'
+import Completable from '../../src/classes/Completable'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Completable(

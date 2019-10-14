@@ -1,5 +1,5 @@
 import test from 'ava'
-import Fetchable from '../../src/libraries/Fetchable'
+import Fetchable from '../../src/classes/Fetchable'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Fetchable(

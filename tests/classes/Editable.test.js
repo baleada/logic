@@ -1,8 +1,8 @@
 import test from 'ava'
-import Syncable from '../../src/libraries/Syncable'
+import Editable from '../../src/classes/Editable'
 
 test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Syncable('Baleada', options)
+  t.context.setup = (options = {}) => new Editable('Baleada', options)
 })
 
 /* Basic */

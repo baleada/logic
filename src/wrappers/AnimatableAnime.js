@@ -65,7 +65,7 @@ export default class AnimatableAnime {
       received: options,
       required: ['animation', 'timelineChildren'],
       subject: 'Animatable',
-      docs: 'https://baleada.netlify.com/docs/logic/Animatable',
+      docs: 'https://baleada.netlify.com/docs/logic/classes/Animatable',
     })
 
     const instance = options.hasOwnProperty('timelineChildren')

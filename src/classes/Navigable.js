@@ -120,7 +120,7 @@ class Navigable {
 
   /* Private methods */
   #navigate = function(newLocation, navigateType) {
-    callback(this.#onSync, newLocation, this)
+    callback(this.#onNavigate, newLocation, this)
 
     switch (navigateType) {
     case 'goTo':

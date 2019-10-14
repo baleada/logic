@@ -1,5 +1,5 @@
 /*
- * Syncable.js
+ * Editable.js
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */
@@ -13,12 +13,12 @@ import callback from '../util/callback'
 /* Libraries */
 import Renamable from '../subclasses/Renamable'
 
-class Syncable {
+class Editable {
   /* Private properties */
   #intendedTypes
   #editsFullArray
   #hardCodedType
-  #onSync
+  #onEdit
   #onWrite
   #onErase
   #writeDictionary
@@ -30,13 +30,13 @@ class Syncable {
     /* Options */
     options = {
       editsFullArray: true,
-      onSync: (newState, instance) => instance.setState(newState),
+      onEdit: (newState, instance) => instance.setState(newState),
       ...options
     }
 
     this.#hardCodedType = options.type
     this.#editsFullArray = options.editsFullArray
-    this.#onSync = options.onSync
+    this.#onEdit = options.onEdit
     this.#onWrite = options.onWrite
     this.#onErase = options.onErase
 
@@ -85,14 +85,14 @@ class Syncable {
       : this.editableState
 
 
-    return this.#sync(newState, 'write')
+    return this.#edit(newState, 'write')
   }
   erase (options = {}) {
     const newState = this.#eraseDictionary.hasOwnProperty(this.type)
       ? this.#eraseDictionary[this.type](options)
       : undefined
 
-    return this.#sync(newState, 'erase')
+    return this.#edit(newState, 'erase')
   }
 
   /* Private methods */
@@ -126,10 +126,10 @@ class Syncable {
       return this.#editsFullArray ? this.state : ''
     }
   }
-  #sync = function(newState, syncType) {
-    callback(this.#onSync, newState, this)
+  #edit = function(newState, editType) {
+    callback(this.#onEdit, newState, this)
 
-    switch (syncType) {
+    switch (editType) {
     case 'write':
       callback(this.#onWrite, newState, this)
       break
@@ -148,14 +148,14 @@ class Syncable {
     warn('hasRequiredOptions', {
       received: options,
       required: ['key'],
-      subject: 'Syncable\'s write method',
-      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+      subject: 'Editable\'s write method',
+      docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
     warn('hasRequiredOptions', {
       received: options,
       required: ['value', 'rename'],
-      subject: 'Syncable\'s write method',
-      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+      subject: 'Editable\'s write method',
+      docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
 
     let newState = this.state
@@ -184,14 +184,14 @@ class Syncable {
     warn('hasRequiredOptions', {
       received: options,
       required: ['key'],
-      subject: 'Syncable\'s write method',
-      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+      subject: 'Editable\'s write method',
+      docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
     warn('hasRequiredOptions', {
       received: options,
       required: ['value', 'rename'],
-      subject: 'Syncable\'s write method',
-      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+      subject: 'Editable\'s write method',
+      docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
 
     const newState = this.state,
@@ -213,13 +213,9 @@ class Syncable {
     warn('hasRequiredOptions', {
       received: options,
       required: ['item', 'last', 'all'],
-      subject: 'Syncable\'s erase method',
-      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+      subject: 'Editable\'s erase method',
+      docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
-
-    if (this.#editsFullArray) {
-      options.all = true
-    }
 
     let newState = this.state
 
@@ -228,10 +224,11 @@ class Syncable {
         const item = options.item
         options.item = currentItem => currentItem === item
       }
-      newState = this.state.filter(currentItem => options.item(currentItem))
+
+      newState = newState.filter(currentItem => !options.item(currentItem)) // TODO: Offer a way to choose which match or matches get removed
     }
     if (options.hasOwnProperty('last') && options.last !== false) {
-      newState = this.state.slice(0, -1)
+      newState = newState.slice(0, -1)
     }
     if (options.hasOwnProperty('all') && options.all !== false) {
       newState = []
@@ -243,8 +240,8 @@ class Syncable {
     warn('hasRequiredOptions', {
       received: options,
       required: ['key', 'last', 'all'],
-      subject: 'Syncable\'s erase method',
-      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+      subject: 'Editable\'s erase method',
+      docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
 
     const newState = this.state
@@ -266,8 +263,8 @@ class Syncable {
     warn('hasRequiredOptions', {
       received: options,
       required: ['value', 'last', 'all'],
-      subject: 'Syncable\'s erase method',
-      docs: 'https://baleada.netlify.com/docs/logic/Syncable',
+      subject: 'Editable\'s erase method',
+      docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
 
     let newState = this.state
@@ -286,4 +283,4 @@ class Syncable {
   }
 }
 
-export default Syncable
+export default Editable

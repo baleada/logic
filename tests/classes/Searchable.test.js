@@ -1,5 +1,5 @@
 import test from 'ava'
-import Searchable from '../../src/libraries/Searchable'
+import Searchable from '../../src/classes/Searchable'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Searchable(

@@ -1,5 +1,5 @@
 import test from 'ava'
-import Navigable from '../../src/libraries/Navigable'
+import Navigable from '../../src/classes/Navigable'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Navigable(
