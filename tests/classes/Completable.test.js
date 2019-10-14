@@ -163,9 +163,9 @@ test('complete(completion) correctly updates location when segmentsFromDivider i
 
 test('complete(completion) does not update location when locatesAfterCompletion is false', t => {
   const instance = t.context.setup({
-    locatesAfterCompletion: false
-  })
-  const originalLocation = instance.location
+          locatesAfterCompletion: false
+        }),
+        originalLocation = instance.location
   instance.complete('Baleada')
 
   t.is(instance.location, originalLocation)
@@ -173,11 +173,11 @@ test('complete(completion) does not update location when locatesAfterCompletion 
 
 /* method chaining */
 test('can chain its public methods', t => {
-  const instance = t.context.setup()
-  const chained = instance
-    .setString('Baleada: a toolkit')
-    .setLocation(instance.string.length)
-    .complete('Baleada: a toolkit for building web apps')
+  const instance = t.context.setup(),
+        chained = instance
+          .setString('Baleada: a toolkit')
+          .setLocation(instance.string.length)
+          .complete('Baleada: a toolkit for building web apps')
 
   t.assert(chained instanceof Completable)
 })
