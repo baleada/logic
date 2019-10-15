@@ -4,4 +4,3 @@
 # Except these files
 !lib/**/*.js
 !index.js
-!helpers.js

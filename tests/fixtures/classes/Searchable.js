@@ -8,6 +8,8 @@ exports.default = void 0;
 
 var _SearchableLunr = _interopRequireDefault(require("../wrappers/SearchableLunr.js"));
 
+var _emit = _interopRequireDefault(require("../util/emit"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { keys.push.apply(keys, Object.getOwnPropertySymbols(object)); } if (enumerableOnly) keys = keys.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); return keys; }
@@ -26,7 +28,6 @@ function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateM
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
-/* Utils */
 var Searchable =
 /*#__PURE__*/
 function () {
@@ -35,7 +36,7 @@ function () {
 
     _classCallCheck(this, Searchable);
 
-    _computedResults.set(this, {
+    _onSearch.set(this, {
       writable: true,
       value: void 0
     });
@@ -50,19 +51,28 @@ function () {
       value: void 0
     });
 
+    _getResults.set(this, {
+      writable: true,
+      value: function value(matchData) {// TODO: structure results in a more palatable format
+      }
+    });
+
     /* Options */
     options = _objectSpread({
-      positionIsIncluded: false,
-      itemIsIncluded: true
+      resultsIncludePosition: false,
+      resultsIncludeItem: true,
+      onSearch: function onSearch(results, instance) {
+        return instance.setResults(results);
+      }
     }, options);
+
+    _classPrivateFieldSet(this, _onSearch, options.onSearch);
     /* Public properties */
 
+
     this.array = array;
-    /* Private properties */
-
-    _classPrivateFieldSet(this, _computedResults, []);
+    this.results = [];
     /* Dependency */
-
 
     _classPrivateFieldSet(this, _dependencyOptions, options);
 
@@ -83,19 +93,21 @@ function () {
       return this;
     }
   }, {
+    key: "setResults",
+    value: function setResults(results) {
+      this.results = results;
+      return this;
+    }
+  }, {
     key: "search",
     value: function search(query) {
-      _classPrivateFieldSet(this, _computedResults, _classPrivateFieldGet(this, _dependency).search(query));
+      var results = _classPrivateFieldGet(this, _dependency).search(query);
 
+      (0, _emit.default)(_classPrivateFieldGet(this, _onSearch), results, this);
       return this;
     }
     /* Private methods */
 
-  }, {
-    key: "results",
-    get: function get() {
-      return _classPrivateFieldGet(this, _computedResults);
-    }
   }, {
     key: "index",
     get: function get() {
@@ -108,18 +120,37 @@ function () {
 
 exports.default = Searchable;
 
-var _computedResults = new WeakMap();
+var _onSearch = new WeakMap();
 
 var _dependencyOptions = new WeakMap();
 
 var _dependency = new WeakMap();
-},{"../wrappers/SearchableLunr.js":3}],2:[function(require,module,exports){
+
+var _getResults = new WeakMap();
+},{"../util/emit":2,"../wrappers/SearchableLunr.js":4}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.default = _default;
+
+var _is = _interopRequireDefault(require("./is"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _default(emitter, mutatedState, instance) {
+  if (_is.default.function(emitter)) {
+    emitter(mutatedState, instance);
+  }
+}
+},{"./is":3}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.orderedIs = exports.default = void 0;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -153,7 +184,7 @@ var is = {
     return Array.isArray(a);
   },
   object: function object(a) {
-    return Object.prototype.toString.call(a).indexOf('Object') > -1;
+    return _typeof(a) === 'object';
   },
   date: function date(a) {
     return a instanceof Date;
@@ -195,10 +226,10 @@ var is = {
     return /^hsl[^a]/.test(a);
   },
   rgba: function rgba(a) {
-    return /^rgba/.test(a);
+    return a.startsWith('rgba');
   },
   hsla: function hsla(a) {
-    return /^hsla/.test(a);
+    return a.startsWith('hsla');
   },
   color: function color(a) {
     return is.hex(a) || is.rgb(a) || is.hsl(a) || is.rgba(a) || is.hsla(a);
@@ -206,7 +237,9 @@ var is = {
 };
 var _default = is;
 exports.default = _default;
-},{}],3:[function(require,module,exports){
+var orderedIs = new Map([['undefined', is.undefined], ['defined', is.defined], ['null', is.null], ['string', is.string], ['number', is.number], ['boolean', is.boolean], ['symbol', is.symbol], ['function', is.function], ['array', is.array], ['object', is.object], ['date', is.date], ['error', is.error], ['file', is.file], ['filelist', is.filelist], ['path', is.path], ['svg', is.svg], ['input', is.input], ['element', is.element], ['node', is.node], ['nodeList', is.nodeList], ['hex', is.hex], ['rgb', is.rgb], ['hsl', is.hsl], ['rgba', is.rgba], ['hsla', is.hsla], ['color', is.color]]);
+exports.orderedIs = orderedIs;
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -214,9 +247,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _lunr2 = _interopRequireDefault(require("lunr"));
+var _lunr = _interopRequireDefault(require("lunr"));
 
-var _is = _interopRequireDefault(require("../utils/is"));
+var _is = _interopRequireDefault(require("../util/is"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -269,27 +302,32 @@ function () {
       value: void 0
     });
 
-    _positionIsIncluded.set(this, {
+    _resultsIncludePosition.set(this, {
       writable: true,
       value: void 0
     });
 
-    _itemIsIncluded.set(this, {
+    _resultsIncludeItem.set(this, {
       writable: true,
       value: void 0
     });
 
-    _lunr.set(this, {
+    _dependency.set(this, {
       writable: true,
       value: void 0
     });
 
-    _lunrConstructor.set(this, {
+    _lunrInstance.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _getLunrInstance.set(this, {
       writable: true,
       value: function value() {
         var _this = this;
 
-        return (0, _lunr2.default)(function (builder) {
+        return _classPrivateFieldGet(this, _dependency).call(this, function (builder) {
           builder.ref(_classPrivateFieldGet(_this, _id));
 
           _classPrivateFieldGet(_this, _keys).forEach(function (key) {
@@ -300,7 +338,7 @@ function () {
             }
           });
 
-          if (_classPrivateFieldGet(_this, _positionIsIncluded)) {
+          if (_classPrivateFieldGet(_this, _resultsIncludePosition)) {
             builder.metadataWhitelist = ['position'];
           }
 
@@ -367,8 +405,8 @@ function () {
     }));
 
     options = _objectSpread({
-      positionIsIncluded: false,
-      itemIsIncluded: false
+      resultsIncludePosition: false,
+      resultsIncludeItem: false
     }, options);
 
     _classPrivateFieldSet(this, _id, _classPrivateFieldGet(this, _getId).call(this, options.id));
@@ -377,11 +415,13 @@ function () {
 
     _classPrivateFieldSet(this, _documents, _classPrivateFieldGet(this, _getDocuments).call(this));
 
-    _classPrivateFieldSet(this, _positionIsIncluded, options.positionIsIncluded);
+    _classPrivateFieldSet(this, _resultsIncludePosition, options.resultsIncludePosition);
 
-    _classPrivateFieldSet(this, _itemIsIncluded, options.itemIsIncluded);
+    _classPrivateFieldSet(this, _resultsIncludeItem, options.resultsIncludeItem);
 
-    _classPrivateFieldSet(this, _lunr, _classPrivateFieldGet(this, _lunrConstructor).call(this));
+    _classPrivateFieldSet(this, _dependency, _lunr.default);
+
+    _classPrivateFieldSet(this, _lunrInstance, _classPrivateFieldGet(this, _getLunrInstance).call(this));
   }
 
   _createClass(SearchableLunr, [{
@@ -393,16 +433,16 @@ function () {
           _this4 = this,
           _classPrivateFieldGet3;
 
-      return _classPrivateFieldGet(this, _itemIsIncluded) ? (_classPrivateFieldGet2 = _classPrivateFieldGet(this, _lunr)).search.apply(_classPrivateFieldGet2, arguments).map(function (match) {
+      return _classPrivateFieldGet(this, _resultsIncludeItem) ? (_classPrivateFieldGet2 = _classPrivateFieldGet(this, _lunrInstance)).search.apply(_classPrivateFieldGet2, arguments).map(function (match) {
         return _classPrivateFieldGet(_this4, _includeItem).call(_this4, match);
-      }) : (_classPrivateFieldGet3 = _classPrivateFieldGet(this, _lunr)).search.apply(_classPrivateFieldGet3, arguments);
+      }) : (_classPrivateFieldGet3 = _classPrivateFieldGet(this, _lunrInstance)).search.apply(_classPrivateFieldGet3, arguments);
     }
     /* Private methods */
 
   }, {
     key: "index",
     get: function get() {
-      return _classPrivateFieldGet(this, _lunr);
+      return _classPrivateFieldGet(this, _lunrInstance);
     }
   }]);
 
@@ -421,13 +461,15 @@ var _documents = new WeakMap();
 
 var _keys = new WeakMap();
 
-var _positionIsIncluded = new WeakMap();
+var _resultsIncludePosition = new WeakMap();
 
-var _itemIsIncluded = new WeakMap();
+var _resultsIncludeItem = new WeakMap();
 
-var _lunr = new WeakMap();
+var _dependency = new WeakMap();
 
-var _lunrConstructor = new WeakMap();
+var _lunrInstance = new WeakMap();
+
+var _getLunrInstance = new WeakMap();
 
 var _getId = new WeakMap();
 
@@ -438,7 +480,7 @@ var _getDocuments = new WeakMap();
 var _includeItem = new WeakMap();
 
 var _findItem = new WeakMap();
-},{"../utils/is":2,"lunr":4}],4:[function(require,module,exports){
+},{"../util/is":3,"lunr":5}],5:[function(require,module,exports){
 /**
  * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.6
  * Copyright (C) 2019 Oliver Nightingale

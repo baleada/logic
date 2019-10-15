@@ -24,7 +24,7 @@ function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = p
 
 /* Dependencies */
 
-/* Utils */
+/* Util */
 var Fetchable =
 /*#__PURE__*/
 function () {

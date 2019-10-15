@@ -6,9 +6,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _is = _interopRequireDefault(require("../utils/is"));
+var _lastMatch = _interopRequireDefault(require("../util/lastMatch"));
 
-var _lastMatch = _interopRequireDefault(require("../utils/lastMatch"));
+var _emit = _interopRequireDefault(require("../util/emit"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -28,31 +28,12 @@ function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateM
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
-/**
- * Completable is a library that enriches a string by:
- * - Allowing it to store
- * - Allowing it to extract a segment of the string
- * - Giving it the methods necessary to replace the segment or the full string with a more complete string
- *
- * Completable is written in vanilla JS with no dependencies. It powers <nuxt-link to="/docs/tools/composition-functions/useCompletable">`useCompletable`</nuxt-link>.
- */
 var Completable =
 /*#__PURE__*/
 function () {
   /* Private properties */
   // TODO: is there a use case for nextMatch instead of lastMatch?
   // #matchDirection
-
-  /**
-   * Completable constructor
-   * @param {String}  string                          The string that will be made completable
-   * @param {Boolean} [segmentsFromDivider=false]     `true` when the Completable instance should start from a divider (for example, the space between words) while extracting a segment, and `false when it should start from the very beginning of the string. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
-   * @param {Boolean} [segmentsToPosition=false]      `true` when the Completable instance should stop at the current position while extracting a segment, and `false` when it should stop at the very end of the string. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
-   * @param {RegExp}  [divider=/s/]                   <p>Tells the Completable instance how segments of the string are divided. Has no effect when <code>segmentsFromDivider</code> is <code>false</code>.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.</p>
-   * @param {Boolean} [positionsAfterCompletion=true] <p><code>true</code> when the Completable instance, after completing the string, should set the current position to the index after the segment's replacement. `false` when it should not change the current position.</p><p>See the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
-   * @param {Function}  [onComplete]                    A function that Completable will call after completing the string. `onComplete` has one paramater: the completed string (String).
-   * @param {Function}  [onPosition]                    A function that Completable will call after completing the string. `onPosition` accepts two parameters: the new position (Number), and the Completable instance (Object).
-   */
   function Completable(string) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
@@ -63,7 +44,7 @@ function () {
       value: void 0
     });
 
-    _segmentsToPosition.set(this, {
+    _segmentsToLocation.set(this, {
       writable: true,
       value: void 0
     });
@@ -73,7 +54,7 @@ function () {
       value: void 0
     });
 
-    _positionsAfterCompletion.set(this, {
+    _locatesAfterCompletion.set(this, {
       writable: true,
       value: void 0
     });
@@ -83,7 +64,7 @@ function () {
       value: void 0
     });
 
-    _onPosition.set(this, {
+    _onLocate.set(this, {
       writable: true,
       value: void 0
     });
@@ -91,102 +72,71 @@ function () {
     _computeSegmentStartIndex.set(this, {
       writable: true,
       value: function value() {
-        return _classPrivateFieldGet(this, _segmentsFromDivider) ? (0, _lastMatch.default)(this.string, _classPrivateFieldGet(this, _divider), this.position) + 1 : 0;
+        return _classPrivateFieldGet(this, _segmentsFromDivider) ? (0, _lastMatch.default)(this.string, _classPrivateFieldGet(this, _divider), this.location) + 1 : 0;
       }
     });
 
     _computeSegmentEndIndex.set(this, {
       writable: true,
       value: function value() {
-        return _classPrivateFieldGet(this, _segmentsToPosition) ? this.position : this.string.length;
+        return _classPrivateFieldGet(this, _segmentsToLocation) ? this.location : this.string.length;
       }
     });
 
     /* Options */
     options = _objectSpread({
       segmentsFromDivider: false,
-      segmentsToPosition: false,
+      segmentsToLocation: false,
       divider: /\s/,
-      positionsAfterCompletion: true
+      locatesAfterCompletion: true,
+      onComplete: function onComplete(completedString, instance) {
+        return instance.setString(completedString);
+      },
+      onLocate: function onLocate(newLocation, instance) {
+        return instance.setLocation(newLocation);
+      }
     }, options);
 
     _classPrivateFieldSet(this, _segmentsFromDivider, options.segmentsFromDivider);
 
-    _classPrivateFieldSet(this, _segmentsToPosition, options.segmentsToPosition);
+    _classPrivateFieldSet(this, _segmentsToLocation, options.segmentsToLocation);
 
     _classPrivateFieldSet(this, _divider, options.divider); // this.#matchDirection = matchDirection
 
 
-    _classPrivateFieldSet(this, _positionsAfterCompletion, options.positionsAfterCompletion);
+    _classPrivateFieldSet(this, _locatesAfterCompletion, options.locatesAfterCompletion);
 
     _classPrivateFieldSet(this, _onComplete, options.onComplete);
 
-    _classPrivateFieldSet(this, _onPosition, options.onPosition);
-    /* Public properties */
-
-    /**
-     * A shallow copy of the string passed to the Completable constructor
-     * @type {String}
-     */
-
+    _classPrivateFieldSet(this, _onLocate, options.onLocate);
 
     this.string = string;
-    /**
-     * The current index-based position in the `string`. See the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.
-     * @type {Number}
-     */
-
-    this.position = string.length;
+    this.location = string.length;
   }
-  /* Public getters */
-
-  /**
-   * Segment getter function
-   * @return {String} An extracted segment of `string`. See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section for more info.
-   */
-
 
   _createClass(Completable, [{
     key: "setString",
-
-    /* Public methods */
-
-    /**
-     * Sets the Completable instance's string
-     * @param {String} string The new string
-     * @return {Object}       The Completable instance
-     */
     value: function setString(string) {
       this.string = string;
       return this;
     }
-    /**
-     * <p>Sets the position from which the Completable instance will start extracting segments.</p><p>See the <nuxt-link to="#How-the-Completable-instance-extracts-segments">How the Completable instance extracts segments</nuxt-link> section and the <nuxt-link to="#How-the-Completable-instance-handles-current-position">How the Completable instance handles current position</nuxt-link> section for more info.</p>
-     * @param {Number} position The new `position`
-     * @return {Object}       The Completable instance
-     */
-
   }, {
-    key: "setPosition",
-    value: function setPosition(position) {
-      this.position = position;
+    key: "setLocation",
+    value: function setLocation(location) {
+      this.location = location;
       return this;
     }
-    /**
-     * <p>Completes the string, replacing <code>segment</code> with a completion/replacement string, and computes a new position based on the <code>positionsAfterCompletion</code> option. Afterward, <code>complete</code> calls the user-provided <code>onComplete</code> function, passing the new string and the new position.</p><p>Note that <code>complete</code> does not set its <code>string</code> or <code>position</code> to the new values, but the user can do so using <code>set</code> and <code>setPosition</code>.</p>
-     * @param {String} completion The completion/replacement.
-     * @return {Object}       The Completable instance
-     */
-
   }, {
     key: "complete",
     value: function complete(completion) {
-      var textBefore = _classPrivateFieldGet(this, _segmentsFromDivider) ? this.string.slice(0, this.position - this.segment.length) : '',
-          textAfter = _classPrivateFieldGet(this, _segmentsToPosition) ? this.string.slice(this.position) : '',
-          string = textBefore + completion + textAfter,
-          position = _classPrivateFieldGet(this, _positionsAfterCompletion) ? textBefore.length + completion.length : this.position;
-      if (_is.default.function(_classPrivateFieldGet(this, _onComplete))) _classPrivateFieldGet(this, _onComplete).call(this, string, this);
-      if (_is.default.function(_classPrivateFieldGet(this, _onPosition))) _classPrivateFieldGet(this, _onPosition).call(this, position, this);
+      var textBefore = this.string.slice(0, this.location - this.segment.length),
+          // segmentsFromDivider
+      textAfter = this.string.slice(_classPrivateFieldGet(this, _computeSegmentEndIndex).call(this)),
+          // segmentsToLocation
+      completedString = textBefore + completion + textAfter,
+          newLocation = _classPrivateFieldGet(this, _locatesAfterCompletion) ? textBefore.length + completion.length : this.location;
+      (0, _emit.default)(_classPrivateFieldGet(this, _onComplete), completedString, this);
+      (0, _emit.default)(_classPrivateFieldGet(this, _onLocate), newLocation, this);
       return this;
     }
     /* Private methods */
@@ -203,15 +153,15 @@ function () {
 
 var _segmentsFromDivider = new WeakMap();
 
-var _segmentsToPosition = new WeakMap();
+var _segmentsToLocation = new WeakMap();
 
 var _divider = new WeakMap();
 
-var _positionsAfterCompletion = new WeakMap();
+var _locatesAfterCompletion = new WeakMap();
 
 var _onComplete = new WeakMap();
 
-var _onPosition = new WeakMap();
+var _onLocate = new WeakMap();
 
 var _computeSegmentStartIndex = new WeakMap();
 
@@ -219,13 +169,30 @@ var _computeSegmentEndIndex = new WeakMap();
 
 var _default = Completable;
 exports.default = _default;
-},{"../utils/is":2,"../utils/lastMatch":3}],2:[function(require,module,exports){
+},{"../util/emit":2,"../util/lastMatch":4}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.default = _default;
+
+var _is = _interopRequireDefault(require("./is"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _default(emitter, mutatedState, instance) {
+  if (_is.default.function(emitter)) {
+    emitter(mutatedState, instance);
+  }
+}
+},{"./is":3}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.orderedIs = exports.default = void 0;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -259,7 +226,7 @@ var is = {
     return Array.isArray(a);
   },
   object: function object(a) {
-    return Object.prototype.toString.call(a).indexOf('Object') > -1;
+    return _typeof(a) === 'object';
   },
   date: function date(a) {
     return a instanceof Date;
@@ -301,10 +268,10 @@ var is = {
     return /^hsl[^a]/.test(a);
   },
   rgba: function rgba(a) {
-    return /^rgba/.test(a);
+    return a.startsWith('rgba');
   },
   hsla: function hsla(a) {
-    return /^hsla/.test(a);
+    return a.startsWith('hsla');
   },
   color: function color(a) {
     return is.hex(a) || is.rgb(a) || is.hsl(a) || is.rgba(a) || is.hsla(a);
@@ -312,7 +279,9 @@ var is = {
 };
 var _default = is;
 exports.default = _default;
-},{}],3:[function(require,module,exports){
+var orderedIs = new Map([['undefined', is.undefined], ['defined', is.defined], ['null', is.null], ['string', is.string], ['number', is.number], ['boolean', is.boolean], ['symbol', is.symbol], ['function', is.function], ['array', is.array], ['object', is.object], ['date', is.date], ['error', is.error], ['file', is.file], ['filelist', is.filelist], ['path', is.path], ['svg', is.svg], ['input', is.input], ['element', is.element], ['node', is.node], ['nodeList', is.nodeList], ['hex', is.hex], ['rgb', is.rgb], ['hsl', is.hsl], ['rgba', is.rgba], ['hsla', is.hsla], ['color', is.color]]);
+exports.orderedIs = orderedIs;
+},{}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Navigable = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Toggleable = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _typedEmit = _interopRequireDefault(require("../util/typedEmit"));
+var _emit = _interopRequireDefault(require("../util/emit"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -26,218 +26,99 @@ function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateM
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
-var Navigable =
+var Togglable =
 /*#__PURE__*/
 function () {
-  function Navigable(array) {
+  function Togglable(boolean) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-    _classCallCheck(this, Navigable);
+    _classCallCheck(this, Togglable);
 
-    _loops.set(this, {
+    _onToggle.set(this, {
       writable: true,
       value: void 0
     });
 
-    _increment.set(this, {
+    _onTrue.set(this, {
       writable: true,
       value: void 0
     });
 
-    _decrement.set(this, {
+    _onFalse.set(this, {
       writable: true,
       value: void 0
-    });
-
-    _onNavigate.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _onGoTo.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _onNext.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _onPrev.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _navigate.set(this, {
-      writable: true,
-      value: function value(newLocation, type) {
-        (0, _typedEmit.default)(newLocation, type, this, _classPrivateFieldGet(this, _onNavigate), [{
-          type: 'goTo',
-          emitter: _classPrivateFieldGet(this, _onGoTo)
-        }, {
-          type: 'next',
-          emitter: _classPrivateFieldGet(this, _onNext)
-        }, {
-          type: 'prev',
-          emitter: _classPrivateFieldGet(this, _onPrev)
-        }]);
-        return this;
-      }
     });
 
     /* Options */
     options = _objectSpread({
-      initialLocation: 0,
-      loops: true,
-      increment: 1,
-      decrement: 1,
-      onNavigate: function onNavigate(newLocation, instance) {
-        return instance.setLocation(newLocation);
+      onToggle: function onToggle(newBoolean, instance) {
+        return instance.setBoolean(newBoolean);
+      },
+      onTrue: function onTrue(newBoolean, instance) {
+        return instance.setBoolean(newBoolean);
+      },
+      onFalse: function onFalse(newBoolean, instance) {
+        return instance.setBoolean(newBoolean);
       }
     }, options);
 
-    _classPrivateFieldSet(this, _loops, options.loops);
+    _classPrivateFieldSet(this, _onToggle, options.onToggle);
 
-    _classPrivateFieldSet(this, _increment, options.increment);
+    _classPrivateFieldSet(this, _onTrue, options.onTrue);
 
-    _classPrivateFieldSet(this, _decrement, options.decrement);
-
-    _classPrivateFieldSet(this, _onNavigate, options.onNavigate);
-
-    _classPrivateFieldSet(this, _onGoTo, options.onGoTo);
-
-    _classPrivateFieldSet(this, _onNext, options.onNext);
-
-    _classPrivateFieldSet(this, _onPrev, options.onPrev);
+    _classPrivateFieldSet(this, _onFalse, options.onFalse);
     /* Public properties */
 
 
-    this.array = array;
-    this.location = options.initialLocation;
+    this.boolean = boolean;
     /* Private properties */
 
     /* Dependency */
   }
   /* Public getters */
 
+  /* Public methods */
 
-  _createClass(Navigable, [{
-    key: "setArray",
 
-    /* Public methods */
-    value: function setArray(array) {
-      this.array = array;
+  _createClass(Togglable, [{
+    key: "setBoolean",
+    value: function setBoolean(boolean) {
+      this.boolean = boolean;
       return this;
     }
   }, {
-    key: "setLocation",
-    value: function setLocation(location) {
-      this.location = location;
+    key: "toggle",
+    value: function toggle() {
+      (0, _emit.default)(_classPrivateFieldGet(this, _onToggle), !this.boolean, this);
       return this;
     }
   }, {
-    key: "goTo",
-    value: function goTo(newLocation, navigateType) {
-      switch (true) {
-        case newLocation > this.array.length:
-          newLocation = this.array.length; // TODO: decide whether to show warnings or not
-          // console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
-
-          break;
-
-        case newLocation < 0:
-          newLocation = 0; // TODO: decide whether to show warnings or not
-          // console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
-
-          break;
-      }
-
-      navigateType = navigateType || 'goTo';
-      return _classPrivateFieldGet(this, _navigate).call(this, newLocation, navigateType);
+    key: "true",
+    value: function _true() {
+      (0, _emit.default)(_classPrivateFieldGet(this, _onTrue), true, this);
+      return this;
     }
   }, {
-    key: "next",
-    value: function next() {
-      var newLocation;
-      var lastLocation = this.array.length - 1;
-
-      if (this.location + _classPrivateFieldGet(this, _increment) > lastLocation) {
-        switch (true) {
-          case _classPrivateFieldGet(this, _loops):
-            newLocation = this.location + _classPrivateFieldGet(this, _increment);
-
-            while (newLocation > lastLocation) {
-              newLocation -= this.array.length;
-            }
-
-            break;
-
-          default:
-            newLocation = lastLocation;
-        }
-      } else {
-        newLocation = this.location + _classPrivateFieldGet(this, _increment);
-      }
-
-      return this.goTo(newLocation, 'next');
-    }
-  }, {
-    key: "prev",
-    value: function prev() {
-      var newLocation;
-
-      if (this.location - _classPrivateFieldGet(this, _decrement) < 0) {
-        switch (true) {
-          case _classPrivateFieldGet(this, _loops):
-            newLocation = this.location - _classPrivateFieldGet(this, _decrement);
-
-            while (newLocation < 0) {
-              newLocation += this.array.length;
-            }
-
-            break;
-
-          default:
-            newLocation = 0;
-        }
-      } else {
-        newLocation = this.location - _classPrivateFieldGet(this, _decrement);
-      }
-
-      return this.goTo(newLocation, 'prev');
+    key: "false",
+    value: function _false() {
+      (0, _emit.default)(_classPrivateFieldGet(this, _onFalse), false, this);
+      return this;
     }
     /* Private methods */
 
-  }, {
-    key: "item",
-    get: function get() {
-      return this.array[this.location];
-    }
   }]);
 
-  return Navigable;
+  return Togglable;
 }();
 
-var _loops = new WeakMap();
+exports.default = Togglable;
 
-var _increment = new WeakMap();
+var _onToggle = new WeakMap();
 
-var _decrement = new WeakMap();
+var _onTrue = new WeakMap();
 
-var _onNavigate = new WeakMap();
-
-var _onGoTo = new WeakMap();
-
-var _onNext = new WeakMap();
-
-var _onPrev = new WeakMap();
-
-var _navigate = new WeakMap();
-
-var _default = Navigable;
-exports.default = _default;
-},{"../util/typedEmit":4}],2:[function(require,module,exports){
+var _onFalse = new WeakMap();
+},{"../util/emit":2}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -349,28 +230,5 @@ var _default = is;
 exports.default = _default;
 var orderedIs = new Map([['undefined', is.undefined], ['defined', is.defined], ['null', is.null], ['string', is.string], ['number', is.number], ['boolean', is.boolean], ['symbol', is.symbol], ['function', is.function], ['array', is.array], ['object', is.object], ['date', is.date], ['error', is.error], ['file', is.file], ['filelist', is.filelist], ['path', is.path], ['svg', is.svg], ['input', is.input], ['element', is.element], ['node', is.node], ['nodeList', is.nodeList], ['hex', is.hex], ['rgb', is.rgb], ['hsl', is.hsl], ['rgba', is.rgba], ['hsla', is.hsla], ['color', is.color]]);
 exports.orderedIs = orderedIs;
-},{}],4:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = _default;
-
-var _emit = _interopRequireDefault(require("./emit"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _default(mutatedState, type, instance, catchallEmitter, typedEmitters) {
-  (0, _emit.default)(catchallEmitter, mutatedState, instance);
-
-  var _typedEmitters$find = typedEmitters.find(function (_ref) {
-    var currentType = _ref.type;
-    return currentType === type;
-  }),
-      typedEmitter = _typedEmitters$find.emitter;
-
-  (0, _emit.default)(typedEmitter, mutatedState, instance);
-}
-},{"./emit":2}]},{},[1])(1)
+},{}]},{},[1])(1)
 });

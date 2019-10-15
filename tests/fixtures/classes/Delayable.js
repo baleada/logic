@@ -6,6 +6,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _is = _interopRequireDefault(require("../util/is"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { keys.push.apply(keys, Object.getOwnPropertySymbols(object)); } if (enumerableOnly) keys = keys.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -29,12 +33,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to get private field on non-instance"); } if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
-
-/*
- * Delayable.js
- * (c) 2019 Alex Vipond
- * Released under the MIT license
- */
 
 /**
  * Delayable is a library that enriches a function by:
@@ -182,7 +180,7 @@ function () {
     _setup.set(this, {
       writable: true,
       value: function value() {
-        this.cancel();
+        this.clear();
 
         _classPrivateFieldSet(this, _computedExecutions, 0);
 
@@ -203,7 +201,7 @@ function () {
 
     _classPrivateFieldSet(this, _delay, options.delay);
 
-    _classPrivateFieldSet(this, _parameters, is.array(options.parameters) ? options.parameters : []);
+    _classPrivateFieldSet(this, _parameters, _is.default.array(options.parameters) ? options.parameters : []);
     /* Public properties */
 
     /**
@@ -242,12 +240,12 @@ function () {
       this.callback = callback;
     }
     /**
-     * Cancels the delayed callback function. The function won't be executed, but <code>timeElapsed</code> and <code>timeRemaining</code> will <b>not</b> be reset to their initial values.
+     * Clears the delayed callback function. The function won't be executed, but <code>timeElapsed</code> and <code>timeRemaining</code> will <b>not</b> be reset to their initial values.
      */
 
   }, {
-    key: "cancel",
-    value: function cancel() {
+    key: "clear",
+    value: function clear() {
       window.clearTimeout(_classPrivateFieldGet(this, _id));
       window.clearInterval(_classPrivateFieldGet(this, _id));
 
@@ -348,5 +346,100 @@ var _startTick = new WeakMap();
 var _stopTick = new WeakMap();
 
 var _setup = new WeakMap();
+},{"../util/is":2}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.orderedIs = exports.default = void 0;
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+/* Modified from anime.js https://github.com/juliangarnier/anime */
+var is = {
+  undefined: function undefined(a) {
+    return typeof a === 'undefined';
+  },
+  defined: function defined(a) {
+    return typeof a !== 'undefined';
+  },
+  null: function _null(a) {
+    return a === null;
+  },
+  string: function string(a) {
+    return typeof a === 'string';
+  },
+  number: function number(a) {
+    return typeof a === 'number';
+  },
+  boolean: function boolean(a) {
+    return typeof a === 'boolean';
+  },
+  symbol: function symbol(a) {
+    return _typeof(a) === 'symbol';
+  },
+  function: function _function(a) {
+    return typeof a === 'function';
+  },
+  array: function array(a) {
+    return Array.isArray(a);
+  },
+  object: function object(a) {
+    return _typeof(a) === 'object';
+  },
+  date: function date(a) {
+    return a instanceof Date;
+  },
+  error: function error(a) {
+    return a instanceof Error;
+  },
+  file: function file(a) {
+    return a instanceof File;
+  },
+  filelist: function filelist(a) {
+    return a instanceof FileList;
+  },
+  path: function path(a) {
+    return a instanceof SVGPathElement;
+  },
+  svg: function svg(a) {
+    return a instanceof SVGElement;
+  },
+  input: function input(a) {
+    return a instanceof HTMLInputElement;
+  },
+  element: function element(a) {
+    return a instanceof HTMLElement;
+  },
+  node: function node(a) {
+    return a instanceof Node;
+  },
+  nodeList: function nodeList(a) {
+    return a instanceof NodeList;
+  },
+  hex: function hex(a) {
+    return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(a);
+  },
+  rgb: function rgb(a) {
+    return /^rgb[^a]/.test(a);
+  },
+  hsl: function hsl(a) {
+    return /^hsl[^a]/.test(a);
+  },
+  rgba: function rgba(a) {
+    return a.startsWith('rgba');
+  },
+  hsla: function hsla(a) {
+    return a.startsWith('hsla');
+  },
+  color: function color(a) {
+    return is.hex(a) || is.rgb(a) || is.hsl(a) || is.rgba(a) || is.hsla(a);
+  }
+};
+var _default = is;
+exports.default = _default;
+var orderedIs = new Map([['undefined', is.undefined], ['defined', is.defined], ['null', is.null], ['string', is.string], ['number', is.number], ['boolean', is.boolean], ['symbol', is.symbol], ['function', is.function], ['array', is.array], ['object', is.object], ['date', is.date], ['error', is.error], ['file', is.file], ['filelist', is.filelist], ['path', is.path], ['svg', is.svg], ['input', is.input], ['element', is.element], ['node', is.node], ['nodeList', is.nodeList], ['hex', is.hex], ['rgb', is.rgb], ['hsl', is.hsl], ['rgba', is.rgba], ['hsla', is.hsla], ['color', is.color]]);
+exports.orderedIs = orderedIs;
 },{}]},{},[1])(1)
 });

@@ -5,10 +5,19 @@
   "main": "lib/index.js",
   "scripts": {
     "index": "node scripts/buildIndices.js",
-    "babelify": "node scripts/emptyLib.js && npx babel src --out-dir lib",
-    "prepare": "npm run index && npm run babelify",
-    "browserify": "npm run babelify && node scripts/browserifyClasses.js",
-    "test": "npm run browserify && ava"
+    "empty-lib": "node scripts/emptyDir.js 'lib'",
+    "babelify": "npm run empty-lib && npx babel src --out-dir lib",
+    "empty-browser-lib": "node scripts/emptyDir.js 'browser-lib'",
+    "browser-babelify": "npm run empty-browser-lib && npx babel src --config-file ./browser-babel.config.js --out-dir browser-lib",
+    "empty-test-fixtures-classes": "node scripts/emptyDir.js 'tests/fixtures/classes'",
+    "empty-test-fixtures-subclasses": "node scripts/emptyDir.js 'tests/fixtures/subclasses'",
+    "empty-test-fixtures-all": "npm run empty-test-fixtures-classes && npm run empty-test-fixtures-subclasses",
+    "browserify-classes": "node scripts/browserify.js 'classes'",
+    "browserify-subclasses": "node scripts/browserify.js 'subclasses'",
+    "browserify-all": "npm run browserify-classes && npm run browserify-subclasses",
+    "browserify": "npm run browser-babelify && npm run empty-test-fixtures-all && npm run browserify-all",
+    "test": "npm run browserify && ava",
+    "prepare": "npm run index && npm run babelify"
   },
   "repository": {
     "type": "git",

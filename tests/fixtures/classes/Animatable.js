@@ -8,8 +8,6 @@ exports.default = void 0;
 
 var _AnimatableAnime = _interopRequireDefault(require("../wrappers/AnimatableAnime"));
 
-var _is = _interopRequireDefault(require("../utils/is"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -117,7 +115,7 @@ exports.default = Animatable;
 var _dependencyOptions = new WeakMap();
 
 var _dependency = new WeakMap();
-},{"../utils/is":3,"../wrappers/AnimatableAnime":6}],2:[function(require,module,exports){
+},{"../wrappers/AnimatableAnime":6}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -143,7 +141,7 @@ function hasSomeProperties(object, properties) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.orderedIs = exports.default = void 0;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -177,7 +175,7 @@ var is = {
     return Array.isArray(a);
   },
   object: function object(a) {
-    return Object.prototype.toString.call(a).indexOf('Object') > -1;
+    return _typeof(a) === 'object';
   },
   date: function date(a) {
     return a instanceof Date;
@@ -219,10 +217,10 @@ var is = {
     return /^hsl[^a]/.test(a);
   },
   rgba: function rgba(a) {
-    return /^rgba/.test(a);
+    return a.startsWith('rgba');
   },
   hsla: function hsla(a) {
-    return /^hsla/.test(a);
+    return a.startsWith('hsla');
   },
   color: function color(a) {
     return is.hex(a) || is.rgb(a) || is.hsl(a) || is.rgba(a) || is.hsla(a);
@@ -230,6 +228,8 @@ var is = {
 };
 var _default = is;
 exports.default = _default;
+var orderedIs = new Map([['undefined', is.undefined], ['defined', is.defined], ['null', is.null], ['string', is.string], ['number', is.number], ['boolean', is.boolean], ['symbol', is.symbol], ['function', is.function], ['array', is.array], ['object', is.object], ['date', is.date], ['error', is.error], ['file', is.file], ['filelist', is.filelist], ['path', is.path], ['svg', is.svg], ['input', is.input], ['element', is.element], ['node', is.node], ['nodeList', is.nodeList], ['hex', is.hex], ['rgb', is.rgb], ['hsl', is.hsl], ['rgba', is.rgba], ['hsla', is.hsla], ['color', is.color]]);
+exports.orderedIs = orderedIs;
 },{}],4:[function(require,module,exports){
 "use strict";
 
@@ -283,6 +283,15 @@ var dictionary = {
           docsLink = "See the docs for more info: ".concat(docs);
       return "".concat(main, " ").concat(someOrEvery, " ").concat(docsLink);
     }
+  },
+  noFallbackAvailable: {
+    shouldWarn: function shouldWarn() {
+      return true;
+    },
+    getWarning: function getWarning(_ref3) {
+      var subject = _ref3.subject;
+      return "There is no fallback available for ".concat(subject, ".");
+    }
   }
 };
 
@@ -301,11 +310,11 @@ exports.default = void 0;
 
 var _animejs = _interopRequireDefault(require("animejs"));
 
-var _is = _interopRequireDefault(require("../utils/is"));
+var _is = _interopRequireDefault(require("../util/is"));
 
-var _resolveOptions = _interopRequireDefault(require("../utils/resolveOptions"));
+var _resolveOptions = _interopRequireDefault(require("../util/resolveOptions"));
 
-var _warn = _interopRequireDefault(require("../utils/warn"));
+var _warn = _interopRequireDefault(require("../util/warn"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -351,12 +360,17 @@ function () {
       value: void 0
     });
 
-    _anime.set(this, {
+    _dependency.set(this, {
       writable: true,
       value: void 0
     });
 
-    _animeConstructor.set(this, {
+    _animeInstance.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _getAnimeInstance.set(this, {
       writable: true,
       value: function value(options) {
         options = (0, _resolveOptions.default)(options, _classPrivateFieldGet(this, _animeApi));
@@ -364,7 +378,7 @@ function () {
           received: options,
           required: ['animation', 'timelineChildren'],
           subject: 'Animatable',
-          docs: 'https://baleada.netlify.com/docs/logic/Animatable'
+          docs: 'https://baleada.netlify.com/docs/logic/classes/Animatable'
         });
         var instance = options.hasOwnProperty('timelineChildren') ? _classPrivateFieldGet(this, _timeline).call(this, options) : _classPrivateFieldGet(this, _animate).call(this, options);
 
@@ -390,7 +404,7 @@ function () {
       value: function value(_ref) {
         var _ref$animation = _ref.animation,
             animation = _ref$animation === void 0 ? {} : _ref$animation;
-        return (0, _animejs.default)(_objectSpread({
+        return _classPrivateFieldGet(this, _dependency).call(this, _objectSpread({
           targets: _classPrivateFieldGet(this, _elements)
         }, animation));
       }
@@ -405,7 +419,7 @@ function () {
             animation = _ref2$animation === void 0 ? {} : _ref2$animation,
             timelineChildren = _ref2.timelineChildren;
 
-        var instance = _animejs.default.timeline(_objectSpread({
+        var instance = _classPrivateFieldGet(this, _dependency).timeline(_objectSpread({
           targets: _classPrivateFieldGet(this, _elements)
         }, animation));
 
@@ -430,22 +444,24 @@ function () {
 
     _classPrivateFieldSet(this, _elements, elements);
 
+    _classPrivateFieldSet(this, _dependency, _animejs.default);
+
     _classPrivateFieldSet(this, _animeApi, {
-      // anime utils
-      path: _animejs.default.path,
-      setDashoffset: _animejs.default.setDashoffset,
-      stagger: _animejs.default.stagger,
-      penner: _animejs.default.penner,
+      // anime util
+      path: _classPrivateFieldGet(this, _dependency).path,
+      setDashoffset: _classPrivateFieldGet(this, _dependency).setDashoffset,
+      stagger: _classPrivateFieldGet(this, _dependency).stagger,
+      penner: _classPrivateFieldGet(this, _dependency).penner,
       // anime helpers
-      remove: _animejs.default.remove,
-      get: _animejs.default.get,
-      set: _animejs.default.set,
-      random: _animejs.default.random,
-      // tick: anime.tick, TODO: does this need another prop? https://animejs.com/documentation/#tick
-      running: _animejs.default.running
+      remove: _classPrivateFieldGet(this, _dependency).remove,
+      get: _classPrivateFieldGet(this, _dependency).get,
+      set: _classPrivateFieldGet(this, _dependency).set,
+      random: _classPrivateFieldGet(this, _dependency).random,
+      // tick: this.#dependency.tick, TODO: does this need another prop? https://animejs.com/documentation/#tick
+      running: _classPrivateFieldGet(this, _dependency).running
     });
 
-    _classPrivateFieldSet(this, _anime, _classPrivateFieldGet(this, _animeConstructor).call(this, _options));
+    _classPrivateFieldSet(this, _animeInstance, _classPrivateFieldGet(this, _getAnimeInstance).call(this, _options));
   }
 
   _createClass(AnimatableAnime, [{
@@ -455,42 +471,42 @@ function () {
     value: function play() {
       var _classPrivateFieldGet2;
 
-      (_classPrivateFieldGet2 = _classPrivateFieldGet(this, _anime)).play.apply(_classPrivateFieldGet2, arguments);
+      (_classPrivateFieldGet2 = _classPrivateFieldGet(this, _animeInstance)).play.apply(_classPrivateFieldGet2, arguments);
     }
   }, {
     key: "pause",
     value: function pause() {
       var _classPrivateFieldGet3;
 
-      (_classPrivateFieldGet3 = _classPrivateFieldGet(this, _anime)).pause.apply(_classPrivateFieldGet3, arguments);
+      (_classPrivateFieldGet3 = _classPrivateFieldGet(this, _animeInstance)).pause.apply(_classPrivateFieldGet3, arguments);
     }
   }, {
     key: "restart",
     value: function restart() {
       var _classPrivateFieldGet4;
 
-      (_classPrivateFieldGet4 = _classPrivateFieldGet(this, _anime)).restart.apply(_classPrivateFieldGet4, arguments);
+      (_classPrivateFieldGet4 = _classPrivateFieldGet(this, _animeInstance)).restart.apply(_classPrivateFieldGet4, arguments);
     }
   }, {
     key: "reverse",
     value: function reverse() {
       var _classPrivateFieldGet5;
 
-      (_classPrivateFieldGet5 = _classPrivateFieldGet(this, _anime)).reverse.apply(_classPrivateFieldGet5, arguments);
+      (_classPrivateFieldGet5 = _classPrivateFieldGet(this, _animeInstance)).reverse.apply(_classPrivateFieldGet5, arguments);
     }
   }, {
     key: "seek",
     value: function seek() {
       var _classPrivateFieldGet6;
 
-      (_classPrivateFieldGet6 = _classPrivateFieldGet(this, _anime)).seek.apply(_classPrivateFieldGet6, arguments);
+      (_classPrivateFieldGet6 = _classPrivateFieldGet(this, _animeInstance)).seek.apply(_classPrivateFieldGet6, arguments);
     }
     /* Private methods */
 
   }, {
     key: "animation",
     get: function get() {
-      return _classPrivateFieldGet(this, _anime);
+      return _classPrivateFieldGet(this, _animeInstance);
     }
   }]);
 
@@ -503,16 +519,18 @@ var _elements = new WeakMap();
 
 var _animeApi = new WeakMap();
 
-var _anime = new WeakMap();
+var _dependency = new WeakMap();
 
-var _animeConstructor = new WeakMap();
+var _animeInstance = new WeakMap();
+
+var _getAnimeInstance = new WeakMap();
 
 var _animate = new WeakMap();
 
 var _timeline = new WeakMap();
 
 var _getAddArguments = new WeakMap();
-},{"../utils/is":3,"../utils/resolveOptions":4,"../utils/warn":5,"animejs":7}],7:[function(require,module,exports){
+},{"../util/is":3,"../util/resolveOptions":4,"../util/warn":5,"animejs":7}],7:[function(require,module,exports){
 /*
  * anime.js v3.0.1
  * (c) 2019 Julian Garnier

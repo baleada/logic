@@ -20,7 +20,7 @@ function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateM
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
-/* Utils */
+/* Util */
 var Touchable =
 /*#__PURE__*/
 function () {
@@ -106,7 +106,7 @@ function capitalize(word) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.orderedIs = exports.default = void 0;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -140,7 +140,7 @@ var is = {
     return Array.isArray(a);
   },
   object: function object(a) {
-    return Object.prototype.toString.call(a).indexOf('Object') > -1;
+    return _typeof(a) === 'object';
   },
   date: function date(a) {
     return a instanceof Date;
@@ -182,10 +182,10 @@ var is = {
     return /^hsl[^a]/.test(a);
   },
   rgba: function rgba(a) {
-    return /^rgba/.test(a);
+    return a.startsWith('rgba');
   },
   hsla: function hsla(a) {
-    return /^hsla/.test(a);
+    return a.startsWith('hsla');
   },
   color: function color(a) {
     return is.hex(a) || is.rgb(a) || is.hsl(a) || is.rgba(a) || is.hsla(a);
@@ -193,6 +193,8 @@ var is = {
 };
 var _default = is;
 exports.default = _default;
+var orderedIs = new Map([['undefined', is.undefined], ['defined', is.defined], ['null', is.null], ['string', is.string], ['number', is.number], ['boolean', is.boolean], ['symbol', is.symbol], ['function', is.function], ['array', is.array], ['object', is.object], ['date', is.date], ['error', is.error], ['file', is.file], ['filelist', is.filelist], ['path', is.path], ['svg', is.svg], ['input', is.input], ['element', is.element], ['node', is.node], ['nodeList', is.nodeList], ['hex', is.hex], ['rgb', is.rgb], ['hsl', is.hsl], ['rgba', is.rgba], ['hsla', is.hsla], ['color', is.color]]);
+exports.orderedIs = orderedIs;
 },{}],4:[function(require,module,exports){
 "use strict";
 
@@ -226,9 +228,11 @@ exports.default = void 0;
 
 var _hammerjs = _interopRequireDefault(require("hammerjs"));
 
-var _resolveOptions = _interopRequireDefault(require("../utils/resolveOptions"));
+var _resolveOptions = _interopRequireDefault(require("../util/resolveOptions"));
 
-var _capitalize = _interopRequireDefault(require("../utils/capitalize"));
+var _capitalize = _interopRequireDefault(require("../util/capitalize"));
+
+var _is = _interopRequireDefault(require("../util/is"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -273,17 +277,22 @@ function () {
       value: void 0
     });
 
+    _blacklist.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _whitelist.set(this, {
+      writable: true,
+      value: void 0
+    });
+
     _callbacks.set(this, {
       writable: true,
       value: void 0
     });
 
     _element.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _intendedTouches.set(this, {
       writable: true,
       value: void 0
     });
@@ -303,7 +312,7 @@ function () {
       value: void 0
     });
 
-    _hammer.set(this, {
+    _hammerInstance.set(this, {
       writable: true,
       value: void 0
     });
@@ -332,7 +341,7 @@ function () {
       }
     });
 
-    _hammerConstructor.set(this, {
+    _getHammerInstance.set(this, {
       writable: true,
       value: function value(options) {
         var _this = this;
@@ -349,7 +358,23 @@ function () {
         });
         events.forEach(function (evt) {
           return instance.on(evt, function (e) {
-            return _classPrivateFieldGet(_this, _callbacks)["on".concat((0, _capitalize.default)(evt))](e);
+            var shouldCallback;
+
+            if (_is.default.array(_classPrivateFieldGet(_this, _blacklist))) {
+              shouldCallback = !_classPrivateFieldGet(_this, _blacklist).some(function (selector) {
+                return e.target.matches(selector);
+              });
+            }
+
+            if (_is.default.array(_classPrivateFieldGet(_this, _whitelist))) {
+              shouldCallback = _classPrivateFieldGet(_this, _whitelist).some(function (selector) {
+                return e.target.matches(selector);
+              });
+            }
+
+            if (shouldCallback) {
+              _classPrivateFieldGet(_this, _callbacks)["on".concat((0, _capitalize.default)(evt))](e);
+            }
           });
         });
         return instance;
@@ -357,6 +382,10 @@ function () {
     });
 
     _classPrivateFieldSet(this, _allowsSelect, _options.allowsSelect);
+
+    _classPrivateFieldSet(this, _blacklist, _options.blacklist);
+
+    _classPrivateFieldSet(this, _whitelist, _options.whitelist);
 
     _classPrivateFieldSet(this, _callbacks, _classPrivateFieldGet(this, _getCallbacks).call(this, _options));
 
@@ -385,7 +414,7 @@ function () {
 
     _classPrivateFieldSet(this, _hammerOptions, _classPrivateFieldGet(this, _getHammerOptions).call(this, _options));
 
-    _classPrivateFieldSet(this, _hammer, _classPrivateFieldGet(this, _hammerConstructor).call(this, _classPrivateFieldGet(this, _hammerOptions)));
+    _classPrivateFieldSet(this, _hammerInstance, _classPrivateFieldGet(this, _getHammerInstance).call(this, _classPrivateFieldGet(this, _hammerOptions)));
   }
   /* Public getters */
 
@@ -395,19 +424,19 @@ function () {
 
     /* Public methods */
     value: function touch(touchType, data) {
-      _classPrivateFieldGet(this, _hammer).emit(touchType, data);
+      _classPrivateFieldGet(this, _hammerInstance).emit(touchType, data);
     }
   }, {
     key: "destroy",
     value: function destroy() {
-      _classPrivateFieldGet(this, _hammer).destroy();
+      _classPrivateFieldGet(this, _hammerInstance).destroy();
     }
     /* Private methods */
 
   }, {
     key: "manager",
     get: function get() {
-      return _classPrivateFieldGet(this, _hammer);
+      return _classPrivateFieldGet(this, _hammerInstance);
     }
   }]);
 
@@ -418,11 +447,13 @@ exports.default = TouchableHammer;
 
 var _allowsSelect = new WeakMap();
 
+var _blacklist = new WeakMap();
+
+var _whitelist = new WeakMap();
+
 var _callbacks = new WeakMap();
 
 var _element = new WeakMap();
-
-var _intendedTouches = new WeakMap();
 
 var _hammerApi = new WeakMap();
 
@@ -430,14 +461,14 @@ var _dependency = new WeakMap();
 
 var _hammerOptions = new WeakMap();
 
-var _hammer = new WeakMap();
+var _hammerInstance = new WeakMap();
 
 var _getCallbacks = new WeakMap();
 
 var _getHammerOptions = new WeakMap();
 
-var _hammerConstructor = new WeakMap();
-},{"../utils/capitalize":2,"../utils/resolveOptions":4,"hammerjs":6}],6:[function(require,module,exports){
+var _getHammerInstance = new WeakMap();
+},{"../util/capitalize":2,"../util/is":3,"../util/resolveOptions":4,"hammerjs":6}],6:[function(require,module,exports){
 /*! Hammer.JS - v2.0.7 - 2016-04-22
  * http://hammerjs.github.io/
  *

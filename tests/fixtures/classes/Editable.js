@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Syncable = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Editable = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6,11 +6,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _is = _interopRequireDefault(require("../utils/is"));
+var _is = _interopRequireDefault(require("../util/is"));
 
-var _hasProperties = require("../utils/hasProperties");
+var _hasProperties = require("../util/hasProperties");
 
-var _warn = _interopRequireDefault(require("../utils/warn"));
+var _warn = _interopRequireDefault(require("../util/warn"));
+
+var _typedEmit = _interopRequireDefault(require("../util/typedEmit"));
 
 var _Renamable = _interopRequireDefault(require("../subclasses/Renamable"));
 
@@ -32,16 +34,16 @@ function _classPrivateFieldGet(receiver, privateMap) { var descriptor = privateM
 
 function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = privateMap.get(receiver); if (!descriptor) { throw new TypeError("attempted to set private field on non-instance"); } if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } return value; }
 
-var Syncable =
+var Editable =
 /*#__PURE__*/
 function () {
   /* Private properties */
-  function Syncable(_state) {
+  function Editable(_state) {
     var _this = this;
 
     var _options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-    _classCallCheck(this, Syncable);
+    _classCallCheck(this, Editable);
 
     _intendedTypes.set(this, {
       writable: true,
@@ -58,7 +60,17 @@ function () {
       value: void 0
     });
 
-    _onSync.set(this, {
+    _onEdit.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _onWrite.set(this, {
+      writable: true,
+      value: void 0
+    });
+
+    _onErase.set(this, {
       writable: true,
       value: void 0
     });
@@ -117,13 +129,16 @@ function () {
       }
     });
 
-    _sync.set(this, {
+    _edit.set(this, {
       writable: true,
-      value: function value(newState) {
-        if (_is.default.function(_classPrivateFieldGet(this, _onSync))) {
-          _classPrivateFieldGet(this, _onSync).call(this, newState);
-        }
-
+      value: function value(newState, type) {
+        (0, _typedEmit.default)(newState, type, this, _classPrivateFieldGet(this, _onEdit), [{
+          type: 'write',
+          emitter: _classPrivateFieldGet(this, _onWrite)
+        }, {
+          type: 'erase',
+          emitter: _classPrivateFieldGet(this, _onErase)
+        }]);
         return this;
       }
     });
@@ -141,29 +156,28 @@ function () {
         (0, _warn.default)('hasRequiredOptions', {
           received: options,
           required: ['key'],
-          subject: 'Syncable\'s write method',
-          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+          subject: 'Editable\'s write method',
+          docs: 'https://baleada.netlify.com/docs/logic/classes/Editable'
         });
         (0, _warn.default)('hasRequiredOptions', {
           received: options,
           required: ['value', 'rename'],
-          subject: 'Syncable\'s write method',
-          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+          subject: 'Editable\'s write method',
+          docs: 'https://baleada.netlify.com/docs/logic/classes/Editable'
         });
         var newState = this.state;
         var key = options.key;
 
         if ((0, _hasProperties.hasEveryProperty)(options, ['rename', 'value'])) {
-          var renamable = new _Renamable.default(newState);
-          renamable.renameKey(options.rename, key);
-          renamable.set(key, options.value);
-          newState = new Map(renamable);
+          var renamable = new _Renamable.default(newState),
+              renamed = renamable.renameKey(options.rename, key);
+          renamed.set(key, options.value);
+          newState = new Map(renamed);
         } else if ((0, _hasProperties.hasEveryProperty)(options, ['rename'])) {
-          var _renamable = new _Renamable.default(newState);
+          var _renamable = new _Renamable.default(newState),
+              _renamed = _renamable.renameKey(options.rename, key);
 
-          _renamable.renameKey(options.rename, key);
-
-          newState = new Map(_renamable);
+          newState = new Map(_renamed);
         } else if ((0, _hasProperties.hasEveryProperty)(options, ['value'])) {
           newState.set(key, options.value);
         }
@@ -178,14 +192,14 @@ function () {
         (0, _warn.default)('hasRequiredOptions', {
           received: options,
           required: ['key'],
-          subject: 'Syncable\'s write method',
-          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+          subject: 'Editable\'s write method',
+          docs: 'https://baleada.netlify.com/docs/logic/classes/Editable'
         });
         (0, _warn.default)('hasRequiredOptions', {
           received: options,
           required: ['value', 'rename'],
-          subject: 'Syncable\'s write method',
-          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+          subject: 'Editable\'s write method',
+          docs: 'https://baleada.netlify.com/docs/logic/classes/Editable'
         });
         var newState = this.state,
             key = options.key;
@@ -209,20 +223,28 @@ function () {
       value: function value(options) {
         (0, _warn.default)('hasRequiredOptions', {
           received: options,
-          required: ['value', 'last', 'all'],
-          subject: 'Syncable\'s erase method',
-          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+          required: ['item', 'last', 'all'],
+          subject: 'Editable\'s erase method',
+          docs: 'https://baleada.netlify.com/docs/logic/classes/Editable'
         });
         var newState = this.state;
 
-        if (options.hasOwnProperty('value')) {
-          newState = this.state.filter(function (item) {
-            return item !== options.value;
-          });
+        if (options.hasOwnProperty('item')) {
+          if (_is.default.string(options.item)) {
+            var item = options.item;
+
+            options.item = function (currentItem) {
+              return currentItem === item;
+            };
+          }
+
+          newState = newState.filter(function (currentItem) {
+            return !options.item(currentItem);
+          }); // TODO: Offer a way to choose which match or matches get removed
         }
 
         if (options.hasOwnProperty('last') && options.last !== false) {
-          newState = this.state.slice(0, -1);
+          newState = newState.slice(0, -1);
         }
 
         if (options.hasOwnProperty('all') && options.all !== false) {
@@ -239,8 +261,8 @@ function () {
         (0, _warn.default)('hasRequiredOptions', {
           received: options,
           required: ['key', 'last', 'all'],
-          subject: 'Syncable\'s erase method',
-          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+          subject: 'Editable\'s erase method',
+          docs: 'https://baleada.netlify.com/docs/logic/classes/Editable'
         });
         var newState = this.state;
 
@@ -267,8 +289,8 @@ function () {
         (0, _warn.default)('hasRequiredOptions', {
           received: options,
           required: ['value', 'last', 'all'],
-          subject: 'Syncable\'s erase method',
-          docs: 'https://baleada.netlify.com/docs/logic/Syncable'
+          subject: 'Editable\'s erase method',
+          docs: 'https://baleada.netlify.com/docs/logic/classes/Editable'
         });
         var newState = this.state;
 
@@ -293,14 +315,21 @@ function () {
 
 
     _options = _objectSpread({
-      editsFullArray: true
+      editsFullArray: true,
+      onEdit: function onEdit(newState, instance) {
+        return instance.setState(newState);
+      }
     }, _options);
 
     _classPrivateFieldSet(this, _hardCodedType, _options.type);
 
     _classPrivateFieldSet(this, _editsFullArray, _options.editsFullArray);
 
-    _classPrivateFieldSet(this, _onSync, _options.onSync);
+    _classPrivateFieldSet(this, _onEdit, _options.onEdit);
+
+    _classPrivateFieldSet(this, _onWrite, _options.onWrite);
+
+    _classPrivateFieldSet(this, _onErase, _options.onErase);
 
     _classPrivateFieldSet(this, _writeDictionary, {
       array: function array() {
@@ -346,7 +375,7 @@ function () {
   /* Public getters */
 
 
-  _createClass(Syncable, [{
+  _createClass(Editable, [{
     key: "setState",
 
     /* Public methods */
@@ -372,14 +401,14 @@ function () {
     value: function write() {
       var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var newState = _classPrivateFieldGet(this, _writeDictionary).hasOwnProperty(this.type) ? _classPrivateFieldGet(this, _writeDictionary)[this.type](options) : this.editableState;
-      return _classPrivateFieldGet(this, _sync).call(this, newState);
+      return _classPrivateFieldGet(this, _edit).call(this, newState, 'write');
     }
   }, {
     key: "erase",
     value: function erase() {
       var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var newState = _classPrivateFieldGet(this, _eraseDictionary).hasOwnProperty(this.type) ? _classPrivateFieldGet(this, _eraseDictionary)[this.type](options) : null;
-      return _classPrivateFieldGet(this, _sync).call(this, newState);
+      var newState = _classPrivateFieldGet(this, _eraseDictionary).hasOwnProperty(this.type) ? _classPrivateFieldGet(this, _eraseDictionary)[this.type](options) : undefined;
+      return _classPrivateFieldGet(this, _edit).call(this, newState, 'erase');
     }
     /* Private methods */
 
@@ -388,14 +417,9 @@ function () {
     get: function get() {
       return _classPrivateFieldGet(this, _getType).call(this, this.state);
     }
-  }, {
-    key: "editableStateType",
-    get: function get() {
-      return _classPrivateFieldGet(this, _getType).call(this, this.editableState);
-    }
   }]);
 
-  return Syncable;
+  return Editable;
 }();
 
 var _intendedTypes = new WeakMap();
@@ -404,7 +428,11 @@ var _editsFullArray = new WeakMap();
 
 var _hardCodedType = new WeakMap();
 
-var _onSync = new WeakMap();
+var _onEdit = new WeakMap();
+
+var _onWrite = new WeakMap();
+
+var _onErase = new WeakMap();
 
 var _writeDictionary = new WeakMap();
 
@@ -416,7 +444,7 @@ var _guessType = new WeakMap();
 
 var _getEditableState = new WeakMap();
 
-var _sync = new WeakMap();
+var _edit = new WeakMap();
 
 var _writeArray = new WeakMap();
 
@@ -430,9 +458,9 @@ var _eraseMap = new WeakMap();
 
 var _eraseObject = new WeakMap();
 
-var _default = Syncable;
+var _default = Editable;
 exports.default = _default;
-},{"../subclasses/Renamable":2,"../utils/hasProperties":3,"../utils/is":4,"../utils/warn":5}],2:[function(require,module,exports){
+},{"../subclasses/Renamable":2,"../util/hasProperties":4,"../util/is":5,"../util/typedEmit":6,"../util/warn":7}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -493,21 +521,16 @@ function (_Map) {
   _createClass(Renamable, [{
     key: "renameKey",
     value: function renameKey(keyToRename, newName) {
-      var _this = this;
-
       var keys = Array.from(this.keys()),
           keyToRenameIndex = keys.findIndex(function (key) {
         return key === keyToRename;
       }),
           newKeys = [].concat(_toConsumableArray(keys.slice(0, keyToRenameIndex)), [newName], _toConsumableArray(keys.slice(keyToRenameIndex + 1))),
-          values = Array.from(this.values());
-      keys.forEach(function (key) {
-        return _this.delete(key);
-      });
-      newKeys.forEach(function (key, index) {
-        return _this.set(key, values[index]);
-      });
-      return this;
+          values = Array.from(this.values()),
+          renamed = newKeys.reduce(function (renamed, key, index) {
+        return renamed.set(key, values[index]);
+      }, new Map());
+      return new Renamable(renamed);
     }
   }]);
 
@@ -516,6 +539,23 @@ function (_Map) {
 
 exports.default = Renamable;
 },{}],3:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _is = _interopRequireDefault(require("./is"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _default(emitter, mutatedState, instance) {
+  if (_is.default.function(emitter)) {
+    emitter(mutatedState, instance);
+  }
+}
+},{"./is":5}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -535,13 +575,13 @@ function hasSomeProperties(object, properties) {
     return object.hasOwnProperty(property);
   });
 }
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.orderedIs = exports.default = void 0;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -575,7 +615,7 @@ var is = {
     return Array.isArray(a);
   },
   object: function object(a) {
-    return Object.prototype.toString.call(a).indexOf('Object') > -1;
+    return _typeof(a) === 'object';
   },
   date: function date(a) {
     return a instanceof Date;
@@ -617,10 +657,10 @@ var is = {
     return /^hsl[^a]/.test(a);
   },
   rgba: function rgba(a) {
-    return /^rgba/.test(a);
+    return a.startsWith('rgba');
   },
   hsla: function hsla(a) {
-    return /^hsla/.test(a);
+    return a.startsWith('hsla');
   },
   color: function color(a) {
     return is.hex(a) || is.rgb(a) || is.hsl(a) || is.rgba(a) || is.hsla(a);
@@ -628,7 +668,32 @@ var is = {
 };
 var _default = is;
 exports.default = _default;
-},{}],5:[function(require,module,exports){
+var orderedIs = new Map([['undefined', is.undefined], ['defined', is.defined], ['null', is.null], ['string', is.string], ['number', is.number], ['boolean', is.boolean], ['symbol', is.symbol], ['function', is.function], ['array', is.array], ['object', is.object], ['date', is.date], ['error', is.error], ['file', is.file], ['filelist', is.filelist], ['path', is.path], ['svg', is.svg], ['input', is.input], ['element', is.element], ['node', is.node], ['nodeList', is.nodeList], ['hex', is.hex], ['rgb', is.rgb], ['hsl', is.hsl], ['rgba', is.rgba], ['hsla', is.hsla], ['color', is.color]]);
+exports.orderedIs = orderedIs;
+},{}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _default;
+
+var _emit = _interopRequireDefault(require("./emit"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _default(mutatedState, type, instance, catchallEmitter, typedEmitters) {
+  (0, _emit.default)(catchallEmitter, mutatedState, instance);
+
+  var _typedEmitters$find = typedEmitters.find(function (_ref) {
+    var currentType = _ref.type;
+    return currentType === type;
+  }),
+      typedEmitter = _typedEmitters$find.emitter;
+
+  (0, _emit.default)(typedEmitter, mutatedState, instance);
+}
+},{"./emit":3}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -658,6 +723,15 @@ var dictionary = {
           docsLink = "See the docs for more info: ".concat(docs);
       return "".concat(main, " ").concat(someOrEvery, " ").concat(docsLink);
     }
+  },
+  noFallbackAvailable: {
+    shouldWarn: function shouldWarn() {
+      return true;
+    },
+    getWarning: function getWarning(_ref3) {
+      var subject = _ref3.subject;
+      return "There is no fallback available for ".concat(subject, ".");
+    }
   }
 };
 
@@ -666,5 +740,5 @@ function warn(type, args) {
     console.warn(dictionary[type].getWarning(args));
   }
 }
-},{"./hasProperties":3}]},{},[1])(1)
+},{"./hasProperties":4}]},{},[1])(1)
 });

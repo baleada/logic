@@ -6,7 +6,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _toNodeList = _interopRequireDefault(require("../utils/toNodeList"));
+var _is = _interopRequireDefault(require("../util/is"));
+
+var _toNodeList = _interopRequireDefault(require("../util/toNodeList"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -123,11 +125,11 @@ function () {
 
     _classPrivateFieldSet(this, _intersectionOptions, _classPrivateFieldGet(this, _getIntersectionOptions).call(this, _options));
 
-    _classPrivateFieldSet(this, _computedIntersection, is.function(_classPrivateFieldGet(this, _onIntersect)) ? _classPrivateFieldGet(this, _getIntersection).call(this, _classPrivateFieldGet(this, _intersectionOptions)) : null);
+    _classPrivateFieldSet(this, _computedIntersection, _is.default.function(_classPrivateFieldGet(this, _onIntersect)) ? _classPrivateFieldGet(this, _getIntersection).call(this, _classPrivateFieldGet(this, _intersectionOptions)) : null);
 
-    _classPrivateFieldSet(this, _computedMutation, is.function(_classPrivateFieldGet(this, _onMutate)) ? _classPrivateFieldGet(this, _getMutation).call(this) : null);
+    _classPrivateFieldSet(this, _computedMutation, _is.default.function(_classPrivateFieldGet(this, _onMutate)) ? _classPrivateFieldGet(this, _getMutation).call(this) : null);
 
-    _classPrivateFieldSet(this, _computedResize, is.function(_classPrivateFieldGet(this, _onResize)) ? _classPrivateFieldGet(this, _getResize).call(this) : null);
+    _classPrivateFieldSet(this, _computedResize, _is.default.function(_classPrivateFieldGet(this, _onResize)) ? _classPrivateFieldGet(this, _getResize).call(this) : null);
   }
   /* Public getters */
 
@@ -148,7 +150,9 @@ function () {
       var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       this.elements.forEach(function (element) {
         _classPrivateFieldGet(_this, _supportedObserverTypes).forEach(function (observerType) {
-          if (!is.null(_this["".concat(observerType)])) _this["".concat(observerType)].observe(element, options);
+          if (!_is.default.null(_this["".concat(observerType)])) {
+            _this["".concat(observerType)].observe(element, options);
+          }
         });
       });
     }
@@ -158,7 +162,9 @@ function () {
       var _this2 = this;
 
       _classPrivateFieldGet(this, _supportedObserverTypes).forEach(function (observerType) {
-        if (!is.null(_this2["".concat(observerType)])) _this2["".concat(observerType)].disconnect();
+        if (!_is.default.null(_this2["".concat(observerType)])) {
+          _this2["".concat(observerType)].disconnect();
+        }
       });
     }
   }, {
@@ -167,7 +173,9 @@ function () {
       var _this3 = this;
 
       _classPrivateFieldGet(this, _supportedObserverTypes).forEach(function (observerType) {
-        if (!is.null(_this3["".concat(observerType)])) _this3["".concat(observerType)].takeRecords();
+        if (!_is.default.null(_this3["".concat(observerType)])) {
+          _this3["".concat(observerType)].takeRecords();
+        }
       });
     }
   }, {
@@ -176,7 +184,9 @@ function () {
       var _this4 = this;
 
       _classPrivateFieldGet(this, _supportedObserverTypes).forEach(function (observerType) {
-        if (!is.null(_this4["".concat(observerType)])) _this4["".concat(observerType)].unobserve(element);
+        if (!_is.default.null(_this4["".concat(observerType)])) {
+          _this4["".concat(observerType)].unobserve(element);
+        }
       });
     }
     /* Private methods */
@@ -226,7 +236,102 @@ var _getIntersection = new WeakMap();
 var _getMutation = new WeakMap();
 
 var _getResize = new WeakMap();
-},{"../utils/toNodeList":2}],2:[function(require,module,exports){
+},{"../util/is":2,"../util/toNodeList":3}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.orderedIs = exports.default = void 0;
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+/* Modified from anime.js https://github.com/juliangarnier/anime */
+var is = {
+  undefined: function undefined(a) {
+    return typeof a === 'undefined';
+  },
+  defined: function defined(a) {
+    return typeof a !== 'undefined';
+  },
+  null: function _null(a) {
+    return a === null;
+  },
+  string: function string(a) {
+    return typeof a === 'string';
+  },
+  number: function number(a) {
+    return typeof a === 'number';
+  },
+  boolean: function boolean(a) {
+    return typeof a === 'boolean';
+  },
+  symbol: function symbol(a) {
+    return _typeof(a) === 'symbol';
+  },
+  function: function _function(a) {
+    return typeof a === 'function';
+  },
+  array: function array(a) {
+    return Array.isArray(a);
+  },
+  object: function object(a) {
+    return _typeof(a) === 'object';
+  },
+  date: function date(a) {
+    return a instanceof Date;
+  },
+  error: function error(a) {
+    return a instanceof Error;
+  },
+  file: function file(a) {
+    return a instanceof File;
+  },
+  filelist: function filelist(a) {
+    return a instanceof FileList;
+  },
+  path: function path(a) {
+    return a instanceof SVGPathElement;
+  },
+  svg: function svg(a) {
+    return a instanceof SVGElement;
+  },
+  input: function input(a) {
+    return a instanceof HTMLInputElement;
+  },
+  element: function element(a) {
+    return a instanceof HTMLElement;
+  },
+  node: function node(a) {
+    return a instanceof Node;
+  },
+  nodeList: function nodeList(a) {
+    return a instanceof NodeList;
+  },
+  hex: function hex(a) {
+    return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(a);
+  },
+  rgb: function rgb(a) {
+    return /^rgb[^a]/.test(a);
+  },
+  hsl: function hsl(a) {
+    return /^hsl[^a]/.test(a);
+  },
+  rgba: function rgba(a) {
+    return a.startsWith('rgba');
+  },
+  hsla: function hsla(a) {
+    return a.startsWith('hsla');
+  },
+  color: function color(a) {
+    return is.hex(a) || is.rgb(a) || is.hsl(a) || is.rgba(a) || is.hsla(a);
+  }
+};
+var _default = is;
+exports.default = _default;
+var orderedIs = new Map([['undefined', is.undefined], ['defined', is.defined], ['null', is.null], ['string', is.string], ['number', is.number], ['boolean', is.boolean], ['symbol', is.symbol], ['function', is.function], ['array', is.array], ['object', is.object], ['date', is.date], ['error', is.error], ['file', is.file], ['filelist', is.filelist], ['path', is.path], ['svg', is.svg], ['input', is.input], ['element', is.element], ['node', is.node], ['nodeList', is.nodeList], ['hex', is.hex], ['rgb', is.rgb], ['hsl', is.hsl], ['rgba', is.rgba], ['hsla', is.hsla], ['color', is.color]]);
+exports.orderedIs = orderedIs;
+},{}],3:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
