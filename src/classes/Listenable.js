@@ -7,6 +7,7 @@
 /* Dependencies */
 
 /* Utils */
+import is from '../util/is'
 
 /* Dictionaries */
 import touchEventDictionary from '../dictionaries/touchEvents'

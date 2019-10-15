@@ -7,7 +7,7 @@
 /* Dependencies */
 
 /* Utils */
-import callback from '../util/callback'
+import emit from '../util/emit'
 
 export default class Togglable {
   #onToggle
@@ -43,15 +43,15 @@ export default class Togglable {
     return this
   }
   toggle () {
-    callback(this.#onToggle, !this.boolean, this)
+    emit(this.#onToggle, !this.boolean, this)
     return this
   }
   true () {
-    callback(this.#onTrue, true, this)
+    emit(this.#onTrue, true, this)
     return this
   }
   false () {
-    callback(this.#onFalse, !false, this)
+    emit(this.#onFalse, false, this)
     return this
   }
 
