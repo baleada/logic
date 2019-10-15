@@ -4,7 +4,9 @@
   "description": "UI logic for the Baleada toolkit",
   "main": "lib/index.js",
   "scripts": {
-    "index": "node scripts/buildIndices.js",
+    "index-classes": "node scripts/generateIndex.js 'src/classes' 'lib/classes' 'index'",
+    "index-subclasses": "node scripts/generateIndex.js 'src/subclasses' 'lib/subclasses' 'subclasses'",
+    "index-all": "npm run index-classes && npm run index-subclasses",
     "empty-lib": "node scripts/emptyDir.js 'lib'",
     "babelify": "npm run empty-lib && npx babel src --out-dir lib",
     "empty-browser-lib": "node scripts/emptyDir.js 'browser-lib'",
@@ -17,7 +19,7 @@
     "browserify-all": "npm run browserify-classes && npm run browserify-subclasses",
     "browserify": "npm run browser-babelify && npm run empty-test-fixtures-all && npm run browserify-all",
     "test": "npm run browserify && ava",
-    "prepare": "npm run index && npm run babelify"
+    "prepare": "npm run index-all && npm run babelify"
   },
   "repository": {
     "type": "git",
