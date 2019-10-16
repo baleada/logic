@@ -18,14 +18,6 @@ test('editableState is state', t => {
   t.deepEqual(instance.editableState, instance.state)
 })
 
-test('editableState is an empty string when editsFullArray is false', t => {
-  const instance = t.context.setup({
-    editsFullArray: false,
-  })
-
-  t.is(instance.editableState, '')
-})
-
 /* Methods */
 test('write() emits editableState through onEdit', t => {
   const instance = t.context.setup()
@@ -35,13 +27,10 @@ test('write() emits editableState through onEdit', t => {
   t.deepEqual(instance.state, ['Baleada'])
 })
 
-test('write() concats editableState and emits through onEdit when editsFullArray is false', t => {
-  const instance = t.context.setup({
-    editsFullArray: false,
-  })
+test('write({ item: (any) }) concats editableState and emits through onEdit', t => {
+  const instance = t.context.setup()
 
-  instance.setEditableState('Baleada')
-  instance.write()
+  instance.write({ item: 'Baleada' })
 
   t.deepEqual(instance.state, ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito', 'Baleada'])
 })

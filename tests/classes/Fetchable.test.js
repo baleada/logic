@@ -21,3 +21,17 @@ test('setResource sets the resource', t => {
 
   t.is(instance.resource, 'http://httpbin.org/post')
 })
+
+test('setResponse sets the response', t => {
+  const instance = t.context.setup()
+  instance.setResponse({ test: true })
+
+  t.deepEqual(instance.response, { test: true })
+})
+
+test('setError sets the error', t => {
+  const instance = t.context.setup()
+  instance.setError({ test: true })
+
+  t.deepEqual(instance.error, { test: true })
+})

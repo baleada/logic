@@ -7,35 +7,41 @@
 /* Dependencies */
 
 /* Util */
+import emit from '../util/emit'
 
 export default class Fetchable {
   /* Private properties */
+  #onResolve
+  #onReject
   #computedFetching
-  #computedResponse
-  #computedError
   #fetchOptions
 
   constructor (resource, options = {}) {
     /* Options */
+    options = {
+      onResolve: (newResponse, instance) => instance.setResponse(newResponse),
+      onReject: (newError, instance) => instance.setError(newError),
+      ...options
+    }
+
+    this.#onResolve = options.onResolve
+    this.#onReject = options.onReject
 
     /* Public properties */
     this.resource = resource
+    this.response = {}
+    this.error = {}
 
     /* Private properties */
     this.#computedFetching = false
-    this.#computedResponse = {}
-    this.#computedError = {}
 
     /* Dependency */
-    this.#fetchOptions = options
+    this.#fetchOptions = this.#getFetchOptions(options)
   }
 
   /* Public getters */
   get fetching () {
     return this.#computedFetching
-  }
-  get response () {
-    return this.#computedResponse
   }
   get responseJson () {
     try {
@@ -43,9 +49,6 @@ export default class Fetchable {
     } catch {
       return {}
     }
-  }
-  get error () {
-    return this.#computedError
   }
   get errorJson () {
     try {
@@ -60,19 +63,30 @@ export default class Fetchable {
     this.resource = resource
     return this
   }
+  setResponse (response) {
+    this.response = response
+    return this
+  }
+  setError (error) {
+    this.error = error
+    return this
+  }
   fetch () {
     this.#computedFetching = true
 
     return fetch(this.resource, this.#fetchOptions)
       .then(response => {
-        this.#computedResponse = response
-        return this
+        emit(this.#onResolve, response, this)
       })
       .catch(error => {
-        this.#computedError = error
+        emit(this.#onReject, error, this)
+      })
+      .finally(() => {
+        this.#computedFetching = false
         return this
       })
   }
 
   /* Private methods */
+  #getFetchOptions = ({ onResolve, onReject, ...rest }) => ({ ...rest })
 }

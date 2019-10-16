@@ -16,7 +16,6 @@ import Renamable from '../subclasses/Renamable'
 class Editable {
   /* Private properties */
   #intendedTypes
-  #editsFullArray
   #hardCodedType
   #onEdit
   #onWrite
@@ -29,19 +28,17 @@ class Editable {
 
     /* Options */
     options = {
-      editsFullArray: true,
       onEdit: (newState, instance) => instance.setState(newState),
       ...options
     }
 
     this.#hardCodedType = options.type
-    this.#editsFullArray = options.editsFullArray
     this.#onEdit = options.onEdit
     this.#onWrite = options.onWrite
     this.#onErase = options.onErase
 
     this.#writeDictionary = {
-      array: () => this.#writeArray(),
+      array: options => this.#writeArray(options),
       map: options => this.#writeMap(options),
       object: options => this.#writeObject(options),
     }
@@ -57,7 +54,7 @@ class Editable {
 
     /* Public properties */
     this.state = state
-    this.editableState = this.#getEditableState()
+    this.editableState = this.state
   }
 
   /* Public getters */
@@ -68,7 +65,7 @@ class Editable {
   /* Public methods */
   setState (state) {
     this.state = state
-    this.setEditableState(this.#getEditableState())
+    this.setEditableState(state)
     return this
   }
   setEditableState (state) {
@@ -76,14 +73,13 @@ class Editable {
     return this
   }
   cancel () {
-    this.editableState = this.#getEditableState()
+    this.#edit(this.state, 'cancel')
     return this
   }
   write (options = {}) {
     const newState = this.#writeDictionary.hasOwnProperty(this.type)
       ? this.#writeDictionary[this.type](options)
       : this.editableState
-
 
     return this.#edit(newState, 'write')
   }
@@ -97,7 +93,7 @@ class Editable {
 
   /* Private methods */
   #getType = function(state) {
-    if (this.#hardCodedType && this.#hardCodedType !== 'array') {
+    if (this.#hardCodedType) {
       return this.#hardCodedType
     } else {
       return this.#guessType(state)
@@ -119,13 +115,6 @@ class Editable {
 
     return type
   }
-  #getEditableState = function() {
-    if (this.type !== 'array') {
-      return this.state
-    } else {
-      return this.#editsFullArray ? this.state : ''
-    }
-  }
   #edit = function(newState, type) {
     typedEmit(
       newState,
@@ -140,10 +129,11 @@ class Editable {
 
     return this
   }
-  #writeArray = function() {
-    return this.#editsFullArray
-      ? this.editableState
-      : this.state.concat([this.editableState])
+  #writeArray = function(options) {
+    // TODO: test this in a real app to see how the workflow feels.
+    return options.hasOwnProperty('item')
+      ? this.state.concat([options.item])
+      : this.editableState
   }
   #writeMap = function(options) {
     warn('hasRequiredOptions', {

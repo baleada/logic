@@ -364,11 +364,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _default(mutatedState, type, instance, catchallEmitter, typedEmitters) {
   (0, _emit.default)(catchallEmitter, mutatedState, instance);
 
-  var _typedEmitters$find = typedEmitters.find(function (_ref) {
-    var currentType = _ref.type;
+  var _ref = typedEmitters.find(function (_ref2) {
+    var currentType = _ref2.type;
     return currentType === type;
-  }),
-      typedEmitter = _typedEmitters$find.emitter;
+  }) || {
+    emitter: undefined
+  },
+      typedEmitter = _ref.emitter;
 
   (0, _emit.default)(typedEmitter, mutatedState, instance);
 }

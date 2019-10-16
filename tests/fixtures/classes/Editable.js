@@ -50,11 +50,6 @@ function () {
       value: void 0
     });
 
-    _editsFullArray.set(this, {
-      writable: true,
-      value: void 0
-    });
-
     _hardCodedType.set(this, {
       writable: true,
       value: void 0
@@ -88,7 +83,7 @@ function () {
     _getType.set(this, {
       writable: true,
       value: function value(state) {
-        if (_classPrivateFieldGet(this, _hardCodedType) && _classPrivateFieldGet(this, _hardCodedType) !== 'array') {
+        if (_classPrivateFieldGet(this, _hardCodedType)) {
           return _classPrivateFieldGet(this, _hardCodedType);
         } else {
           return _classPrivateFieldGet(this, _guessType).call(this, state);
@@ -118,17 +113,6 @@ function () {
       }
     });
 
-    _getEditableState.set(this, {
-      writable: true,
-      value: function value() {
-        if (this.type !== 'array') {
-          return this.state;
-        } else {
-          return _classPrivateFieldGet(this, _editsFullArray) ? this.state : '';
-        }
-      }
-    });
-
     _edit.set(this, {
       writable: true,
       value: function value(newState, type) {
@@ -145,8 +129,9 @@ function () {
 
     _writeArray.set(this, {
       writable: true,
-      value: function value() {
-        return _classPrivateFieldGet(this, _editsFullArray) ? this.editableState : this.state.concat([this.editableState]);
+      value: function value(options) {
+        // TODO: test this in a real app to see how the workflow feels.
+        return options.hasOwnProperty('item') ? this.state.concat([options.item]) : this.editableState;
       }
     });
 
@@ -315,15 +300,12 @@ function () {
 
 
     _options = _objectSpread({
-      editsFullArray: true,
       onEdit: function onEdit(newState, instance) {
         return instance.setState(newState);
       }
     }, _options);
 
     _classPrivateFieldSet(this, _hardCodedType, _options.type);
-
-    _classPrivateFieldSet(this, _editsFullArray, _options.editsFullArray);
 
     _classPrivateFieldSet(this, _onEdit, _options.onEdit);
 
@@ -332,8 +314,8 @@ function () {
     _classPrivateFieldSet(this, _onErase, _options.onErase);
 
     _classPrivateFieldSet(this, _writeDictionary, {
-      array: function array() {
-        return _classPrivateFieldGet(_this, _writeArray).call(_this);
+      array: function array(options) {
+        return _classPrivateFieldGet(_this, _writeArray).call(_this, options);
       },
       map: function map(options) {
         return _classPrivateFieldGet(_this, _writeMap).call(_this, options);
@@ -370,7 +352,7 @@ function () {
     });
 
     this.state = _state;
-    this.editableState = _classPrivateFieldGet(this, _getEditableState).call(this);
+    this.editableState = this.state;
   }
   /* Public getters */
 
@@ -381,7 +363,7 @@ function () {
     /* Public methods */
     value: function setState(state) {
       this.state = state;
-      this.setEditableState(_classPrivateFieldGet(this, _getEditableState).call(this));
+      this.setEditableState(state);
       return this;
     }
   }, {
@@ -393,7 +375,8 @@ function () {
   }, {
     key: "cancel",
     value: function cancel() {
-      this.editableState = _classPrivateFieldGet(this, _getEditableState).call(this);
+      _classPrivateFieldGet(this, _edit).call(this, this.state, 'cancel');
+
       return this;
     }
   }, {
@@ -424,8 +407,6 @@ function () {
 
 var _intendedTypes = new WeakMap();
 
-var _editsFullArray = new WeakMap();
-
 var _hardCodedType = new WeakMap();
 
 var _onEdit = new WeakMap();
@@ -441,8 +422,6 @@ var _eraseDictionary = new WeakMap();
 var _getType = new WeakMap();
 
 var _guessType = new WeakMap();
-
-var _getEditableState = new WeakMap();
 
 var _edit = new WeakMap();
 
@@ -685,11 +664,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _default(mutatedState, type, instance, catchallEmitter, typedEmitters) {
   (0, _emit.default)(catchallEmitter, mutatedState, instance);
 
-  var _typedEmitters$find = typedEmitters.find(function (_ref) {
-    var currentType = _ref.type;
+  var _ref = typedEmitters.find(function (_ref2) {
+    var currentType = _ref2.type;
     return currentType === type;
-  }),
-      typedEmitter = _typedEmitters$find.emitter;
+  }) || {
+    emitter: undefined
+  },
+      typedEmitter = _ref.emitter;
 
   (0, _emit.default)(typedEmitter, mutatedState, instance);
 }
