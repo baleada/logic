@@ -28,10 +28,3 @@ test('setResponse sets the response', t => {
 
   t.deepEqual(instance.response, { test: true })
 })
-
-test('setError sets the error', t => {
-  const instance = t.context.setup()
-  instance.setError({ test: true })
-
-  t.deepEqual(instance.error, { test: true })
-})

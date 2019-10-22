@@ -11,49 +11,49 @@ import is from '../util/is'
 import toNodeList from '../util/toNodeList'
 
 export default class Observable {
-  #supportedObserverTypes
-  #onIntersect
-  #onMutate
-  #onResize
-  #intersectionOptions
-  #computedIntersection
-  #computedMutation
-  #computedResize
+  // _supportedObserverTypes
+  // _onIntersect
+  // _onMutate
+  // _onResize
+  // _intersectionOptions
+  // _computedIntersection
+  // _computedMutation
+  // _computedResize
 
   constructor (elements, options = {}) {
     /* Options */
-    this.#onIntersect = options.onIntersect
-    this.#onMutate = options.onMutate
-    this.#onResize = options.onResize
+    this._onIntersect = options.onIntersect
+    this._onMutate = options.onMutate
+    this._onResize = options.onResize
 
     /* Public properties */
     this.elements = toNodeList(elements)
 
     /* Private properties */
-    this.#supportedObserverTypes = ['intersection', 'mutation', 'resize']
+    this._supportedObserverTypes = ['intersection', 'mutation', 'resize']
 
     /* Dependency */
-    this.#intersectionOptions = this.#getIntersectionOptions(options)
-    this.#computedIntersection = is.function(this.#onIntersect)
-      ? this.#getIntersection(this.#intersectionOptions)
+    this._intersectionOptions = this._getIntersectionOptions(options)
+    this._computedIntersection = is.function(this._onIntersect)
+      ? this._getIntersection(this._intersectionOptions)
       : null
-    this.#computedMutation = is.function(this.#onMutate)
-      ? this.#getMutation()
+    this._computedMutation = is.function(this._onMutate)
+      ? this._getMutation()
       : null
-    this.#computedResize = is.function(this.#onResize)
-      ? this.#getResize()
+    this._computedResize = is.function(this._onResize)
+      ? this._getResize()
       : null
   }
 
   /* Public getters */
   get intersection () {
-    return this.#computedIntersection
+    return this._computedIntersection
   }
   get mutation () {
-    return this.#computedMutation
+    return this._computedMutation
   }
   get resize () {
-    return this.#computedResize
+    return this._computedResize
   }
 
   /* Public methods */
@@ -63,7 +63,7 @@ export default class Observable {
   }
   observe (options = {}) {
     this.elements.forEach(element => {
-      this.#supportedObserverTypes.forEach(observerType => {
+      this._supportedObserverTypes.forEach(observerType => {
         if (!is.null(this[`${observerType}`])) {
           this[`${observerType}`].observe(element, options)
         }
@@ -71,21 +71,21 @@ export default class Observable {
     })
   }
   disconnect () {
-    this.#supportedObserverTypes.forEach(observerType => {
+    this._supportedObserverTypes.forEach(observerType => {
       if (!is.null(this[`${observerType}`])) {
         this[`${observerType}`].disconnect()
       }
     })
   }
   takeRecords () {
-    this.#supportedObserverTypes.forEach(observerType => {
+    this._supportedObserverTypes.forEach(observerType => {
       if (!is.null(this[`${observerType}`])) {
         this[`${observerType}`].takeRecords()
       }
     })
   }
   unobserve (element) {
-    this.#supportedObserverTypes.forEach(observerType => {
+    this._supportedObserverTypes.forEach(observerType => {
       if (!is.null(this[`${observerType}`])) {
         this[`${observerType}`].unobserve(element)
       }
@@ -93,14 +93,14 @@ export default class Observable {
   }
 
   /* Private methods */
-  #getIntersectionOptions = ({ onIntersect, onMutate, onResize, ...rest }) => rest
-  #getIntersection = function(options) {
-    return new IntersectionObserver(this.#onIntersect, options)
+  _getIntersectionOptions = ({ onIntersect, onMutate, onResize, ...rest }) => rest
+  _getIntersection = function(options) {
+    return new IntersectionObserver(this._onIntersect, options)
   }
-  #getMutation = function() {
-    return new MutationObserver(this.#onMutate)
+  _getMutation = function() {
+    return new MutationObserver(this._onMutate)
   }
-  #getResize = function() {
-    return new ResizeObserver(this.#onResize)
+  _getResize = function() {
+    return new ResizeObserver(this._onResize)
   }
 }

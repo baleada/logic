@@ -9,8 +9,8 @@ import is from '../util/is'
 
 export default class Reorderable extends Array {
   reorder (itemsToMoveParam, itemsDestinationParam) {
-    const { sliceFrom, sliceItemCount } = this.#getSliceFromAndSliceItemCount(itemsToMoveParam),
-          spliceFrom = this.#getSpliceFrom(itemsDestinationParam, sliceFrom),
+    const { sliceFrom, sliceItemCount } = this._getSliceFromAndSliceItemCount(itemsToMoveParam),
+          spliceFrom = this._getSpliceFrom(itemsDestinationParam, sliceFrom),
           itemsToMove = this.slice(sliceFrom, sliceFrom + sliceItemCount),
           before = this.slice(0, sliceFrom),
           middle = this.slice(sliceFrom + sliceItemCount, spliceFrom + 1),
@@ -26,7 +26,7 @@ export default class Reorderable extends Array {
   } // Adapted from Adam Wathan's Advanced Vue Component Design course
 
   /* Private methods */
-  #getSliceFromAndSliceItemCount = function(param) {
+  _getSliceFromAndSliceItemCount = function(param) {
     const sliceFrom = is.number(param)
             ? param
             : is.object(param)
@@ -45,7 +45,7 @@ export default class Reorderable extends Array {
     return { sliceFrom, sliceItemCount }
   }
 
-  #getSpliceFrom = function(param, sliceFrom) {
+  _getSpliceFrom = function(param, sliceFrom) {
     return is.number(param) ? param : sliceFrom
   }
 }

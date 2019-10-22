@@ -2,7 +2,7 @@
   "name": "@baleada/logic",
   "version": "0.0.0",
   "description": "UI logic for the Baleada toolkit",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {
     "index-classes": "node scripts/generateIndex.js 'src/classes' 'lib/classes' 'index'",
     "index-subclasses": "node scripts/generateIndex.js 'src/subclasses' 'lib/subclasses' 'subclasses'",
@@ -48,6 +48,7 @@
     "@babel/core": "^7.5.4",
     "@babel/plugin-proposal-class-properties": "^7.5.0",
     "@babel/plugin-proposal-private-methods": "^7.4.4",
+    "@babel/plugin-transform-regenerator": "^7.4.5",
     "@babel/preset-env": "^7.5.4",
     "@babel/runtime-corejs3": "^7.5.4",
     "@nuxtjs/eslint-config": "^1.1.2",
@@ -62,6 +63,7 @@
     "eslint-plugin-nuxt": "^0.4.3",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
+    "fast-async": "^6.3.8",
     "puppeteer": "^1.18.1",
     "regenerator-runtime": "^0.13.3"
   },

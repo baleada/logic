@@ -14,15 +14,15 @@ import is from '../util/is'
  * Delayable depends on `[setTimeout](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout)`, `[setInterval](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval)`, `[requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)`, and the `[global Data object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)`, but is otherwise written in vanilla JS. Delayable powers <nuxt-link to="/docs/tools/composition-functions/useDelayable">`useDelayable`</nuxt-link>.
  */
 export default class Delayable {
-  #delay
-  #isInterval
-  #parameters
-  #id
-  #tickId
-  #started
-  #computedExecutions
-  #computedTimeElapsed
-  #computedTimeRemaining
+  // _delay
+  // _isInterval
+  // _parameters
+  // _id
+  // _tickId
+  // _started
+  // _computedExecutions
+  // _computedTimeElapsed
+  // _computedTimeRemaining
 
   constructor (callback, options) {
     options = {
@@ -31,8 +31,8 @@ export default class Delayable {
     }
 
     /* Options */
-    this.#delay = options.delay
-    this.#parameters = is.array(options.parameters) ? options.parameters : []
+    this._delay = options.delay
+    this._parameters = is.array(options.parameters) ? options.parameters : []
 
     /* Public properties */
     /**
@@ -42,9 +42,9 @@ export default class Delayable {
     this.callback = callback
 
     /* Private properties */
-    this.#computedExecutions = 0
-    this.#computedTimeElapsed = 0
-    this.#computedTimeRemaining = this.#delay
+    this._computedExecutions = 0
+    this._computedTimeElapsed = 0
+    this._computedTimeRemaining = this._delay
   }
 
   /* Public getters */
@@ -53,21 +53,21 @@ export default class Delayable {
    * @type {Number}
    */
   get executions () {
-    return this.#computedExecutions
+    return this._computedExecutions
   }
   /**
    * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
    * @type {Number}
    */
   get timeElapsed () {
-    return this.#computedTimeElapsed
+    return this._computedTimeElapsed
   }
   /**
    * The time (in milliseconds) that remains until the callback function will be executed
    * @type {Number}
    */
   get timeRemaining () {
-    return this.#computedTimeRemaining
+    return this._computedTimeRemaining
   }
 
   /* Public methods */
@@ -82,82 +82,82 @@ export default class Delayable {
    * Clears the delayed callback function. The function won't be executed, but <code>timeElapsed</code> and <code>timeRemaining</code> will <b>not</b> be reset to their initial values.
    */
   clear () {
-    window.clearTimeout(this.#id)
-    window.clearInterval(this.#id)
-    this.#stopTick()
-    this.#computedExecutions = 0
+    window.clearTimeout(this._id)
+    window.clearInterval(this._id)
+    this._stopTick()
+    this._computedExecutions = 0
   }
   /**
    * Executes the callback function after the period of time specified by <code>delay</code>
    */
   timeout () {
-    this.#isInterval = false
-    this.#setup()
-    this.#id = this.#setTimeout()
+    this._isInterval = false
+    this._setup()
+    this._id = this._setTimeout()
   }
   /**
    * Repeatedly executes the callback function with a fixed time delay (specified by <code>delay</code>) between each execution
    */
   interval () {
-    this.#isInterval = true
-    this.#setup()
-    this.#id = this.#setInterval()
+    this._isInterval = true
+    this._setup()
+    this._id = this._setInterval()
   }
 
   /* Private methods */
-  #setTimeout = function() {
+  _setTimeout = function() {
     return window.setTimeout(
       () => {
         this.callback(...arguments)
-        this.#stopTick()
-        this.#computedTimeElapsed = this.#delay // Set timeElapsed to delay in case the user has switched tabs (which pauses requestAnimationFrame)
-        this.#computedExecutions = 1
+        this._stopTick()
+        this._computedTimeElapsed = this._delay // Set timeElapsed to delay in case the user has switched tabs (which pauses requestAnimationFrame)
+        this._computedExecutions = 1
       },
-      this.#delay,
-      ...this.#parameters
+      this._delay,
+      ...this._parameters
     )
   }
-  #setInterval = function() {
+  _setInterval = function() {
     return window.setInterval(
       () => {
-        this.callback(...this.#parameters)
-        this.#stopTick()
-        this.#computedTimeElapsed = 0
-        this.#computedExecutions++
-        this.#startTick()
+        this.callback(...this._parameters)
+        this._stopTick()
+        this._computedTimeElapsed = 0
+        this._computedExecutions++
+        this._startTick()
       },
-      this.#delay,
+      this._delay,
     )
   }
-  #setTimeElapsed = function() {
-    const timeElapsed = Date.now() - this.#started
-    this.#computedTimeElapsed = this.#isInterval
-      ? timeElapsed - this.#delay * this.#computedExecutions
-      : Math.min(timeElapsed, this.#delay)
+  _setTimeElapsed = function() {
+    const timeElapsed = Date.now() - this._started
+    this._computedTimeElapsed = this._isInterval
+      ? timeElapsed - this._delay * this._computedExecutions
+      : Math.min(timeElapsed, this._delay)
   }
-  #setTimeRemaining = function() {
-    this.#computedTimeRemaining = this.#delay - this.#computedTimeElapsed
+  _setTimeRemaining = function() {
+    this._computedTimeRemaining = this._delay - this._computedTimeElapsed
   }
-  #tick = function() {
-    this.#setTimeElapsed()
-    this.#setTimeRemaining()
-    if (this.#computedTimeElapsed < this.#delay) {
-      this.#stopTick()
-      this.#startTick()
+  _tick = function() {
+    this._setTimeElapsed()
+    this._setTimeRemaining()
+    if (this._computedTimeElapsed < this._delay) {
+      this._stopTick()
+      this._startTick()
     }
   }
-  #startTick = function() {
-    this.#tickId = window.requestAnimationFrame(this.#tick.bind(this))
+  _startTick = function() {
+    this._tickId = window.requestAnimationFrame(this._tick.bind(this))
   }
-  #stopTick = function() {
-    window.cancelAnimationFrame(this.#tickId)
+  _stopTick = function() {
+    window.cancelAnimationFrame(this._tickId)
   }
-  #setup = function() {
+  _setup = function() {
     this.clear()
-    this.#computedExecutions = 0
-    this.#computedTimeElapsed = 0
-    this.#computedTimeRemaining = this.#delay
-    this.#started = Date.now()
-    this.#startTick()
+    this._computedExecutions = 0
+    this._computedTimeElapsed = 0
+    this._computedTimeRemaining = this._delay
+    this._started = Date.now()
+    this._startTick()
   }
 }

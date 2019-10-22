@@ -9,7 +9,7 @@ import Navigable from './lib/classes/Navigable.js'
 import Observable from './lib/classes/Observable.js'
 import Poppable from './lib/classes/Poppable.js'
 import Searchable from './lib/classes/Searchable.js'
-import Toggleable from './lib/classes/Toggleable.js'
+import Togglable from './lib/classes/Togglable.js'
 import Touchable from './lib/classes/Touchable.js'
 
 export {
@@ -24,6 +24,6 @@ export {
   Observable,
   Poppable,
   Searchable,
-  Toggleable,
+  Togglable,
   Touchable,
 }

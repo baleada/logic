@@ -9,8 +9,8 @@ import Dependency from '../wrappers/AnimatableAnime'
 
 export default class Animatable {
   /* Private properties */
-  #dependencyOptions
-  #dependency
+  // _dependencyOptions
+  // _dependency
 
   constructor (elements, options = {}) {
     /* Options */
@@ -19,39 +19,39 @@ export default class Animatable {
     this.elements = elements
 
     /* Dependency */
-    this.#dependencyOptions = options
-    this.#dependency = new Dependency(this.elements, this.#dependencyOptions)
+    this._dependencyOptions = options
+    this._dependency = new Dependency(this.elements, this._dependencyOptions)
   }
 
   /* Public getters */
   get animation () {
-    return this.#dependency.animation
+    return this._dependency.animation
   }
 
   /* Public methods */
   setElements (elements) {
     this.elements = elements
-    this.#dependency = new Dependency(this.elements, this.#dependencyOptions)
+    this._dependency = new Dependency(this.elements, this._dependencyOptions)
     return this
   }
   play () {
-    this.#dependency.play()
+    this._dependency.play()
     return this
   }
   pause () {
-    this.#dependency.pause()
+    this._dependency.pause()
     return this
   }
   restart () {
-    this.#dependency.restart()
+    this._dependency.restart()
     return this
   }
   reverse () {
-    this.#dependency.reverse()
+    this._dependency.reverse()
     return this
   }
   seek (timestamp) {
-    this.#dependency.seek(timestamp)
+    this._dependency.seek(timestamp)
     return this
   }
 

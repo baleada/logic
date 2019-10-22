@@ -7,7 +7,10 @@ export default async function withPage (t, fileName, isClass, run) {
         page = await browser.newPage()
 
   await page.on('console', msg => console.log(msg.text()))
-  await page.on('pageerror', pageerror => console.log(pageerror))
+  await page.on('pageerror', pageerror => {
+    console.log('pageerror:')
+    console.log(pageerror)
+  })
 
   await page.exposeFunction('assert', condition => t.assert(condition))
   await page.exposeFunction('is', (value, expected) => t.is(value, expected))

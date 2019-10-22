@@ -1,5 +1,5 @@
 /*
- * Toggleable.js
+ * Togglable.js
  * (c) 2019 Alex Vipond
  * Released under the MIT license
  */
@@ -10,9 +10,9 @@
 import emit from '../util/emit'
 
 export default class Togglable {
-  #onToggle
-  #onTrue
-  #onFalse
+  // _onToggle
+  // _onTrue
+  // _onFalse
 
   constructor (boolean, options = {}) {
     /* Options */
@@ -23,9 +23,9 @@ export default class Togglable {
       ...options
     }
 
-    this.#onToggle = options.onToggle
-    this.#onTrue = options.onTrue
-    this.#onFalse = options.onFalse
+    this._onToggle = options.onToggle
+    this._onTrue = options.onTrue
+    this._onFalse = options.onFalse
 
     /* Public properties */
     this.boolean = boolean
@@ -43,15 +43,15 @@ export default class Togglable {
     return this
   }
   toggle () {
-    emit(this.#onToggle, !this.boolean, this)
+    emit(this._onToggle, !this.boolean, this)
     return this
   }
   true () {
-    emit(this.#onTrue, true, this)
+    emit(this._onTrue, true, this)
     return this
   }
   false () {
-    emit(this.#onFalse, false, this)
+    emit(this._onFalse, false, this)
     return this
   }
 

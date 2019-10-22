@@ -1,6 +1,8 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Fetchable = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
+function _typeof2(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof2 = function _typeof2(obj) { return typeof obj; }; } else { _typeof2 = function _typeof2(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof2(obj); }
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -9,6 +11,12 @@ exports.default = void 0;
 var _emit = _interopRequireDefault(require("../util/emit"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol") { _typeof = function _typeof(obj) { return _typeof2(obj); }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : _typeof2(obj); }; } return _typeof(obj); }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { keys.push.apply(keys, Object.getOwnPropertySymbols(object)); } if (enumerableOnly) keys = keys.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); return keys; }
 
@@ -39,12 +47,7 @@ function () {
 
     _classCallCheck(this, Fetchable);
 
-    _onResolve.set(this, {
-      writable: true,
-      value: void 0
-    });
-
-    _onReject.set(this, {
+    _onFetch.set(this, {
       writable: true,
       value: void 0
     });
@@ -63,8 +66,7 @@ function () {
       writable: true,
       value: function value(_ref) {
         var onResolve = _ref.onResolve,
-            onReject = _ref.onReject,
-            rest = _objectWithoutProperties(_ref, ["onResolve", "onReject"]);
+            rest = _objectWithoutProperties(_ref, ["onResolve"]);
 
         return _objectSpread({}, rest);
       }
@@ -72,23 +74,17 @@ function () {
 
     /* Options */
     options = _objectSpread({
-      onResolve: function onResolve(newResponse, instance) {
+      onFetch: function onFetch(newResponse, instance) {
         return instance.setResponse(newResponse);
-      },
-      onReject: function onReject(newError, instance) {
-        return instance.setError(newError);
       }
     }, options);
 
-    _classPrivateFieldSet(this, _onResolve, options.onResolve);
-
-    _classPrivateFieldSet(this, _onReject, options.onReject);
+    _classPrivateFieldSet(this, _onFetch, options.onResolve);
     /* Public properties */
 
 
     this.resource = resource;
     this.response = {};
-    this.error = {};
     /* Private properties */
 
     _classPrivateFieldSet(this, _computedFetching, false);
@@ -115,12 +111,6 @@ function () {
       return this;
     }
   }, {
-    key: "setError",
-    value: function setError(error) {
-      this.error = error;
-      return this;
-    }
-  }, {
     key: "fetch",
     value: function (_fetch) {
       function fetch() {
@@ -132,19 +122,18 @@ function () {
       };
 
       return fetch;
-    }(function () {
-      var _this = this;
-
+    }(
+    /*#__PURE__*/
+    _asyncToGenerator(function* () {
       _classPrivateFieldSet(this, _computedFetching, true);
 
-      return fetch(this.resource, _classPrivateFieldGet(this, _fetchOptions)).then(function (response) {
-        (0, _emit.default)(_classPrivateFieldGet(_this, _onResolve), response, _this);
-      }).catch(function (error) {
-        (0, _emit.default)(_classPrivateFieldGet(_this, _onReject), error, _this);
-      }).finally(function () {
-        return _this;
-      });
-    })
+      var response = yield fetch(this.resource, _classPrivateFieldGet(this, _fetchOptions));
+      (0, _emit.default)(_classPrivateFieldGet(this, _onFetch), response, this);
+
+      _classPrivateFieldSet(this, _computedFetching, false);
+
+      return this;
+    }))
     /* Private methods */
 
   }, {
@@ -157,17 +146,8 @@ function () {
     get: function get() {
       try {
         return this.response.json();
-      } catch (_unused) {
-        return {};
-      }
-    }
-  }, {
-    key: "errorJson",
-    get: function get() {
-      try {
-        return this.error.json();
-      } catch (_unused2) {
-        return {};
+      } catch (error) {
+        return error;
       }
     }
   }]);
@@ -177,9 +157,7 @@ function () {
 
 exports.default = Fetchable;
 
-var _onResolve = new WeakMap();
-
-var _onReject = new WeakMap();
+var _onFetch = new WeakMap();
 
 var _computedFetching = new WeakMap();
 

@@ -10,8 +10,8 @@ import Dependency from '../wrappers/TouchableHammer'
 /* Util */
 
 export default class Touchable {
-  #dependencyOptions
-  #dependency
+  // _dependencyOptions
+  // _dependency
 
   constructor (element, options = {}) {
     /* Options */
@@ -22,13 +22,13 @@ export default class Touchable {
     /* Private properties */
 
     /* Dependency */
-    this.#dependencyOptions = options
-    this.#dependency = new Dependency(this.element, this.#dependencyOptions)
+    this._dependencyOptions = options
+    this._dependency = new Dependency(this.element, this._dependencyOptions)
   }
 
   /* Public getters */
   get manager () {
-    return this.#dependency.manager
+    return this._dependency.manager
   }
 
   /* Public methods */
@@ -37,10 +37,10 @@ export default class Touchable {
     return this
   }
   touch (touchType, data) {
-    this.#dependency.touch(touchType, data)
+    this._dependency.touch(touchType, data)
   }
   destroy () {
-    this.#dependency.destroy()
+    this._dependency.destroy()
   }
 
   /* Private methods */

@@ -1,5 +1,5 @@
 import test from 'ava'
-import Togglable from '../../src/classes/Toggleable'
+import Togglable from '../../src/classes/Togglable'
 
 test.beforeEach(t => {
   t.context.setup = (options) => new Togglable(true, options)

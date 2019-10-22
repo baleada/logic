@@ -10,8 +10,8 @@ import Dependency from '../wrappers/PoppablePopper'
 /* Util */
 
 export default class Poppable {
-  #dependencyOptions
-  #dependency
+  // _dependencyOptions
+  // _dependency
 
   constructor ({ reference, popper }, options = {}) {
     /* Options */
@@ -23,13 +23,13 @@ export default class Poppable {
     /* Private properties */
 
     /* Dependency */
-    this.#dependencyOptions = this.#getDependencyOptions(options)
-    this.#dependency = new Dependency({ reference: this.reference, popper: this.popper }, this.#dependencyOptions)
+    this._dependencyOptions = this._getDependencyOptions(options)
+    this._dependency = new Dependency({ reference: this.reference, popper: this.popper }, this._dependencyOptions)
   }
 
   /* Public getters */
   get manager () {
-    return this.#dependency.manager
+    return this._dependency.manager
   }
 
   /* Public methods */
@@ -42,21 +42,21 @@ export default class Poppable {
     return this
   }
   update () {
-    this.#dependency.update()
+    this._dependency.update()
   }
   enableEventListeners () {
-    this.#dependency.enableEventListeners()
+    this._dependency.enableEventListeners()
   }
   disableEventListeners () {
-    this.#dependency.disableEventListeners()
+    this._dependency.disableEventListeners()
   }
   scheduleUpdate () {
-    this.#dependency.scheduleUpdate()
+    this._dependency.scheduleUpdate()
   }
   destroy () {
-    this.#dependency.destroy()
+    this._dependency.destroy()
   }
 
   /* Private methods */
-  #getDependencyOptions = (options) => options
+  _getDependencyOptions = (options) => options
 }

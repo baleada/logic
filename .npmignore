@@ -4,3 +4,4 @@
 # Except these files
 !lib/**/*.js
 !index.js
+!subclasses.js

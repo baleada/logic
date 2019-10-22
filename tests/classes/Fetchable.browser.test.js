@@ -5,23 +5,32 @@ test('stores the response', withPage, 'Fetchable', true, async (t, page) => {
   await page.evaluate(async () => {
     const instance = new Fetchable('https://httpbin.org/get', { method: 'get' })
 
-    console.log(instance)
     await instance.fetch()
 
-    await window.assert(instance.response)
+    await window.assert(instance.response.ok)
   })
 })
 
-/* Methods */
-// test('fetch() stores response when request is resolved', withPage, 'Fetchable', async (t, page) => {
-//   const value = await page.evaluate(() => {
-//     let value
-//     const instance = new Fetchable({ method: 'get', url: 'http://httpbin.org/get' })
+// test('stores the error', withPage, 'Fetchable', true, async (t, page) => {
+//   await page.evaluate(async () => {
+//     const instance = new Fetchable('https://httpbin.org/get', { method: 'post' })
 //
-//     instance.fetch()
+//     await instance.fetch()
 //
-//     return instance.response
+//     console.log(typeof instance.response.ok)
+//
+//     await window.assert(typeof instance.response.ok === 'string')
 //   })
+// })
+
+// test('gets the JSON', withPage, 'Fetchable', true, async (t, page) => {
+//   await page.evaluate(async () => {
+//     const instance = new Fetchable('https://httpbin.org/get', { method: 'get' })
 //
-//   t.is(value, false)
+//     await instance.fetch()
+//
+//     const json = await instance.responseJson
+//
+//     await window.assert(json)
+//   })
 // })

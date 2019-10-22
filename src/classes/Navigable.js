@@ -8,13 +8,13 @@
 import typedEmit from '../util/typedEmit'
 
 class Navigable {
-  #loops
-  #increment
-  #decrement
-  #onNavigate
-  #onGoTo
-  #onNext
-  #onPrev
+  // _loops
+  // _increment
+  // _decrement
+  // _onNavigate
+  // _onGoTo
+  // _onNext
+  // _onPrev
 
   constructor (array, options = {}) {
     /* Options */
@@ -27,13 +27,13 @@ class Navigable {
       ...options
     }
 
-    this.#loops = options.loops
-    this.#increment = options.increment
-    this.#decrement = options.decrement
-    this.#onNavigate = options.onNavigate
-    this.#onGoTo = options.onGoTo
-    this.#onNext = options.onNext
-    this.#onPrev = options.onPrev
+    this._loops = options.loops
+    this._increment = options.increment
+    this._decrement = options.decrement
+    this._onNavigate = options.onNavigate
+    this._onGoTo = options.onGoTo
+    this._onNext = options.onNext
+    this._onPrev = options.onPrev
 
     /* Public properties */
     this.array = array
@@ -74,16 +74,16 @@ class Navigable {
 
     navigateType = navigateType || 'goTo'
 
-    return this.#navigate(newLocation, navigateType)
+    return this._navigate(newLocation, navigateType)
   }
   next () {
     let newLocation
     const lastLocation = this.array.length - 1
 
-    if (this.location + this.#increment > lastLocation) {
+    if (this.location + this._increment > lastLocation) {
       switch (true) {
-      case (this.#loops):
-        newLocation = this.location + this.#increment
+      case (this._loops):
+        newLocation = this.location + this._increment
         while (newLocation > lastLocation) {
           newLocation -= this.array.length
         }
@@ -92,7 +92,7 @@ class Navigable {
         newLocation = lastLocation
       }
     } else {
-      newLocation = this.location + this.#increment
+      newLocation = this.location + this._increment
     }
 
     return this.goTo(newLocation, 'next')
@@ -100,10 +100,10 @@ class Navigable {
   prev () {
     let newLocation
 
-    if (this.location - this.#decrement < 0) {
+    if (this.location - this._decrement < 0) {
       switch (true) {
-      case (this.#loops):
-        newLocation = this.location - this.#decrement
+      case (this._loops):
+        newLocation = this.location - this._decrement
         while (newLocation < 0) {
           newLocation += this.array.length
         }
@@ -112,23 +112,23 @@ class Navigable {
         newLocation = 0
       }
     } else {
-      newLocation = this.location - this.#decrement
+      newLocation = this.location - this._decrement
     }
 
     return this.goTo(newLocation, 'prev')
   }
 
   /* Private methods */
-  #navigate = function(newLocation, type) {
+  _navigate = function(newLocation, type) {
     typedEmit(
       newLocation,
       type,
       this,
-      this.#onNavigate,
+      this._onNavigate,
       [
-        { type: 'goTo', emitter: this.#onGoTo },
-        { type: 'next', emitter: this.#onNext },
-        { type: 'prev', emitter: this.#onPrev },
+        { type: 'goTo', emitter: this._onGoTo },
+        { type: 'next', emitter: this._onNext },
+        { type: 'prev', emitter: this._onPrev },
       ]
     )
 

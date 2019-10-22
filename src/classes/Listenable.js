@@ -10,16 +10,17 @@
 import is from '../util/is'
 
 /* Dictionaries */
-import touchEventDictionary from '../dictionaries/touchEvents'
+import touchDictionary from '../dictionaries/touches'
+import observerDictionary from '../dictionaries/observers'
 
 export default class Listenable {
-  #element
-  #recognizerOptions
-  #store
-  #activeListenerIds
-  #eventListenersGetter
+  // _element
+  // _recognizerOptions
+  // _store
+  // _activeListenerIds
+  // _eventListenersGetter
 
-  constructor (eventType, options = {}) {
+  constructor (eventName, options = {}) {
     /* Options */
     options = {
       element: document,
@@ -27,54 +28,75 @@ export default class Listenable {
       ...options
     }
 
-    this.#element = options.element
-    this.#recognizerOptions = options.recognizer
+    this._element = options.element
+    this._recognizerOptions = options.recognizer
 
     /* Public properties */
-    this.eventType = eventType
+    this.eventName = eventName
 
     /* Private properties */
-    this.#store = {}
-    this.#activeListenerIds = []
-    this.#eventListenersGetter = touchEventDictionary.hasOwnProperty(this.eventType)
-      ? this.#getTouchEventListeners
-      : (listener, options) => [[this.eventType, listener, ...options]]
+    this._store = {}
+    this._activeListenerIds = []
 
     /* Dependency */
   }
 
   get activeListeners () {
-    return this.#activeListenerIds
+    return this._activeListenerIds
   }
-
   get eventData () {
-    return this.#store
+    return this._store
   }
 
   /* Public getters */
 
   /* Public methods */
-  setEventType (eventType) {
+  setEventName (eventName) {
     this.destroy()
-    this.eventType = eventType
+    this.eventName = eventName
     return this
   }
-  listen (listener, optionsOrUseCapture, wantsUntrusted) {
-    const eventListeners = this.#getEventListeners(listener, optionsOrUseCapture, wantsUntrusted)
 
-    eventListeners.forEach(eventListener => {
-      this.#element.addEventListener(...eventListener)
-      this.#activeListenerIds.push(this.#getId(eventListener))
-    })
+  listen (listener, { listenerOptions, observerOptions, observeOptions, useCapture, wantsUntrusted }) {
+    if (this._isObserved()) {
+      const observer = new observerDictionary[this.eventName](listener, optionsOrUseCapture)
+      observer.observe(this.element, observeOptions)
+      this._activeListenerIds.push(observer)
+    } else {
+      const eventListeners = this._getEventListeners(listener, optionsOrUseCapture, wantsUntrusted)
+
+      eventListeners.forEach(eventListener => {
+        this._element.addEventListener(...eventListener)
+        this._activeListenerIds.push(this._getId(eventListener))
+      })
+    }
 
     return this
   }
+  _isObserved = function() {
+    return observerDictionary.hasOwnProperty(this.eventName)
+  }
+  _getEventListeners = function(listener, optionsOrUseCapture, wantsUntrusted) {
+    const options = [optionsOrUseCapture, wantsUntrusted],
+          getter = this._isTouch()
+            ? this._getTouchEventListeners
+            : (listener, options) => [[this.eventName, listener, ...options]]
+    return this._eventListenersGetter(listener, options)
+  }
+  _isTouch = function() {
+    return touchDictionary.hasOwnProperty(this.eventName)
+  }
+  _getTouchEventListeners = function(listener, options) {
+    return touchDictionary[this.eventName](listener, this._store, this._recognizerOptions)
+      .map(eventListener => [...eventListener, ...options])
+  }
+
   destroy (activeListener) {
-    if (activeListener) {
-      this.#element.removeEventListener(...this.#getRemoveArgs(activeListener))
+    if (this._isObservation()) {
+      this._activeListenerIds.forEach(observer => observer.disconnect())
     } else {
       this.activeListeners.forEach(activeListener => {
-        this.#element.removeEventListener(...this.#getRemoveArgs(activeListener))
+        this._element.removeEventListener(...this._getRemoveArgs(activeListener))
       })
     }
 
@@ -82,15 +104,7 @@ export default class Listenable {
   }
 
   /* Private methods */
-  #getEventListeners = function(listener, optionsOrUseCapture, wantsUntrusted) {
-    const options = [optionsOrUseCapture, wantsUntrusted]
-    return this.#eventListenersGetter(listener, options)
-  }
-  #getTouchEventListeners = function(listener, options) {
-    return touchEventDictionary[this.eventType](listener, this.#store, this.#recognizerOptions)
-      .map(eventListener => [...eventListener, ...options])
-  }
-  #getId = function(listener, optionsOrUseCapture) {
+  _getId = function(listener, optionsOrUseCapture) {
     const id = { listener }
 
     if (is.object(optionsOrUseCapture) && optionsOrUseCapture.hasOwnProperty('capture')) {
@@ -101,7 +115,7 @@ export default class Listenable {
 
     return id
   }
-  #getRemoveArgs = function(activeListener) {
+  _getRemoveArgs = function(activeListener) {
     const { listener, options, useCapture } = activeListener
     return [listener, options, useCapture].filter(a => !!a)
   }

@@ -15,16 +15,16 @@ import Renamable from '../subclasses/Renamable'
 
 class Editable {
   /* Private properties */
-  #intendedTypes
-  #hardCodedType
-  #onEdit
-  #onWrite
-  #onErase
-  #writeDictionary
-  #eraseDictionary
+  // _intendedTypes
+  // _hardCodedType
+  // _onEdit
+  // _onWrite
+  // _onErase
+  // _writeDictionary
+  // _eraseDictionary
 
   constructor (state, options = {}) {
-    this.#intendedTypes = ['array', 'boolean', 'date', 'file', 'filelist', 'map', 'number', 'object', 'string']
+    this._intendedTypes = ['array', 'boolean', 'date', 'file', 'filelist', 'map', 'number', 'object', 'string']
 
     /* Options */
     options = {
@@ -32,23 +32,23 @@ class Editable {
       ...options
     }
 
-    this.#hardCodedType = options.type
-    this.#onEdit = options.onEdit
-    this.#onWrite = options.onWrite
-    this.#onErase = options.onErase
+    this._hardCodedType = options.type
+    this._onEdit = options.onEdit
+    this._onWrite = options.onWrite
+    this._onErase = options.onErase
 
-    this.#writeDictionary = {
-      array: options => this.#writeArray(options),
-      map: options => this.#writeMap(options),
-      object: options => this.#writeObject(options),
+    this._writeDictionary = {
+      array: options => this._writeArray(options),
+      map: options => this._writeMap(options),
+      object: options => this._writeObject(options),
     }
-    this.#eraseDictionary = {
-      array: options => this.#eraseArray(options),
+    this._eraseDictionary = {
+      array: options => this._eraseArray(options),
       boolean: () => false,
       date: () => new Date(),
-      map: options => this.#eraseMap(options),
+      map: options => this._eraseMap(options),
       number: () => 0,
-      object: options => this.#eraseObject(options),
+      object: options => this._eraseObject(options),
       string: () => '',
     }
 
@@ -59,7 +59,7 @@ class Editable {
 
   /* Public getters */
   get type () {
-    return this.#getType(this.state)
+    return this._getType(this.state)
   }
 
   /* Public methods */
@@ -73,38 +73,38 @@ class Editable {
     return this
   }
   cancel () {
-    this.#edit(this.state, 'cancel')
+    this._edit(this.state, 'cancel')
     return this
   }
   write (options = {}) {
-    const newState = this.#writeDictionary.hasOwnProperty(this.type)
-      ? this.#writeDictionary[this.type](options)
+    const newState = this._writeDictionary.hasOwnProperty(this.type)
+      ? this._writeDictionary[this.type](options)
       : this.editableState
 
-    return this.#edit(newState, 'write')
+    return this._edit(newState, 'write')
   }
   erase (options = {}) {
-    const newState = this.#eraseDictionary.hasOwnProperty(this.type)
-      ? this.#eraseDictionary[this.type](options)
+    const newState = this._eraseDictionary.hasOwnProperty(this.type)
+      ? this._eraseDictionary[this.type](options)
       : undefined
 
-    return this.#edit(newState, 'erase')
+    return this._edit(newState, 'erase')
   }
 
   /* Private methods */
-  #getType = function(state) {
-    if (this.#hardCodedType) {
-      return this.#hardCodedType
+  _getType = function(state) {
+    if (this._hardCodedType) {
+      return this._hardCodedType
     } else {
-      return this.#guessType(state)
+      return this._guessType(state)
     }
   }
-  #guessType = function(state) {
+  _guessType = function(state) {
     let type,
         i = 0
-    while (type === undefined && i < this.#intendedTypes.length) {
-      if (is[this.#intendedTypes[i]](state)) {
-        type = this.#intendedTypes[i]
+    while (type === undefined && i < this._intendedTypes.length) {
+      if (is[this._intendedTypes[i]](state)) {
+        type = this._intendedTypes[i]
       }
       i++
     }
@@ -115,27 +115,27 @@ class Editable {
 
     return type
   }
-  #edit = function(newState, type) {
+  _edit = function(newState, type) {
     typedEmit(
       newState,
       type,
       this,
-      this.#onEdit,
+      this._onEdit,
       [
-        { type: 'write', emitter: this.#onWrite },
-        { type: 'erase', emitter: this.#onErase },
+        { type: 'write', emitter: this._onWrite },
+        { type: 'erase', emitter: this._onErase },
       ]
     )
 
     return this
   }
-  #writeArray = function(options) {
+  _writeArray = function(options) {
     // TODO: test this in a real app to see how the workflow feels.
     return options.hasOwnProperty('item')
       ? this.state.concat([options.item])
       : this.editableState
   }
-  #writeMap = function(options) {
+  _writeMap = function(options) {
     warn('hasRequiredOptions', {
       received: options,
       required: ['key'],
@@ -170,7 +170,7 @@ class Editable {
 
     return newState
   }
-  #writeObject = function(options) {
+  _writeObject = function(options) {
     warn('hasRequiredOptions', {
       received: options,
       required: ['key'],
@@ -199,7 +199,7 @@ class Editable {
 
     return newState
   }
-  #eraseArray = function(options) {
+  _eraseArray = function(options) {
     warn('hasRequiredOptions', {
       received: options,
       required: ['item', 'last', 'all'],
@@ -226,7 +226,7 @@ class Editable {
 
     return newState
   }
-  #eraseMap = function(options) {
+  _eraseMap = function(options) {
     warn('hasRequiredOptions', {
       received: options,
       required: ['key', 'last', 'all'],
@@ -249,7 +249,7 @@ class Editable {
 
     return newState
   }
-  #eraseObject = function(options) {
+  _eraseObject = function(options) {
     warn('hasRequiredOptions', {
       received: options,
       required: ['value', 'last', 'all'],

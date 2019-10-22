@@ -11,9 +11,9 @@ import Dependency from '../wrappers/SearchableLunr.js'
 import emit from '../util/emit'
 
 export default class Searchable {
-  #onSearch
-  #dependencyOptions
-  #dependency
+  // _onSearch
+  // _dependencyOptions
+  // _dependency
 
   constructor (array, options = {}) {
     /* Options */
@@ -24,26 +24,26 @@ export default class Searchable {
       ...options
     }
 
-    this.#onSearch = options.onSearch
+    this._onSearch = options.onSearch
 
     /* Public properties */
     this.array = array
     this.results = []
 
     /* Dependency */
-    this.#dependencyOptions = options
-    this.#dependency = new Dependency(this.array, this.#dependencyOptions)
+    this._dependencyOptions = options
+    this._dependency = new Dependency(this.array, this._dependencyOptions)
   }
 
   /* Public getters */
   get index () {
-    return this.#dependency.index
+    return this._dependency.index
   }
 
   /* Public methods */
   setArray (array) {
     this.array = array
-    this.#dependency = new Dependency(this.array, this.#dependencyOptions)
+    this._dependency = new Dependency(this.array, this._dependencyOptions)
     return this
   }
   setResults (results) {
@@ -51,13 +51,13 @@ export default class Searchable {
     return this
   }
   search (query) {
-    const results = this.#dependency.search(query)
-    emit(this.#onSearch, results, this)
+    const results = this._dependency.search(query)
+    emit(this._onSearch, results, this)
     return this
   }
 
   /* Private methods */
-  #getResults = function(matchData) {
+  _getResults = function(matchData) {
     // TODO: structure results in a more palatable format
   }
 }

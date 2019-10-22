@@ -7,13 +7,11 @@
 /* Dependencies */
 
 /* Util */
-import warn from '../util/warn'
 
 export default class Copiable {
-  #usesFallbacks
-  #computedClipboard
-  #computedSucceeded
-  #computedErrored
+  // _usesFallbacks
+  // _computedSucceeded
+  // _computedErrored
 
   constructor (string, options = {}) {
     /* Options */
@@ -21,30 +19,23 @@ export default class Copiable {
       usesFallbacks: false,
       ...options,
     }
-    this.#usesFallbacks = options.usesFallbacks
+    this._usesFallbacks = options.usesFallbacks
 
     /* Public properties */
     this.string = string
 
     /* Private properties */
-    this.#computedClipboard = navigator.clipboard
-    this.#computedSucceeded = false
-    this.#computedErrored = false
+    this._computedCopying = false
+
     /* Dependency */
   }
 
   /* Public getters */
-  get clipboard () {
-    return this.#computedClipboard
+  get copying () {
+    return this._computedCopying
   }
   get copied () {
-    return this.#getCopied
-  }
-  get succeeded () {
-    return this.#computedSucceeded
-  }
-  get errored () {
-    return this.#computedErrored
+    // Boolean: this.string is equal to the clipboard text
   }
 
   /* Public methods */
@@ -52,44 +43,22 @@ export default class Copiable {
     this.string = string
     return this
   }
-  copy () {
-    if (this.#usesFallbacks) {
-      this.#writeTextFallback()
-      this.#computedErrored = false
-      this.#computedSucceeded = true
+  async copy () {
+    if (this._usesFallbacks) {
+      this._computedCopying = true
+      this._writeTextFallback()
+      this._computedCopying = false
     } else {
-      this.#writeText()
-        .then(() => {
-          this.#computedErrored = false
-          this.#computedSucceeded = true
-        })
-        .catch(() => {
-          this.#computedErrored = true
-          this.#computedSucceeded = false
-        })
+      this._computedCopying = true
+      await navigator.clipboard.writeText(this.string)
+      this._computedCopying = false
     }
 
     return this
   }
 
   /* Private methods */
-  #getCopied = function() {
-    if (this.#usesFallbacks) {
-      warn('noFallbackAvailable', {
-        subject: 'Copiable\'s copied property'
-      })
-    } else {
-      return this.#readText()
-        .then(text => text)
-    }
-  }
-  #readText = function() {
-    return this.clipboard.readText()
-  }
-  #writeText = function() {
-    return this.clipboard.writeText(this.string)
-  }
-  #writeTextFallback = function() {
+  _writeTextFallback = function() {
     const input = document.createElement('input')
     input.type = 'text'
     input.value = this.string

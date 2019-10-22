@@ -7,17 +7,17 @@
 import MarkdownIt from 'markdown-it'
 
 export default class Markupable extends String {
-  #markdownitOptions
-  #markdownit
+  // _markdownitOptions
+  // _markdownit
 
   constructor (string, options = {}) {
     super(string)
 
-    this.#markdownitOptions = options.markdownit
-    this.#markdownit = new MarkdownIt(this.#markdownitOptions)
+    this._markdownitOptions = options.markdownit
+    this._markdownit = new MarkdownIt(this._markdownitOptions)
   }
 
   markup () {
-    return new Markupable(this.#markdownit.render(`${this}`), { markdownit: this.#markdownitOptions })
+    return new Markupable(this._markdownit.render(`${this}`), { markdownit: this._markdownitOptions })
   }
 }

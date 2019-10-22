@@ -10,14 +10,14 @@ import emit from '../util/emit'
 
 class Completable {
   /* Private properties */
-  #segmentsFromDivider
-  #segmentsToLocation
-  #divider
+  // _segmentsFromDivider
+  // _segmentsToLocation
+  // _divider
   // TODO: is there a use case for nextMatch instead of lastMatch?
-  // #matchDirection
-  #locatesAfterCompletion
-  #onComplete
-  #onLocate
+  // _matchDirection
+  // _locatesAfterCompletion
+  // _onComplete
+  // _onLocate
 
   constructor (string, options = {}) {
     /* Options */
@@ -30,13 +30,13 @@ class Completable {
       onLocate: (newLocation, instance) => instance.setLocation(newLocation),
       ...options
     }
-    this.#segmentsFromDivider = options.segmentsFromDivider
-    this.#segmentsToLocation = options.segmentsToLocation
-    this.#divider = options.divider
-    // this.#matchDirection = matchDirection
-    this.#locatesAfterCompletion = options.locatesAfterCompletion
-    this.#onComplete = options.onComplete
-    this.#onLocate = options.onLocate
+    this._segmentsFromDivider = options.segmentsFromDivider
+    this._segmentsToLocation = options.segmentsToLocation
+    this._divider = options.divider
+    // this._matchDirection = matchDirection
+    this._locatesAfterCompletion = options.locatesAfterCompletion
+    this._onComplete = options.onComplete
+    this._onLocate = options.onLocate
 
     this.string = string
     this.location = string.length
@@ -44,8 +44,8 @@ class Completable {
 
   get segment () {
     return this.string.slice(
-      this.#computeSegmentStartIndex(),
-      this.#computeSegmentEndIndex()
+      this._computeSegmentStartIndex(),
+      this._computeSegmentEndIndex()
     )
   }
 
@@ -59,22 +59,22 @@ class Completable {
   }
   complete (completion) {
     const textBefore = this.string.slice(0, this.location - this.segment.length), // segmentsFromDivider
-          textAfter = this.string.slice(this.#computeSegmentEndIndex()), // segmentsToLocation
+          textAfter = this.string.slice(this._computeSegmentEndIndex()), // segmentsToLocation
           completedString = textBefore + completion + textAfter,
-          newLocation = this.#locatesAfterCompletion ? textBefore.length + completion.length : this.location
+          newLocation = this._locatesAfterCompletion ? textBefore.length + completion.length : this.location
 
-    emit(this.#onComplete, completedString, this)
-    emit(this.#onLocate, newLocation, this)
+    emit(this._onComplete, completedString, this)
+    emit(this._onLocate, newLocation, this)
 
     return this
   }
 
   /* Private methods */
-  #computeSegmentStartIndex = function() {
-    return this.#segmentsFromDivider ? lastMatch(this.string, this.#divider, this.location) + 1 : 0
+  _computeSegmentStartIndex = function() {
+    return this._segmentsFromDivider ? lastMatch(this.string, this._divider, this.location) + 1 : 0
   }
-  #computeSegmentEndIndex = function() {
-    return this.#segmentsToLocation ? this.location : this.string.length
+  _computeSegmentEndIndex = function() {
+    return this._segmentsToLocation ? this.location : this.string.length
   }
 }
 

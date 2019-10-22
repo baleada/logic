@@ -11,51 +11,38 @@ import emit from '../util/emit'
 
 export default class Fetchable {
   /* Private properties */
-  #onResolve
-  #onReject
-  #computedFetching
-  #fetchOptions
+  // _onFetch
+  // _computedFetching
+  // _computedResponseJson
+  // _fetchOptions
 
   constructor (resource, options = {}) {
     /* Options */
     options = {
-      onResolve: (newResponse, instance) => instance.setResponse(newResponse),
-      onReject: (newError, instance) => instance.setError(newError),
+      onFetch: (newResponse, instance) => instance.setResponse(newResponse),
       ...options
     }
 
-    this.#onResolve = options.onResolve
-    this.#onReject = options.onReject
+    this._onFetch = options.onFetch
 
     /* Public properties */
     this.resource = resource
     this.response = {}
-    this.error = {}
 
     /* Private properties */
-    this.#computedFetching = false
+    this._computedFetching = false
+    this._computedResponseJson = {}
 
     /* Dependency */
-    this.#fetchOptions = this.#getFetchOptions(options)
+    this._fetchOptions = this._getFetchOptions(options)
   }
 
   /* Public getters */
   get fetching () {
-    return this.#computedFetching
+    return this._computedFetching
   }
   get responseJson () {
-    try {
-      return this.response.json()
-    } catch {
-      return {}
-    }
-  }
-  get errorJson () {
-    try {
-      return this.error.json()
-    } catch {
-      return {}
-    }
+    return this._computedResponseJson
   }
 
   /* Public methods */
@@ -67,26 +54,22 @@ export default class Fetchable {
     this.response = response
     return this
   }
-  setError (error) {
-    this.error = error
-    return this
-  }
-  fetch () {
-    this.#computedFetching = true
+  async fetch () {
+    this._computedFetching = true
 
-    return fetch(this.resource, this.#fetchOptions)
-      .then(response => {
-        emit(this.#onResolve, response, this)
-      })
-      .catch(error => {
-        emit(this.#onReject, error, this)
-      })
-      .finally(() => {
-        this.#computedFetching = false
-        return this
-      })
+    const response = await fetch(this.resource, this._fetchOptions)
+    this._computedFetching = false
+
+    emit(this._onFetch, response, this)
+    try {
+      this._computedResponseJson = await response.json()
+    } catch (error) {
+      this._computedResponseJson = error
+    }
+
+    return this
   }
 
   /* Private methods */
-  #getFetchOptions = ({ onResolve, onReject, ...rest }) => ({ ...rest })
+  _getFetchOptions = ({ onFetch, ...rest }) => ({ ...rest })
 }
