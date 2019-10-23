@@ -6,7 +6,6 @@ import Editable from './lib/classes/Editable.js'
 import Fetchable from './lib/classes/Fetchable.js'
 import Listenable from './lib/classes/Listenable.js'
 import Navigable from './lib/classes/Navigable.js'
-import Observable from './lib/classes/Observable.js'
 import Poppable from './lib/classes/Poppable.js'
 import Searchable from './lib/classes/Searchable.js'
 import Togglable from './lib/classes/Togglable.js'
@@ -21,7 +20,6 @@ export {
   Fetchable,
   Listenable,
   Navigable,
-  Observable,
   Poppable,
   Searchable,
   Togglable,

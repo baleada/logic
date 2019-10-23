@@ -1,40 +1,29 @@
-/* Utils, dictionaries, and default options */
-const directions = {
-  up: {
-    degrees: degrees => (degrees > 45 && degrees < 135),
-    radians: radians => (radians > 0.25 * Math.PI && radians < 0.75 * Math.PI),
-  },
-  left: {
-    degrees: degrees => (degrees > 135 && degrees < 225),
-    radians: radians => (radians > 0.75 * Math.PI && radians < 1.25 * Math.PI),
-  },
-  down: {
-    degrees: degrees => (degrees > 225 && degrees < 315),
-    radians: radians => (radians > 1.25 * Math.PI && radians < 1.75 * Math.PI),
-  },
-  right: {
-    degrees: degrees => ((degrees > 315 && degrees <= 360) || (degrees < 45 && degrees >= 0)),
-    radians: radians => ((radians > 1.75 * Math.PI && radians <= 2 * Math.PI) || (radians < 0.25 * Math.PI && radians >= 0)),
-  }
-}
+/* Utils */
+import is from '../util/is'
+import withDirectionCondition from '../util/withDirectionCondition'
 
+/* Dictionaries */
+import directions from './directions'
+
+/* recognize */
 function toDirection (angle, unit = 'degrees') {
   return Object.keys(directions).find(direction => directions[direction][unit](angle))
 }
 
-const api = {
+const listenerApi = {
   toDirection
 }
 
-function recognize (listener, recognizer, event, store) {
-  if (recognizer(event, store)) {
-    listener(event, api)
+function recognize (recognized, listener) {
+  if (recognized) {
+    listener(event, listenerApi)
   }
 }
 
+/* handle */
 function getPolarCoordinates ({ xA, xB, yA, yB }) {
   const distance = Math.hypot(xB - xA, yB - yA),
-        angle = Math.atan2((yB - yA), (xB - xA)),
+        angle = Math.atan2((yA - yB), (xB - xA)),
         radians = angle >= 0
           ? angle
           : 2 * Math.PI + angle,
@@ -43,6 +32,17 @@ function getPolarCoordinates ({ xA, xB, yA, yB }) {
   return {
     distance,
     angle: { radians, degrees }
+  }
+}
+
+const handlerApi = {
+  getPolarCoordinates
+}
+
+function handle (requiredHandler, optionalHandler, event, store) {
+  requiredHandler(event, handlerApi)
+  if (is.function(optionalHandler)) {
+    optionalHandler(event, store, handlerApi)
   }
 }
 
@@ -58,36 +58,39 @@ const mouseEquivalents = {
   touchmove: 'mousemove',
 }
 
-/* Listeners */
-function panListeners (listener, store, options) {
+/* Listener getters */
+
+// Pan
+function pan (listener, store, options) {
   options = {
-    threshold: 1,
-    includesMouseEquivalents: true,
+    threshold: 0,
+    includesMouseEquivalents: false,
+    conditions: [],
     ...options
   }
 
-  const { threshold, includesMouseEquivalents } = options,
-        recognizer = (event, store) => {
+  const { threshold, includesMouseEquivalents, conditions, onStart, onMove, onCancel, onEnd } = options,
+        recognizer = (event, { getPolarCoordinates }) => {
           const { x: xA, y: yA } = store.start,
-                { clientX: xB, clientY: yB } = event,
+                { clientX: xB, clientY: yB } = event.touches[0],
                 { distance, angle } = getPolarCoordinates({ xA, xB, yA, yB }),
                 end = { x: xB, y: yB }
 
-          store = { ...store, end, distance, angle }
+          store.end = end
+          store.distance = distance
+          store.angle = angle
 
-          return distance > threshold
+          return [() => distance > threshold, ...conditions].every(condition => condition(event, store, listenerApi))
         },
-        storeTouchstartPoint = event => {
-          store.start.x = event.clientX
-          store.start.y = event.clientY
-        },
-        touchstart = event => storeTouchstartPoint(event),
-        touchmove = event => recognize(listener, recognizer, event, store),
-        touchcancel = event => event,
+        panStart = event => (store.start = { x: event.touches[0].clientX, y: event.touches[0].clientY }),
+        panMove = event => recognize(recognizer(event), listener),
+        panCancel = () => ['start', 'end', 'distance', 'angle'].forEach(datum => (store[datum] = undefined)),
+        panEnd = () => { /* do nothing */ },
         touchListeners = [
-          ['touchstart', touchstart],
-          ['touchmove', touchmove],
-          ['touchcancel', touchcancel],
+          ['touchstart', event => handle(panStart, onStart, event, store)],
+          ['touchmove', event => handle(panMove, onMove, event, store)],
+          ['touchcancel', event => handle(panCancel, onCancel, event, store)],
+          ['touchend', event => handle(panEnd, onEnd, event, store)],
         ]
 
   if (includesMouseEquivalents) {
@@ -99,119 +102,79 @@ function panListeners (listener, store, options) {
     return touchListeners
   }
 }
-function panstartListeners (listener, store, options) {
+function panLeft (listener, store, options) {
+  options = withDirectionCondition('left', options)
+  pan(listener, store, options)
+}
+function panRight (listener, store, options) {
+  options = withDirectionCondition('right', options)
+  pan(listener, store, options)
+}
+function panUp (listener, store, options) {
+  options = withDirectionCondition('up', options)
+  pan(listener, store, options)
+}
+function panDown (listener, store, options) {
+  options = withDirectionCondition('down', options)
+  pan(listener, store, options)
+}
+
+// Pinch
+function pinch (listener, store, options) {
 
 }
-function panmoveListeners (listener, store, options) {
+function pinchIn (listener, store, options) {
 
 }
-function panendListeners (listener, store, options) {
+function pinchOut (listener, store, options) {
 
 }
-function pancancelListeners (listener, store, options) {
+
+// Press
+function press (listener, store, options) {
 
 }
-function panleftListeners (listener, store, options) {
+function pressup (listener, store, options) {
 
 }
-function panrightListeners (listener, store, options) {
+
+// Rotate
+function rotate (listener, store, options) {
 
 }
-function panupListeners (listener, store, options) {
+
+// Swipe
+function swipe (listener, store, options) {
 
 }
-function pandownListeners (listener, store, options) {
+function swipeLeft (listener, store, options) {
 
 }
-function pinchListeners (listener, store, options) {
+function swipeRight (listener, store, options) {
 
 }
-function pinchstartListeners (listener, store, options) {
+function swipeUp (listener, store, options) {
 
 }
-function pinchmoveListeners (listener, store, options) {
+function swipeDown (listener, store, options) {
 
 }
-function pinchendListeners (listener, store, options) {
 
-}
-function pinchcancelListeners (listener, store, options) {
-
-}
-function pinchinListeners (listener, store, options) {
-
-}
-function pinchoutListeners (listener, store, options) {
-
-}
-function pressListeners (listener, store, options) {
-
-}
-function pressupListeners (listener, store, options) {
-
-}
-function rotateListeners (listener, store, options) {
-
-}
-function rotatestartListeners (listener, store, options) {
-
-}
-function rotatemoveListeners (listener, store, options) {
-
-}
-function rotateendListeners (listener, store, options) {
-
-}
-function rotatecancelListeners (listener, store, options) {
-
-}
-function swipeListeners (listener, store, options) {
-
-}
-function swipeleftListeners (listener, store, options) {
-
-}
-function swiperightListeners (listener, store, options) {
-
-}
-function swipeupListeners (listener, store, options) {
-
-}
-function swipedownListeners (listener, store, options) {
-
-}
-function tapListeners (listener, store, options) {
+// Tap
+function tap (listener, store, options) {
 
 }
 
 export default {
-  panListeners,
-  panstartListeners,
-  panmoveListeners,
-  panendListeners,
-  pancancelListeners,
-  panleftListeners,
-  panrightListeners,
-  panupListeners,
-  pandownListeners,
-  pinchListeners,
-  pinchstartListeners,
-  pinchmoveListeners,
-  pinchendListeners,
-  pinchcancelListeners,
-  pinchinListeners,
-  pinchoutListeners,
-  pressListeners,
-  pressupListeners,
-  rotateListeners,
-  rotatestartListeners,
-  rotatemoveListeners,
-  rotateendListeners,
-  rotatecancelListeners,
-  swipeListeners,
-  swipeleftListeners,
-  swiperightListeners,
-  swipeupListeners,
-  swipedownListeners,
-  tapListeners,
+  pan,
+  panUp,
+  panRight,
+  panDown,
+  panLeft,
+  pinch,
+  press,
+  pressup,
+  rotate,
+  swipe,
+  tap,
 }

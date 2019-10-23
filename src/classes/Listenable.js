@@ -14,7 +14,7 @@ import observers from '../dictionaries/observers'
 
 export default class Listenable {
   // _element
-  // _recognizerOptions
+  // _touchOptions
   // _store
   // _activeListenerIds
   // _eventListenersGetter
@@ -23,19 +23,21 @@ export default class Listenable {
     /* Options */
     options = {
       element: document,
-      recognizer: {},
+      touches,
+      touch: {},
       ...options
     }
 
+    this._touches = options.touches
     this._element = options.element
-    this._recognizerOptions = options.recognizer
+    this._touchOptions = options.touch
 
     /* Public properties */
     this.eventName = eventName
 
     /* Private properties */
     this._isObserved = observers.hasOwnProperty(this.eventName)
-    this._isTouch = touches.hasOwnProperty(this.eventName)
+    this._isTouch = this._touches.hasOwnProperty(this.eventName)
     this._computedEventData = {}
     this._activeListenerIds = []
 
@@ -53,7 +55,8 @@ export default class Listenable {
     this.destroy()
     this.eventName = eventName
     this._isObserved = observers.hasOwnProperty(eventName)
-    this._isTouch = touches.hasOwnProperty(eventName)
+    this._isTouch = this._touches.hasOwnProperty(eventName)
+    // TODO: re-add all active listeners?
     return this
   }
 
@@ -67,7 +70,7 @@ export default class Listenable {
     } else {
       const options = [addEventListener || useCapture, wantsUntrusted],
             eventListeners = this._isTouch
-              ? touches[this.eventName](listener, this._computedEventData, this._recognizerOptions).map(eventListener => [...eventListener, ...options])
+              ? this._touches[this.eventName](listener, this._computedEventData, this._touchOptions).map(eventListener => [...eventListener, ...options])
               : [[this.eventName, listener, ...options]]
 
       eventListeners.forEach(eventListener => {
@@ -79,7 +82,7 @@ export default class Listenable {
     return this
   }
 
-  destroy (activeListener) {
+  destroy () {
     if (this._isObserved) {
       this.activeListeners.forEach(observerInstance => observerInstance.disconnect())
     } else {
