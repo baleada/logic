@@ -7,11 +7,10 @@
 /* Dependencies */
 
 /* Utils */
-import is from '../util/is'
 
 /* Dictionaries */
-import touchDictionary from '../dictionaries/touches'
-import observerDictionary from '../dictionaries/observers'
+import touches from '../dictionaries/touches'
+import observers from '../dictionaries/observers'
 
 export default class Listenable {
   // _element
@@ -35,7 +34,9 @@ export default class Listenable {
     this.eventName = eventName
 
     /* Private properties */
-    this._store = {}
+    this._isObserved = observers.hasOwnProperty(this.eventName)
+    this._isTouch = touches.hasOwnProperty(this.eventName)
+    this._computedEventData = {}
     this._activeListenerIds = []
 
     /* Dependency */
@@ -45,78 +46,46 @@ export default class Listenable {
     return this._activeListenerIds
   }
   get eventData () {
-    return this._store
+    return this._computedEventData
   }
 
-  /* Public getters */
-
-  /* Public methods */
   setEventName (eventName) {
     this.destroy()
     this.eventName = eventName
+    this._isObserved = observers.hasOwnProperty(eventName)
+    this._isTouch = touches.hasOwnProperty(eventName)
     return this
   }
 
-  listen (listener, { listenerOptions, observerOptions, observeOptions, useCapture, wantsUntrusted }) {
-    if (this._isObserved()) {
-      const observer = new observerDictionary[this.eventName](listener, optionsOrUseCapture)
-      observer.observe(this.element, observeOptions)
-      this._activeListenerIds.push(observer)
+  listen (listener, options = {}) {
+    const { addEventListener, observer, observe, useCapture, wantsUntrusted } = options
+
+    if (this._isObserved) {
+      const observerInstance = new observers[this.eventName](listener, observer)
+      observerInstance.observe(this.element, observe)
+      this._activeListenerIds.push(observerInstance)
     } else {
-      const eventListeners = this._getEventListeners(listener, optionsOrUseCapture, wantsUntrusted)
+      const options = [addEventListener || useCapture, wantsUntrusted],
+            eventListeners = this._isTouch
+              ? touches[this.eventName](listener, this._computedEventData, this._recognizerOptions).map(eventListener => [...eventListener, ...options])
+              : [[this.eventName, listener, ...options]]
 
       eventListeners.forEach(eventListener => {
         this._element.addEventListener(...eventListener)
-        this._activeListenerIds.push(this._getId(eventListener))
+        this._activeListenerIds.push(eventListener)
       })
     }
 
     return this
-  }
-  _isObserved = function() {
-    return observerDictionary.hasOwnProperty(this.eventName)
-  }
-  _getEventListeners = function(listener, optionsOrUseCapture, wantsUntrusted) {
-    const options = [optionsOrUseCapture, wantsUntrusted],
-          getter = this._isTouch()
-            ? this._getTouchEventListeners
-            : (listener, options) => [[this.eventName, listener, ...options]]
-    return this._eventListenersGetter(listener, options)
-  }
-  _isTouch = function() {
-    return touchDictionary.hasOwnProperty(this.eventName)
-  }
-  _getTouchEventListeners = function(listener, options) {
-    return touchDictionary[this.eventName](listener, this._store, this._recognizerOptions)
-      .map(eventListener => [...eventListener, ...options])
   }
 
   destroy (activeListener) {
-    if (this._isObservation()) {
-      this._activeListenerIds.forEach(observer => observer.disconnect())
+    if (this._isObserved) {
+      this.activeListeners.forEach(observerInstance => observerInstance.disconnect())
     } else {
-      this.activeListeners.forEach(activeListener => {
-        this._element.removeEventListener(...this._getRemoveArgs(activeListener))
-      })
+      this.activeListeners.forEach(activeListener => this._element.removeEventListener(...activeListener))
     }
 
     return this
-  }
-
-  /* Private methods */
-  _getId = function(listener, optionsOrUseCapture) {
-    const id = { listener }
-
-    if (is.object(optionsOrUseCapture) && optionsOrUseCapture.hasOwnProperty('capture')) {
-      id.options = { capture: optionsOrUseCapture.capture }
-    } else if (is.boolean(optionsOrUseCapture)) {
-      id.useCapture = optionsOrUseCapture
-    }
-
-    return id
-  }
-  _getRemoveArgs = function(activeListener) {
-    const { listener, options, useCapture } = activeListener
-    return [listener, options, useCapture].filter(a => !!a)
   }
 }
