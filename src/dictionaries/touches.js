@@ -49,25 +49,53 @@ function pan (listener, eventMetadata, options) {
     options = withDirectionCondition(options.direction, options)
   }
 
+  let isSingleTouch = true
+  function reset () {
+    [
+      'startPoint',
+      'endPoint',
+      'startTime',
+      'endTime',
+      'distance',
+      'angle',
+      'velocity'
+    ].forEach(datum => (eventMetadata[datum] = undefined))
+    isSingleTouch = true
+  }
+
   const { minDistance, conditions, includesMouseEquivalents, onStart, onMove, onCancel, onEnd } = options,
         recognizer = (event, { toPolarCoordinates }) => {
-          const { x: xA, y: yA } = eventMetadata.startPoint,
-                { clientX: xB, clientY: yB } = event.touches.item(0),
-                { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
-                endPoint = { x: xB, y: yB }
+          let recognized
+          switch (true) {
+          case !isSingleTouch: // Guard against multiple touches
+            reset()
+            recognized = false
+            break
+          default:
+            const { x: xA, y: yA } = eventMetadata.startPoint,
+                  { clientX: xB, clientY: yB } = event.touches.item(0),
+                  { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
+                  endPoint = { x: xB, y: yB }
 
-          eventMetadata.endPoint = endPoint
-          eventMetadata.distance = distance
-          eventMetadata.angle = angle
+            eventMetadata.endPoint = endPoint
+            eventMetadata.distance = distance
+            eventMetadata.angle = angle
 
-          return [
-            () => eventMetadata.distance > minDistance,
-            ...conditions
-          ].every(condition => condition(event, eventMetadata, listenerApi))
+            recognized = [
+              () => eventMetadata.distance > minDistance,
+              ...conditions
+            ].every(condition => condition(event, eventMetadata, listenerApi))
+            break
+          }
+
+          return recognized
         },
-        panStart = event => (eventMetadata.startPoint = { x: event.touches.item(0).clientX, y: event.touches.item(0).clientY }),
+        panStart = event => {
+          isSingleTouch = event.touches.length === 1
+          eventMetadata.startPoint = { x: event.touches.item(0).clientX, y: event.touches.item(0).clientY }
+        },
         panMove = (event, { toPolarCoordinates }) => recognize(recognizer(event, { toPolarCoordinates }), listener),
-        panCancel = () => ['startPoint', 'endPoint', 'distance', 'angle'].forEach(datum => (eventMetadata[datum] = undefined)),
+        panCancel = () => reset(),
         panEnd = () => { /* do nothing */ },
         touchListeners = [
           ['touchstart', event => handle(panStart, onStart, event, eventMetadata)],
@@ -103,8 +131,22 @@ function swipe (listener, eventMetadata, options) {
     options = withDirectionCondition(options.direction, options)
   }
 
+  let isSingleTouch = true
+  function reset () {
+    [
+      'startPoint',
+      'endPoint',
+      'startTime',
+      'endTime',
+      'distance',
+      'angle',
+      'velocity'
+    ].forEach(datum => (eventMetadata[datum] = undefined))
+    isSingleTouch = true
+  }
+
   const { minDistance, minVelocity, conditions, includesMouseEquivalents, onStart, onMove, onCancel, onEnd } = options,
-        storeEventData = (event, { toPolarCoordinates }) => {
+        storeEventMetadata = (event, { toPolarCoordinates }) => {
           const { x: xA, y: yA } = eventMetadata.startPoint,
                 { clientX: xB, clientY: yB } = event.touches.item(0),
                 { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
@@ -117,17 +159,35 @@ function swipe (listener, eventMetadata, options) {
           eventMetadata.angle = angle
           eventMetadata.velocity = distance / (eventMetadata.endTime - eventMetadata.startTime)
         },
-        recognizer = event => [
-          () => eventMetadata.distance > minDistance,
-          () => eventMetadata.velocity > minVelocity,
-          ...conditions
-        ].every(condition => condition(event, eventMetadata, listenerApi)),
+        recognizer = event => {
+          let recognized
+          switch (true) {
+          case !isSingleTouch: // Guard against multiple touches
+            reset()
+            recognized = false
+            break
+          default:
+            recognized = [
+              () => eventMetadata.distance > minDistance,
+              () => eventMetadata.velocity > minVelocity,
+              ...conditions
+            ].every(condition => condition(event, eventMetadata, listenerApi))
+            break
+          }
+
+          return recognized
+        },
         swipeStart = event => {
+          isSingleTouch = event.touches.length === 1
           eventMetadata.startTime = event.timeStamp
           eventMetadata.startPoint = { x: event.touches.item(0).clientX, y: event.touches.item(0).clientY }
         },
-        swipeMove = (event, { toPolarCoordinates }) => storeEventData(event, { toPolarCoordinates }),
-        swipeCancel = () => ['startPoint', 'endPoint', 'startTime', 'endTime', 'distance', 'angle', 'velocity'].forEach(datum => (eventMetadata[datum] = undefined)),
+        swipeMove = (event, { toPolarCoordinates }) => {
+          if (isSingleTouch) {
+            storeEventMetadata(event, { toPolarCoordinates })
+          }
+        },
+        swipeCancel = () => reset(),
         swipeEnd = (event, { toPolarCoordinates }) => recognize(recognizer(event, { toPolarCoordinates }), listener),
         touchListeners = [
           ['touchstart', event => handle(swipeStart, onStart, event, eventMetadata)],
@@ -192,10 +252,12 @@ function tap (listener, eventMetadata, options) {
   }
 
   let didNotTravel = true,
+      isSingleTouch = true,
       recognized = false
 
   function reset () {
     didNotTravel = true
+    isSingleTouch = true
     recognized = false
     eventMetadata.taps = 0
     eventMetadata.endTimes = []
@@ -210,7 +272,7 @@ function tap (listener, eventMetadata, options) {
                 secondToLastTapTime = eventMetadata.endTimes.reverse()[1]
 
           switch (true) {
-          case !didNotTravel: // Guard against travelling taps
+          case !didNotTravel || !isSingleTouch: // Guard against travelling taps and multiple touches
             reset()
             break
           case minTaps === 1: // Shortcut for single taps
@@ -234,10 +296,11 @@ function tap (listener, eventMetadata, options) {
 
           return recognized
         },
-        tapStart = () => {
+        tapStart = event => {
           if (recognized) {
             reset()
           }
+          isSingleTouch = event.touches.length === 1
         },
         tapMove = () => (didNotTravel = false),
         tapEnd = event => {
