@@ -5,6 +5,7 @@ import toPolarCoordinates from '../util/toPolarCoordinates'
 
 /* Dictionaries */
 import { toDirection } from './directions'
+import { toMouseEquivalents } from './mouseEquivalents'
 
 /* recognize */
 const listenerApi = {
@@ -29,18 +30,6 @@ function handle (requiredHandler, optionalHandler, event, eventMetadata) {
   }
 }
 
-function toMouseEquivalents (touchListeners) {
-  return touchListeners
-    .map(([eventType, listener]) => [mouseEquivalents[eventType], listener])
-    .filter(([eventType]) => !!eventType)
-}
-
-const mouseEquivalents = {
-  touchstart: 'mousedown',
-  touchend: 'mouseup',
-  touchmove: 'mousemove',
-}
-
 /* Listener getters */
 
 /*
@@ -51,15 +40,15 @@ const mouseEquivalents = {
 function pan (listener, eventMetadata, options) {
   options = {
     minDistance: 0,
-    includesMouseEquivalents: false,
     conditions: [],
+    includesMouseEquivalents: false,
     ...options
   }
 
-  const { minDistance, includesMouseEquivalents, conditions, onStart, onMove, onCancel, onEnd } = options,
+  const { minDistance, conditions, includesMouseEquivalents, onStart, onMove, onCancel, onEnd } = options,
         recognizer = (event, { toPolarCoordinates }) => {
           const { x: xA, y: yA } = eventMetadata.startPoint,
-                { clientX: xB, clientY: yB } = event.touches[0],
+                { clientX: xB, clientY: yB } = event.touches.item(0),
                 { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
                 endPoint = { x: xB, y: yB }
 
@@ -67,9 +56,12 @@ function pan (listener, eventMetadata, options) {
           eventMetadata.distance = distance
           eventMetadata.angle = angle
 
-          return [() => eventMetadata.distance > minDistance, ...conditions].every(condition => condition(event, eventMetadata, listenerApi))
+          return [
+            () => eventMetadata.distance > minDistance,
+            ...conditions
+          ].every(condition => condition(event, eventMetadata, listenerApi))
         },
-        panStart = event => (eventMetadata.startPoint = { x: event.touches[0].clientX, y: event.touches[0].clientY }),
+        panStart = event => (eventMetadata.startPoint = { x: event.touches.item(0).clientX, y: event.touches.item(0).clientY }),
         panMove = (event, { toPolarCoordinates }) => recognize(recognizer(event, { toPolarCoordinates }), listener),
         panCancel = () => ['startPoint', 'endPoint', 'distance', 'angle'].forEach(datum => (eventMetadata[datum] = undefined)),
         panEnd = () => { /* do nothing */ },
@@ -130,18 +122,18 @@ function swipe (listener, eventMetadata, options) {
   options = {
     minDistance: 0,
     minVelocity: 0,
-    includesMouseEquivalents: false,
     conditions: [],
+    includesMouseEquivalents: false,
     ...options
   }
 
-  const { minDistance, minVelocity, includesMouseEquivalents, conditions, onStart, onMove, onCancel, onEnd } = options,
+  const { minDistance, minVelocity, conditions, includesMouseEquivalents, onStart, onMove, onCancel, onEnd } = options,
         storeEventData = (event, { toPolarCoordinates }) => {
           const { x: xA, y: yA } = eventMetadata.startPoint,
-                { clientX: xB, clientY: yB } = event.touches[0],
+                { clientX: xB, clientY: yB } = event.touches.item(0),
                 { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
                 endPoint = { x: xB, y: yB },
-                endTime = Date.now()
+                endTime = event.timeStamp
 
           eventMetadata.endPoint = endPoint
           eventMetadata.endTime = endTime
@@ -149,10 +141,14 @@ function swipe (listener, eventMetadata, options) {
           eventMetadata.angle = angle
           eventMetadata.velocity = distance / (eventMetadata.endTime - eventMetadata.startTime)
         },
-        recognizer = event => [() => eventMetadata.distance > minDistance && eventMetadata.velocity > minVelocity, ...conditions].every(condition => condition(event, eventMetadata, listenerApi)),
+        recognizer = event => [
+          () => eventMetadata.distance > minDistance,
+          () => eventMetadata.velocity > minVelocity,
+          ...conditions
+        ].every(condition => condition(event, eventMetadata, listenerApi)),
         swipeStart = event => {
-          eventMetadata.startTime = Date.now()
-          eventMetadata.startPoint = { x: event.touches[0].clientX, y: event.touches[0].clientY }
+          eventMetadata.startTime = event.timeStamp
+          eventMetadata.startPoint = { x: event.touches.item(0).clientX, y: event.touches.item(0).clientY }
         },
         swipeMove = (event, { toPolarCoordinates }) => storeEventData(event, { toPolarCoordinates }),
         swipeCancel = () => ['startPoint', 'endPoint', 'startTime', 'endTime', 'distance', 'angle', 'velocity'].forEach(datum => (eventMetadata[datum] = undefined)),
@@ -246,8 +242,77 @@ function tap (listener, eventMetadata, options) {
   options = {
     minTaps: 1,
     maxInterval: 500, // Via https://ux.stackexchange.com/questions/40364/what-is-the-expected-timeframe-of-a-double-click
-    conditions: []
+    conditions: [],
+    includesMouseEquivalents: false,
+    ...options
   }
+
+  let didNotTravel = true,
+      recognized = false
+
+  function reset () {
+    didNotTravel = true
+    recognized = false
+    eventMetadata.taps = 0
+    eventMetadata.endTimes = []
+    eventMetadata.points = []
+  }
+
+  reset()
+
+  const { minTaps, maxInterval, conditions, includesMouseEquivalents, onStart, onMove, onEnd } = options,
+        recognizer = event => {
+          const lastTapTime = eventMetadata.endTimes.reverse()[0],
+                secondToLastTapTime = eventMetadata.endTimes.reverse()[1]
+
+          switch (true) {
+          case !didNotTravel: // Guard against travelling taps
+            reset()
+            break
+          case minTaps === 1: // Shortcut for single taps
+            recognized = conditions.every(condition => condition(event, eventMetadata, listenerApi))
+            break
+          case lastTapTime - secondToLastTapTime > maxInterval: // Guard against taps with intervals that are too large
+            const lastPoint = eventMetadata.points.reverse()[0]
+            reset()
+            eventMetadata.taps += 1
+            eventMetadata.endTimes.push(lastTapTime)
+            eventMetadata.points.push(lastPoint)
+            break
+          default:
+            recognized = [
+              () => eventMetadata.taps >= minTaps,
+              () => eventMetadata.endTimes.every((endTime, index, array) => index === 0 || endTime - array[index - 1] <= maxInterval),
+              ...conditions
+            ].every(condition => condition(event, eventMetadata, listenerApi))
+            break
+          }
+
+          return recognized
+        },
+        tapStart = () => {
+          if (recognized) {
+            reset()
+          }
+        },
+        tapMove = () => (didNotTravel = false),
+        tapEnd = event => {
+          eventMetadata.taps += 1
+          eventMetadata.endTimes.push(event.timeStamp)
+          eventMetadata.points.push({ x: event.changedTouches.item(0).clientX, y: event.changedTouches.item(0).clientY })
+          recognize(recognizer(event), listener)
+        },
+        touchListeners = [
+          ['touchstart', event => handle(tapStart, onStart, event, eventMetadata)],
+          ['touchmove', event => handle(tapMove, onMove, event, eventMetadata)],
+          ['touchend', event => handle(tapEnd, onEnd, event, eventMetadata)],
+        ],
+        mouseEquivalents = includesMouseEquivalents ? toMouseEquivalents(touchListeners) : []
+
+  return [
+    ...touchListeners,
+    ...mouseEquivalents
+  ]
 }
 
 export default {
