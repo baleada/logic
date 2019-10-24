@@ -1,15 +1,12 @@
 /* Utils */
 import is from '../util/is'
 import withDirectionCondition from '../util/withDirectionCondition'
+import toPolarCoordinates from '../util/toPolarCoordinates'
 
 /* Dictionaries */
-import directions from './directions'
+import { toDirection } from './directions'
 
 /* recognize */
-function toDirection (angle, unit = 'degrees') {
-  return Object.keys(directions).find(direction => directions[direction][unit](angle))
-}
-
 const listenerApi = {
   toDirection
 }
@@ -21,32 +18,18 @@ function recognize (recognized, listener) {
 }
 
 /* handle */
-function getPolarCoordinates ({ xA, xB, yA, yB }) {
-  const distance = Math.hypot(xB - xA, yB - yA),
-        angle = Math.atan2((yA - yB), (xB - xA)),
-        radians = angle >= 0
-          ? angle
-          : 2 * Math.PI + angle,
-        degrees = radians * 180 / Math.PI
-
-  return {
-    distance,
-    angle: { radians, degrees }
-  }
-}
-
 const handlerApi = {
-  getPolarCoordinates
+  toPolarCoordinates
 }
 
-function handle (requiredHandler, optionalHandler, event, store) {
+function handle (requiredHandler, optionalHandler, event, eventMetadata) {
   requiredHandler(event, handlerApi)
   if (is.function(optionalHandler)) {
-    optionalHandler(event, store, handlerApi)
+    optionalHandler(event, eventMetadata, handlerApi)
   }
 }
 
-function getMouseEquivalents (touchListeners) {
+function toMouseEquivalents (touchListeners) {
   return touchListeners
     .map(([eventType, listener]) => [mouseEquivalents[eventType], listener])
     .filter(([eventType]) => !!eventType)
@@ -60,121 +43,235 @@ const mouseEquivalents = {
 
 /* Listener getters */
 
-// Pan
-function pan (listener, store, options) {
+/*
+ * Pan is defined as a single touch that:
+ * - starts at given point
+ * - travels a distance greater than 0px (or a minimum distance of your choice)
+ */
+function pan (listener, eventMetadata, options) {
   options = {
-    threshold: 0,
+    minDistance: 0,
     includesMouseEquivalents: false,
     conditions: [],
     ...options
   }
 
-  const { threshold, includesMouseEquivalents, conditions, onStart, onMove, onCancel, onEnd } = options,
-        recognizer = (event, { getPolarCoordinates }) => {
-          const { x: xA, y: yA } = store.start,
+  const { minDistance, includesMouseEquivalents, conditions, onStart, onMove, onCancel, onEnd } = options,
+        recognizer = (event, { toPolarCoordinates }) => {
+          const { x: xA, y: yA } = eventMetadata.startPoint,
                 { clientX: xB, clientY: yB } = event.touches[0],
-                { distance, angle } = getPolarCoordinates({ xA, xB, yA, yB }),
-                end = { x: xB, y: yB }
+                { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
+                endPoint = { x: xB, y: yB }
 
-          store.end = end
-          store.distance = distance
-          store.angle = angle
+          eventMetadata.endPoint = endPoint
+          eventMetadata.distance = distance
+          eventMetadata.angle = angle
 
-          return [() => distance > threshold, ...conditions].every(condition => condition(event, store, listenerApi))
+          return [() => eventMetadata.distance > minDistance, ...conditions].every(condition => condition(event, eventMetadata, listenerApi))
         },
-        panStart = event => (store.start = { x: event.touches[0].clientX, y: event.touches[0].clientY }),
-        panMove = event => recognize(recognizer(event), listener),
-        panCancel = () => ['start', 'end', 'distance', 'angle'].forEach(datum => (store[datum] = undefined)),
+        panStart = event => (eventMetadata.startPoint = { x: event.touches[0].clientX, y: event.touches[0].clientY }),
+        panMove = (event, { toPolarCoordinates }) => recognize(recognizer(event, { toPolarCoordinates }), listener),
+        panCancel = () => ['startPoint', 'endPoint', 'distance', 'angle'].forEach(datum => (eventMetadata[datum] = undefined)),
         panEnd = () => { /* do nothing */ },
         touchListeners = [
-          ['touchstart', event => handle(panStart, onStart, event, store)],
-          ['touchmove', event => handle(panMove, onMove, event, store)],
-          ['touchcancel', event => handle(panCancel, onCancel, event, store)],
-          ['touchend', event => handle(panEnd, onEnd, event, store)],
-        ]
+          ['touchstart', event => handle(panStart, onStart, event, eventMetadata)],
+          ['touchmove', event => handle(panMove, onMove, event, eventMetadata)],
+          ['touchcancel', event => handle(panCancel, onCancel, event, eventMetadata)],
+          ['touchend', event => handle(panEnd, onEnd, event, eventMetadata)],
+        ],
+        mouseEquivalents = includesMouseEquivalents ? toMouseEquivalents(touchListeners) : []
 
-  if (includesMouseEquivalents) {
-    return [
-      ...touchListeners,
-      ...getMouseEquivalents(touchListeners),
-    ]
-  } else {
-    return touchListeners
-  }
+  return [
+    ...touchListeners,
+    ...mouseEquivalents
+  ]
 }
-function panLeft (listener, store, options) {
-  options = withDirectionCondition('left', options)
-  pan(listener, store, options)
-}
-function panRight (listener, store, options) {
-  options = withDirectionCondition('right', options)
-  pan(listener, store, options)
-}
-function panUp (listener, store, options) {
+function panUp (listener, eventMetadata, options) {
   options = withDirectionCondition('up', options)
-  pan(listener, store, options)
+  return pan(listener, eventMetadata, options)
 }
-function panDown (listener, store, options) {
+function panUpRight (listener, eventMetadata, options) {
+  options = withDirectionCondition('upRight', options)
+  return pan(listener, eventMetadata, options)
+}
+function panRight (listener, eventMetadata, options) {
+  options = withDirectionCondition('right', options)
+  return pan(listener, eventMetadata, options)
+}
+function panDownRight (listener, eventMetadata, options) {
+  options = withDirectionCondition('downRight', options)
+  return pan(listener, eventMetadata, options)
+}
+function panDown (listener, eventMetadata, options) {
   options = withDirectionCondition('down', options)
-  pan(listener, store, options)
+  return pan(listener, eventMetadata, options)
+}
+function panDownLeft (listener, eventMetadata, options) {
+  options = withDirectionCondition('downLeft', options)
+  return pan(listener, eventMetadata, options)
+}
+function panLeft (listener, eventMetadata, options) {
+  options = withDirectionCondition('left', options)
+  return pan(listener, eventMetadata, options)
+}
+function panUpLeft (listener, eventMetadata, options) {
+  options = withDirectionCondition('upLeft', options)
+  return pan(listener, eventMetadata, options)
 }
 
-// Pinch
-function pinch (listener, store, options) {
+/*
+ * Swipe is defined as a single touch that:
+ * - starts at given point
+ * - travels a distance greater than 0px (or a minimum distance of your choice)
+ * - travels at a velocity of greater than 0px/ms (or a minimum velocity of your choice)
+ * - ends
+ */
+function swipe (listener, eventMetadata, options) {
+  options = {
+    minDistance: 0,
+    minVelocity: 0,
+    includesMouseEquivalents: false,
+    conditions: [],
+    ...options
+  }
+
+  const { minDistance, minVelocity, includesMouseEquivalents, conditions, onStart, onMove, onCancel, onEnd } = options,
+        storeEventData = (event, { toPolarCoordinates }) => {
+          const { x: xA, y: yA } = eventMetadata.startPoint,
+                { clientX: xB, clientY: yB } = event.touches[0],
+                { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
+                endPoint = { x: xB, y: yB },
+                endTime = Date.now()
+
+          eventMetadata.endPoint = endPoint
+          eventMetadata.endTime = endTime
+          eventMetadata.distance = distance
+          eventMetadata.angle = angle
+          eventMetadata.velocity = distance / (eventMetadata.endTime - eventMetadata.startTime)
+        },
+        recognizer = event => [() => eventMetadata.distance > minDistance && eventMetadata.velocity > minVelocity, ...conditions].every(condition => condition(event, eventMetadata, listenerApi)),
+        swipeStart = event => {
+          eventMetadata.startTime = Date.now()
+          eventMetadata.startPoint = { x: event.touches[0].clientX, y: event.touches[0].clientY }
+        },
+        swipeMove = (event, { toPolarCoordinates }) => storeEventData(event, { toPolarCoordinates }),
+        swipeCancel = () => ['startPoint', 'endPoint', 'startTime', 'endTime', 'distance', 'angle', 'velocity'].forEach(datum => (eventMetadata[datum] = undefined)),
+        swipeEnd = (event, { toPolarCoordinates }) => recognize(recognizer(event, { toPolarCoordinates }), listener),
+        touchListeners = [
+          ['touchstart', event => handle(swipeStart, onStart, event, eventMetadata)],
+          ['touchmove', event => handle(swipeMove, onMove, event, eventMetadata)],
+          ['touchcancel', event => handle(swipeCancel, onCancel, event, eventMetadata)],
+          ['touchend', event => handle(swipeEnd, onEnd, event, eventMetadata)],
+        ],
+        mouseEquivalents = includesMouseEquivalents ? toMouseEquivalents(touchListeners) : []
+
+  return [
+    ...touchListeners,
+    ...mouseEquivalents
+  ]
+}
+function swipeUp (listener, eventMetadata, options) {
+  options = withDirectionCondition('up', options)
+  return swipe(listener, eventMetadata, options)
+}
+function swipeUpRight (listener, eventMetadata, options) {
+  options = withDirectionCondition('upRight', options)
+  return swipe(listener, eventMetadata, options)
+}
+function swipeRight (listener, eventMetadata, options) {
+  options = withDirectionCondition('right', options)
+  return swipe(listener, eventMetadata, options)
+}
+function swipeDownRight (listener, eventMetadata, options) {
+  options = withDirectionCondition('downRight', options)
+  return swipe(listener, eventMetadata, options)
+}
+function swipeDown (listener, eventMetadata, options) {
+  options = withDirectionCondition('down', options)
+  return swipe(listener, eventMetadata, options)
+}
+function swipeDownLeft (listener, eventMetadata, options) {
+  options = withDirectionCondition('downLeft', options)
+  return swipe(listener, eventMetadata, options)
+}
+function swipeLeft (listener, eventMetadata, options) {
+  options = withDirectionCondition('left', options)
+  return swipe(listener, eventMetadata, options)
+}
+function swipeUpLeft (listener, eventMetadata, options) {
+  options = withDirectionCondition('upLeft', options)
+  return swipe(listener, eventMetadata, options)
+}
+
+/*
+ * Pinch is defined as two touches that:
+ * - each start at a given point, a given distance from each other
+ * - change their starting distance by more than 0px (or a minimum distance of your choice)
+ */
+function pinch (listener, eventMetadata, options) {
 
 }
-function pinchIn (listener, store, options) {
+function pinchIn (listener, eventMetadata, options) {
 
 }
-function pinchOut (listener, store, options) {
+function pinchOut (listener, eventMetadata, options) {
 
 }
 
 // Press
-function press (listener, store, options) {
+function press (listener, eventMetadata, options) {
 
 }
-function pressup (listener, store, options) {
-
-}
-
-// Rotate
-function rotate (listener, store, options) {
+function pressup (listener, eventMetadata, options) {
 
 }
 
-// Swipe
-function swipe (listener, store, options) {
-
-}
-function swipeLeft (listener, store, options) {
-
-}
-function swipeRight (listener, store, options) {
-
-}
-function swipeUp (listener, store, options) {
-
-}
-function swipeDown (listener, store, options) {
+/*
+ * Rotate is defined as two touches that:
+ * - each start at a given point, forming a line with a given angle
+ * - change their starting angle by more than 0 degrees (or a minimum rotation of your choice)
+ */
+function rotate (listener, eventMetadata, options) {
 
 }
 
-// Tap
-function tap (listener, store, options) {
-
+/*
+ * Tap is defined as a single touch that:
+ * - starts at given point
+ * - does not travel
+ * - ends
+ * - repeats 1 time (or a minimum number of your choice), with each tap ocurring less than or equal to 500ms (or a maximum interval of your choice) after the previous tap
+ */
+function tap (listener, eventMetadata, options) {
+  options = {
+    minTaps: 1,
+    maxInterval: 500, // Via https://ux.stackexchange.com/questions/40364/what-is-the-expected-timeframe-of-a-double-click
+    conditions: []
+  }
 }
 
 export default {
   pan,
   panUp,
+  panUpRight,
   panRight,
+  panDownRight,
   panDown,
+  panDownLeft,
   panLeft,
+  panUpLeft,
   pinch,
   press,
   pressup,
   rotate,
   swipe,
+  swipeUp,
+  swipeUpRight,
+  swipeRight,
+  swipeDownRight,
+  swipeDown,
+  swipeDownLeft,
+  swipeLeft,
+  swipeUpLeft,
   tap,
 }

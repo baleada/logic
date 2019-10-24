@@ -38,7 +38,7 @@ export default class Listenable {
     /* Private properties */
     this._isObserved = observers.hasOwnProperty(this.eventName)
     this._isTouch = this._touches.hasOwnProperty(this.eventName)
-    this._computedEventData = {}
+    this._computedEventMetadata = {}
     this._activeListenerIds = []
 
     /* Dependency */
@@ -47,12 +47,12 @@ export default class Listenable {
   get activeListeners () {
     return this._activeListenerIds
   }
-  get eventData () {
-    return this._computedEventData
+  get eventMetadata () {
+    return this._computedEventMetadata
   }
 
   setEventName (eventName) {
-    this.destroy()
+    this.stop()
     this.eventName = eventName
     this._isObserved = observers.hasOwnProperty(eventName)
     this._isTouch = this._touches.hasOwnProperty(eventName)
@@ -70,7 +70,7 @@ export default class Listenable {
     } else {
       const options = [addEventListener || useCapture, wantsUntrusted],
             eventListeners = this._isTouch
-              ? this._touches[this.eventName](listener, this._computedEventData, this._touchOptions).map(eventListener => [...eventListener, ...options])
+              ? this._touches[this.eventName](listener, this._computedEventMetadata, this._touchOptions).map(eventListener => [...eventListener, ...options])
               : [[this.eventName, listener, ...options]]
 
       eventListeners.forEach(eventListener => {
@@ -82,7 +82,7 @@ export default class Listenable {
     return this
   }
 
-  destroy () {
+  stop () {
     if (this._isObserved) {
       this.activeListeners.forEach(observerInstance => observerInstance.disconnect())
     } else {
