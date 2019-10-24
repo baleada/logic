@@ -4,7 +4,7 @@ import withDirectionCondition from '../util/withDirectionCondition'
 import toPolarCoordinates from '../util/toPolarCoordinates'
 
 /* Dictionaries */
-import { toDirection } from './directions'
+import directions, { toDirection } from './directions'
 import { toMouseEquivalents } from './mouseEquivalents'
 
 /* recognize */
@@ -45,6 +45,10 @@ function pan (listener, eventMetadata, options) {
     ...options
   }
 
+  if (directions.hasOwnProperty(options.direction)) {
+    options = withDirectionCondition(options.direction, options)
+  }
+
   const { minDistance, conditions, includesMouseEquivalents, onStart, onMove, onCancel, onEnd } = options,
         recognizer = (event, { toPolarCoordinates }) => {
           const { x: xA, y: yA } = eventMetadata.startPoint,
@@ -78,38 +82,6 @@ function pan (listener, eventMetadata, options) {
     ...mouseEquivalents
   ]
 }
-function panUp (listener, eventMetadata, options) {
-  options = withDirectionCondition('up', options)
-  return pan(listener, eventMetadata, options)
-}
-function panUpRight (listener, eventMetadata, options) {
-  options = withDirectionCondition('upRight', options)
-  return pan(listener, eventMetadata, options)
-}
-function panRight (listener, eventMetadata, options) {
-  options = withDirectionCondition('right', options)
-  return pan(listener, eventMetadata, options)
-}
-function panDownRight (listener, eventMetadata, options) {
-  options = withDirectionCondition('downRight', options)
-  return pan(listener, eventMetadata, options)
-}
-function panDown (listener, eventMetadata, options) {
-  options = withDirectionCondition('down', options)
-  return pan(listener, eventMetadata, options)
-}
-function panDownLeft (listener, eventMetadata, options) {
-  options = withDirectionCondition('downLeft', options)
-  return pan(listener, eventMetadata, options)
-}
-function panLeft (listener, eventMetadata, options) {
-  options = withDirectionCondition('left', options)
-  return pan(listener, eventMetadata, options)
-}
-function panUpLeft (listener, eventMetadata, options) {
-  options = withDirectionCondition('upLeft', options)
-  return pan(listener, eventMetadata, options)
-}
 
 /*
  * Swipe is defined as a single touch that:
@@ -125,6 +97,10 @@ function swipe (listener, eventMetadata, options) {
     conditions: [],
     includesMouseEquivalents: false,
     ...options
+  }
+
+  if (directions.hasOwnProperty(options.direction)) {
+    options = withDirectionCondition(options.direction, options)
   }
 
   const { minDistance, minVelocity, conditions, includesMouseEquivalents, onStart, onMove, onCancel, onEnd } = options,
@@ -165,38 +141,6 @@ function swipe (listener, eventMetadata, options) {
     ...touchListeners,
     ...mouseEquivalents
   ]
-}
-function swipeUp (listener, eventMetadata, options) {
-  options = withDirectionCondition('up', options)
-  return swipe(listener, eventMetadata, options)
-}
-function swipeUpRight (listener, eventMetadata, options) {
-  options = withDirectionCondition('upRight', options)
-  return swipe(listener, eventMetadata, options)
-}
-function swipeRight (listener, eventMetadata, options) {
-  options = withDirectionCondition('right', options)
-  return swipe(listener, eventMetadata, options)
-}
-function swipeDownRight (listener, eventMetadata, options) {
-  options = withDirectionCondition('downRight', options)
-  return swipe(listener, eventMetadata, options)
-}
-function swipeDown (listener, eventMetadata, options) {
-  options = withDirectionCondition('down', options)
-  return swipe(listener, eventMetadata, options)
-}
-function swipeDownLeft (listener, eventMetadata, options) {
-  options = withDirectionCondition('downLeft', options)
-  return swipe(listener, eventMetadata, options)
-}
-function swipeLeft (listener, eventMetadata, options) {
-  options = withDirectionCondition('left', options)
-  return swipe(listener, eventMetadata, options)
-}
-function swipeUpLeft (listener, eventMetadata, options) {
-  options = withDirectionCondition('upLeft', options)
-  return swipe(listener, eventMetadata, options)
 }
 
 /*
@@ -317,26 +261,10 @@ function tap (listener, eventMetadata, options) {
 
 export default {
   pan,
-  panUp,
-  panUpRight,
-  panRight,
-  panDownRight,
-  panDown,
-  panDownLeft,
-  panLeft,
-  panUpLeft,
   pinch,
   press,
   pressup,
   rotate,
   swipe,
-  swipeUp,
-  swipeUpRight,
-  swipeRight,
-  swipeDownRight,
-  swipeDown,
-  swipeDownLeft,
-  swipeLeft,
-  swipeUpLeft,
   tap,
 }
