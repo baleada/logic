@@ -25,7 +25,6 @@ class Completable {
       segmentsFromDivider: false,
       segmentsToLocation: false,
       divider: /\s/,
-      locatesAfterCompletion: true,
       onComplete: (completedString, instance) => instance.setString(completedString),
       onLocate: (newLocation, instance) => instance.setLocation(newLocation),
       ...options
@@ -33,10 +32,9 @@ class Completable {
     this._segmentsFromDivider = options.segmentsFromDivider
     this._segmentsToLocation = options.segmentsToLocation
     this._divider = options.divider
-    // this._matchDirection = matchDirection
-    this._locatesAfterCompletion = options.locatesAfterCompletion
     this._onComplete = options.onComplete
     this._onLocate = options.onLocate
+    // this._matchDirection = matchDirection
 
     this.string = string
     this.location = string.length
@@ -57,11 +55,17 @@ class Completable {
     this.location = location
     return this
   }
-  complete (completion) {
-    const textBefore = this.string.slice(0, this.location - this.segment.length), // segmentsFromDivider
+  complete (completion, options = {}) {
+    options = {
+      locatesAfterCompletion: true,
+      ...options
+    }
+
+    const { locatesAfterCompletion } = options,
+          textBefore = this.string.slice(0, this.location - this.segment.length), // segmentsFromDivider
           textAfter = this.string.slice(this._computeSegmentEndIndex()), // segmentsToLocation
           completedString = textBefore + completion + textAfter,
-          newLocation = this._locatesAfterCompletion ? textBefore.length + completion.length : this.location
+          newLocation = locatesAfterCompletion ? textBefore.length + completion.length : this.location
 
     emit(this._onComplete, completedString, this)
     emit(this._onLocate, newLocation, this)

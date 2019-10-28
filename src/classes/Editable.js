@@ -154,14 +154,14 @@ class Editable {
 
     if (hasEveryProperty(options, ['rename', 'value'])) {
       const renamable = new Renamable(newState),
-            renamed = renamable.renameKey(options.rename, key)
+            renamed = renamable.invoke(options.rename, key)
 
       renamed.set(key, options.value)
 
       newState = new Map(renamed)
     } else if (hasEveryProperty(options, ['rename'])) {
       const renamable = new Renamable(newState),
-            renamed = renamable.renameKey(options.rename, key)
+            renamed = renamable.invoke(options.rename, key)
 
       newState = new Map(renamed)
     } else if (hasEveryProperty(options, ['value'])) {

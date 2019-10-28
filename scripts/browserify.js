@@ -8,17 +8,17 @@ function browserifyClasses () {
     .map(file => ({
       name: file.split('.')[0],
       source: `./browser-lib/${dir}/${file}`,
-      output: `./tests/fixtures/${dir}/${file}`,
+      output: `./dist/${dir}/${file}`,
     }))
 
   files.forEach(file => browserifyLibrary(file))
   console.log(`Browserified ${files.length} ${dir}.`)
 }
 
-function browserifyLibrary (file) {
-  browserify(file.source, { standalone: file.name })
+function browserifyLibrary ({ source, name, output }) {
+  browserify(source, { standalone: name })
     .bundle()
-    .pipe(fs.createWriteStream(file.output))
+    .pipe(fs.createWriteStream(output))
 }
 
 browserifyClasses()

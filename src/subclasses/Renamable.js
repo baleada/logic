@@ -5,7 +5,7 @@
  */
 
 export default class Renamable extends Map {
-  renameKey (keyToRename, newName) {
+  invoke (keyToRename, newName) {
     const keys = Array.from(this.keys()),
           keyToRenameIndex = keys.findIndex(key => key === keyToRename),
           newKeys = [...keys.slice(0, keyToRenameIndex), newName, ...keys.slice(keyToRenameIndex + 1)],

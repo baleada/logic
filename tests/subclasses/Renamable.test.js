@@ -5,16 +5,16 @@ test.beforeEach(t => {
   t.context.setup = () => new Renamable([['one', 'value'], ['two', 'value']])
 })
 
-test('renameKey(keyToRename, newName) renames keyToRename to newName', t => {
+test('invoke(keyToRename, newName) renames keyToRename to newName', t => {
   const instance = t.context.setup(),
-        result = instance.renameKey('one', 'uno')
+        result = instance.invoke('one', 'uno')
 
   t.deepEqual(result, new Renamable([['uno', 'value'], ['two', 'value']]))
 })
 
-test('rename(...) returns Renamable', t => {
+test('invoke(...) returns Renamable', t => {
   const instance = t.context.setup(),
-        result = instance.renameKey('one', 'uno')
+        result = instance.invoke('one', 'uno')
 
   t.assert(result instanceof Renamable)
 })

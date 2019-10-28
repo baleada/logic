@@ -161,12 +161,10 @@ test('complete(completion) correctly updates location when segmentsFromDivider i
   t.is(instance.location, 'Baleada: a toolkit for building web Baleada'.length)
 })
 
-test('complete(completion) does not update location when locatesAfterCompletion is false', t => {
-  const instance = t.context.setup({
-          locatesAfterCompletion: false
-        }),
+test('complete(completion, options) does not update location when locatesAfterCompletion is false', t => {
+  const instance = t.context.setup(),
         originalLocation = instance.location
-  instance.complete('Baleada')
+  instance.complete('Baleada', { locatesAfterCompletion: false })
 
   t.is(instance.location, originalLocation)
 })

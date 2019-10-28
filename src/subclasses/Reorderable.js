@@ -8,7 +8,7 @@
 import is from '../util/is'
 
 export default class Reorderable extends Array {
-  reorder (itemsToMoveParam, itemsDestinationParam) {
+  invoke (itemsToMoveParam, itemsDestinationParam) {
     const { sliceFrom, sliceItemCount } = this._getSliceFromAndSliceItemCount(itemsToMoveParam),
           spliceFrom = this._getSpliceFrom(itemsDestinationParam, sliceFrom),
           itemsToMove = this.slice(sliceFrom, sliceFrom + sliceItemCount),

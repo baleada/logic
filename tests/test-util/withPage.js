@@ -17,7 +17,7 @@ export default async function withPage (t, fileName, isClass, run) {
   await page.exposeFunction('deepEqual', (value, expected) => t.deepEqual(value, expected))
 
   await page.addScriptTag({
-    path: `./tests/fixtures/${isClass ? 'classes' : 'subclasses'}/${fileName}.js`,
+    path: `./dist/${isClass ? 'classes' : 'subclasses'}/${fileName}.js`,
     type: 'text/javascript'
   })
 

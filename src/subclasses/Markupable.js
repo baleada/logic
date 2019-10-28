@@ -10,14 +10,14 @@ export default class Markupable extends String {
   // _markdownitOptions
   // _markdownit
 
-  constructor (string, options = {}) {
-    super(string)
+  constructor (markdown, options = {}) {
+    super(markdown)
 
     this._markdownitOptions = options.markdownit
     this._markdownit = new MarkdownIt(this._markdownitOptions)
   }
 
-  markup () {
+  invoke () {
     return new Markupable(this._markdownit.render(`${this}`), { markdownit: this._markdownitOptions })
   }
 }
