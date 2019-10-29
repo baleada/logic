@@ -64,7 +64,7 @@ export default class Listenable {
     const { addEventListener, observer, observe, useCapture, wantsUntrusted } = options
 
     if (this._isObserved) {
-      const observerInstance = new observers[this.eventName](listener, observer)
+      const observerInstance = new observers[this.eventName]()(listener, observer)
       observerInstance.observe(this.element, observe)
       this._activeListenerIds.push(observerInstance)
     } else {

@@ -71,7 +71,6 @@
     "@shopify/draggable": "^1.0.0-beta.8",
     "animejs": "^3.0.1",
     "gotrue-js": "^0.9.25",
-    "hammerjs": "^2.0.8",
     "lunr": "^2.3.6",
     "luxon": "^1.17.1",
     "markdown-it": "^10.0.0",
