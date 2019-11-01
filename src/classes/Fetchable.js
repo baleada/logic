@@ -1,6 +1,6 @@
 /*
  * Fetchable.js
- * (c) 2019 Alex Vipond
+ * (c) 2019-present Alex Vipond
  * Released under the MIT license
  */
 
@@ -56,18 +56,20 @@ export default class Fetchable {
   }
   async fetch () {
     this._computedFetching = true
-
     const response = await fetch(this.resource, this._fetchOptions)
     this._computedFetching = false
-
     emit(this._onFetch, response, this)
+
+    await this._setResponseJson(response)
+
+    return this
+  }
+  async _setResponseJson (response) {
     try {
       this._computedResponseJson = await response.json()
     } catch (error) {
       this._computedResponseJson = error
     }
-
-    return this
   }
 
   /* Private methods */
