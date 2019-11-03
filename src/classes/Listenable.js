@@ -64,8 +64,17 @@ export default class Listenable {
     const { addEventListener, observer, observe, useCapture, wantsUntrusted } = options
 
     if (this._isObserved) {
-      const observerInstance = new observers[this.eventName]()(listener, observer)
-      observerInstance.observe(this.element, observe)
+      const observerInstance = observers[this.eventName](listener, observer)
+      try {
+        observerInstance.observe(this._element, observe)
+      } catch (error) {
+        if (error.message === 'Argument 1 of IntersectionObserver.observe does not implement interface Element.') {
+          this._element = document.querySelector('html') // Can't observe document
+          observerInstance.observe(this._element, observe)
+        } else {
+          return error
+        }
+      }
       this._activeListenerIds.push(observerInstance)
     } else {
       const options = [addEventListener || useCapture, wantsUntrusted],
