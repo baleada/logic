@@ -30,48 +30,54 @@ export default class Fetchable {
     this.response = {}
 
     /* Private properties */
-    this._computedFetching = false
+    this._computedStatus = {
+      updatingResponseJson: true,
+      fetching: false,
+    }
     this._computedResponseJson = {}
 
     /* Dependency */
     this._fetchOptions = this._getFetchOptions(options)
   }
 
+  _getFetchOptions = ({ onFetch, ...rest }) => ({ ...rest })
+
   /* Public getters */
-  get fetching () {
-    return this._computedFetching
+  get status () {
+    return this._computedStatus
   }
   get responseJson () {
     return this._computedResponseJson
   }
 
-  /* Public methods */
+  async updateResponseJson () {
+    try {
+      this._computedStatus.updatingResponseJson = true
+      this._computedResponseJson = await this.response.json()
+      this._computedStatus.updatingResponseJson = false
+    } catch (error) {
+      this._computedResponseJson = error
+      this._computedStatus.updatingResponseJson = false
+    }
+
+    return this
+  }
+
   setResource (resource) {
     this.resource = resource
     return this
   }
   setResponse (response) {
     this.response = response
+    this.updateResponseJson()
     return this
   }
   async fetch () {
-    this._computedFetching = true
+    this._computedStatus.fetching = true
     const response = await fetch(this.resource, this._fetchOptions)
-    this._computedFetching = false
+    this._computedStatus.fetching = false
     emit(this._onFetch, response, this)
-
-    await this._setResponseJson(response)
 
     return this
   }
-  async _setResponseJson (response) {
-    try {
-      this._computedResponseJson = await response.json()
-    } catch (error) {
-      this._computedResponseJson = error
-    }
-  }
-
-  /* Private methods */
-  _getFetchOptions = ({ onFetch, ...rest }) => ({ ...rest })
 }

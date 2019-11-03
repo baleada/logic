@@ -20,16 +20,10 @@ class Navigable {
     /* Options */
     options = {
       initialLocation: 0,
-      loops: true,
-      increment: 1,
-      decrement: 1,
       onNavigate: (newLocation, instance) => instance.setLocation(newLocation),
       ...options
     }
 
-    this._loops = options.loops
-    this._increment = options.increment
-    this._decrement = options.decrement
     this._onNavigate = options.onNavigate
     this._onGoTo = options.onGoTo
     this._onNext = options.onNext
@@ -76,14 +70,21 @@ class Navigable {
 
     return this._navigate(newLocation, navigateType)
   }
-  next () {
+  next (options = {}) {
+    options = {
+      increment: 1,
+      loops: true,
+      ...options,
+    }
+    const { increment, loops } = options
+
     let newLocation
     const lastLocation = this.array.length - 1
 
-    if (this.location + this._increment > lastLocation) {
+    if (this.location + increment > lastLocation) {
       switch (true) {
-      case (this._loops):
-        newLocation = this.location + this._increment
+      case (loops):
+        newLocation = this.location + increment
         while (newLocation > lastLocation) {
           newLocation -= this.array.length
         }
@@ -92,18 +93,25 @@ class Navigable {
         newLocation = lastLocation
       }
     } else {
-      newLocation = this.location + this._increment
+      newLocation = this.location + increment
     }
 
     return this.goTo(newLocation, 'next')
   }
-  prev () {
+  prev (options = {}) {
+    options = {
+      decrement: 1,
+      loops: true,
+      ...options,
+    }
+    const { decrement, loops } = options
+
     let newLocation
 
-    if (this.location - this._decrement < 0) {
+    if (this.location - decrement < 0) {
       switch (true) {
-      case (this._loops):
-        newLocation = this.location - this._decrement
+      case (loops):
+        newLocation = this.location - decrement
         while (newLocation < 0) {
           newLocation += this.array.length
         }
@@ -112,7 +120,7 @@ class Navigable {
         newLocation = 0
       }
     } else {
-      newLocation = this.location - this._decrement
+      newLocation = this.location - decrement
     }
 
     return this.goTo(newLocation, 'prev')
