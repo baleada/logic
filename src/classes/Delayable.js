@@ -34,7 +34,14 @@ export default class Delayable {
 
     /* Private properties */
     this._computedExecutions = 0
-    this._computedTimeElapsed = 0
+    this._computedTime = {
+      start: undefined,
+      lastExecution: undefined,
+    }
+    this._computedTimeElapsed = {
+      total: 0,
+      sinceLastExecution: 0,
+    }
     this._computedTimeRemaining = undefined
   }
 
@@ -50,8 +57,8 @@ export default class Delayable {
    * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
    * @type {Number}
    */
-  get startTime () {
-    return this._computedStartTime
+  get time () {
+    return this._computedTime
   }
   get timeElapsed () {
     return this._computedTimeElapsed
@@ -103,7 +110,7 @@ export default class Delayable {
   _setup = function(delay, isInterval) {
     this.stop()
     this._computedExecutions = 0
-    this._computedTimeElapsed = 0
+    this._computedTimeElapsed.sinceLastExecution = 0
     this._computedTimeRemaining = delay
     this._isFirstTick = true
     this._startTick(delay, isInterval)
@@ -113,16 +120,16 @@ export default class Delayable {
   }
   _tick = function(timestamp, delay, isInterval) {
     if (this._isFirstTick) {
-      this._computedStartTime = timestamp
+      this._computedTime.start = timestamp
       this._isFirstTick = false
     }
 
     this._setTimeElapsed(timestamp, delay, isInterval)
     this._setTimeRemaining(delay)
 
-    if (this._computedTimeElapsed < delay) {
+    if (this.timeElapsed.sinceLastExecution < delay) {
       this._stopTick()
-      this._startTick(delay)
+      this._startTick(delay, isInterval) // Ticks recursively as shown in example at https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
     }
   }
   _stopTick = function() {
@@ -130,20 +137,26 @@ export default class Delayable {
     this._isFirstTick = false
   }
   _setTimeElapsed = function(timestamp, delay, isInterval) {
-    const timeElapsed = timestamp - this._computedStartTime
-    this._computedTimeElapsed = isInterval
-      ? timeElapsed - delay * this._computedExecutions
+    const timeElapsed = timestamp - this.time.start
+    this._computedTimeElapsed.sinceLastExecution = isInterval
+      ? timeElapsed - delay * this.executions
       : Math.min(timeElapsed, delay)
+
+    this._computedTimeElapsed.total = this.timeElapsed.sinceLastExecution + delay * this.executions
+
+    this._tickTimestamp = timestamp
   }
   _setTimeRemaining = function(delay) {
-    this._computedTimeRemaining = delay - this._computedTimeElapsed
+    this._computedTimeRemaining = delay - this.timeElapsed.sinceLastExecution
   }
   _setTimeout = function(delay, parameters) {
     return window.setTimeout(
       (delay, parameters) => {
         this.callback(...parameters)
         this._stopTick()
-        this._computedTimeElapsed = delay // Set timeElapsed to delay in case the user has switched tabs (which pauses requestAnimationFrame)
+        this._computedTimeElapsed.sinceLastExecution = delay // Set timeElapsed to delay in case the user has switched tabs (which pauses requestAnimationFrame)
+        this._computedTimeElapsed.total = delay
+        this._computedTime.lastExecution = this._tickTimestamp
         this._computedExecutions = 1
       },
       delay,
@@ -156,8 +169,10 @@ export default class Delayable {
       (delay, parameters) => {
         this.callback(...parameters)
         this._stopTick()
-        this._computedTimeElapsed = 0
+        this._computedTimeElapsed.sinceLastExecution = 0
         this._computedExecutions++
+        this._computedTimeElapsed.total = delay * this.executions
+        this._computedTime.lastExecution = this._tickTimestamp
         this._startTick(delay, true)
       },
       delay,
