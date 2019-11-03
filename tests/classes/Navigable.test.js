@@ -57,11 +57,9 @@ test('next() increments the current location by 1 when increment is default', t 
 })
 
 test('next() increments the current location by increment when increment is not default', t => {
-  const instance = t.context.setup({
-    increment: 2,
-  })
+  const instance = t.context.setup()
 
-  instance.next()
+  instance.next({ increment: 2, })
 
   t.is(instance.location, 2)
 })
@@ -76,22 +74,18 @@ test('next() loops back through the array by default when the current location i
 })
 
 test('next() loops recursively through the array by default until current location is less than or equal to the last location', t => {
-  const instance = t.context.setup({
-    increment: 15
-  })
+  const instance = t.context.setup()
 
-  instance.next()
+  instance.next({ increment: 15 })
 
   t.is(instance.location, 0)
 })
 
 test('next() stops at the last location when loops is false AND incremented location is greater than the last location', t => {
-  const instance = t.context.setup({
-    loops: false
-  })
+  const instance = t.context.setup()
 
   instance.goTo(instance.array.length - 1)
-  instance.next()
+  instance.next({ loops: false })
 
   t.is(instance.location, instance.array.length - 1)
 })
@@ -110,10 +104,9 @@ test('prev() decrements the current location by 1 when decrement is default', t 
 test('prev() decrements the current location by decrement when decrement is not default', t => {
   const instance = t.context.setup({
     initialLocation: 2,
-    decrement: 2
   })
 
-  instance.prev()
+  instance.prev({ decrement: 2 })
 
   t.is(instance.location, 0)
 })
@@ -127,21 +120,17 @@ test('prev() loops back through the array by default when the current location i
 })
 
 test('prev() loops recursively through the array by default until current location is greater than or equal to 0', t => {
-  const instance = t.context.setup({
-    decrement: 15
-  })
+  const instance = t.context.setup()
 
-  instance.prev()
+  instance.prev({ decrement: 15 })
 
   t.is(instance.location, 0)
 })
 
 test('prev() stops at 0 when loops is false AND decremented location is less than 0', t => {
-  const instance = t.context.setup({
-    loops: false
-  })
+  const instance = t.context.setup()
 
-  instance.prev()
+  instance.prev({ loops: false })
 
   t.is(instance.location, 0)
 })

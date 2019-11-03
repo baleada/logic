@@ -89,9 +89,8 @@ export default class IdentifiableGoTrue {
     onAcceptInvite,
     onAcceptInviteExternalProvider,
     onUpdate,
-    onGetJwt,
     onLogout,
-    ...rest,
+    ...rest
   }) => rest
 
   get user () {

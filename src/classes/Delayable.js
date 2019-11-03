@@ -14,11 +14,10 @@
  */
 export default class Delayable {
   // _delay
-  // _isInterval
   // _parameters
   // _id
   // _tickId
-  // _started
+  // _computedStartTime
   // _computedExecutions
   // _computedTimeElapsed
   // _computedTimeRemaining
@@ -51,6 +50,9 @@ export default class Delayable {
    * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
    * @type {Number}
    */
+  get startTime () {
+    return this._computedStartTime
+  }
   get timeElapsed () {
     return this._computedTimeElapsed
   }
@@ -85,8 +87,7 @@ export default class Delayable {
    * Executes the callback function after the period of time specified by <code>delay</code>
    */
   timeout (delay = 0, parameters = []) {
-    this._isInterval = false
-    this._setup(delay)
+    this._setup(delay, false)
     this._id = this._setTimeout(delay, parameters)
     return this
   }
@@ -94,26 +95,31 @@ export default class Delayable {
    * Repeatedly executes the callback function with a fixed time delay (specified by <code>delay</code>) between each execution
    */
   interval (delay = 0, parameters = []) {
-    this._isInterval = true
-    this._setup(delay)
+    this._setup(delay, true)
     this._id = this._setInterval(delay, parameters)
     return this
   }
 
-  _setup = function(delay) {
+  _setup = function(delay, isInterval) {
     this.stop()
     this._computedExecutions = 0
     this._computedTimeElapsed = 0
     this._computedTimeRemaining = delay
-    this._started = Date.now()
-    this._startTick(delay)
+    this._isFirstTick = true
+    this._startTick(delay, isInterval)
   }
-  _startTick = function(delay) {
-    this._tickId = window.requestAnimationFrame(() => this._tick(delay))
+  _startTick = function(delay, isInterval) {
+    this._tickId = window.requestAnimationFrame(timestamp => this._tick(timestamp, delay, isInterval))
   }
-  _tick = function(delay) {
-    this._setTimeElapsed(delay)
+  _tick = function(timestamp, delay, isInterval) {
+    if (this._isFirstTick) {
+      this._computedStartTime = timestamp
+      this._isFirstTick = false
+    }
+
+    this._setTimeElapsed(timestamp, delay, isInterval)
     this._setTimeRemaining(delay)
+
     if (this._computedTimeElapsed < delay) {
       this._stopTick()
       this._startTick(delay)
@@ -121,10 +127,11 @@ export default class Delayable {
   }
   _stopTick = function() {
     window.cancelAnimationFrame(this._tickId)
+    this._isFirstTick = false
   }
-  _setTimeElapsed = function(delay) {
-    const timeElapsed = Date.now() - this._started
-    this._computedTimeElapsed = this._isInterval
+  _setTimeElapsed = function(timestamp, delay, isInterval) {
+    const timeElapsed = timestamp - this._computedStartTime
+    this._computedTimeElapsed = isInterval
       ? timeElapsed - delay * this._computedExecutions
       : Math.min(timeElapsed, delay)
   }
@@ -140,6 +147,7 @@ export default class Delayable {
         this._computedExecutions = 1
       },
       delay,
+      delay,
       parameters
     )
   }
@@ -150,8 +158,9 @@ export default class Delayable {
         this._stopTick()
         this._computedTimeElapsed = 0
         this._computedExecutions++
-        this._startTick(delay)
+        this._startTick(delay, true)
       },
+      delay,
       delay,
       parameters
     )
