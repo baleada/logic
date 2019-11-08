@@ -1,9 +1,6 @@
-const fs = require('fs'),
-      filesPath = process.argv[2],
-      importPath = process.argv[3],
-      outfile = process.argv[4]
+const fs = require('fs')
 
-function generateIndex (filesPath, importPath, outfile) {
+module.exports = function(filesPath, importPath, outfile) {
   const files = fs
           .readdirSync(`./${filesPath}`)
           .filter(file => file !== 'index.js')
@@ -23,5 +20,3 @@ ${imported}\n${exported}\n\
 
   console.log(`Indexed ${files.length} files in ${filesPath}.`)
 }
-
-generateIndex(filesPath, importPath, outfile)

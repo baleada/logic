@@ -1,4 +1,4 @@
-/* Modified from anime.js https://github.com/juliangarnier/anime */
+/* Adapted from anime.js https://github.com/juliangarnier/anime */
 
 const is = {
   undefined: a => typeof a === 'undefined',

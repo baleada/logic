@@ -2,24 +2,10 @@
   "name": "@baleada/logic",
   "version": "0.1.0",
   "description": "UI logic for the Baleada toolkit",
-  "main": "index.js",
+  "main": "classes.js",
   "scripts": {
-    "index-classes": "node scripts/generateIndex.js 'src/classes' 'lib/classes' 'index'",
-    "index-subclasses": "node scripts/generateIndex.js 'src/subclasses' 'lib/subclasses' 'subclasses'",
-    "index-all": "npm run index-classes && npm run index-subclasses",
-    "empty-lib": "node scripts/emptyDir.js 'lib'",
-    "babelify": "npm run empty-lib && npx babel src --out-dir lib",
-    "empty-browser-lib": "node scripts/emptyDir.js 'browser-lib'",
-    "browser-babelify": "npm run empty-browser-lib && npx babel src --config-file ./browser-babel.config.js --out-dir browser-lib",
-    "empty-test-fixtures-classes": "node scripts/emptyDir.js 'tests/fixtures/classes'",
-    "empty-test-fixtures-subclasses": "node scripts/emptyDir.js 'tests/fixtures/subclasses'",
-    "empty-test-fixtures-all": "npm run empty-test-fixtures-classes && npm run empty-test-fixtures-subclasses",
-    "browserify-classes": "node scripts/browserify.js 'classes'",
-    "browserify-subclasses": "node scripts/browserify.js 'subclasses'",
-    "browserify-all": "npm run browserify-classes && npm run browserify-subclasses",
-    "browserify": "npm run browser-babelify && npm run empty-test-fixtures-all && npm run browserify-all",
-    "test": "npm run browserify && ava",
-    "prepare": "npm run index-all && npm run babelify"
+    "prepare": "node scripts/prepare.js",
+    "test": "npm run prepare && ava"
   },
   "repository": {
     "type": "git",
@@ -81,5 +67,5 @@
     "popper.js": "^1.15.0",
     "pressure": "^2.1.2"
   },
-  "sideEffects": "false"
+  "sideEffects": false
 }

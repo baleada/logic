@@ -1,24 +1,32 @@
 const fs = require('fs'),
       browserify = require('browserify'),
-      dir = process.argv[process.argv.length - 1]
+      browserBabelify = require('./browserBabelify'),
+      empty = require('./emptyDir')
 
-function browserifyClasses () {
+module.exports = function() {
+  browserBabelify()
+  empty('dist')
+  browserifyDir('classes')
+  browserifyDir('subclasses')
+}
+
+function browserifyDir (dir) {
   const files = fs
-    .readdirSync(`./browser-lib/${dir}`)
+    .readdirSync(`./src/${dir}`)
     .map(file => ({
       name: file.split('.')[0],
       source: `./browser-lib/${dir}/${file}`,
       output: `./dist/${dir}/${file}`,
     }))
 
-  files.forEach(file => browserifyLibrary(file))
+  fs.mkdirSync(`./dist/${dir}`)
+  files.forEach(file => browserifyFile(file))
+  
   console.log(`Browserified ${files.length} ${dir}.`)
 }
 
-function browserifyLibrary ({ source, name, output }) {
+function browserifyFile ({ source, name, output }) {
   browserify(source, { standalone: name })
     .bundle()
     .pipe(fs.createWriteStream(output))
 }
-
-browserifyClasses()

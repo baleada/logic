@@ -1,22 +1,21 @@
 const fs = require('fs'),
-      dir = process.argv[process.argv.length - 1]
+      path = require('path')
 
-function empty (dir) {
-  fs.readdirSync(`./${dir}`)
-    .forEach(item => remove(item))
+module.exports = function(dir) {
+  const dirPath = path.resolve(dir)
+  fs.readdirSync(dirPath)
+    .forEach(item => remove(`${dirPath}/${item}`))
 
   console.log(`Emptied ${dir} directory`)
 }
 
-function remove (item) {
-  if (item.includes('.')) {
-    fs.unlinkSync(`./${dir}/${item}`)
+function remove (path) {
+  if (fs.lstatSync(path).isFile()) {
+    fs.unlinkSync(path)
   } else {
-    fs.readdirSync(`./${dir}/${item}`)
-      .forEach(file => remove(`${item}/${file}`))
+    fs.readdirSync(path)
+      .forEach(item => remove(`${path}/${item}`))
 
-    fs.rmdirSync(`./${dir}/${item}`)
+    fs.rmdirSync(`${path}`)
   }
 }
-
-empty(dir)

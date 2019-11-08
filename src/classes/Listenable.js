@@ -23,11 +23,16 @@ export default class Listenable {
     /* Options */
     options = {
       element: document,
+      blacklist: [],
+      whitelist: [],
       touches,
       touch: {},
       ...options
     }
 
+    // TODO: whitelist and blacklist for events
+    this._blacklist = options.blacklist
+    this._whitelist = options.whitelist
     this._touches = options.touches
     this._element = options.element
     this._touchOptions = options.touch

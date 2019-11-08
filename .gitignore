@@ -89,3 +89,4 @@ sw.*
 # Published version
 lib
 browser-lib
+dist

@@ -7,7 +7,6 @@ import Fetchable from './lib/classes/Fetchable.js'
 import IdentifiableGoTrue from './lib/classes/IdentifiableGoTrue.js'
 import Listenable from './lib/classes/Listenable.js'
 import Navigable from './lib/classes/Navigable.js'
-import Poppable from './lib/classes/Poppable.js'
 import Searchable from './lib/classes/Searchable.js'
 import Togglable from './lib/classes/Togglable.js'
 
@@ -21,7 +20,6 @@ export {
   IdentifiableGoTrue,
   Listenable,
   Navigable,
-  Poppable,
   Searchable,
   Togglable,
 }
