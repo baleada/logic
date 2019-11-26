@@ -30,7 +30,7 @@ function getName (file) {
 
 function getUsesDOM (file) {
   const contents = fs.readFileSync(`./src/classes/${file}`, 'utf8')
-  return /this\._?element/.test(contents)
+  return /(this\._?element|window)/.test(contents)
 }
 
 function getNeedsCleanup (file) {

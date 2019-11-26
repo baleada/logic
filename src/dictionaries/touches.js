@@ -1,3 +1,5 @@
+// TODO: figure out if touch action CSS stuff is necessary
+
 /* Utils */
 import is from '../util/is'
 import withDirectionCondition from '../util/withDirectionCondition'
