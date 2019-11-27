@@ -82,10 +82,11 @@ export default class Listenable {
       }
       this._activeListenerIds.push(observerInstance)
     } else {
-      const options = [addEventListener || useCapture, wantsUntrusted],
+      const blackAndWhiteListedListener = this._getBlackAndWhiteListedListener(listener),
+            options = [addEventListener || useCapture, wantsUntrusted],
             eventListeners = this._isTouch
-              ? this._touches[this.eventName](listener, this._computedEventMetadata, this._touchOptions).map(eventListener => [...eventListener, ...options])
-              : [[this.eventName, listener, ...options]]
+              ? this._touches[this.eventName](blackAndWhiteListedListener, this._computedEventMetadata, this._touchOptions).map(eventListener => [...eventListener, ...options])
+              : [[this.eventName, blackAndWhiteListedListener, ...options]]
 
       eventListeners.forEach(eventListener => {
         this._element.addEventListener(...eventListener)
@@ -94,6 +95,20 @@ export default class Listenable {
     }
 
     return this
+  }
+  _getBlackAndWhiteListedListener = function(listener) {
+    function blackAndWhiteListedListener (event) {
+      const { target } = event,
+            [isWhitelisted, isBlacklisted] = [this._whitelist, this._blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
+
+      if (isWhitelisted) { // Whitelist always wins
+        listener(...arguments)
+      } else if (!isBlacklisted) {
+        listener(...arguments)
+      }
+    }
+
+    return blackAndWhiteListedListener
   }
 
   stop () {
