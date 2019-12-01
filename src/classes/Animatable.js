@@ -12,15 +12,14 @@ export default class Animatable {
   // _dependencyOptions
   // _dependency
 
-  constructor (elements, options = {}) {
+  constructor (elements) {
     /* Options */
 
     /* Public properties */
     this.elements = elements
 
     /* Dependency */
-    this._dependencyOptions = options
-    this._dependency = new Dependency(this.elements, this._dependencyOptions)
+    this._dependency = {}
   }
 
   /* Public getters */
@@ -34,25 +33,48 @@ export default class Animatable {
     this._dependency = new Dependency(this.elements, this._dependencyOptions)
     return this
   }
+  animate (config) {
+    this._dependency = new Dependency(this.elements, config)
+  }
   play () {
-    this._dependency.play()
-    return this
+    try {
+      this._dependency.play()
+      return this
+    } catch (error) {
+      // warn(need to call animate first)
+    }
   }
   pause () {
-    this._dependency.pause()
-    return this
+    try {
+      this._dependency.pause()
+      return this
+    } catch (error) {
+      // warn(need to call animate first)
+    }
   }
   restart () {
-    this._dependency.restart()
-    return this
+    try {
+      this._dependency.restart()
+      return this
+    } catch (error) {
+      // warn(need to call animate first)
+    }
   }
   reverse () {
-    this._dependency.reverse()
-    return this
+    try {
+      this._dependency.reverse()
+      return this
+    } catch (error) {
+      // warn(need to call animate first)
+    }
   }
   seek (timestamp) {
-    this._dependency.seek(timestamp)
-    return this
+    try {
+      this._dependency.seek(timestamp)
+      return this
+    } catch (error) {
+      // warn(need to call animate first)
+    }
   }
 
   /* Private methods */

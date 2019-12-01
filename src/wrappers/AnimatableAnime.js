@@ -12,7 +12,7 @@ export default class AnimatableAnime {
   #dependency
   #animeInstance
 
-  constructor (elements, options = {}) {
+  constructor (elements, config = {}) {
     this.#elements = elements
 
     this.#dependency = anime
@@ -33,7 +33,7 @@ export default class AnimatableAnime {
       running: this.#dependency.running,
     }
 
-    this.#animeInstance = this.#getAnimeInstance(options)
+    this.#animeInstance = this.#getAnimeInstance(config)
   }
 
   get animation () {
@@ -58,33 +58,33 @@ export default class AnimatableAnime {
   }
 
   /* Private methods */
-  #getAnimeInstance = function(options) {
-    options = resolveOptions(options, this.#animeApi)
+  #getAnimeInstance = function(config) {
+    config = resolveOptions(config, this.#animeApi)
 
     warn('hasRequiredOptions', {
-      received: options,
+      received: config,
       required: ['animation', 'timelineChildren'],
       subject: 'Animatable',
       docs: 'https://baleada.netlify.com/docs/logic/classes/Animatable',
     })
 
-    const instance = options.hasOwnProperty('timelineChildren')
-      ? this.#timeline(options)
-      : this.#animate(options)
+    const instance = config.hasOwnProperty('timelineChildren')
+      ? this.#timeline(config)
+      : this.#animate(config)
 
-    if (options.hasOwnProperty('speed')) {
-      instance.speed = options.speed
+    if (config.hasOwnProperty('speed')) {
+      instance.speed = config.speed
     }
 
     instance.finished
       .then((response) => {
-        if (options.hasOwnProperty('onFinishedSuccess')) {
-          options.onFinishedSuccess(response)
+        if (config.hasOwnProperty('onFinishedSuccess')) {
+          config.onFinishedSuccess(response)
         }
       })
       .catch((error) => {
-        if (options.hasOwnProperty('onFinishedError')) {
-          options.onFinishedError(error)
+        if (config.hasOwnProperty('onFinishedError')) {
+          config.onFinishedError(error)
         }
       })
 
