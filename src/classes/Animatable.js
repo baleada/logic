@@ -34,6 +34,7 @@ export default class Animatable {
     return this
   }
   animate (config) {
+    // stop previous animation
     this._dependency = new Dependency(this.elements, config)
   }
   play () {
