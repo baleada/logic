@@ -28,6 +28,7 @@ class Navigable {
     this._onGoTo = options.onGoTo
     this._onNext = options.onNext
     this._onPrev = options.onPrev
+    this._onRand = options.onRand
 
     /* Public properties */
     this.array = array
@@ -125,6 +126,10 @@ class Navigable {
 
     return this.goTo(newLocation, 'prev')
   }
+  rand () {
+    const newLocation = Math.floor(Math.random() * (this.array.length))
+    return this.goTo(newLocation, 'rand')
+  }
 
   /* Private methods */
   _navigate = function(newLocation, type) {
@@ -137,6 +142,7 @@ class Navigable {
         { type: 'goTo', emitter: this._onGoTo },
         { type: 'next', emitter: this._onNext },
         { type: 'prev', emitter: this._onPrev },
+        { type: 'rand', emitter: this._onRand },
       ]
     )
 

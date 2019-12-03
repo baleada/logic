@@ -135,24 +135,35 @@ test('prev() stops at 0 when loops is false AND decremented location is less tha
   t.is(instance.location, 0)
 })
 
+test('rand() navigates to a random location', t => {
+  const instance = t.context.setup()
+
+  instance.rand()
+
+  t.assert(instance.location >= 0 && instance.location <= instance.array.length)
+})
+
 test('typed emitters correctly emit', t => {
   let onNavigate = 0,
       onGoTo = 0,
       onNext = 0,
-      onPrev = 0
+      onPrev = 0,
+      onRand = 0
 
   const instance = t.context.setup({
     onNavigate: () => (onNavigate += 1),
     onGoTo: () => (onGoTo += 1),
     onNext: () => (onNext += 1),
     onPrev: () => (onPrev += 1),
+    onRand: () => (onRand += 1)
   })
 
   instance.goTo(0)
   instance.next()
   instance.prev()
+  instance.rand()
 
-  t.deepEqual({ onNavigate, onGoTo, onNext, onPrev }, { onNavigate: 3, onGoTo: 1, onNext: 1, onPrev: 1 })
+  t.deepEqual({ onNavigate, onGoTo, onNext, onPrev, onRand }, { onNavigate: 4, onGoTo: 1, onNext: 1, onPrev: 1, onRand: 1 })
 })
 
 /* method chaining */
