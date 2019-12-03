@@ -7,59 +7,59 @@ import resolveOptions from '../util/resolveOptions'
 import warn from '../util/warn'
 
 export default class AnimatableAnime {
-  #elements
-  #animeApi
-  #dependency
-  #animeInstance
+  // _elements
+  // _animeApi
+  // _dependency
+  // _animeInstance
 
   constructor (elements, config = {}) {
-    this.#elements = elements
+    this._elements = elements
 
-    this.#dependency = anime
+    this._dependency = anime
 
-    this.#animeApi = {
+    this._animeApi = {
       // anime util
-      path: this.#dependency.path,
-      setDashoffset: this.#dependency.setDashoffset,
-      stagger: this.#dependency.stagger,
-      penner: this.#dependency.penner,
+      path: this._dependency.path,
+      setDashoffset: this._dependency.setDashoffset,
+      stagger: this._dependency.stagger,
+      penner: this._dependency.penner,
 
       // anime helpers
-      remove: this.#dependency.remove,
-      get: this.#dependency.get,
-      set: this.#dependency.set,
-      random: this.#dependency.random,
-      // tick: this.#dependency.tick, TODO: does this need another prop? https://animejs.com/documentation/#tick
-      running: this.#dependency.running,
+      remove: this._dependency.remove,
+      get: this._dependency.get,
+      set: this._dependency.set,
+      random: this._dependency.random,
+      // tick: this._dependency.tick, TODO: does this need another prop? https://animejs.com/documentation/_tick
+      running: this._dependency.running,
     }
 
-    this.#animeInstance = this.#getAnimeInstance(config)
+    this._animeInstance = this._getAnimeInstance(config)
   }
 
   get animation () {
-    return this.#animeInstance
+    return this._animeInstance
   }
 
   /* Public methods */
   play () {
-    this.#animeInstance.play(...arguments)
+    this._animeInstance.play(...arguments)
   }
   pause () {
-    this.#animeInstance.pause(...arguments)
+    this._animeInstance.pause(...arguments)
   }
   restart () {
-    this.#animeInstance.restart(...arguments)
+    this._animeInstance.restart(...arguments)
   }
   reverse () {
-    this.#animeInstance.reverse(...arguments)
+    this._animeInstance.reverse(...arguments)
   }
   seek () {
-    this.#animeInstance.seek(...arguments)
+    this._animeInstance.seek(...arguments)
   }
 
   /* Private methods */
-  #getAnimeInstance = function(config) {
-    config = resolveOptions(config, this.#animeApi)
+  _getAnimeInstance = function(config) {
+    config = resolveOptions(config, this._animeApi)
 
     warn('hasRequiredOptions', {
       received: config,
@@ -69,8 +69,8 @@ export default class AnimatableAnime {
     })
 
     const instance = config.hasOwnProperty('timelineChildren')
-      ? this.#timeline(config)
-      : this.#animate(config)
+      ? this._timeline(config)
+      : this._animate(config)
 
     if (config.hasOwnProperty('speed')) {
       instance.speed = config.speed
@@ -90,26 +90,26 @@ export default class AnimatableAnime {
 
     return instance
   }
-  #animate = function({ animation = {} }) {
-    return this.#dependency({
-      targets: this.#elements,
+  _animate = function({ animation = {} }) {
+    return this._dependency({
+      targets: this._elements,
       ...animation
     })
   }
-  #timeline = function({ animation = {}, timelineChildren }) {
-    const instance = this.#dependency.timeline({
-      targets: this.#elements,
+  _timeline = function({ animation = {}, timelineChildren }) {
+    const instance = this._dependency.timeline({
+      targets: this._elements,
       ...animation
     })
 
     timelineChildren.forEach(child => {
-      const childAddArgs = this.#getAddArguments(child)
+      const childAddArgs = this._getAddArguments(child)
       instance.add(...childAddArgs)
     })
 
     return instance
   }
-  #getAddArguments = function(child) {
+  _getAddArguments = function(child) {
     const childConfig = is.array(child) ? child[0] : child,
           offset = (child[1] === undefined) ? '+=0' : child[1] // As per the anime docs, if no offset is specifed, the animation should start after the previous animation ends.
     return [childConfig, offset]

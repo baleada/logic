@@ -30,12 +30,14 @@ export default class Animatable {
   /* Public methods */
   setElements (elements) {
     this.elements = elements
-    this._dependency = new Dependency(this.elements, this._dependencyOptions)
+    // TODO: destroy previous dependency instance
+    this._dependency = {}
     return this
   }
   animate (config) {
-    // stop previous animation
+    // TODO: destroy previous dependency instance
     this._dependency = new Dependency(this.elements, config)
+    return this
   }
   play () {
     try {
