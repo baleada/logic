@@ -5,7 +5,7 @@
  */
 
 // Utils
-import { typedEmit } from '../util'
+import { typedEmit } from '../util/functions'
 
 class Navigable {
   // _loops

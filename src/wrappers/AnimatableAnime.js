@@ -2,7 +2,7 @@
 import anime from 'animejs'
 
 /* Util */
-import { is, resolveOptions, warn } from '../util'
+import { is, resolveOptions, warn } from '../util/functions'
 
 export default class AnimatableAnime {
   // _elements

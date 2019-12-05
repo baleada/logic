@@ -5,7 +5,7 @@
  */
 
 /* Util */
-import { is, warn, typedEmit, hasProperties } from '../util'
+import { is, warn, typedEmit, hasProperties } from '../util/functions'
 
 /* Libraries */
 import Renamable from '../subclasses/Renamable'

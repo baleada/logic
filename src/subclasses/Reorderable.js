@@ -5,7 +5,7 @@
  */
 
 /* Util */
-import { is } from '../util'
+import { is } from '../util/functions'
 
 export default class Reorderable extends Array {
   invoke (itemsToMoveParam, itemsDestinationParam) {

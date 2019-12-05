@@ -8,7 +8,7 @@
 import { SearchableLunr as Dependency } from '../wrappers'
 
 /* Util */
-import { emit } from '../util'
+import { emit } from '../util/functions'
 
 export default class Searchable {
   // _onSearch

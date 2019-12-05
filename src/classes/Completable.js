@@ -5,7 +5,7 @@
  */
 
 /* Util */
-import { lastMatch, emit } from '../util'
+import { lastMatch, emit } from '../util/functions'
 
 class Completable {
   /* Private properties */

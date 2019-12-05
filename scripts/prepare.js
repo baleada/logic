@@ -9,7 +9,9 @@ function prepare () {
   generateIndex('src/subclasses', { importPath: 'lib/subclasses', outfile: 'subclasses' })
   generateIndex('src/constants')
   generateIndex('src/dictionaries')
-  generateIndex('src/util')
+  generateIndex('src/util/classes')
+  generateIndex('src/util/functions')
+  generateIndex('src/util/subclasses')
   generateIndex('src/wrappers')
 
   /* Generate metadata */

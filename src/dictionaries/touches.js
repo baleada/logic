@@ -1,7 +1,7 @@
-// TODO: figure out if touch action CSS stuff is necessary
+  // TODO: figure out if touch action CSS stuff is necessary
 
 /* Utils */
-import { is, withDirectionCondition, toPolarCoordinates, toDirection, toMouseEquivalents } from '../util'
+import { is, withDirectionCondition, toPolarCoordinates, toDirection, toMouseEquivalents } from '../util/functions'
 import directions from './directions'
 
 /* recognize */
