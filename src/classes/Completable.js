@@ -5,8 +5,7 @@
  */
 
 /* Util */
-import lastMatch from '../util/lastMatch'
-import emit from '../util/emit'
+import { lastMatch, emit } from '../util'
 
 class Completable {
   /* Private properties */

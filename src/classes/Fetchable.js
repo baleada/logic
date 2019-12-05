@@ -7,7 +7,7 @@
 /* Dependencies */
 
 /* Util */
-import emit from '../util/emit'
+import { emit } from '../util'
 
 export default class Fetchable {
   /* Private properties */

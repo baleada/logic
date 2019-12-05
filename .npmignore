@@ -2,7 +2,7 @@
 *
 
 # Except these files
-!dist/**/*.js
+# !dist/**/*.js
 !lib/**/*.js
 !classes.js
 !subclasses.js

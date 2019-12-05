@@ -1,5 +1,5 @@
 import lunr from 'lunr'
-import is from '../util/is'
+import { is } from '../util'
 
 export default class SearchableLunr {
   #array

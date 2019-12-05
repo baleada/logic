@@ -5,15 +5,19 @@ const generateIndex = require('./generateIndex'),
 
 function prepare () {
   /* Index all */
-  generateIndex('src/classes', 'lib/classes', 'classes')
-  generateIndex('src/subclasses', 'lib/subclasses', 'subclasses')
+  generateIndex('src/classes', { importPath: 'lib/classes', outfile: 'classes' })
+  generateIndex('src/subclasses', { importPath: 'lib/subclasses', outfile: 'subclasses' })
+  generateIndex('src/constants')
+  generateIndex('src/dictionaries')
+  generateIndex('src/util')
+  generateIndex('src/wrappers')
 
   /* Generate metadata */
   generateMetadata()
 
   /* Transform files */
   babelify()
-  browserify()
+  // browserify()
 }
 
 prepare()

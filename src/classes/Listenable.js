@@ -9,51 +9,32 @@
 /* Utils */
 
 /* Dictionaries */
-import touches from '../dictionaries/touches'
-import observers from '../dictionaries/observers'
+import { touches, observers } from '../dictionaries'
+import { touchTypes } from '../constants'
 
 export default class Listenable {
   // _element
   // _touchOptions
   // _store
-  // _activeListenerIds
+  // _computedActiveListeners
   // _eventListenersGetter
 
   constructor (eventName, options = {}) {
     /* Options */
-    options = {
-      element: document,
-      blacklist: [],
-      whitelist: [],
-      touches,
-      touch: {},
-      ...options
-    }
-
-    // TODO: whitelist and blacklist for events
-    this._blacklist = options.blacklist
-    this._whitelist = options.whitelist
-    this._touches = options.touches
-    this._element = options.element
-    this._touchOptions = options.touch
 
     /* Public properties */
     this.eventName = eventName
 
     /* Private properties */
     this._isObserved = observers.hasOwnProperty(this.eventName)
-    this._isTouch = this._touches.hasOwnProperty(this.eventName)
-    this._computedEventMetadata = {}
-    this._activeListenerIds = []
+    this._isTouch = touchTypes.includes(this.eventName)
+    this._computedActiveListeners = []
 
     /* Dependency */
   }
 
   get activeListeners () {
-    return this._activeListenerIds
-  }
-  get eventMetadata () {
-    return this._computedEventMetadata
+    return this._computedActiveListeners
   }
 
   setEventName (eventName) {
@@ -66,57 +47,64 @@ export default class Listenable {
   }
 
   listen (listener, options = {}) {
-    const { addEventListener, observer, observe, useCapture, wantsUntrusted } = options
+    const { addEventListener, observer: observerOptions, observe: observeOptions, useCapture, wantsUntrusted, blacklist, whitelist, element: rawElement, recognize: recognizeOptions } = options
 
     if (this._isObserved) {
-      const observerInstance = observers[this.eventName](listener, observer)
-      try {
-        observerInstance.observe(this._element, observe)
-      } catch (error) {
-        if (error.message === 'Argument 1 of IntersectionObserver.observe does not implement interface Element.') {
-          this._element = document.querySelector('html') // Can't observe document
-          observerInstance.observe(this._element, observe)
-        } else {
-          return error
-        }
-      }
-      this._activeListenerIds.push(observerInstance)
+      const observerInstance = observers[this.eventName](listener, observerOptions),
+            element = rawElement || document.querySelector('html')
+
+      observerInstance.observe(element, observeOptions)
+      this._computedActiveListeners.push({ element, id: observerInstance })
     } else {
-      const blackAndWhiteListedListener = this._getBlackAndWhiteListedListener(listener),
+      const blackAndWhiteListedListener = this._getBlackAndWhiteListedListener({ listener, blacklist, whitelist }),
             options = [addEventListener || useCapture, wantsUntrusted],
             eventListeners = this._isTouch
-              ? this._touches[this.eventName](blackAndWhiteListedListener, this._computedEventMetadata, this._touchOptions).map(eventListener => [...eventListener, ...options])
-              : [[this.eventName, blackAndWhiteListedListener, ...options]]
+              ? this._recognize({ listener: blackAndWhiteListedListener }, recognizeOptions).map(eventListener => [...eventListener, ...options])
+              : [[this.eventName, blackAndWhiteListedListener, ...options]],
+            element = rawElement || document
 
       eventListeners.forEach(eventListener => {
-        this._element.addEventListener(...eventListener)
-        this._activeListenerIds.push(eventListener)
+        element.addEventListener(...eventListener)
+        this._computedActiveListeners.push({ element, id: eventListener })
       })
     }
 
     return this
   }
-  _getBlackAndWhiteListedListener = function(listener) {
+  _getBlackAndWhiteListedListener = function({ listener, blacklist: rawBlacklist, whitelist: rawWhitelist }) {
+    const blacklist = rawBlacklist || [],
+          whitelist = rawWhitelist || []
+
     function blackAndWhiteListedListener (event) {
       const { target } = event,
-            [isWhitelisted, isBlacklisted] = [this._whitelist, this._blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
+            [isWhitelisted, isBlacklisted] = [whitelist, blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
 
       if (isWhitelisted) { // Whitelist always wins
         listener(...arguments)
-      } else if (!isBlacklisted) {
+      } else if (isBlacklisted) {
+        // do nothing
+      } else if (whitelist.length === 0) {
         listener(...arguments)
       }
     }
 
     return blackAndWhiteListedListener
   }
+  _recognize (required, options) {
+    return touches[this.eventName](required, options)
+  }
 
-  stop () {
-    if (this._isObserved) {
-      this.activeListeners.forEach(observerInstance => observerInstance.disconnect())
-    } else {
-      this.activeListeners.forEach(activeListener => this._element.removeEventListener(...activeListener))
-    }
+  stop (options = {}) {
+    const { element } = options,
+          activeListeners = this.activeListeners.filter(({ element: e }) => !element || e.isSameNode(element))
+
+    activeListeners.forEach(({ element: e, id }) => {
+      if (this._isObserved) {
+        id.disconnect()
+      } else {
+        e.removeEventListener(...id)
+      }
+    })
 
     return this
   }

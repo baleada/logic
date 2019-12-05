@@ -1,4 +1,4 @@
-export default function toPolarCoordinates ({ xA, xB, yA, yB }) {
+export default function({ xA, xB, yA, yB }) {
   const distance = Math.hypot(xB - xA, yB - yA),
         angle = Math.atan2((yA - yB), (xB - xA)),
         radians = angle >= 0

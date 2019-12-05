@@ -5,7 +5,7 @@
  */
 
 /* Dependencies */
-import Dependency from '../wrappers/AnimatableAnime'
+import { AnimatableAnime as Dependency } from '../wrappers'
 
 export default class Animatable {
   /* Private properties */

@@ -5,10 +5,7 @@
  */
 
 /* Util */
-import is from '../util/is'
-import { hasEveryProperty } from '../util/hasProperties'
-import warn from '../util/warn'
-import typedEmit from '../util/typedEmit'
+import { is, warn, typedEmit, hasProperties } from '../util'
 
 /* Libraries */
 import Renamable from '../subclasses/Renamable'
@@ -152,19 +149,19 @@ class Editable {
     let newState = this.state
     const key = options.key
 
-    if (hasEveryProperty(options, ['rename', 'value'])) {
+    if (hasProperties({ object: options, properties: ['rename', 'value'] })) {
       const renamable = new Renamable(newState),
             renamed = renamable.invoke(options.rename, key)
 
       renamed.set(key, options.value)
 
       newState = new Map(renamed)
-    } else if (hasEveryProperty(options, ['rename'])) {
+    } else if (hasProperties({ object: options, properties: ['rename'] })) {
       const renamable = new Renamable(newState),
             renamed = renamable.invoke(options.rename, key)
 
       newState = new Map(renamed)
-    } else if (hasEveryProperty(options, ['value'])) {
+    } else if (hasProperties({ object: options, properties: ['value'] })) {
       newState.set(key, options.value)
     }
 
@@ -187,13 +184,13 @@ class Editable {
     const newState = this.state,
           key = options.key
 
-    if (hasEveryProperty(options, ['rename', 'value'])) {
+    if (hasProperties({ object: options, properties: ['rename', 'value'] })) {
       newState[key] = options.value
       delete newState[options.rename]
-    } else if (hasEveryProperty(options, ['rename'])) {
+    } else if (hasProperties({ object: options, properties: ['rename'] })) {
       newState[key] = newState[options.rename]
       delete newState[options.rename]
-    } else if (hasEveryProperty(options, ['value'])) {
+    } else if (hasProperties({ object: options, properties: ['value'] })) {
       newState[key] = options.value
     }
 

@@ -1,4 +1,4 @@
-const directions = {
+export default {
   up: {
     degrees: degrees => (degrees >= 67.5 && degrees <= 112.5),
     radians: radians => (radians >= 0.375 * Math.PI && radians <= 0.625 * Math.PI),
@@ -32,9 +32,3 @@ const directions = {
     radians: radians => (radians > 0.625 * Math.PI && radians <= 0.875 * Math.PI),
   },
 }
-
-export function toDirection (angle, unit = 'degrees') {
-  return Object.keys(directions).find(direction => directions[direction][unit](angle))
-}
-
-export default directions
