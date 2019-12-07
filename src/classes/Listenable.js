@@ -76,8 +76,8 @@ export default class Listenable {
     const blacklist = rawBlacklist || [],
           whitelist = rawWhitelist || []
 
-    function blackAndWhiteListedListener (event) {
-      const { target } = event,
+    function blackAndWhiteListedListener (arg) {
+      const { target } = this.isTouch ? arg.lastEvent : arg,
             [isWhitelisted, isBlacklisted] = [whitelist, blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
 
       if (isWhitelisted) { // Whitelist always wins
