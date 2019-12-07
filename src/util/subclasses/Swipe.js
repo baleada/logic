@@ -26,23 +26,23 @@ export default class Swipe extends Touch {
     this._onReset()
   }
 
-  _handleStart = function() {
+  touchstart () {
     this._isSingleTouch = this.lastEvent.touches.length === 1
-    this._computedMetadata.times.start = this.lastEvent.timeStamp
-    this._computedMetadata.points.start = {
+    this.metadata.times.start = this.lastEvent.timeStamp
+    this.metadata.points.start = {
       x: this.lastEvent.touches.item(0).clientX,
       y: this.lastEvent.touches.item(0).clientY
     }
     emit(this._onStart, this)
   }
-  _handleMove = function() {
+  touchmove () {
     emit(this._onMove, this)
   }
-  _handleCancel = function() {
+  touchcancel () {
     this._reset()
     emit(this._onCancel, this)
   }
-  _handleEnd = function() {
+  touchend () {
     if (this._isSingleTouch) {
       const { x: xA, y: yA } = this.metadata.points.start,
             { clientX: xB, clientY: yB } = this.lastEvent.changedTouches.item(0),
@@ -50,11 +50,11 @@ export default class Swipe extends Touch {
             endPoint = { x: xB, y: yB },
             endTime = this.lastEvent.timeStamp
 
-      this._computedMetadata.points.end = endPoint
-      this._computedMetadata.times.end = endTime
-      this._computedMetadata.distance = distance
-      this._computedMetadata.angle = angle
-      this._computedMetadata.velocity = distance / (this.metadata.times.end - this.metadata.times.start)
+      this.metadata.points.end = endPoint
+      this.metadata.times.end = endTime
+      this.metadata.distance = distance
+      this.metadata.angle = angle
+      this.metadata.velocity = distance / (this.metadata.times.end - this.metadata.times.start)
     }
 
     this._recognize()
@@ -68,13 +68,13 @@ export default class Swipe extends Touch {
       this._onReset()
       break
     default:
-      this._computedRecognized = this.metadata.distance > this._minDistance && this.metadata.velocity > this._minVelocity
+      this.metadata = this.metadata.distance > this._minDistance && this.metadata.velocity > this._minVelocity
       break
     }
   }
   _onReset = function() {
-    this._computedMetadata.points = {}
-    this._computedMetadata.times = {}
+    this.metadata.points = {}
+    this.metadata.times = {}
     this._isSingleTouch = true
   }
 }

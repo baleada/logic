@@ -29,24 +29,24 @@ export default class Tap extends Touch {
     this._onReset()
   }
 
-  _handleStart = function() {
+  touchstart () {
     this._isSingleTouch = this.lastEvent.touches.length === 1
-    this._computedMetadata.lastTap.times.start = this.lastEvent.timeStamp
-    this._computedMetadata.lastTap.points.start = {
+    this.metadata.lastTap.times.start = this.lastEvent.timeStamp
+    this.metadata.lastTap.points.start = {
       x: this.lastEvent.touches.item(0).clientX,
       y: this.lastEvent.touches.item(0).clientY
     }
 
     emit(this._onStart, this)
   }
-  _handleMove = function() {
+  touchmove () {
     emit(this._onMove, this)
   }
-  _handleCancel = function() {
+  touchcancel () {
     this._reset()
     emit(this._onCancel, this)
   }
-  _handleEnd = function() {
+  touchend () {
     if (this._isSingleTouch) {
       const { x: xA, y: yA } = this.metadata.lastTap.points.start,
             { clientX: xB, clientY: yB } = this.lastEvent.changedTouches.item(0),
@@ -54,15 +54,15 @@ export default class Tap extends Touch {
             endPoint = { x: xB, y: yB },
             endTime = this.lastEvent.timeStamp
 
-      this._computedMetadata.lastTap.points.end = endPoint
-      this._computedMetadata.lastTap.times.end = endTime
-      this._computedMetadata.lastTap.distance = distance
-      this._computedMetadata.lastTap.interval = this.metadata.taps.length === 0
+      this.metadata.lastTap.points.end = endPoint
+      this.metadata.lastTap.times.end = endTime
+      this.metadata.lastTap.distance = distance
+      this.metadata.lastTap.interval = this.metadata.taps.length === 0
         ? 0
         : endTime - this.metadata.taps[this.metadata.taps.length - 1].times.end
 
       const newTap = JSON.parse(JSON.stringify(this.metadata.lastTap)) // Simple deep copy (excludes methods, which this object doesn't have)
-      this._computedMetadata.taps.push(newTap)
+      this.metadata.taps.push(newTap)
     }
 
     this._recognize()
@@ -74,16 +74,16 @@ export default class Tap extends Touch {
     case !this._isSingleTouch || this.metadata.lastTap.interval > this._maxInterval || this.metadata.lastTap.distance > this._maxDistance: // Reset after multiple touoches and after taps with intervals or movement distances that are too large
       const lastTap = this.metadata.lastTap
       this._reset()
-      this._computedMetadata.taps.push(lastTap)
+      this.metadata.taps.push(lastTap)
       break
     default:
-      this._computedRecognized = this.metadata.taps.length >= this._minTaps
+      this.metadata = this.metadata.taps.length >= this._minTaps
       break
     }
   }
   _onReset = function() {
-    this._computedMetadata.taps = []
-    this._computedMetadata.lastTap = { points: {}, times: {} }
+    this.metadata.taps = []
+    this.metadata.lastTap = { points: {}, times: {} }
     this.isSingleTouch = true
   }
 }
