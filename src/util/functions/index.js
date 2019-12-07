@@ -10,6 +10,7 @@ import toMouseEquivalent from './toMouseEquivalent.js'
 import toMouseListeners from './toMouseListeners.js'
 import toNodeList from './toNodeList.js'
 import toPolarCoordinates from './toPolarCoordinates.js'
+import toTouchListeners from './toTouchListeners.js'
 import typedEmit from './typedEmit.js'
 import warn from './warn.js'
 import withDirectionCondition from './withDirectionCondition.js'
@@ -27,6 +28,7 @@ export {
   toMouseListeners,
   toNodeList,
   toPolarCoordinates,
+  toTouchListeners,
   typedEmit,
   warn,
   withDirectionCondition,

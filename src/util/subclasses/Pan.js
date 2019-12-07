@@ -1,46 +1,53 @@
-import { Recognizable } from '../classes'
+import { Touch } from '../classes'
 import { emit, toPolarCoordinates } from '../functions'
 
 /*
  * Pan is defined as a single touch that:
  * - starts at given point
  * - travels a distance greater than 0px (or a minimum distance of your choice)
+ * - does not cancel or end
  */
-export class Pan extends Recognizable {
+export default class Pan extends Touch {
   constructor (options = {}) {
-    super(options)
-
     options = {
-      minDistance: 0,
-      ...options
+      minDistance: 5, // TODO: research
+      ...options,
+      onReset: () => this._onReset()
     }
+
+    super(options)
 
     this._minDistance = options.minDistance
 
-    this._isSingleTouch = true
+    this._recognizesConsecutive = true
+
+    this._onReset()
   }
 
   _handleStart = function() {
-    this._reset()
-    this._isSingleTouch = this.event.touches.length === 1
-    this._computedMetadata.startPoint = {
-      x: this.event.touches.item(0).clientX,
-      y: this.event.touches.item(0).clientY,
+    this._isSingleTouch = this.lastEvent.touches.length === 1
+    this._computedMetadata.times.start = this.lastEvent.timeStamp
+    this._computedMetadata.points.start = {
+      x: this.lastEvent.touches.item(0).clientX,
+      y: this.lastEvent.touches.item(0).clientY,
     }
     emit(this._onStart, this)
   }
   _handleMove = function() {
-    const { x: xA, y: yA } = this.metadata.startPoint,
-          { clientX: xB, clientY: yB } = this.event.touches.item(0),
+    const { x: xA, y: yA } = this.metadata.points.start, // TODO: less naive start point so that velocity is closer to reality
+          { clientX: xB, clientY: yB } = this.lastEvent.touches.item(0),
           { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
-          endPoint = { x: xB, y: yB }
+          endPoint = { x: xB, y: yB },
+          endTime = this.lastEvent.timeStamp
 
-    this._computedMetadata.endPoint = endPoint
+    this._computedMetadata.points.end = endPoint
+    this._computedMetadata.times.end = endTime
     this._computedMetadata.distance = distance
     this._computedMetadata.angle = angle
+    this._computedMetadata.velocity = distance / (this.metadata.times.end - this.metadata.times.start)
 
     this._recognize()
-    
+
     emit(this._onMove, this)
   }
   _recognize = function() {
@@ -58,22 +65,12 @@ export class Pan extends Recognizable {
     emit(this._onCancel, this)
   }
   _handleEnd = function() {
-    /* do nothing */
+    this._reset()
     emit(this._onEnd, this)
   }
-  _reset = function() {
-    [
-      'startPoint',
-      'endPoint',
-      'startTime',
-      'endTime',
-      'distance',
-      'angle',
-      'velocity'
-    ].forEach(datum => (this._computedMetadata[datum] = undefined))
-
+  _onReset = function() {
+    this._computedMetadata.points = {}
+    this._computedMetadata.times = {}
     this._isSingleTouch = true
-
-    this._computedRecognized = false
   }
 }

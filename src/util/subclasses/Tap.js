@@ -1,41 +1,45 @@
-import { Recognizable } from '../classes'
-import { emit } from '../functions'
+import { Touch } from '../classes'
+import { emit, toPolarCoordinates } from '../functions'
 
 /*
  * Tap is defined as a single touch that:
- * - starts at given point
- * - does not travel
+ * - starts at a given point
+ * - does not move beyond a maximum distance
+ * - does not cancel
  * - ends
- * - repeats 1 time (or a minimum number of your choice), with each tap ocurring less than or equal to 500ms (or a maximum interval of your choice) after the previous tap
+ * - repeats 1 time (or a minimum number of your choice), with each tap ending less than or equal to 500ms (or a maximum interval of your choice) after the previous tap ended
  */
-export class Tap extends Recognizable {
-  constructor (options = {}) {
-    super(options)
 
+export default class Tap extends Touch {
+  constructor (options = {}) {
     options = {
       minTaps: 1,
       maxInterval: 500, // Via https://ux.stackexchange.com/questions/40364/what-is-the-expected-timeframe-of-a-double-click
-      ...options
+      maxDistance: 5, // TODO: research this
+      ...options,
+      onReset: () => this._onReset()
     }
+
+    super(options)
 
     this._minTaps = options.minTaps
     this._maxInterval = options.maxInterval
+    this._maxDistance = options.maxDistance
 
-    this._isSingleTouch = true
-    this._didNotTravel = true
+    this._onReset()
   }
 
   _handleStart = function() {
-    if (this.recognized) {
-      this._reset()
+    this._isSingleTouch = this.lastEvent.touches.length === 1
+    this._computedMetadata.lastTap.times.start = this.lastEvent.timeStamp
+    this._computedMetadata.lastTap.points.start = {
+      x: this.lastEvent.touches.item(0).clientX,
+      y: this.lastEvent.touches.item(0).clientY
     }
-    
-    this._isSingleTouch = this.event.touches.length === 1
 
     emit(this._onStart, this)
   }
   _handleMove = function() {
-    this._didNotTravel = false
     emit(this._onMove, this)
   }
   _handleCancel = function() {
@@ -43,53 +47,43 @@ export class Tap extends Recognizable {
     emit(this._onCancel, this)
   }
   _handleEnd = function() {
-    const interval = this._computedMetadata.endTimes.length === 0
-      ? 0
-      : this.event.timestamp - this._computedMetadata.endTimes[this._computedMetadata.endTimes - 1]
+    if (this._isSingleTouch) {
+      const { x: xA, y: yA } = this.metadata.lastTap.points.start,
+            { clientX: xB, clientY: yB } = this.lastEvent.changedTouches.item(0),
+            { distance } = toPolarCoordinates({ xA, xB, yA, yB }),
+            endPoint = { x: xB, y: yB },
+            endTime = this.lastEvent.timeStamp
 
-    this._computedMetadata.taps = 1
-    this._computedMetadata.endTimes.push(this.event.timeStamp)
-    this._computedMetadata.intervals.push(interval)
-    this._computedMetadata.points.push({
-      x: this.event.changedTouches.item(0).clientX,
-      y: this.event.changedTouches.item(0).clientY
-    })
+      this._computedMetadata.lastTap.points.end = endPoint
+      this._computedMetadata.lastTap.times.end = endTime
+      this._computedMetadata.lastTap.distance = distance
+      this._computedMetadata.lastTap.interval = this.metadata.taps.length === 0
+        ? 0
+        : endTime - this.metadata.taps[this.metadata.taps.length - 1].times.end
+
+      const newTap = JSON.parse(JSON.stringify(this.metadata.lastTap)) // Simple deep copy (excludes methods, which this object doesn't have)
+      this._computedMetadata.taps.push(newTap)
+    }
 
     this._recognize()
 
     emit(this._onEnd, this)
   }
   _recognize = function() {
-    const lastTapTime = this.metadata.endTimes[this.metadata.endTimes.length - 1],
-          secondToLastTapTime = this.metadata.endTimes[this.metadata.endTimes.length - 2],
-          interval = lastTapTime - secondToLastTapTime
-
     switch (true) {
-    case !this._didNotTravel || !this._isSingleTouch: // Guard against travelling taps and multiple touches
+    case !this._isSingleTouch || this.metadata.lastTap.interval > this._maxInterval || this.metadata.lastTap.distance > this._maxDistance: // Reset after multiple touoches and after taps with intervals or movement distances that are too large
+      const lastTap = this.metadata.lastTap
       this._reset()
-      break
-    case this._minTaps === 1: // Shortcut for single taps
-      this._computedRecognized = true
-      break
-    case interval > this._maxInterval: // Guard against taps with intervals that are too large
-      const lastPoint = this.metadata.points[this.metadata.points.length - 1]
-      this._reset()
-      this._computedMetadata.taps = 1
-      this._computedMetadata.endTimes.push(lastTapTime)
-      this._computedMetadata.points.push(lastPoint)
+      this._computedMetadata.taps.push(lastTap)
       break
     default:
-      this._computedRecognized = this.metadata.taps > this._minTaps && this.metadata.intervals.every(interval => interval <= this._maxInterval)
+      this._computedRecognized = this.metadata.taps.length >= this._minTaps
       break
     }
   }
-  _reset = function() {
-    this._computedMetadata.taps = 0
-    this._computedMetadata.endTimes = []
-    this._computedMetadata.intervals = []
-    this._computedMetadata.points = []
-    this.didNotTravel = true
+  _onReset = function() {
+    this._computedMetadata.taps = []
+    this._computedMetadata.lastTap = { points: {}, times: {} }
     this.isSingleTouch = true
-    this._computedRecognized = false
   }
 }

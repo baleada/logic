@@ -9,20 +9,22 @@
 /* Utils */
 import { toMouseEquivalent } from '../functions'
 
-export default class Recognizable {
+export default class Touch {
   constructor (options = {}) {
+    this._onReset = options.onReset
     this._onStart = options.onStart
     this._onMove = options.onMove
     this._onCancel = options.onCancel
     this._onEnd = options.onEnd
 
-    this._computedEvent = {}
-    this._computedMetadata = {}
-    this._computedRecognized = false
+    this._reset(true)
   }
 
-  get event () {
-    return this._computedEvent
+  get events () {
+    return this._computedEvents
+  }
+  get lastEvent () {
+    return this.events[this.events.length - 1]
   }
   get recognized () {
     return this._computedRecognized
@@ -32,7 +34,11 @@ export default class Recognizable {
   }
 
   handle (event) {
-    this._computedEvent = event
+    if (!this._recognizesConsecutive && this.recognized) {
+      this._reset()
+    }
+
+    this._computedEvents.push(event)
 
     const { type } = event
     switch (true) {
@@ -51,5 +57,13 @@ export default class Recognizable {
     }
 
     return this.recognized
+  }
+  _reset = function(constructing) {
+    this._computedEvents = []
+    this._computedMetadata = {}
+    this._computedRecognized = false
+    if (!constructing) {
+      this._onReset()
+    }
   }
 }

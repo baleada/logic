@@ -6,6 +6,7 @@
 
 /* Util */
 import { is, warn, typedEmit, hasProperties } from '../util/functions'
+import { editableTypes } from '../constants'
 
 /* Libraries */
 import Renamable from '../subclasses/Renamable'
@@ -21,7 +22,7 @@ class Editable {
   // _eraseDictionary
 
   constructor (state, options = {}) {
-    this._intendedTypes = ['array', 'boolean', 'date', 'file', 'filelist', 'map', 'number', 'object', 'string']
+    editableTypes =
 
     /* Options */
     options = {
@@ -99,9 +100,9 @@ class Editable {
   _guessType = function(state) {
     let type,
         i = 0
-    while (type === undefined && i < this._intendedTypes.length) {
-      if (is[this._intendedTypes[i]](state)) {
-        type = this._intendedTypes[i]
+    while (type === undefined && i < editableTypes.length) {
+      if (is[editableTypes[i]](state)) {
+        type = editableTypes[i]
       }
       i++
     }

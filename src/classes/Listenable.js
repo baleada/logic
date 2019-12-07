@@ -48,7 +48,7 @@ export default class Listenable {
   }
 
   listen (listener, options = {}) {
-    const { addEventListener, observer: observerOptions, observe: observeOptions, useCapture, wantsUntrusted, blacklist, whitelist, element: rawElement, recognize: recognizeOptions, mouse } = options
+    const { addEventListener, observer: observerOptions, observe: observeOptions, useCapture, wantsUntrusted, blacklist, whitelist, element: rawElement, recognize: recognizeOptions, listensToMouse } = options
 
     if (this._isObserved) {
       const observerInstance = observers[this.eventName](listener, observerOptions),
@@ -60,9 +60,7 @@ export default class Listenable {
       const blackAndWhiteListedListener = this._getBlackAndWhiteListedListener({ listener, blacklist, whitelist }),
             options = [addEventListener || useCapture, wantsUntrusted],
             eventListeners = this._isTouch
-              ? this._getTouchListeners(blackAndWhiteListedListener, { options, recognizeOptions, mouse })
-
-              ? this._recognize({ listener: blackAndWhiteListedListener }, recognizeOptions).map(eventListener => [...eventListener, ...options])
+              ? this._getTouchListeners(blackAndWhiteListedListener, { options, recognizeOptions, listensToMouse })
               : [[this.eventName, blackAndWhiteListedListener, ...options]],
             element = rawElement || document
 
@@ -93,17 +91,17 @@ export default class Listenable {
 
     return blackAndWhiteListedListener
   }
-  _getTouchListeners = function(blackAndWhiteListedListener, { options, recognizeOptions, mouse }) {
+  _getTouchListeners = function(blackAndWhiteListedListener, { options, recognizeOptions, listensToMouse }) {
     const recognizable = new recognizables[this.eventName](recognizeOptions),
           touchListeners = ['touchstart', 'touchmove', 'touchcancel', 'touchend'].map(touchType => {
             return [touchType, event => {
               recognizable.handle(event)
               if (recognizable.recognized) {
-                blackAndWhiteListedListener(event, { metadata: recognizable.metadata, ...listenerApi })
+                blackAndWhiteListedListener(recognizable, listenerApi)
               }
             }, ...options]
           }),
-          mouseListeners = mouse
+          mouseListeners = listensToMouse
             ? toMouseListeners(touchListeners)
             : []
 

@@ -1,5 +1,5 @@
-import Recognizable from './Recognizable.js'
+import Touch from './Touch.js'
 
 export {
-  Recognizable
+  Touch,
 }

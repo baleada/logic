@@ -58,6 +58,9 @@ module.exports = {
   ],
   "subclasses": [
     {
+      "name": "Handlable"
+    },
+    {
       "name": "Markupable"
     },
     {
