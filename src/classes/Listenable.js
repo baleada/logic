@@ -74,21 +74,19 @@ export default class Listenable {
   }
   _getBlackAndWhiteListedListener = function({ listener, blacklist: rawBlacklist, whitelist: rawWhitelist }) {
     const blacklist = rawBlacklist || [],
-          whitelist = rawWhitelist || [],
-          blackAndWhiteListedListener = arg => {
-            const { target } = this.isTouch ? arg.lastEvent : arg,
-                  [isWhitelisted, isBlacklisted] = [whitelist, blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
+          whitelist = rawWhitelist || []
+    function blackAndWhiteListedListener (arg) {
+      const { target } = this._isTouch ? arg.lastEvent : arg,
+            [isWhitelisted, isBlacklisted] = [whitelist, blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
 
-            if (isWhitelisted) { // Whitelist always wins
-              listener(...arguments)
-            } else if (isBlacklisted) {
-              // do nothing
-            } else if (whitelist.length === 0) {
-              listener(...arguments)
-            }
-          }
+      if (isWhitelisted) { // Whitelist always wins
+        listener(...arguments)
+      } else if (whitelist.length === 0 && !isBlacklisted) {
+        listener(...arguments)
+      }
+    }
 
-    return blackAndWhiteListedListener
+    return blackAndWhiteListedListener.bind(this)
   }
   _getTouchListeners = function(blackAndWhiteListedListener, { options, recognizeOptions, listensToMouse }) {
     const recognizable = new recognizables[this.eventName](recognizeOptions),
