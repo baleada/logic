@@ -1,29 +1,26 @@
-import { Touch } from '../classes'
+import Gesture from '@baleada/gesture'
 import { emit, toPolarCoordinates } from '../functions'
 
 /*
- * Swipe is defined as a single touch that:
+ * DragDrop is defined as a single click that:
  * - starts at a given point
  * - travels a distance greater than 0px (or a minimum distance of your choice)
  * - travels at a velocity of greater than 0px/ms (or a minimum velocity of your choice)
- * - does not cancel
+ * - does not mouseout
  * - ends
  */
-export default class Swipe extends Touch {
+export default class DragDrop extends Gesture {
   constructor (options = {}) {
     options = {
       minDistance: 10, // TODO: research
       minVelocity: 0.5, // TODO: research
       ...options,
-      onReset: () => this._onReset()
     }
 
     super(options)
 
     this._minDistance = options.minDistance
     this._minVelocity = options.minVelocity
-
-    this._onReset()
   }
 
   touchstart () {
@@ -39,7 +36,7 @@ export default class Swipe extends Touch {
     emit(this._onMove, this)
   }
   touchcancel () {
-    this._reset()
+    this.reset()
     emit(this._onCancel, this)
   }
   touchend () {
@@ -64,15 +61,15 @@ export default class Swipe extends Touch {
   _recognize = function() {
     switch (true) {
     case !this._isSingleTouch: // Guard against multiple touches
-      this._reset()
-      this._onReset()
+      this.reset()
+      this.onReset()
       break
     default:
-      this.metadata = this.metadata.distance > this._minDistance && this.metadata.velocity > this._minVelocity
+      this.recognized = this.metadata.distance > this._minDistance && this.metadata.velocity > this._minVelocity
       break
     }
   }
-  _onReset = function() {
+  onReset () {
     this.metadata.points = {}
     this.metadata.times = {}
     this._isSingleTouch = true

@@ -5,13 +5,12 @@
  */
 
 /* Dependencies */
+// import * as gestures from '@baleada/gesture/lib/stubs'
 
 /* Utils */
 
 /* Dictionaries */
-import { recognizables, observers } from '../dictionaries'
-import { touchTypes, listenerApi } from '../constants'
-import { toMouseListeners } from '../util/functions'
+import { observers, gestures, gestureListenerApi } from '../constants'
 
 export default class Listenable {
   // _element
@@ -22,13 +21,13 @@ export default class Listenable {
 
   constructor (eventName, options = {}) {
     /* Options */
-
+    
     /* Public properties */
     this.eventName = eventName
 
     /* Private properties */
-    this._isObserved = observers.hasOwnProperty(this.eventName)
-    this._isTouch = touchTypes.includes(this.eventName)
+    this._computedGesture = options.gesture
+    this._gestureTypes = this._gestures.map(({ name }) => name)
     this._computedActiveListeners = []
 
     /* Dependency */
@@ -38,19 +37,33 @@ export default class Listenable {
     return this._computedActiveListeners
   }
 
+  get isObservation () {
+    return observers.hasOwnProperty(this.eventName)
+  }
+
+  get observer () {
+    return this._computedObserver
+  }
+
+  get isGesture () {
+    this._gestureTypes.includes(this.eventName)
+  }
+
+  get gesture () {
+    return this._computedGesture
+  }
+
   setEventName (eventName) {
     this.stop()
     this.eventName = eventName
-    this._isObserved = observers.hasOwnProperty(eventName)
-    this._isTouch = recognizables.hasOwnProperty(eventName)
     // TODO: re-add all active listeners?
     return this
   }
 
   listen (listener, options = {}) {
-    const { addEventListener, observer: observerOptions, observe: observeOptions, useCapture, wantsUntrusted, blacklist, whitelist, element: rawElement, recognize: recognizeOptions, listensToMouse } = options
+    const { addEventListener, observer: observerOptions, observe: observeOptions, useCapture, wantsUntrusted, blacklist, whitelist, element: rawElement, gesture: gestureOptions, listensToMouse } = options
 
-    if (this._isObserved) {
+    if (this.isObservation) {
       const observerInstance = observers[this.eventName](listener, observerOptions),
             element = rawElement || document.querySelector('html')
 
@@ -59,8 +72,8 @@ export default class Listenable {
     } else {
       const blackAndWhiteListedListener = this._getBlackAndWhiteListedListener({ listener, blacklist, whitelist }),
             options = [addEventListener || useCapture, wantsUntrusted],
-            eventListeners = this._isTouch
-              ? this._getTouchListeners(blackAndWhiteListedListener, { options, recognizeOptions, listensToMouse })
+            eventListeners = this.isGesture
+              ? this._getGestureListeners(blackAndWhiteListedListener, { options, gestureOptions, listensToMouse })
               : [[this.eventName, blackAndWhiteListedListener, ...options]],
             element = rawElement || document
 
@@ -76,7 +89,7 @@ export default class Listenable {
     const blacklist = rawBlacklist || [],
           whitelist = rawWhitelist || []
     function blackAndWhiteListedListener (arg) {
-      const { target } = this._isTouch ? arg.lastEvent : arg,
+      const { target } = this.isGesture ? arg.lastEvent : arg,
             [isWhitelisted, isBlacklisted] = [whitelist, blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
 
       if (isWhitelisted) { // Whitelist always wins
@@ -88,24 +101,18 @@ export default class Listenable {
 
     return blackAndWhiteListedListener.bind(this)
   }
-  _getTouchListeners = function(blackAndWhiteListedListener, { options, recognizeOptions, listensToMouse }) {
-    const recognizable = new recognizables[this.eventName](recognizeOptions),
-          touchListeners = ['touchstart', 'touchmove', 'touchcancel', 'touchend'].map(touchType => {
-            return [touchType, event => {
-              recognizable.handle(event)
-              if (recognizable.recognized) {
-                blackAndWhiteListedListener(recognizable, listenerApi)
+  _getGestureListeners = function(blackAndWhiteListedListener, { options, gestureOptions, listensToMouse }) {
+    const { constructor: Gesture, events, handle } = gestures.find(({ name }) => name === this.eventName),
+          instance = new Gesture(gestureOptions),
+          gestureListeners = events.map(name => {
+            return [name, event => {
+              if (instance[handle](event)) {
+                blackAndWhiteListedListener(instance, gestureListenerApi)
               }
             }, ...options]
-          }),
-          mouseListeners = listensToMouse
-            ? toMouseListeners(touchListeners)
-            : []
+          })
 
-    return [
-      ...touchListeners,
-      ...mouseListeners,
-    ]
+    return gestureListeners
   }
 
   stop (options = {}) {
@@ -113,7 +120,7 @@ export default class Listenable {
           activeListeners = this.activeListeners.filter(({ element: e }) => !element || e.isSameNode(element))
 
     activeListeners.forEach(({ element: e, id }) => {
-      if (this._isObserved) {
+      if (this.isObservation) {
         id.disconnect()
       } else {
         e.removeEventListener(...id)

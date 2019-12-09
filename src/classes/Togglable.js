@@ -7,7 +7,7 @@
 /* Dependencies */
 
 /* Utils */
-import { emit } from '../util/functions'
+import { emit } from '../util'
 
 export default class Togglable {
   // _onToggle

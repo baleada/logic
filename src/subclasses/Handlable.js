@@ -7,7 +7,7 @@
 /* Dependencies */
 
 /* Utils */
-import { is, toPolarCoordinates } from '../util/functions'
+import { is, toPolarCoordinates } from '../util'
 
 /* Constants */
 const getEvent = () => Event

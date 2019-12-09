@@ -5,7 +5,7 @@
  */
 
 /* Util */
-import { is, warn, typedEmit, hasProperties } from '../util/functions'
+import { is, warn, typedEmit, hasProperties } from '../util'
 import { editableTypes } from '../constants'
 
 /* Libraries */

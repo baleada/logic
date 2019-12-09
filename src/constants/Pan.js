@@ -1,4 +1,4 @@
-import { Touch } from '../classes'
+import Gesture from '@baleada/gesture'
 import { emit, toPolarCoordinates } from '../functions'
 
 /*
@@ -7,20 +7,17 @@ import { emit, toPolarCoordinates } from '../functions'
  * - travels a distance greater than 0px (or a minimum distance of your choice)
  * - does not cancel or end
  */
-export default class Pan extends Touch {
+export default class Pan extends Gesture {
   constructor (options = {}) {
     options = {
       minDistance: 5, // TODO: research
       ...options,
-      onReset: () => this._onReset(),
       recognizesConsecutive: true,
     }
 
     super(options)
 
     this._minDistance = options.minDistance
-
-    this._onReset()
   }
 
   touchstart () {
@@ -52,22 +49,22 @@ export default class Pan extends Touch {
   _recognize = function() {
     switch (true) {
     case !this._isSingleTouch: // Guard against multiple touches
-      this._reset()
+      this.reset()
       break
     default:
-      this.metadata = this.metadata.distance > this._minDistance
+      this.recognized = this.metadata.distance > this._minDistance
       break
     }
   }
   touchcancel () {
-    this._reset()
+    this.reset()
     emit(this._onCancel, this)
   }
   touchend () {
-    this._reset()
+    this.reset()
     emit(this._onEnd, this)
   }
-  _onReset = function() {
+  onReset () {
     this.metadata.points = {}
     this.metadata.times = {}
     this._isSingleTouch = true

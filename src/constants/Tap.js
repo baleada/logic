@@ -1,4 +1,4 @@
-import { Touch } from '../classes'
+import Gesture from '@baleada/gesture'
 import { emit, toPolarCoordinates } from '../functions'
 
 /*
@@ -10,14 +10,13 @@ import { emit, toPolarCoordinates } from '../functions'
  * - repeats 1 time (or a minimum number of your choice), with each tap ending less than or equal to 500ms (or a maximum interval of your choice) after the previous tap ended
  */
 
-export default class Tap extends Touch {
+export default class Tap extends Gesture {
   constructor (options = {}) {
     options = {
       minTaps: 1,
       maxInterval: 500, // Via https://ux.stackexchange.com/questions/40364/what-is-the-expected-timeframe-of-a-double-click
       maxDistance: 5, // TODO: research this
       ...options,
-      onReset: () => this._onReset()
     }
 
     super(options)
@@ -25,8 +24,6 @@ export default class Tap extends Touch {
     this._minTaps = options.minTaps
     this._maxInterval = options.maxInterval
     this._maxDistance = options.maxDistance
-
-    this._onReset()
   }
 
   touchstart () {
@@ -43,7 +40,7 @@ export default class Tap extends Touch {
     emit(this._onMove, this)
   }
   touchcancel () {
-    this._reset()
+    this.reset()
     emit(this._onCancel, this)
   }
   touchend () {
@@ -72,18 +69,18 @@ export default class Tap extends Touch {
   _recognize = function() {
     switch (true) {
     case !this._isSingleTouch || this.metadata.lastTap.interval > this._maxInterval || this.metadata.lastTap.distance > this._maxDistance: // Reset after multiple touoches and after taps with intervals or movement distances that are too large
-      const lastTap = this.metadata.lastTap
-      this._reset()
+      const lastTap = JSON.parse(JSON.stringify(this.metadata.lastTap)) // Simple deep copy (excludes methods, which this object doesn't have)
+      this.reset()
       this.metadata.taps.push(lastTap)
       break
     default:
-      this.metadata = this.metadata.taps.length >= this._minTaps
+      this.recognized = this.metadata.taps.length >= this._minTaps
       break
     }
   }
-  _onReset = function() {
+  onReset () {
     this.metadata.taps = []
     this.metadata.lastTap = { points: {}, times: {} }
-    this.isSingleTouch = true
+    this._isSingleTouch = true
   }
 }

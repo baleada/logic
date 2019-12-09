@@ -8,7 +8,7 @@
 import GoTrue from 'gotrue-js'
 
 /* Utils */
-import { emit } from '../util/functions'
+import { emit } from '../util'
 
 /* Constants */
 // https://github.com/netlify/gotrue-js#oauth-providers-supported-by-netlify

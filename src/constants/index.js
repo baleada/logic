@@ -1,9 +1,9 @@
 import editableTypes from './editableTypes.js'
-import listenerApi from './listenerApi.js'
-import touchTypes from './touchTypes.js'
+import gestureListenerApi from './gestureListenerApi.js'
+import gestures from './gestures.js'
 
 export {
   editableTypes,
-  listenerApi,
-  touchTypes,
+  gestureListenerApi,
+  gestures,
 }
