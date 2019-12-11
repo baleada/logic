@@ -1,5 +1,5 @@
 import Gesture from '@baleada/gesture'
-import { emit, toPolarCoordinates } from '../functions'
+import { emit, toPolarCoordinates } from '../util'
 
 /*
  * Pan is defined as a single touch that:

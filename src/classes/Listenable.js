@@ -8,6 +8,7 @@
 // import * as gestures from '@baleada/gesture/lib/stubs'
 
 /* Utils */
+import { warn } from '../util'
 
 /* Dictionaries */
 import { observers, gestures, gestureListenerApi } from '../constants'
@@ -21,13 +22,22 @@ export default class Listenable {
 
   constructor (eventName, options = {}) {
     /* Options */
-    
+
     /* Public properties */
     this.eventName = eventName
 
     /* Private properties */
-    this._computedGesture = options.gesture
-    this._gestureTypes = this._gestures.map(({ name }) => name)
+    this._gesture = options.gesture || gestures.find(({ name }) => name === eventName) || undefined
+    warn('hasRequiredOptions', {
+      received: this._gesture,
+      required: ['constructor', 'events', 'handle'],
+      every: true,
+      subject: 'Listenable\'s gesture option',
+      docs: 'https://baleada.netlify.com/docs/logic/listenable',
+    })
+    this._isGesture = !!this._gesture
+    this._observer = observers[this.eventName]
+    this._isObservation = !!this._observer
     this._computedActiveListeners = []
 
     /* Dependency */
@@ -35,22 +45,6 @@ export default class Listenable {
 
   get activeListeners () {
     return this._computedActiveListeners
-  }
-
-  get isObservation () {
-    return observers.hasOwnProperty(this.eventName)
-  }
-
-  get observer () {
-    return this._computedObserver
-  }
-
-  get isGesture () {
-    this._gestureTypes.includes(this.eventName)
-  }
-
-  get gesture () {
-    return this._computedGesture
   }
 
   setEventName (eventName) {
@@ -63,8 +57,8 @@ export default class Listenable {
   listen (listener, options = {}) {
     const { addEventListener, observer: observerOptions, observe: observeOptions, useCapture, wantsUntrusted, blacklist, whitelist, element: rawElement, gesture: gestureOptions, listensToMouse } = options
 
-    if (this.isObservation) {
-      const observerInstance = observers[this.eventName](listener, observerOptions),
+    if (this._isObservation) {
+      const observerInstance = this._observer(listener, observerOptions),
             element = rawElement || document.querySelector('html')
 
       observerInstance.observe(element, observeOptions)
@@ -72,7 +66,7 @@ export default class Listenable {
     } else {
       const blackAndWhiteListedListener = this._getBlackAndWhiteListedListener({ listener, blacklist, whitelist }),
             options = [addEventListener || useCapture, wantsUntrusted],
-            eventListeners = this.isGesture
+            eventListeners = this._isGesture
               ? this._getGestureListeners(blackAndWhiteListedListener, { options, gestureOptions, listensToMouse })
               : [[this.eventName, blackAndWhiteListedListener, ...options]],
             element = rawElement || document
@@ -89,7 +83,7 @@ export default class Listenable {
     const blacklist = rawBlacklist || [],
           whitelist = rawWhitelist || []
     function blackAndWhiteListedListener (arg) {
-      const { target } = this.isGesture ? arg.lastEvent : arg,
+      const { target } = this._isGesture ? arg.lastEvent : arg,
             [isWhitelisted, isBlacklisted] = [whitelist, blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
 
       if (isWhitelisted) { // Whitelist always wins
@@ -102,7 +96,7 @@ export default class Listenable {
     return blackAndWhiteListedListener.bind(this)
   }
   _getGestureListeners = function(blackAndWhiteListedListener, { options, gestureOptions, listensToMouse }) {
-    const { constructor: Gesture, events, handle } = gestures.find(({ name }) => name === this.eventName),
+    const { constructor: Gesture, events, handle } = this._gesture,
           instance = new Gesture(gestureOptions),
           gestureListeners = events.map(name => {
             return [name, event => {
@@ -120,7 +114,7 @@ export default class Listenable {
           activeListeners = this.activeListeners.filter(({ element: e }) => !element || e.isSameNode(element))
 
     activeListeners.forEach(({ element: e, id }) => {
-      if (this.isObservation) {
+      if (this._isObservation) {
         id.disconnect()
       } else {
         e.removeEventListener(...id)
