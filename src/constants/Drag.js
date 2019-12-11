@@ -17,56 +17,61 @@ export default class Drag extends Gesture {
 
     super(options)
 
+    this._onDown = options.onDown
+    this._onMove = options.onMove
+    this._onOut = options.onOut
+    this._onUp = options.onUp
+
     this._minDistance = options.minDistance
   }
 
-  touchstart () {
-    this._isSingleTouch = this.lastEvent.touches.length === 1
+  mousedown () {
+    this._mouseIsDown = true
     this.metadata.times.start = this.lastEvent.timeStamp
     this.metadata.points.start = {
-      x: this.lastEvent.touches.item(0).clientX,
-      y: this.lastEvent.touches.item(0).clientY,
+      x: this.lastEvent.clientX,
+      y: this.lastEvent.clientY,
     }
-    emit(this._onStart, this)
+    emit(this._onDown, this)
   }
-  touchmove () {
-    const { x: xA, y: yA } = this.metadata.points.start, // TODO: less naive start point so that velocity is closer to reality
-          { clientX: xB, clientY: yB } = this.lastEvent.touches.item(0),
-          { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
-          endPoint = { x: xB, y: yB },
-          endTime = this.lastEvent.timeStamp
+  mousemove () {
+    if (this._mouseIsDown) {
+      const { x: xA, y: yA } = this.metadata.points.start,
+            { clientX: xB, clientY: yB } = this.lastEvent,
+            { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
+            endPoint = { x: xB, y: yB },
+            endTime = this.lastEvent.timeStamp
 
-    this.metadata.points.end = endPoint
-    this.metadata.times.end = endTime
-    this.metadata.distance = distance
-    this.metadata.angle = angle
-    this.metadata.velocity = distance / (this.metadata.times.end - this.metadata.times.start)
+      this.metadata.points.end = endPoint
+      this.metadata.times.end = endTime
+      this.metadata.distance = distance
+      this.metadata.angle = angle
+      this.metadata.velocity = distance / (this.metadata.times.end - this.metadata.times.start)
 
-    this._recognize()
+      this._recognize()
 
-    emit(this._onMove, this)
+      emit(this._onMove, this)
+    } else {
+      this.reset()
+    }
   }
   _recognize = function() {
-    switch (true) {
-    case !this._isSingleTouch: // Guard against multiple touches
+    this.recognized = this.metadata.distance > this._minDistance
+  }
+  mouseout () {
+    if (this._mouseIsDown) {
       this.reset()
-      break
-    default:
-      this.recognized = this.metadata.distance > this._minDistance
-      break
+      emit(this._onOut, this)
     }
   }
-  touchcancel () {
-    this.reset()
-    emit(this._onCancel, this)
-  }
-  touchend () {
+  mouseup () {
+    this._mouseIsDown = false
     this.reset()
     emit(this._onEnd, this)
   }
   onReset () {
     this.metadata.points = {}
     this.metadata.times = {}
-    this._isSingleTouch = true
+    this._mouseIsDown = false
   }
 }

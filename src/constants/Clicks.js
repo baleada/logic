@@ -21,6 +21,11 @@ export default class Clicks extends Gesture {
 
     super(options)
 
+    this._onDown = options.onDown
+    this._onMove = options.onMove
+    this._onOut = options.onOut
+    this._onUp = options.onUp
+
     this._minClicks = options.minClicks
     this._maxInterval = options.maxInterval
     this._maxDistance = options.maxDistance
@@ -39,6 +44,8 @@ export default class Clicks extends Gesture {
   mousemove () {
     if (this._mouseIsDown) {
       emit(this._onMove, this)
+    } else {
+      this.reset()
     }
   }
   mouseout () {

@@ -62,7 +62,6 @@ export default class Swipe extends Gesture {
     switch (true) {
     case !this._isSingleTouch: // Guard against multiple touches
       this.reset()
-      this.onReset()
       break
     default:
       this.recognized = this.metadata.distance > this._minDistance && this.metadata.velocity > this._minVelocity

@@ -19,59 +19,61 @@ export default class DragDrop extends Gesture {
 
     super(options)
 
+    this._onDown = options.onDown
+    this._onMove = options.onMove
+    this._onOut = options.onOut
+    this._onUp = options.onUp
+
     this._minDistance = options.minDistance
     this._minVelocity = options.minVelocity
   }
 
-  touchstart () {
-    this._isSingleTouch = this.lastEvent.touches.length === 1
+  mousedown () {
+    this._mouseIsDown = true
     this.metadata.times.start = this.lastEvent.timeStamp
     this.metadata.points.start = {
-      x: this.lastEvent.touches.item(0).clientX,
-      y: this.lastEvent.touches.item(0).clientY
+      x: this.lastEvent.clientX,
+      y: this.lastEvent.clientY
     }
-    emit(this._onStart, this)
+    emit(this._onDown, this)
   }
-  touchmove () {
-    emit(this._onMove, this)
+  mousemove () {
+    if (this._mouseIsDown) {
+      emit(this._onMove, this)
+    } else {
+      this.reset()
+    }
   }
-  touchcancel () {
-    this.reset()
-    emit(this._onCancel, this)
+  mouseout () {
+    if (this._mouseIsDown) {
+      this.reset()
+      emit(this._onOut, this)
+    }
   }
-  touchend () {
-    if (this._isSingleTouch) {
-      const { x: xA, y: yA } = this.metadata.points.start,
-            { clientX: xB, clientY: yB } = this.lastEvent.changedTouches.item(0),
-            { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
-            endPoint = { x: xB, y: yB },
-            endTime = this.lastEvent.timeStamp
+  mouseup () {
+    this._mouseIsDown = false
+    const { x: xA, y: yA } = this.metadata.points.start, // TODO: less naive start point so that velocity is closer to reality
+          { clientX: xB, clientY: yB } = this.lastEvent,
+          { distance, angle } = toPolarCoordinates({ xA, xB, yA, yB }),
+          endPoint = { x: xB, y: yB },
+          endTime = this.lastEvent.timeStamp
 
-      this.metadata.points.end = endPoint
-      this.metadata.times.end = endTime
-      this.metadata.distance = distance
-      this.metadata.angle = angle
-      this.metadata.velocity = distance / (this.metadata.times.end - this.metadata.times.start)
-    }
+    this.metadata.points.end = endPoint
+    this.metadata.times.end = endTime
+    this.metadata.distance = distance
+    this.metadata.angle = angle
+    this.metadata.velocity = distance / (this.metadata.times.end - this.metadata.times.start)
 
     this._recognize()
 
-    emit(this._onEnd, this)
+    emit(this._onUp, this)
   }
   _recognize = function() {
-    switch (true) {
-    case !this._isSingleTouch: // Guard against multiple touches
-      this.reset()
-      this.onReset()
-      break
-    default:
-      this.recognized = this.metadata.distance > this._minDistance && this.metadata.velocity > this._minVelocity
-      break
-    }
+    this.recognized = this.metadata.distance > this._minDistance && this.metadata.velocity > this._minVelocity
   }
   onReset () {
     this.metadata.points = {}
     this.metadata.times = {}
-    this._isSingleTouch = true
+    this._mouseIsDown = false
   }
 }
