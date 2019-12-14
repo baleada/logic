@@ -8,7 +8,7 @@
 // import * as gestures from '@baleada/gesture/lib/stubs'
 
 /* Utils */
-import { warn } from '../util'
+import { warn, is } from '../util'
 
 /* Dictionaries */
 import { observers, gestures, gestureListenerApi } from '../constants'
@@ -22,17 +22,20 @@ export default class Listenable {
 
     /* Private properties */
     this._gesture = options.gesture || gestures.find(({ name }) => name === eventName) || undefined
-    warn('hasRequiredOptions', {
-      received: this._gesture,
-      required: ['constructor', 'events', 'handle'],
-      every: true,
-      subject: 'Listenable\'s gesture option',
-      docs: 'https://baleada.netlify.com/docs/logic/listenable',
-    })
-    this._isGesture = !!this._gesture
+    this._isGesture = is.object(this._gesture)
     this._observer = observers[this.eventName]
     this._isObservation = !!this._observer
     this._computedActiveListeners = []
+
+    if (this._isGesture) {
+      warn('hasRequiredOptions', {
+        received: this._gesture,
+        required: ['constructor', 'events', 'handle'],
+        every: true,
+        subject: 'Listenable\'s gesture option',
+        docs: 'https://baleada.netlify.com/docs/logic/listenable',
+      })
+    }
 
     /* Dependency */
   }
