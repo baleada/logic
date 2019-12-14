@@ -14,12 +14,6 @@ import { warn } from '../util'
 import { observers, gestures, gestureListenerApi } from '../constants'
 
 export default class Listenable {
-  // _element
-  // _touchOptions
-  // _store
-  // _computedActiveListeners
-  // _eventListenersGetter
-
   constructor (eventName, options = {}) {
     /* Options */
 

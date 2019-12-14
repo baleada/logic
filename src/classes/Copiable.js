@@ -9,33 +9,21 @@
 /* Util */
 
 export default class Copiable {
-  // _usesFallbacks
-  // _computedSucceeded
-  // _computedErrored
-
   constructor (string, options = {}) {
     /* Options */
-    options = {
-      usesFallbacks: false,
-      ...options,
-    }
-    this._usesFallbacks = options.usesFallbacks
 
     /* Public properties */
     this.string = string
 
     /* Private properties */
-    this._computedCopying = false
+    this._computedStatus = 'ready'
 
     /* Dependency */
   }
 
   /* Public getters */
-  get copying () {
-    return this._computedCopying
-  }
-  get copied () {
-    // Boolean: this.string is equal to the clipboard text
+  get status () {
+    return this._computedStatus
   }
 
   /* Public methods */
@@ -43,15 +31,16 @@ export default class Copiable {
     this.string = string
     return this
   }
-  async copy () {
-    if (this._usesFallbacks) {
-      this._computedCopying = true
+
+  async copy ({ usesFallback }) {
+    if (usesFallback) {
+      this._computedStatus = 'copying'
       this._writeTextFallback()
-      this._computedCopying = false
+      this._computedStatus = 'copied'
     } else {
-      this._computedCopying = true
+      this._computedStatus = 'copying'
       await navigator.clipboard.writeText(this.string)
-      this._computedCopying = false
+      this._computedStatus = 'copied'
     }
 
     return this

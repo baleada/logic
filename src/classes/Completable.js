@@ -8,16 +8,6 @@
 import { lastMatch, emit } from '../util'
 
 class Completable {
-  /* Private properties */
-  // _segmentsFromDivider
-  // _segmentsToLocation
-  // _divider
-  // TODO: is there a use case for nextMatch instead of lastMatch?
-  // _matchDirection
-  // _locatesAfterCompletion
-  // _onComplete
-  // _onLocate
-
   constructor (string, options = {}) {
     /* Options */
     options = {
@@ -28,12 +18,13 @@ class Completable {
       onLocate: (newLocation, instance) => instance.setLocation(newLocation),
       ...options
     }
+    
     this._segmentsFromDivider = options.segmentsFromDivider
     this._segmentsToLocation = options.segmentsToLocation
     this._divider = options.divider
     this._onComplete = options.onComplete
     this._onLocate = options.onLocate
-    // this._matchDirection = matchDirection
+    // this._matchDirection = matchDirection TODO: is there a use case for nextMatch instead of lastMatch?
 
     this.string = string
     this.location = string.length

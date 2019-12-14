@@ -30,10 +30,7 @@ export default class Fetchable {
     this.response = {}
 
     /* Private properties */
-    this._computedStatus = {
-      updatingResponseJson: true,
-      fetching: false,
-    }
+    this._computedStatus = 'ready'
     this._computedResponseJson = {}
 
     /* Dependency */
@@ -52,12 +49,12 @@ export default class Fetchable {
 
   async updateResponseJson () {
     try {
-      this._computedStatus.updatingResponseJson = true
+      this._computedStatus = 'updatingResponseJson'
       this._computedResponseJson = await this.response.json()
-      this._computedStatus.updatingResponseJson = false
+      this._computedStatus = 'responseJsonSuccess'
     } catch (error) {
       this._computedResponseJson = error
-      this._computedStatus.updatingResponseJson = false
+      this._computedStatus = 'respnseJsonError'
     }
 
     return this
@@ -73,9 +70,9 @@ export default class Fetchable {
     return this
   }
   async fetch () {
-    this._computedStatus.fetching = true
+    this._computedStatus = 'fetching'
     const response = await fetch(this.resource, this._fetchOptions)
-    this._computedStatus.fetching = false
+    this._computedStatus = 'fetched'
     emit(this._onFetch, response, this)
 
     return this

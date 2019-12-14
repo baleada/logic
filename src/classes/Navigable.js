@@ -8,14 +8,6 @@
 import { typedEmit } from '../util'
 
 class Navigable {
-  // _loops
-  // _increment
-  // _decrement
-  // _onNavigate
-  // _onGoTo
-  // _onNext
-  // _onPrev
-
   constructor (array, options = {}) {
     /* Options */
     options = {
@@ -49,20 +41,22 @@ class Navigable {
     this.array = array
     return this
   }
+
   setLocation (location) {
     this.location = location
     return this
   }
+
   goTo (newLocation, navigateType) {
     switch (true) {
     case (newLocation > this.array.length):
       newLocation = this.array.length
-      // TODO: decide whether to show warnings or not
+      // TODO: decide whether or not to show warnings
       // console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
       break
     case (newLocation < 0):
       newLocation = 0
-      // TODO: decide whether to show warnings or not
+      // TODO: decide whether or not to show warnings
       // console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
       break
     }
@@ -71,12 +65,14 @@ class Navigable {
 
     return this._navigate(newLocation, navigateType)
   }
+
   next (options = {}) {
     options = {
       increment: 1,
       loops: true,
       ...options,
     }
+
     const { increment, loops } = options
 
     let newLocation
@@ -99,6 +95,7 @@ class Navigable {
 
     return this.goTo(newLocation, 'next')
   }
+
   prev (options = {}) {
     options = {
       decrement: 1,
@@ -126,12 +123,12 @@ class Navigable {
 
     return this.goTo(newLocation, 'prev')
   }
+
   rand () {
     const newLocation = Math.floor(Math.random() * (this.array.length))
     return this.goTo(newLocation, 'rand')
   }
 
-  /* Private methods */
   _navigate = function(newLocation, type) {
     typedEmit(
       newLocation,

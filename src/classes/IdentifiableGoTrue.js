@@ -46,13 +46,7 @@ export default class IdentifiableGoTrue {
     this._computedUserData = {}
     this._computedJwt = ''
     this._on = {}
-    this._computedStatus = {
-      updating: {
-        userData: false,
-        jwt: false,
-      },
-      doing: {}
-    }
+    this._computedStatus = 'ready'
 
     // Init options, responses, and on<Method>s
     const promises = [
@@ -69,7 +63,6 @@ export default class IdentifiableGoTrue {
       options[emitter] = options[emitter] || ((response, instance) => instance.setResponse(response, name))
       this.responses[name] = {}
       this._on[name] = options[emitter]
-      this._computedStatus.doing[name] = false
     })
 
     /* Dependency */
@@ -132,24 +125,24 @@ export default class IdentifiableGoTrue {
 
   async updateUserData () {
     try {
-      this._computedStatus.updating.userData = true
+      this._computedStatus = 'updatingUserData'
       this._computedUserData = await this.user.getUserData()
-      this._computedStatus.updating.userData = false
+      this._computedStatus = 'updateUserDataSuccess'
     } catch (error) {
       this._computedUserData = error
-      this._computedStatus.updating.userData = false
+      this._computedStatus = 'updateUserDataError'
     }
 
     return this
   }
   async updateJwt (forceRefresh) {
     try {
-      this._computedStatus.updating.jwt = true
+      this._computedStatus = 'updatingJwt'
       this._computedJwt = await this.user.jwt(forceRefresh)
-      this._computedStatus.updating.jwt = false
+      this._computedStatus = 'updateJwtSuccess'
     } catch (error) {
       this._computedJwt = error
-      this._computedStatus.updating.jwt = false
+      this._computedStatus = 'updategJwtError'
     }
 
     return this
@@ -173,60 +166,60 @@ export default class IdentifiableGoTrue {
   }
 
   async signup (email, password, data) {
-    this._computedStatus.doing.signup = true
+    this._computedStatus = 'signingUp'
     const response = await this._goTrue.signup(email, password, data)
-    this._computedStatus.doing.signup = false
+    this._computedStatus = 'signedUp'
     emit(this._on.signup, response, this)
     return this
   }
   async login (email, password, remember) {
-    this._computedStatus.doing.login = true
+    this._computedStatus = 'loggingIn'
     const response = await this._goTrue.login(email, password, remember)
-    this._computedStatus.doing.login = false
+    this._computedStatus = 'loggedIn'
     emit(this._on.login, response, this)
     return this
   }
   async confirm (token, remember) {
-    this._computedStatus.doing.confirm = true
+    this._computedStatus = 'confirming'
     const response = await this._goTrue.confirm(token, remember)
-    this._computedStatus.doing.confirm = false
+    this._computedStatus = 'confirmed'
     emit(this._on.confirm, response, this)
     return this
   }
   async requestPasswordRecovery (email) {
-    this._computedStatus.doing.requestPasswordRecovery = true
+    this._computedStatus = 'requestingPasswordRecovery'
     const response = await this._goTrue.requestPasswordRecovery(email)
-    this._computedStatus.doing.requestPasswordRecovery = false
+    this._computedStatus = 'requestedPasswordRecovery'
     emit(this._on.requestPasswordRecovery, response, this)
     return this
   }
   async recover (token, remember) {
-    this._computedStatus.doing.recover = true
+    this._computedStatus = 'recovering'
     const response = await this._goTrue.recover(token, remember)
-    this._computedStatus.doing.recover = false
+    this._computedStatus = 'recovered'
     emit(this._on.recover, response, this)
     return this
   }
   async acceptInvite (token, password, remember) {
-    this._computedStatus.doing.acceptInvite = true
+    this._computedStatus = 'acceptingInvite'
     const response = await this._goTrue.acceptInvite(token, password, remember)
-    this._computedStatus.doing.acceptInvite = false
+    this._computedStatus = 'acceptedInvite'
     emit(this._on.acceptInvite, response, this)
     return this
   }
 
   // User methods—does this belong in a different class?
   async update (data) {
-    this._computedStatus.doing.update = true
+    this._computedStatus = 'updatingUserData'
     const response = await this.user.update(data)
-    this._computedStatus.doing.update = false
+    this._computedStatus = 'updatedUserData'
     emit(this._on.update, response, this)
     return this
   }
   async logout () {
-    this._computedStatus.doing.logout = true
+    this._computedStatus = 'loggingOut'
     const response = await this.user.logout()
-    this._computedStatus.doing.logout = false
+    this._computedStatus = 'loggedOut'
     emit(this._on.logout, response, this)
     return this
   }

@@ -12,15 +12,6 @@ import { editableTypes } from '../constants'
 import Renamable from '../subclasses/Renamable'
 
 class Editable {
-  /* Private properties */
-  // _intendedTypes
-  // _hardCodedType
-  // _onEdit
-  // _onWrite
-  // _onErase
-  // _writeDictionary
-  // _eraseDictionary
-
   constructor (state, options = {}) {
     editableTypes =
 

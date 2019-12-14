@@ -11,10 +11,6 @@ import { SearchableLunr as Dependency } from '../wrappers'
 import { emit } from '../util'
 
 export default class Searchable {
-  // _onSearch
-  // _dependencyOptions
-  // _dependency
-
   constructor (array, options = {}) {
     /* Options */
     options = {
