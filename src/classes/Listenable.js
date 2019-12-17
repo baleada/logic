@@ -8,10 +8,15 @@
 // import * as gestures from '@baleada/gesture/lib/stubs'
 
 /* Utils */
-import { warn, is } from '../util'
+import { warn, is, toDirection } from '../util'
 
-/* Dictionaries */
-import { observers, gestures, gestureListenerApi } from '../constants'
+/* Constants */
+import { observers, gestures } from '../constants'
+
+// TODO: figure out why this was undefined when imported from constants
+const gestureListenerApi = {
+  toDirection
+}
 
 export default class Listenable {
   constructor (eventName, options = {}) {

@@ -27,4 +27,3 @@ ${imported}\n${exported}\n\
 
   console.log(`Indexed ${files.length} files in ${filesPath}.`)
 }
-  
