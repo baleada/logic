@@ -1,8 +1,7 @@
 export default function(required, options = {}) {
   const { object, properties } = required,
-        { every } = options
+        { every } = options,
+        method = every ? 'every' : 'some'
 
-  return every
-    ? properties.every(property => object.hasOwnProperty(property))
-    : properties.some(property => object.hasOwnProperty(property))
+  return properties[method](property => object.hasOwnProperty(property))
 }

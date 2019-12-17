@@ -2,7 +2,7 @@ import hasProperties from './hasProperties'
 
 const dictionary = {
   hasRequiredOptions: {
-    shouldWarn: ({ received, required, every }) => hasProperties({ object: received, properties: required }, { every }),
+    shouldWarn: ({ received, required, every }) => !hasProperties({ object: received, properties: required }, { every }),
     getWarning: ({ subject, required, every, docs }) => {
       const main = required.length > 1
         ? `${subject} received neither ${required[0]} ${required.slice(1).map(option => 'nor ' + option).join(' ')} options.`
