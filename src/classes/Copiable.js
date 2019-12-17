@@ -32,7 +32,9 @@ export default class Copiable {
     return this
   }
 
-  async copy ({ usesFallback }) {
+  async copy (options = {}) {
+    const { usesFallback } = options
+    
     if (usesFallback) {
       this._computedStatus = 'copying'
       this._writeTextFallback()
