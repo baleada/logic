@@ -57,7 +57,18 @@ export default class Listenable {
   }
 
   listen (listener, options = {}) {
-    const { addEventListener, observer: observerOptions, observe: observeOptions, useCapture, wantsUntrusted, blacklist, whitelist, element: rawElement, gesture: gestureOptions, listensToMouse } = options
+    const {
+      addEventListener,
+      observer: observerOptions,
+      observe: observeOptions,
+      useCapture,
+      wantsUntrusted,
+      blacklist,
+      whitelist,
+      element: rawElement,
+      gesture: gestureOptions,
+      listensToMouse
+    } = options
 
     if (this._isObservation) {
       const observerInstance = this._observer(listener, observerOptions),
