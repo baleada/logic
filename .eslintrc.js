@@ -17,6 +17,7 @@ module.exports = {
     'comma-dangle': 'off',
     'no-console': 'off',
     'arrow-parens': 'off',
+    'no-new-wrappers': 'off',
     'one-var': ['error', 'consecutive'],
     'space-before-function-paren': ['error', {
         'anonymous': 'never',

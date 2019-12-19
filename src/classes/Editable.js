@@ -8,8 +8,8 @@
 import { is, warn, typedEmit, hasProperties } from '../util'
 import { editableTypes } from '../constants'
 
-/* Libraries */
-import Renamable from '../subclasses/Renamable'
+/* Factories */
+import renamable from '../factories/renamable'
 
 class Editable {
   constructor (state, options = {}) {
@@ -142,15 +142,15 @@ class Editable {
     const key = options.key
 
     if (hasProperties({ object: options, properties: ['rename', 'value'] })) {
-      const renamable = new Renamable(newState),
-            renamed = renamable.invoke(options.rename, key)
+      const renamableState = renamable(newState),
+            renamed = renamableState.rename(options.rename, key)
 
       renamed.set(key, options.value)
 
       newState = new Map(renamed)
     } else if (hasProperties({ object: options, properties: ['rename'] })) {
-      const renamable = new Renamable(newState),
-            renamed = renamable.invoke(options.rename, key)
+      const renamableState = renamable(newState),
+            renamed = renamableState.rename(options.rename, key)
 
       newState = new Map(renamed)
     } else if (hasProperties({ object: options, properties: ['value'] })) {

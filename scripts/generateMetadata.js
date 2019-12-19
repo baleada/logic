@@ -2,12 +2,12 @@ const fs = require('fs')
 
 module.exports = function() {
   const classes = fs.readdirSync('./src/classes'),
-        subclasses = fs.readdirSync('./src/subclasses'),
+        factories = fs.readdirSync('./src/factories'),
         classMetadata = getClassMetadata(classes),
-        subclassMetadata = getSubclassMetadata(subclasses),
+        subclassMetadata = getFactoriesMetadata(factories),
         metadata = {
           classes: classMetadata,
-          subclasses: subclassMetadata,
+          factories: subclassMetadata,
         }
 
   fs.writeFileSync(
@@ -20,8 +20,8 @@ function getClassMetadata (classes) {
   return classes.map(file => ({ name: getName(file), usesDOM: getUsesDOM(file), needsCleanup: getNeedsCleanup(file) }))
 }
 
-function getSubclassMetadata (subclasses) {
-  return subclasses.map(file => ({ name: getName(file) }))
+function getFactoriesMetadata (factories) {
+  return factories.map(file => ({ name: getName(file) }))
 }
 
 function getName (file) {

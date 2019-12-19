@@ -56,15 +56,15 @@ module.exports = {
       "needsCleanup": false
     }
   ],
-  "subclasses": [
+  "factories": [
     {
-      "name": "Markupable"
+      "name": "markupable"
     },
     {
-      "name": "Renamable"
+      "name": "renamable"
     },
     {
-      "name": "Reorderable"
+      "name": "reorderable"
     }
   ]
 }

@@ -5,7 +5,7 @@ const generateIndex = require('./generateIndex'),
 function prepare () {
   /* Index all */
   generateIndex('src/classes', { importPath: 'lib/classes', outfile: 'classes' })
-  generateIndex('src/subclasses', { importPath: 'lib/subclasses', outfile: 'subclasses' })
+  generateIndex('src/factories', { importPath: 'lib/factories', outfile: 'factories' })
   generateIndex('src/constants')
   generateIndex('src/util')
   generateIndex('src/wrappers')

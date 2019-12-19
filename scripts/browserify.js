@@ -7,7 +7,7 @@ module.exports = function() {
   browserBabelify()
   empty('dist')
   browserifyDir('classes')
-  browserifyDir('subclasses')
+  browserifyDir('factories')
 }
 
 function browserifyDir (dir) {
@@ -21,7 +21,7 @@ function browserifyDir (dir) {
 
   fs.mkdirSync(`./dist/${dir}`)
   files.forEach(file => browserifyFile(file))
-  
+
   console.log(`Browserified ${files.length} ${dir}.`)
 }
 
