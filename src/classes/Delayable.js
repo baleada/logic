@@ -13,15 +13,6 @@
  * Delayable depends on `[setTimeout](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setTimeout)`, `[setInterval](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval)`, `[requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)`, and the `[global Data object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)`, but is otherwise written in vanilla JS. Delayable powers <nuxt-link to="/docs/tools/composition-functions/useDelayable">`useDelayable`</nuxt-link>.
  */
 export default class Delayable {
-  // _delay
-  // _parameters
-  // _id
-  // _tickId
-  // _computedStartTime
-  // _computedExecutions
-  // _computedTimeElapsed
-  // _computedTimeRemaining
-
   constructor (callback, options) {
     /* Options */
 

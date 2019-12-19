@@ -27,9 +27,10 @@ export default class Listenable {
 
     /* Private properties */
     this._gesture = options.gesture || gestures.find(({ name }) => name === eventName) || undefined
-    this._isGesture = is.object(this._gesture)
+    this._isGesture = is.defined(this._gesture)
     this._observer = observers[this.eventName]
-    this._isObservation = !!this._observer
+    this._isObservation = !!this._observer && !this._isGesture // custom gesture always wins
+    this._isMediaQuery = /^\(.+\)$/.test(this.eventName) && !this._isGesture // custom gesture always wins
     this._computedActiveListeners = []
 
     if (this._isGesture) {
@@ -50,51 +51,75 @@ export default class Listenable {
   }
 
   setEventName (eventName) {
-    this.stop()
+    // TODO: stop listeners and re-add afterward?
     this.eventName = eventName
-    // TODO: re-add all active listeners?
     return this
   }
 
   listen (listener, options = {}) {
-    const {
-      addEventListener,
-      observer: observerOptions,
-      observe: observeOptions,
-      useCapture,
-      wantsUntrusted,
-      blacklist,
-      whitelist,
-      element: rawElement,
-      gesture: gestureOptions,
-      listensToMouse
-    } = options
-
-    if (this._isObservation) {
-      const observerInstance = this._observer(listener, observerOptions),
-            element = rawElement || document.querySelector('html')
-
-      observerInstance.observe(element, observeOptions)
-      this._computedActiveListeners.push({ element, id: observerInstance })
-    } else {
-      const blackAndWhiteListedListener = this._getBlackAndWhiteListedListener({ listener, blacklist, whitelist }),
-            options = [addEventListener || useCapture, wantsUntrusted],
-            eventListeners = this._isGesture
-              ? this._getGestureListeners(blackAndWhiteListedListener, { options, gestureOptions, listensToMouse })
-              : [[this.eventName, blackAndWhiteListedListener, ...options]],
-            element = rawElement || document
-
-      eventListeners.forEach(eventListener => {
-        element.addEventListener(...eventListener)
-        this._computedActiveListeners.push({ element, id: eventListener })
-      })
+    switch (true) {
+    case this._isObservation:
+      return this._observationListen(listener, options)
+    case this._isMediaQuery:
+      return this._mediaQueryListen(listener, options)
+    case this._isGesture:
+      return this._gestureListen(listener, options)
+    default:
+      return this._eventListen(listener, options)
     }
+  }
+  _observationListen = function(listener, options) {
+    const { observer: observerOptions, observe: observeOptions, target = document.querySelector('html') } = options,
+          observerInstance = this._observer(listener, observerOptions)
+
+    observerInstance.observe(target, observeOptions)
+    this._computedActiveListeners.push({ target, id: observerInstance, type: 'observation' })
 
     return this
   }
-  _getBlackAndWhiteListedListener = function({ listener, blacklist: rawBlacklist, whitelist: rawWhitelist }) {
-    const blacklist = rawBlacklist || [],
-          whitelist = rawWhitelist || []
+  _mediaQueryListen = function(listener) {
+    const target = window.matchMedia(this.eventName)
+
+    target.addListener(listener)
+    this._computedActiveListeners.push({ target, id: listener, type: 'mediaQuery' })
+
+    return this
+  }
+  _gestureListen = function(listener, options) {
+    const { gesture: gestureOptions } = options,
+          { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
+          { constructor: Gesture, events, handle } = this._gesture,
+          instance = new Gesture(gestureOptions),
+          eventListeners = events.map(name => {
+            return [name, event => {
+              if (instance[handle](event)) {
+                blackAndWhiteListedListener(instance, gestureListenerApi)
+              }
+            }, ...listenerOptions]
+          })
+
+    this._addEventListeners(eventListeners, options)
+
+    return this
+  }
+  _eventListen = function(listener, options) {
+    const { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
+          eventListeners = [[this.eventName, blackAndWhiteListedListener, ...listenerOptions]]
+
+    this._addEventListeners(eventListeners, options)
+
+    return this
+  }
+  _getAddEventListenerSetup = function(listener, options) {
+    const { addEventListener, useCapture, wantsUntrusted } = options,
+          blackAndWhiteListedListener = this._getBlackAndWhiteListedListener(listener, options),
+          listenerOptions = [addEventListener || useCapture, wantsUntrusted]
+
+    return { blackAndWhiteListedListener, listenerOptions }
+  }
+  _getBlackAndWhiteListedListener = function(listener, options) {
+    const { blacklist = [], whitelist = [] } = options
+
     function blackAndWhiteListedListener (arg) {
       const { target } = this._isGesture ? arg.lastEvent : arg,
             [isWhitelisted, isBlacklisted] = [whitelist, blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
@@ -108,29 +133,32 @@ export default class Listenable {
 
     return blackAndWhiteListedListener.bind(this)
   }
-  _getGestureListeners = function(blackAndWhiteListedListener, { options, gestureOptions, listensToMouse }) {
-    const { constructor: Gesture, events, handle } = this._gesture,
-          instance = new Gesture(gestureOptions),
-          gestureListeners = events.map(name => {
-            return [name, event => {
-              if (instance[handle](event)) {
-                blackAndWhiteListedListener(instance, gestureListenerApi)
-              }
-            }, ...options]
-          })
+  _addEventListeners = function(eventListeners, options) {
+    const { target = document } = options
 
-    return gestureListeners
+    eventListeners.forEach(eventListener => {
+      target.addEventListener(...eventListener)
+      this._computedActiveListeners.push({ target, id: eventListener, type: 'event' })
+    })
   }
 
   stop (options = {}) {
-    const { element } = options,
-          activeListeners = this.activeListeners.filter(({ element: e }) => !element || e.isSameNode(element))
+    const { target } = options,
+          activeListeners = this._isMediaQuery
+            ? this.activeListeners
+            : this.activeListeners.filter(({ target: t }) => !target || t === target) // Not using .isSameNode() here because it needs to handle MediaQueryLists too
 
-    activeListeners.forEach(({ element: e, id }) => {
-      if (this._isObservation) {
+    activeListeners.forEach(({ target: t, id, type }) => {
+      switch (true) {
+      case type === 'observation':
         id.disconnect()
-      } else {
-        e.removeEventListener(...id)
+        break
+      case type === 'mediaQuery':
+        t.removeListener(id)
+        break
+      case type === 'event':
+        t.removeEventListener(...id)
+        break
       }
     })
 

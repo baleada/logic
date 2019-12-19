@@ -29,8 +29,10 @@ function getName (file) {
 }
 
 function getUsesDOM (file) {
-  const contents = fs.readFileSync(`./src/classes/${file}`, 'utf8')
-  return /(this\._?element|window)/.test(contents)
+  const contents = fs.readFileSync(`./src/classes/${file}`, 'utf8'),
+        { 1: constructor = '' } = contents.match(/constructor ?\(.*?\) ?\{((.|\r?\n)*?)\n\s\s\}/) || []
+
+  return /(this\._?element|window)/.test(constructor)
 }
 
 function getNeedsCleanup (file) {

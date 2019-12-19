@@ -17,7 +17,7 @@ module.exports = {
     },
     {
       "name": "Delayable",
-      "usesDOM": true,
+      "usesDOM": false,
       "needsCleanup": true
     },
     {
