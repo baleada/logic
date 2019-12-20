@@ -31,6 +31,7 @@ export default class Listenable {
     this._observer = observers[this.eventName]
     this._isObservation = !!this._observer && !this._isGesture // custom gesture always wins
     this._isMediaQuery = /^\(.+\)$/.test(this.eventName) && !this._isGesture // custom gesture always wins
+    this._isIdle = this.eventName === 'idle' && !this._isGesture // custom gesture always wins
     this._computedActiveListeners = []
 
     if (this._isGesture) {
@@ -62,6 +63,8 @@ export default class Listenable {
       return this._observationListen(listener, options)
     case this._isMediaQuery:
       return this._mediaQueryListen(listener, options)
+    case this._isIdle:
+      return this._idleListen(listener, options)
     case this._isGesture:
       return this._gestureListen(listener, options)
     default:
@@ -82,6 +85,14 @@ export default class Listenable {
 
     target.addListener(listener)
     this._computedActiveListeners.push({ target, id: listener, type: 'mediaQuery' })
+
+    return this
+  }
+  _idleListen = function(listener, options) {
+    const { idle: idleOptions = {} } = options,
+          id = window.requestIdleCallback(listener, idleOptions)
+
+    this._computedActiveListeners.push({ id, type: 'idle' })
 
     return this
   }
@@ -155,6 +166,9 @@ export default class Listenable {
         break
       case type === 'mediaQuery':
         t.removeListener(id)
+        break
+      case type === 'idle':
+        window.cancelIdleCallback(id)
         break
       case type === 'event':
         t.removeEventListener(...id)
