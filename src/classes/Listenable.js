@@ -36,7 +36,7 @@ export default class Listenable {
     if (this._isGesture) {
       warn('hasRequiredOptions', {
         received: this._gesture,
-        required: ['constructor', 'events', 'recognized'],
+        required: ['factory', 'events', 'recognized'],
         every: true,
         subject: 'Listenable\'s gesture option',
         docs: 'https://baleada.netlify.com/docs/logic/listenable',

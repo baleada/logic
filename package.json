@@ -1,6 +1,6 @@
 {
   "name": "@baleada/logic",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "UI logic for the Baleada toolkit",
   "main": "classes.js",
   "scripts": {
