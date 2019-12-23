@@ -2,6 +2,7 @@ export default {
   files: [ 'tests/**/*.test.js' ],
   helpers: [
     'src/**/*.js',
+    // 'node_modules/@baleada/gesture/**/*.js',
     'tests/test-util/*.js',
   ],
   verbose: true,

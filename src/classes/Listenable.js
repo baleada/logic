@@ -5,13 +5,12 @@
  */
 
 /* Dependencies */
-// import * as gestures from '@baleada/gesture/lib/stubs'
 
 /* Utils */
 import { warn, is, toDirection } from '../util'
 
 /* Constants */
-import { observers, gestures } from '../constants'
+import { observers } from '../constants'
 
 // TODO: figure out why this was undefined when imported from constants
 const gestureListenerApi = {
@@ -26,7 +25,7 @@ export default class Listenable {
     this.eventName = eventName
 
     /* Private properties */
-    this._gesture = options.gesture || gestures.find(({ name }) => name === eventName) || undefined
+    this._gesture = options.gesture || undefined
     this._isGesture = is.defined(this._gesture)
     this._observer = observers[this.eventName]
     this._isObservation = !!this._observer && !this._isGesture // custom gesture always wins
@@ -37,7 +36,7 @@ export default class Listenable {
     if (this._isGesture) {
       warn('hasRequiredOptions', {
         received: this._gesture,
-        required: ['constructor', 'events', 'handle'],
+        required: ['constructor', 'events', 'recognized'],
         every: true,
         subject: 'Listenable\'s gesture option',
         docs: 'https://baleada.netlify.com/docs/logic/listenable',
@@ -99,12 +98,12 @@ export default class Listenable {
   _gestureListen = function(listener, options) {
     const { gesture: gestureOptions } = options,
           { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
-          { constructor: Gesture, events, handle } = this._gesture,
-          instance = new Gesture(gestureOptions),
+          { factory: gestureFactory, events, recognized } = this._gesture,
+          gesture = gestureFactory(gestureOptions),
           eventListeners = events.map(name => {
             return [name, event => {
-              if (instance[handle](event)) {
-                blackAndWhiteListedListener(instance, gestureListenerApi)
+              if (recognized(event, gesture)) {
+                blackAndWhiteListedListener(event, gesture, gestureListenerApi)
               }
             }, ...listenerOptions]
           })
@@ -131,8 +130,8 @@ export default class Listenable {
   _getBlackAndWhiteListedListener = function(listener, options) {
     const { blacklist = [], whitelist = [] } = options
 
-    function blackAndWhiteListedListener (arg) {
-      const { target } = this._isGesture ? arg.lastEvent : arg,
+    function blackAndWhiteListedListener (event) {
+      const { target } = event,
             [isWhitelisted, isBlacklisted] = [whitelist, blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
 
       if (isWhitelisted) { // Whitelist always wins
