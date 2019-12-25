@@ -25,18 +25,18 @@ export default class Listenable {
     this.eventName = eventName
 
     /* Private properties */
-    this._gesture = options.gesture || undefined
-    this._isGesture = is.defined(this._gesture)
+    this._recognizer = options.recognizer || undefined
+    this._isRecognizable = is.defined(this._recognizer)
     this._observer = observers[this.eventName]
-    this._isObservation = !!this._observer && !this._isGesture // custom gesture always wins
-    this._isMediaQuery = /^\(.+\)$/.test(this.eventName) && !this._isGesture // custom gesture always wins
-    this._isIdle = this.eventName === 'idle' && !this._isGesture // custom gesture always wins
+    this._isObservation = !!this._observer && !this._isRecognizable // custom recognizer always wins
+    this._isMediaQuery = /^\(.+\)$/.test(this.eventName) && !this._isRecognizable // custom recognizer always wins
+    this._isIdle = this.eventName === 'idle' && !this._isRecognizable // custom recognizer always wins
     this._computedActiveListeners = []
 
-    if (this._isGesture) {
+    if (this._isRecognizable) {
       warn('hasRequiredOptions', {
-        received: this._gesture,
-        required: ['factory', 'events', 'recognized'],
+        received: this._recognizer,
+        required: ['setup', 'events', 'recognized'],
         every: true,
         subject: 'Listenable\'s gesture option',
         docs: 'https://baleada.netlify.com/docs/logic/listenable',
@@ -64,8 +64,8 @@ export default class Listenable {
       return this._mediaQueryListen(listener, options)
     case this._isIdle:
       return this._idleListen(listener, options)
-    case this._isGesture:
-      return this._gestureListen(listener, options)
+    case this._isRecognizable:
+      return this._recognizableListen(listener, options)
     default:
       return this._eventListen(listener, options)
     }
@@ -95,15 +95,15 @@ export default class Listenable {
 
     return this
   }
-  _gestureListen = function(listener, options) {
-    const { gesture: gestureOptions } = options,
+  _recognizableListen = function(listener, options) {
+    const { recognizer: recognizerOptions } = options,
           { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
-          { factory: gestureFactory, events, recognized } = this._gesture,
-          gesture = gestureFactory(gestureOptions),
+          { get, events, recognized } = this._recognizer,
+          recognizer = get(recognizerOptions),
           eventListeners = events.map(name => {
             return [name, event => {
-              if (recognized(event, gesture)) {
-                blackAndWhiteListedListener(event, gesture, gestureListenerApi)
+              if (recognized(event, recognizer)) {
+                blackAndWhiteListedListener(event, recognizer, gestureListenerApi)
               }
             }, ...listenerOptions]
           })
