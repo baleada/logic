@@ -1,13 +1,5 @@
-import directions from './directions.js'
-import editableTypes from './editableTypes.js'
-import gestureListenerApi from './gestureListenerApi.js'
-import mouseEquivalents from './mouseEquivalents.js'
-import observers from './observers.js'
-
-export {
-  directions,
-  editableTypes,
-  gestureListenerApi,
-  mouseEquivalents,
-  observers,
-}
+export { default as directions } from './directions.js'
+export { default as editableTypes } from './editableTypes.js'
+export { default as gestureListenerApi } from './gestureListenerApi.js'
+export { default as mouseEquivalents } from './mouseEquivalents.js'
+export { default as observers } from './observers.js'

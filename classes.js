@@ -1,25 +1,11 @@
-import Animatable from './lib/classes/Animatable.js'
-import Completable from './lib/classes/Completable.js'
-import Copiable from './lib/classes/Copiable.js'
-import Delayable from './lib/classes/Delayable.js'
-import Editable from './lib/classes/Editable.js'
-import Fetchable from './lib/classes/Fetchable.js'
-import IdentifiableGoTrue from './lib/classes/IdentifiableGoTrue.js'
-import Listenable from './lib/classes/Listenable.js'
-import Navigable from './lib/classes/Navigable.js'
-import Searchable from './lib/classes/Searchable.js'
-import Togglable from './lib/classes/Togglable.js'
-
-export {
-  Animatable,
-  Completable,
-  Copiable,
-  Delayable,
-  Editable,
-  Fetchable,
-  IdentifiableGoTrue,
-  Listenable,
-  Navigable,
-  Searchable,
-  Togglable,
-}
+export { default as Animatable } from './lib/classes/Animatable.js'
+export { default as Completable } from './lib/classes/Completable.js'
+export { default as Copiable } from './lib/classes/Copiable.js'
+export { default as Delayable } from './lib/classes/Delayable.js'
+export { default as Editable } from './lib/classes/Editable.js'
+export { default as Fetchable } from './lib/classes/Fetchable.js'
+export { default as IdentifiableGoTrue } from './lib/classes/IdentifiableGoTrue.js'
+export { default as Listenable } from './lib/classes/Listenable.js'
+export { default as Navigable } from './lib/classes/Navigable.js'
+export { default as Searchable } from './lib/classes/Searchable.js'
+export { default as Togglable } from './lib/classes/Togglable.js'

@@ -1,7 +1,2 @@
-import AnimatableAnime from './AnimatableAnime.js'
-import SearchableLunr from './SearchableLunr.js'
-
-export {
-  AnimatableAnime,
-  SearchableLunr,
-}
+export { default as AnimatableAnime } from './AnimatableAnime.js'
+export { default as SearchableLunr } from './SearchableLunr.js'

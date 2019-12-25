@@ -15,14 +15,11 @@ module.exports = function(filesPath, options = {}) {
             path: importPath ? `./${importPath}/${file}` : `./${file}`,
             name: file.split('.')[0],
           })),
-        imported = files.reduce((imported, file) => `${imported}import ${file.name} from '${file.path}'\n`, ''),
-        exported = files.reduce((exported, file) => `${exported}  ${file.name},\n`, 'export {\n') + '}'
+        exported = files.reduce((exported, file) => `${exported}export { default as ${file.name} } from '${file.path}'\n`, '')
 
   fs.writeFileSync(
     `./${outfile}.js`,
-    `\
-${imported}\n${exported}\n\
-`
+    exported
   )
 
   console.log(`Indexed ${files.length} files in ${filesPath}.`)
