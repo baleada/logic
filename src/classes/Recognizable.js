@@ -7,6 +7,9 @@
 /* Utils */
 import { emit, toPolarCoordinates } from '../util'
 
+/* Dependencies */
+import objectPath from 'object-path'
+
 export default class Recognizable {
   constructor (sequence, options = {}) {
     /* Options */
@@ -15,7 +18,7 @@ export default class Recognizable {
       maxSequenceLenth: false,
       onRecognize: (newSequence, instance) => instance.setSequence(sequence),
       onDeny: (newSequence, instance) => instance.setSequence(sequence),
-      initialState: {},
+      initialMetadata: {},
       ...options,
     }
 
@@ -24,7 +27,7 @@ export default class Recognizable {
     this._onRecognize = options.onRecognize
     this._onDeny = options.onDeny
     this._handlers = options.handlers
-    this._initialState = options.initialState
+    this._initialMetadata = options.initialMetadata
 
     this.sequence = sequence
 
@@ -32,18 +35,18 @@ export default class Recognizable {
       toPolarCoordinates,
       deny: () => this.deny(),
       recognized: () => this._recognized(),
-      setState: (path, value) => this._setState(path, value),
-      getState: path => this.state[path],
+      setMetadata: (path, value) => this._setMetadata(path, value),
+      getMetadata: path => this.state[path],
     }
 
-    this.deny()
+    this._ready()
   }
 
   get status () {
     return this._computedStatus
   }
   get state () {
-    return this._computedState
+    return this._computedMetadata
   }
   get lastEvent () {
     return this.sequence[this.sequence.length - 1]
@@ -54,9 +57,9 @@ export default class Recognizable {
     return this
   }
   recognize (event) {
-    if (!this._recognizesConsecutive && this.status === 'recognized') {
-      return this.deny()
-    }
+    // if (!this._recognizesConsecutive && this.status === 'recognized') {
+    //   return this.deny()
+    // }
 
     this._recognizing()
 
@@ -73,18 +76,22 @@ export default class Recognizable {
       })
     }
 
+    switch (true) {
+    case this.status === 'denied':
+      emit(this._onRecognize, [], this)
+      break
+    case this.status === 'recognized':
+      emit(this._onRecognize, newSequence, this)
+      break
+    }
+
     emit(this._onRecognize, newSequence, this)
 
     return this
   }
   deny = function() {
-    this._ready()
-    this._computedState = this._initialState
-
-    const newSequence = []
-    emit(this._onDeny, newSequence, this)
-
-    return this
+    this._computedStatus = 'denied'
+    this._computedMetadata = this._initialMetadata
   }
   _ready = function() {
     this._computedStatus = 'ready'
@@ -95,11 +102,10 @@ export default class Recognizable {
   _recognized = function() {
     this._computedStatus = 'recognized'
   }
-  _setState = function(path, value) {
-    const properties = path.split('.'),
-
-
-
-    this._computedState[path] = value
+  _setMetadata = function(path, value) {
+    objectPath.set(this._computedMetadata, path, value)
+  }
+  _getMetadata = function(path) {
+    return objectPath.get(this._computedMetadata, path)
   }
 }
