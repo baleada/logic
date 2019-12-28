@@ -32,7 +32,7 @@ function getUsesDOM (file) {
   const contents = fs.readFileSync(`./src/classes/${file}`, 'utf8'),
         { 1: constructor = '' } = contents.match(/constructor ?\(.*?\) ?\{((.|\r?\n)*?)\n\s\s\}/) || []
 
-  return /(this\._?element|window)/.test(constructor)
+  return /(this\._?element|window|observers)/.test(constructor)
 }
 
 function getNeedsCleanup (file) {
