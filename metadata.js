@@ -2,6 +2,11 @@ module.exports = {
   "classes": [
     {
       "name": "Animatable",
+      "usesDOM": false,
+      "needsCleanup": false
+    },
+    {
+      "name": "AnimatableAnime",
       "usesDOM": true,
       "needsCleanup": false
     },
@@ -37,11 +42,16 @@ module.exports = {
     },
     {
       "name": "Listenable",
-      "usesDOM": false,
+      "usesDOM": true,
       "needsCleanup": true
     },
     {
       "name": "Navigable",
+      "usesDOM": false,
+      "needsCleanup": false
+    },
+    {
+      "name": "Recognizable",
       "usesDOM": false,
       "needsCleanup": false
     },
