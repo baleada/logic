@@ -5,7 +5,7 @@
  */
 
 /* Dependencies */
-import Bezier from 'bezier-js'
+import BezierEasing from 'bezier-easing'
 import { mix } from 'chroma-js/chroma-light'
 
 /* Utils */
@@ -18,11 +18,6 @@ function byProgress ({ progress: progressA }, { progress: progressB }) {
 function naiveDeepClone (object) {
   return JSON.parse(JSON.stringify(object)) // Deep copies everything except methods
 }
-
-// [{ progress: <Number>, data: <Object> }]
-// Numbers is just math
-// Strings are colors and should mix
-// Arrays are iterables and should add next item at appropriate time
 
 export default class Animatable {
   constructor (keyframes, options = {}) {
@@ -47,8 +42,8 @@ export default class Animatable {
     this._direction = options.direction
     this._fillMode = options.fillMode
     
-    this._computedBezier = this._getBezier(this._timing)
-    this._computedReversedBezier = this._getBezier(this._timing.reverse().map(({ x, y }) => ({ x: 1 - x, y: 1 - y })))
+    this._toAnimationProgress = this._getToAnimationProgress(this._timing)
+    this._reversedToAnimationProgress = this._getToAnimationProgress(this._timing.reverse().map(({ x, y }) => ({ x: 1 - x, y: 1 - y })))
 
     this._onPlay = options.onPlay
     this._onPause = options.onPause
@@ -62,8 +57,9 @@ export default class Animatable {
     this._resetIterations()
   }
 
-  _getBezier = function(timing) {
-    return new Bezier([{ x: 0, y: 0 }, ...timing, { x: 1, y: 1 }])
+  _getToAnimationProgress = function(timing) {
+    const { 0: { x: p1x, y: p1y }, 1: { x: p2x, y: p2y } } = timing
+    return BezierEasing(p1x, p1y, p2x, p2y)
   }
   _ready = function() {
     this._computedStatus = 'ready'
@@ -138,10 +134,10 @@ export default class Animatable {
         break
       }
 
-      const elapsedTime = timestamp - this._startTime, // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
+      const elapsedTime = Math.min(timestamp - this._startTime, this._duration), // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
             remainingTime = this._duration - elapsedTime,
             timeProgress = elapsedTime / this._duration,
-            animationProgress = this.bezier.get(timeProgress).x,
+            animationProgress = this._toAnimationProgress(timeProgress),
             nextKeyframeIndex = timeProgress === 0
               ? 1
               : this.keyframes.findIndex(frame => frame.progress >= timeProgress),
@@ -152,15 +148,6 @@ export default class Animatable {
               progress: { time: timeProgress, animation: animationProgress },
               data: this._toEased(previousKeyframe.data, nextKeyframe.data, animationProgress, easeOptions)
             }
-      
-      console.log({
-        elapsedTime,
-        remainingTime,
-        timeProgress,
-        animationProgress,
-        nextKeyframe,
-        previousKeyframe,
-      })
 
       callback(frame)
 
@@ -191,7 +178,6 @@ export default class Animatable {
       )
   }
   _ease = function (previousValue, nextValue, progress, options = {}) {
-    console.log(options)
     let easedValue
     switch (true) {
     case is.undefined(nextValue):
