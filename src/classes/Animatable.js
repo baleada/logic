@@ -9,10 +9,10 @@ import BezierEasing from 'bezier-easing'
 import { mix } from 'chroma-js/chroma-light'
 
 /* Utils */
-import { is, typedEmit, emit } from '../util'
+import { is } from '../util'
 
 function byProgress ({ progress: progressA }, { progress: progressB }) {
-  return progressB - progressA
+  return progressA - progressB
 }
 
 function naiveDeepClone (object) {
@@ -114,8 +114,13 @@ export default class Animatable {
 
   setKeyframes (keyframes) {
     // TODO: Pause? Stop?
-    this.keyframes = keyframes.sort(byProgress)
-    this._reversedKeyframes = keyframes.reverse().map(({ progress, data }) => ({ progress: 1 - progress, data }))
+    this.keyframes = keyframes
+    this.keyframes.sort(byProgress)
+
+    this._reversedKeyframes = this.keyframes
+      .slice().reverse() // Reverse without mutating
+      .map(({ progress, data }) => ({ progress: 1 - progress, data }))
+
     return this
   }
   setFrame (newFrame) {
@@ -123,45 +128,9 @@ export default class Animatable {
     return this
   }
 
-  play (callback, options = {}) { // Play from current time
-    const { ease: easeOptions } = options
-
-    this._computedRequest = window.requestAnimationFrame(timestamp => {
-      switch (this.status) {
-      case 'ready':
-        this._startTime = timestamp
-        this._computedStatus = 'playing'
-        break
-      }
-
-      const elapsedTime = Math.min(timestamp - this._startTime, this._duration), // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
-            remainingTime = this._duration - elapsedTime,
-            timeProgress = elapsedTime / this._duration,
-            animationProgress = this._toAnimationProgress(timeProgress),
-            nextKeyframeIndex = timeProgress === 0
-              ? 1
-              : this.keyframes.findIndex(frame => frame.progress >= timeProgress),
-            nextKeyframe = this.keyframes[nextKeyframeIndex],
-            previousKeyframe = this.keyframes[nextKeyframeIndex - 1],
-            frame = {
-              time: { elapsed: elapsedTime, remaining: remainingTime, start: this._startTime, stamp: timestamp },
-              progress: { time: timeProgress, animation: animationProgress },
-              data: this._toEased(previousKeyframe.data, nextKeyframe.data, animationProgress, easeOptions)
-            }
-
-      callback(frame)
-
-      switch (true) {
-      case remainingTime <= 0:
-        this._played()
-        break
-      default:
-        this.play(callback, options)
-        break
-      }
-    })
-
-    return this
+  play (callback, options) { // Play from current time
+    // TODO: calling play while playing should have no effect
+    return this._animate(callback, options, 'play')
   }
   _playing = function() {
     this._computedStatus = 'playing'
@@ -170,6 +139,97 @@ export default class Animatable {
     this._computedStatus = 'played'
   }
 
+  reverse (callback, options) { // Reverse from current time
+    // TODO: calling reverse while reversing should have no effect
+    return this._animate(callback, options, 'reverse')
+  }
+  _reversing = function() {
+    this._computedStatus = 'reversing'
+  }
+  _reversed = function() {
+    this._computedStatus = 'reversed'
+  }
+
+  _animate = function(callback, options = {}, type) {
+    const { ease: easeOptions } = options
+
+    this._computedRequest = window.requestAnimationFrame(timestamp => {
+      switch (type) {
+      case 'play':
+        switch (this.status) {
+        case 'ready':
+        case 'played':
+          this._startTime = timestamp
+          this._playing()
+          break
+        }
+        break
+      case 'reverse':
+        switch (this.status) {
+        case 'ready':
+        case 'reversed':
+          this._startTime = timestamp
+          this._reversing()
+          break
+        }
+        break
+      }
+
+      const toAnimationProgress = this._toToAnimationProgress(type),
+            keyframes = this._toKeyframes(type),
+            elapsedTime = Math.min(timestamp - this._startTime, this._duration), // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
+            remainingTime = this._duration - elapsedTime,
+            timeProgress = elapsedTime / this._duration,
+            animationProgress = toAnimationProgress(timeProgress),
+            nextKeyframeIndex = timeProgress === 0
+              ? 1
+              : keyframes.findIndex(frame => frame.progress >= timeProgress),
+            nextKeyframe = keyframes[nextKeyframeIndex],
+            previousKeyframe = keyframes[nextKeyframeIndex - 1],
+            frame = {
+              time: { elapsed: elapsedTime, remaining: remainingTime, start: this._startTime, stamp: timestamp },
+              progress: { time: timeProgress, animation: animationProgress },
+              data: this._toEased(previousKeyframe.data, nextKeyframe.data, animationProgress, easeOptions)
+            }
+
+      callback(frame/*, callbackApi */) // TODO: keep an eye out for good stuff for a callback API
+
+      switch (type) {
+      case 'play':
+        if (remainingTime <= 0) {
+          this._played()
+        } else {
+          this._animate(callback, options, 'play')
+        }
+        break
+      case 'reverse':
+        if (remainingTime <= 0) {
+          this._reversed()
+        } else {
+          this._animate(callback, options, 'reverse')
+        }
+        break
+      }
+    })
+
+    return this
+  }
+  _toToAnimationProgress = function(type) {
+    switch (type) {
+    case 'play':
+      return this._toAnimationProgress.bind(this)
+    case 'reverse':
+      return this._reversedToAnimationProgress.bind(this)
+    }
+  }
+  _toKeyframes = function(type) {
+    switch (type) {
+    case 'play':
+      return this.keyframes
+    case 'reverse':
+      return this._reversedKeyframes
+    }
+  }
   _toEased = function (previousData, nextData, progress, easeOptions) {
     return Object.keys(previousData)
       .reduce(
@@ -184,15 +244,18 @@ export default class Animatable {
       easedValue = previousValue
       break
     case is.number(previousValue):
-      easedValue = (previousValue + nextValue) * progress
+      easedValue = (nextValue - previousValue) * progress + previousValue
       break
     case is.string(previousValue):
       const { colorMixMode } = options
       easedValue = mix(previousValue, nextValue, progress, colorMixMode)
       break
     case is.array(previousValue):
-      const sliceTo = Math.floor((previousValue.length + nextValue.length) * progress)
-      easedValue = nextValue.slice(0, sliceTo)
+      const sliceTo = Math.floor((nextValue.length - previousValue.length) * progress + previousValue.length),
+            shouldBeSliced = nextValue.length > previousValue.length
+              ? nextValue
+              : previousValue
+      easedValue = shouldBeSliced.slice(0, sliceTo)
       break
     }
 
@@ -207,29 +270,9 @@ export default class Animatable {
 
 
 
-
-
-
-
-  // reverse (options = {}) { // Play from current time using reversed keyframes
-  //   if (this.status !== 'reversing') {
-  //     this._cancelOnBeforeRepaint()
-  //     this._reversing()
-  //     const { time: timeProgress } = this.progress.time
-  //     return this._animate(options)
-  //   }
-
-  //   return this
-  //   this._reverse()
-  //   return this._animate('reverse', options)
-  // }
-  // _reversing = function() {
-  //   this._computedStatus = 'reversing'
-  // }
-
   // pause (options = {}) { // Set time and stop playing
   //   if (this.status !== 'pausing') {
-  //     this._cancelOnBeforeRepaint()
+  //     this._cancelAnimate()
   //     this._pausing()
   //     const { time: timeProgress } = this.progress.time
   //     return this._animate(options)
@@ -275,17 +318,9 @@ export default class Animatable {
   //     return naiveDeepClone(this.time.lastIteration)
   //   }
   // }
-  // _toKeyframes = function() {
-  //   switch (this.status) {
-  //   case 'playing':
-  //     return this.keyframes
-  //   case 'reversing':
-  //     return this._reversedKeyframes
-  //   }
-  // }
   
   // stop () {
-  //   this._cancelOnBeforeRepaint()
+  //   this._cancelAnimate()
   //   this._resetTime()
   //   this._stopped()
   //   return this
@@ -294,10 +329,7 @@ export default class Animatable {
   //   this._computedStatus = 'stopped'
   // }
 
-  // _onBeforeRepaint = function(callback) {
-  //   this._computedRequest = window.requestAnimationFrame(callback)
-  // }
-  // _cancelOnBeforeRepaint = function() {
+  // _cancelAnimate = function() {
   //   window.cancelAnimationFrame(this.request)
   // }
 }
