@@ -26,24 +26,27 @@ export default class Animatable {
         { x: 2 / 3, y: 2 / 3 },
       ], // cubic linear by default
       iterations: 1,
-      direction: 'forwards',
+      alternates: false,
       fillMode: 'none',
       ...options
     }
 
     this._duration = options.duration
     this._timing = options.timing
-    this._iterations = options.iterations
-    this._direction = options.direction
+    this._iterationLimit = options.iterations
+    this._alternates = options.alternates
     this._fillMode = options.fillMode
     
     this._toAnimationProgress = this._getToAnimationProgress(this._timing)
     this._reversedToAnimationProgress = this._getToAnimationProgress(this._timing.reverse().map(({ x, y }) => ({ x: 1 - x, y: 1 - y })))
 
-    this._onPlay = options.onPlay
-    this._onPause = options.onPause
-    this._onReverse = options.onReverse
-    
+    this._computedIterations = 0
+
+    this._playCache = {}
+    this._reverseCache = {}
+    this._pauseCache = {}
+    this._seekCache = {}
+    this._alternateCache = { status: 'ready' }
 
     /* Public properties */
     this.setKeyframes(keyframes)
@@ -81,7 +84,8 @@ export default class Animatable {
   }
 
   setKeyframes (keyframes) {
-    // TODO: Pause? Stop?
+    this.stop()
+
     this.keyframes = keyframes
     this.keyframes.sort(byProgress)
 
@@ -96,6 +100,14 @@ export default class Animatable {
     this._playCache = {
       callback,
       options,
+    }
+
+    if (this._alternates) {
+      switch (this._alternateCache.status) {
+      case 'ready':
+        this._alternateCache.status = 'playing'
+        break
+      }
     }
 
     switch (this.status) {
@@ -126,6 +138,14 @@ export default class Animatable {
     this._reverseCache = {
       callback,
       options,
+    }
+
+    if (this._alternates) {
+      switch (this._alternateCache.status) {
+      case 'ready':
+        this._alternateCache.status = 'reversing'
+        break
+      }
     }
 
     switch (this.status) {
@@ -234,6 +254,30 @@ export default class Animatable {
       case 'play':
         if (remainingTime <= 0) {
           this._played()
+
+          if (this._alternates) {
+            switch (this._alternateCache.status) {
+            case 'playing':
+              this._animate(callback, options, 'reverse')
+              break
+            case 'reversing':
+              this._computedIterations += 1
+
+              if (this.iterations < this._iterationLimit) {
+                this._animate(callback, options, 'reverse')
+              } else {
+                this._alternateCache.status = 'ready'
+              }
+
+              break
+            }
+          } else {
+            this._computedIterations += 1
+
+            if (this.iterations < this._iterationLimit) {
+              this._animate(callback, options, 'play')
+            }
+          }
         } else {
           this._animate(callback, options, 'play')
         }
@@ -241,6 +285,30 @@ export default class Animatable {
       case 'reverse':
         if (remainingTime <= 0) {
           this._reversed()
+
+          if (this._alternates) {
+            switch (this._alternateCache.status) {
+            case 'playing':
+              this._computedIterations += 1
+
+              if (this.iterations < this._iterationLimit) {
+                this._animate(callback, options, 'play')
+              } else {
+                this._alternateCache.status = 'ready'
+              }
+
+              break
+            case 'reversing':
+              this._animate(callback, options, 'play')
+              break
+            }
+          } else {
+            this._computedIterations += 1
+
+            if (this.iterations < this._iterationLimit) {
+              this._animate(callback, options, 'play')
+            }
+          }
         } else {
           this._animate(callback, options, 'reverse')
         }
