@@ -3,7 +3,7 @@ module.exports = {
     {
       "name": "Animatable",
       "usesDOM": false,
-      "needsCleanup": false
+      "needsCleanup": true
     },
     {
       "name": "AnimatableAnime",

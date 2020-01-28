@@ -75,39 +75,12 @@ export default class Animatable {
     this._computedIterations = 0
   }
 
-  get bezier () {
-    return this._computedBezier
-  }
-  get reversedBezier () {
-    return this._computedReversedBezier
-  }
   get status () {
     return this._computedStatus
   }
   get iterations () {
     return this._computedIterations
   }
-  get progress () {
-    const { elapsed, remaining } = this.time,
-          bezier = this._toBezier(),
-          timeProgress = elapsed / (elapsed + remaining),
-          animationProgress = bezier.get(timeProgress)
-
-    return {
-      time: timeProgress * 100,
-      animation: animationProgress * 100,
-    }
-  }
-  _toBezier = function() {
-    return this.bezier
-    // switch (this.status) {
-    // case 'playing':
-    //   return this.bezier
-    // case 'reversing':
-    //   return this.reversedBezier
-    // }
-  }
-
   get request () {
     return this._computedRequest
   }
@@ -123,14 +96,23 @@ export default class Animatable {
 
     return this
   }
-  setFrame (newFrame) {
-    this.frame = newFrame
-    return this
-  }
 
   play (callback, options) { // Play from current time
-    // TODO: calling play while playing should have no effect
-    return this._animate(callback, options, 'play')
+    switch (this.status) {
+    case 'ready':
+    case 'stopped':
+    case 'played':
+    case 'reversed':
+    case 'paused':
+      this._animate(callback, options, 'play')
+      break
+    case 'reversing':
+      this.pause()
+      this._animate(callback, options, 'play')
+      break
+    }
+    
+    return this
   }
   _playing = function() {
     this._computedStatus = 'playing'
@@ -140,8 +122,19 @@ export default class Animatable {
   }
 
   reverse (callback, options) { // Reverse from current time
-    // TODO: calling reverse while reversing should have no effect
-    return this._animate(callback, options, 'reverse')
+    switch (this.status) {
+      case 'ready':
+      case 'stopped':
+      case 'played':
+      case 'reversed':
+      case 'paused':
+        this._animate(callback, options, 'reverse')
+        break
+      case 'playing':
+        this.pause()
+        this._animate(callback, options, 'reverse')
+        break
+      }
   }
   _reversing = function() {
     this._computedStatus = 'reversing'
@@ -159,28 +152,52 @@ export default class Animatable {
         switch (this.status) {
         case 'ready':
         case 'played':
+        case 'reversed':
+        case 'stopped':
           this._startTime = timestamp
           this._playing()
           break
+        case 'paused':
+          switch (this._pauseData.status) {
+          case 'playing':
+            this._startTime = timestamp - (this._pauseData.pauseTime - this._pauseData.startTime)
+            break
+          case 'reversing':
+            this._startTime = timestamp - (this._duration - (this._pauseData.pauseTime - this._pauseData.startTime))
+            break
+          }
+          this._playing()
         }
         break
       case 'reverse':
         switch (this.status) {
         case 'ready':
+        case 'played':
         case 'reversed':
+        case 'stopped':
           this._startTime = timestamp
           this._reversing()
           break
+        case 'paused':
+          switch (this._pauseData.status) {
+          case 'playing':
+            this._startTime = timestamp - (this._duration - (this._pauseData.pauseTime - this._pauseData.startTime))
+            break
+          case 'reversing':
+            this._startTime = timestamp - (this._pauseData.pauseTime - this._pauseData.startTime)
+            break
+          }
+          this._reversing()
         }
         break
       }
 
-      const toAnimationProgress = this._toToAnimationProgress(type),
-            keyframes = this._toKeyframes(type),
-            elapsedTime = Math.min(timestamp - this._startTime, this._duration), // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
+      const elapsedTime = Math.min(timestamp - this._startTime, this._duration), // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
             remainingTime = this._duration - elapsedTime,
             timeProgress = elapsedTime / this._duration,
+            toAnimationProgress = this._toToAnimationProgress(type),
             animationProgress = toAnimationProgress(timeProgress),
+            keyframes = this._toKeyframes(type),
             nextKeyframeIndex = timeProgress === 0
               ? 1
               : keyframes.findIndex(frame => frame.progress >= timeProgress),
@@ -192,7 +209,7 @@ export default class Animatable {
               data: this._toEased(previousKeyframe.data, nextKeyframe.data, animationProgress, easeOptions)
             }
 
-      callback(frame/*, callbackApi */) // TODO: keep an eye out for good stuff for a callback API
+      callback(frame)
 
       switch (type) {
       case 'play':
@@ -251,10 +268,10 @@ export default class Animatable {
       easedValue = mix(previousValue, nextValue, progress, colorMixMode)
       break
     case is.array(previousValue):
-      const sliceTo = Math.floor((nextValue.length - previousValue.length) * progress + previousValue.length),
-            shouldBeSliced = nextValue.length > previousValue.length
-              ? nextValue
-              : previousValue
+      const sliceToExact = (nextValue.length - previousValue.length) * progress + previousValue.length,
+            nextValueIsLonger = nextValue.length > previousValue.length,
+            sliceTo = nextValueIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
+            shouldBeSliced = nextValueIsLonger ? nextValue : previousValue
       easedValue = shouldBeSliced.slice(0, sliceTo)
       break
     }
@@ -262,74 +279,65 @@ export default class Animatable {
     return easedValue
   }
 
-
-
-
-
-
-
-
-
-  // pause (options = {}) { // Set time and stop playing
-  //   if (this.status !== 'pausing') {
-  //     this._cancelAnimate()
-  //     this._pausing()
-  //     const { time: timeProgress } = this.progress.time
-  //     return this._animate(options)
-  //   }
-
-  //   return this
-  // }
-  // _pausing = function() {
-  //   this._computedStatus = 'pausing'
-  // }
-
-  // seek (timeProgress, options = {}) { // Set time and continue pausing or playing
-  //   options = {
-  //     timeProgress,
-  //     options,
-  //   }
-  //   this._seeking()
-  //   return this._animate('seek', options)
-  // }
-  // _seeking = function() {
-  //   this._computedStatus = 'seeking'
-  // }
-
-  // restart (options = {}) { // Set time to 0 and play
-  //   this.seek(0)
-  //   switch (this.status) {
-  //   case 'playing':
-  //     return this.play()
-  //   case 'reversing':
-  //     return this.reverse()
-  //   }
-  // }
-  // _toLastIteration = function(timestamp) {
-  //   switch (this.status) {
-  //   case 'ready':
-  //   case 'stopped':
-  //   case 'played':
-  //   case 'reversed':
-  //     return { start: timestamp, end: timestamp + this._duration }
-  //   case 'playing':
-  //   case 'reversing':
-  //   case 'pausing':
-  //     return naiveDeepClone(this.time.lastIteration)
-  //   }
-  // }
+  pause () {
+    switch (this.status) {
+    case 'playing':
+    case 'reversing':
+      window.requestAnimationFrame(timestamp => {
+        this._cancelAnimate()
   
-  // stop () {
-  //   this._cancelAnimate()
-  //   this._resetTime()
-  //   this._stopped()
-  //   return this
-  // }
-  // _stopped = function() {
-  //   this._computedStatus = 'stopped'
-  // }
+        this._pauseData = {
+          status: this.status,
+          startTime: this._startTime,
+          pauseTime: timestamp,
+        }
+  
+        this._paused()
+      })
+    }
 
-  // _cancelAnimate = function() {
-  //   window.cancelAnimationFrame(this.request)
-  // }
+    return this
+  }
+  _paused = function() {
+    this._computedStatus = 'paused'
+  }
+
+  stop () {
+    this._cancelAnimate()
+    this._stopped()
+    return this
+  }
+  _stopped = function() {
+    this._computedStatus = 'stopped'
+  }
+
+  _cancelAnimate = function() {
+    window.cancelAnimationFrame(this.request)
+  }
+
+  seek (timeProgress) { // Store time progress. Continue playing or reversing if applicable.
+
+  }
+
+  restart (callback) { // Seek to progress 0 and play or reverse
+    switch (this.status) {
+    case 'played':
+    case 'playing':
+      this.seek(0)
+      return this.play(callback)
+    case 'reversed':
+    case 'reversing':
+      this.seek(0)
+      return this.reverse(callback)
+    case 'paused':
+      switch (this._pauseData.status) {
+      case 'playing':
+        this.seek(0)
+        return this.play(callback)
+      case 'reversing':
+        this.seek(0)
+        return this.reverse(callback)
+      }
+    }
+  }
 }
