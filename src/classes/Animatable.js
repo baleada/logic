@@ -19,7 +19,6 @@ export default class Animatable {
   constructor (keyframes, options = {}) {
     /* Options */
     options = {
-      onAnimate: (newFrame, instance) => instance.setFrame(newFrame),
       duration: 0,
       // delay can be handled by delayable
       timing: [
@@ -370,21 +369,29 @@ export default class Animatable {
   restart () { // Seek to progress 0 and play or reverse
     switch (this.status) {
     case 'played':
-    case 'playing':
       this.seek(0)
       this.play(this._playCache.callback, this._playCache.options)
+      break
+    case 'playing':
+      this.seek(0)
+      break
     case 'reversed':
-    case 'reversing':
       this.seek(0)
       this.reverse(this._reverseCache.callback, this._reverseCache.options)
+      break
+    case 'reversing':
+      this.seek(0)
+      break
     case 'paused':
       switch (this._pauseCache.status) {
       case 'playing':
         this.seek(0)
         this.play(this._playCache.callback, this._playCache.options)
+        break
       case 'reversing':
         this.seek(0)
         this.reverse(this._reverseCache.callback, this._reverseCache.options)
+        break
       }
     }
 
