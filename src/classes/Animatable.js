@@ -15,10 +15,6 @@ function byProgress ({ progress: progressA }, { progress: progressB }) {
   return progressA - progressB
 }
 
-function naiveDeepClone (object) {
-  return JSON.parse(JSON.stringify(object)) // Deep copies everything except methods
-}
-
 export default class Animatable {
   constructor (keyframes, options = {}) {
     /* Options */
@@ -97,13 +93,19 @@ export default class Animatable {
     return this
   }
 
-  play (callback, options) { // Play from current time
+  play (callback, options) { // Play from current time progress
+    this._playCache = {
+      callback,
+      options,
+    }
+
     switch (this.status) {
     case 'ready':
     case 'stopped':
     case 'played':
     case 'reversed':
     case 'paused':
+    case 'sought':
       this._animate(callback, options, 'play')
       break
     case 'reversing':
@@ -121,13 +123,19 @@ export default class Animatable {
     this._computedStatus = 'played'
   }
 
-  reverse (callback, options) { // Reverse from current time
+  reverse (callback, options) { // Reverse from current time progress
+    this._reverseCache = {
+      callback,
+      options,
+    }
+
     switch (this.status) {
       case 'ready':
       case 'stopped':
       case 'played':
       case 'reversed':
       case 'paused':
+      case 'sought':
         this._animate(callback, options, 'reverse')
         break
       case 'playing':
@@ -135,6 +143,8 @@ export default class Animatable {
         this._animate(callback, options, 'reverse')
         break
       }
+    
+    return this
   }
   _reversing = function() {
     this._computedStatus = 'reversing'
@@ -158,15 +168,20 @@ export default class Animatable {
           this._playing()
           break
         case 'paused':
-          switch (this._pauseData.status) {
+          switch (this._pauseCache.status) {
           case 'playing':
-            this._startTime = timestamp - (this._pauseData.pauseTime - this._pauseData.startTime)
+            this._startTime = timestamp - (this._pauseCache.pauseTime - this._pauseCache.startTime)
             break
           case 'reversing':
-            this._startTime = timestamp - (this._duration - (this._pauseData.pauseTime - this._pauseData.startTime))
+            this._startTime = timestamp - (this._duration - (this._pauseCache.pauseTime - this._pauseCache.startTime))
             break
           }
           this._playing()
+          break
+        case 'sought':
+          this._startTime = timestamp - Math.round(this._duration * this._seekCache.timeProgress)
+          this._playing()
+          break
         }
         break
       case 'reverse':
@@ -179,15 +194,20 @@ export default class Animatable {
           this._reversing()
           break
         case 'paused':
-          switch (this._pauseData.status) {
+          switch (this._pauseCache.status) {
           case 'playing':
-            this._startTime = timestamp - (this._duration - (this._pauseData.pauseTime - this._pauseData.startTime))
+            this._startTime = timestamp - (this._duration - (this._pauseCache.pauseTime - this._pauseCache.startTime))
             break
           case 'reversing':
-            this._startTime = timestamp - (this._pauseData.pauseTime - this._pauseData.startTime)
+            this._startTime = timestamp - (this._pauseCache.pauseTime - this._pauseCache.startTime)
             break
           }
           this._reversing()
+          break
+        case 'sought':
+          this._startTime = timestamp - Math.round(this._duration * this._seekCache.timeProgress)
+          this._reversing()
+          break
         }
         break
       }
@@ -204,7 +224,7 @@ export default class Animatable {
             nextKeyframe = keyframes[nextKeyframeIndex],
             previousKeyframe = keyframes[nextKeyframeIndex - 1],
             frame = {
-              time: { elapsed: elapsedTime, remaining: remainingTime, start: this._startTime, stamp: timestamp },
+              time: { elapsed: elapsedTime, remaining: remainingTime, stamp: timestamp },
               progress: { time: timeProgress, animation: animationProgress },
               data: this._toEased(previousKeyframe.data, nextKeyframe.data, animationProgress, easeOptions)
             }
@@ -286,7 +306,7 @@ export default class Animatable {
       window.requestAnimationFrame(timestamp => {
         this._cancelAnimate()
   
-        this._pauseData = {
+        this._pauseCache = {
           status: this.status,
           startTime: this._startTime,
           pauseTime: timestamp,
@@ -316,28 +336,58 @@ export default class Animatable {
   }
 
   seek (timeProgress) { // Store time progress. Continue playing or reversing if applicable.
+    switch (this.status) {
+    case 'playing':
+      this._cancelAnimate()
+      this._seekCache = {
+        timeProgress
+      }
+      this._sought()
+      this.play(this._playCache.callback, this._playCache.options)
+      break
+    case 'reversing':
+      this._cancelAnimate()
+      this._seekCache = {
+        timeProgress
+      }
+      this._sought()
+      this.reverse(this._reverseCache.callback, this._reverseCache.options)
+      break
+    default:
+      this._seekCache = {
+        timeProgress
+      }
+      this._sought()
+      break
+    }
 
+    return this
+  }
+  _sought = function() {
+    this._computedStatus = 'sought'
   }
 
-  restart (callback) { // Seek to progress 0 and play or reverse
+  restart () { // Seek to progress 0 and play or reverse
     switch (this.status) {
     case 'played':
     case 'playing':
       this.seek(0)
-      return this.play(callback)
+      this.play(this._playCache.callback, this._playCache.options)
     case 'reversed':
     case 'reversing':
       this.seek(0)
-      return this.reverse(callback)
+      this.reverse(this._reverseCache.callback, this._reverseCache.options)
     case 'paused':
-      switch (this._pauseData.status) {
+      switch (this._pauseCache.status) {
       case 'playing':
         this.seek(0)
-        return this.play(callback)
+        this.play(this._playCache.callback, this._playCache.options)
       case 'reversing':
         this.seek(0)
-        return this.reverse(callback)
+        this.reverse(this._reverseCache.callback, this._reverseCache.options)
       }
     }
+
+    return this
   }
 }
