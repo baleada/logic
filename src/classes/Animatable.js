@@ -425,11 +425,13 @@ export default class Animatable {
         timeProgress = naiveTimeProgress * 2
         switch (this._alternateCache.status) {
         case 'playing':
+          this._cancelAnimate()
           this._seekCache = { timeProgress }
           this._sought()
           this.play(this._playCache.callback, this._playCache.options)
           break
         case 'reversing':
+          this._cancelAnimate()
           this._seekCache = { timeProgress }
           this._sought()
           this.reverse(this._reverseCache.callback, this._reverseCache.options)
@@ -444,11 +446,13 @@ export default class Animatable {
         timeProgress = (naiveTimeProgress - .5) * 2
         switch (this._alternateCache.status) {
         case 'playing':
+          this._cancelAnimate()
           this._seekCache = { timeProgress }
           this._sought()
           this.reverse(this._reverseCache.callback, this._reverseCache.options)
           break
         case 'reversing':
+          this._cancelAnimate()
           this._seekCache = { timeProgress }
           this._sought()
           this.play(this._playCache.callback, this._playCache.options)
