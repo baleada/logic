@@ -114,9 +114,37 @@ export default class Animatable {
     case 'stopped':
     case 'played':
     case 'reversed':
-    case 'paused':
     case 'sought':
       this._animate(callback, options, 'play')
+      break
+    case 'paused':
+      if (this._alternates) {
+        switch (this._alternateCache.status) {
+        case 'playing':
+          switch (this._pauseCache.status) {
+          case 'playing':
+            this._animate(callback, options, 'play')
+            break
+          case 'reversing':
+            this._animate(callback, options, 'reverse')
+            break
+          }
+          break
+        case 'reversing':
+          this._alternateCache.status = 'playing'
+          switch (this._pauseCache.status) {
+          case 'playing':
+            this._animate(callback, options, 'play')
+            break
+          case 'reversing':
+            this._animate(callback, options, 'play')
+            break
+          }
+          break
+        }
+      } else {
+        this._animate(callback, options, 'play')
+      }
       break
     case 'reversing':
       this.pause()
@@ -152,9 +180,37 @@ export default class Animatable {
       case 'stopped':
       case 'played':
       case 'reversed':
-      case 'paused':
       case 'sought':
         this._animate(callback, options, 'reverse')
+        break
+      case 'paused':
+        if (this._alternates) {
+          switch (this._alternateCache.status) {
+          case 'playing':
+            this._alternateCache.status = 'reversing'
+            switch (this._pauseCache.status) {
+            case 'playing':
+              this._animate(callback, options, 'reverse')
+              break
+            case 'reversing':
+              this._animate(callback, options, 'reverse')
+              break
+            }
+            break
+          case 'reversing':
+            switch (this._pauseCache.status) {
+            case 'playing':
+              this._animate(callback, options, 'play')
+              break
+            case 'reversing':
+              this._animate(callback, options, 'reverse')
+              break
+            }
+            break
+          }
+        } else {
+          this._animate(callback, options, 'play')
+        }
         break
       case 'playing':
         this.pause()
@@ -372,30 +428,58 @@ export default class Animatable {
   }
 
   pause () {
-    switch (this.status) {
-    case 'playing':
-      window.requestAnimationFrame(timestamp => {
-        this._cancelAnimate()
-              
-        this._pauseCache = {
-          status: this.status,
-          timeProgress: (timestamp - this._startTime) / this._duration,
-        }
+    if (this._alternates) {
+      switch (this.status) {
+      case 'playing':
+        window.requestAnimationFrame(timestamp => {
+          this._cancelAnimate()
 
-        this._paused()
-      })
-      break
-    case 'reversing':
-      window.requestAnimationFrame(timestamp => {
-        this._cancelAnimate()
+          this._pauseCache = {
+            status: this.status,
+            timeProgress: (timestamp - this._startTime) / this._duration,
+          }
   
-        this._pauseCache = {
-          status: this.status,
-          timeProgress: (timestamp - this._startTime) / this._duration,
-        }
+          this._paused()
+        })
+        break
+      case 'reversing':
+        window.requestAnimationFrame(timestamp => {
+          this._cancelAnimate()
+    
+          this._pauseCache = {
+            status: this.status,
+            timeProgress: (timestamp - this._startTime) / this._duration,
+          }
+    
+          this._paused()
+        })
+      }
+    } else {
+      switch (this.status) {
+      case 'playing':
+        window.requestAnimationFrame(timestamp => {
+          this._cancelAnimate()
+                
+          this._pauseCache = {
+            status: this.status,
+            timeProgress: (timestamp - this._startTime) / this._duration,
+          }
   
-        this._paused()
-      })
+          this._paused()
+        })
+        break
+      case 'reversing':
+        window.requestAnimationFrame(timestamp => {
+          this._cancelAnimate()
+    
+          this._pauseCache = {
+            status: this.status,
+            timeProgress: (timestamp - this._startTime) / this._duration,
+          }
+    
+          this._paused()
+        })
+      }
     }
 
     return this
@@ -496,14 +580,14 @@ export default class Animatable {
 
   restart () { // Seek to progress 0 and play or reverse
     switch (this.status) {
-    case 'played':
+    case 'played': // TODO: Pretty sure this could cause problems for alternating animations
       this.seek(0)
       this.play(this._playCache.callback, this._playCache.options)
       break
     case 'playing':
       this.seek(0)
       break
-    case 'reversed':
+    case 'reversed': // TODO: Pretty sure this could cause problems for alternating animations
       this.seek(0)
       this.reverse(this._reverseCache.callback, this._reverseCache.options)
       break
