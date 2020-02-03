@@ -9,7 +9,7 @@ import BezierEasing from 'bezier-easing'
 import { mix } from 'chroma-js/chroma-light'
 
 /* Utils */
-import { is, toTouchListeners } from '../util'
+import { is } from '../util'
 
 function byProgress ({ progress: progressA }, { progress: progressB }) {
   return progressA - progressB
@@ -231,7 +231,7 @@ export default class Animatable {
     const { ease: easeOptions } = options
 
     this._computedRequest = window.requestAnimationFrame(timestamp => {
-      this._setStartTime(type, timestamp)
+      this._setStartTimeAndStatus(type, timestamp)
 
       const elapsedTime = Math.min(timestamp - this._startTime, this._duration), // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
             remainingTime = this._duration - elapsedTime,
@@ -250,14 +250,14 @@ export default class Animatable {
               data: this._toEased(previousKeyframe.data, nextKeyframe.data, animationProgress, easeOptions)
             }
 
-      callback(frame)
+      callback(frame) // Will error
 
       this._recurse(type, remainingTime, callback, options)
     })
 
     return this
   }
-  _setStartTime (type, timestamp) {
+  _setStartTimeAndStatus (type, timestamp) {
     switch (type) {
     case 'play':
       switch (this.status) {
@@ -311,11 +311,15 @@ export default class Animatable {
         break
       }
       break
+    case 'seek':
+      this._startTime = timestamp - this._duration * this._seekCache.timeProgress
+      break
     }
   }
   _toToAnimationProgress (type) {
     switch (type) {
     case 'play':
+    case 'seek':
       return this._toAnimationProgress.bind(this)
     case 'reverse':
       return this._reversedToAnimationProgress.bind(this)
@@ -324,6 +328,7 @@ export default class Animatable {
   _toKeyframes (type) {
     switch (type) {
     case 'play':
+    case 'seek':
       return this.keyframes
     case 'reverse':
       return this._reversedKeyframes
@@ -338,24 +343,19 @@ export default class Animatable {
   }
   _ease = function (previousValue, nextValue, progress, options = {}) {
     let easedValue
-    switch (true) {
-    case is.undefined(nextValue):
+    if (is.undefined(nextValue)) {
       easedValue = previousValue
-      break
-    case is.number(previousValue):
+    } else if (is.number(previousValue)) {
       easedValue = (nextValue - previousValue) * progress + previousValue
-      break
-    case is.string(previousValue):
+    } else if (is.string(previousValue)) {
       const { colorMixMode } = options
       easedValue = mix(previousValue, nextValue, progress, colorMixMode)
-      break
-    case is.array(previousValue):
+    } else if (is.array(previousValue)) {
       const sliceToExact = (nextValue.length - previousValue.length) * progress + previousValue.length,
             nextValueIsLonger = nextValue.length > previousValue.length,
             sliceTo = nextValueIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
             shouldBeSliced = nextValueIsLonger ? nextValue : previousValue
       easedValue = shouldBeSliced.slice(0, sliceTo)
-      break
     }
 
     return easedValue
@@ -424,6 +424,9 @@ export default class Animatable {
         this._animate(callback, options, 'reverse')
       }
       break
+    case 'seek':
+      // Do nothing
+      break
     }
   }
 
@@ -490,7 +493,10 @@ export default class Animatable {
 
   stop () {
     this._cancelAnimate()
+    this._alternateCache.status = 'ready'
+    this._computedIterations = 0
     this._stopped()
+
     return this
   }
   _stopped () {
@@ -501,7 +507,7 @@ export default class Animatable {
     window.cancelAnimationFrame(this.request)
   }
 
-  seek (naiveTimeProgress) { // Store time progress. Continue playing or reversing if applicable.
+  seek (naiveTimeProgress, callback, options) { // Store time progress. Continue playing or reversing if applicable.
     let timeProgress
 
     if (this._alternates) {
@@ -523,7 +529,7 @@ export default class Animatable {
         default:
           this._seekCache = { timeProgress }
           this._sought()
-          // TODO: emit frame
+          this._animate(callback, options, 'seek')
           break
         }
       } else {
@@ -544,7 +550,7 @@ export default class Animatable {
         default:
           this._seekCache = { timeProgress }
           this._sought()
-          // TODO: emit frame
+          this._animate(callback, options, 'seek')
           break
         }
       }
@@ -567,7 +573,7 @@ export default class Animatable {
       default:
         this._seekCache = { timeProgress }
         this._sought()
-        // TODO: emit frame
+        this._animate(callback, options, 'seek')
         break
       }    
     }
