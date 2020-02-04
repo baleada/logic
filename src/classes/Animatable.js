@@ -109,6 +109,10 @@ export default class Animatable {
       }
     }
 
+    if (this.iterations === this._iterationLimit) {
+      this._computedIterations = 0
+    }
+
     switch (this.status) {
     case 'ready':
     case 'stopped':
@@ -173,6 +177,10 @@ export default class Animatable {
         this._alternateCache.status = 'reversing'
         break
       }
+    }
+
+    if (this.iterations === this._iterationLimit) {
+      this._computedIterations = 0
     }
 
     switch (this.status) {
@@ -374,7 +382,7 @@ export default class Animatable {
           case 'reversing':
             this._computedIterations += 1
 
-            if (this.iterations < this._iterationLimit) {
+            if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
               this._animate(callback, options, 'reverse')
             } else {
               this._alternateCache.status = 'ready'
@@ -385,7 +393,7 @@ export default class Animatable {
         } else {
           this._computedIterations += 1
 
-          if (this.iterations < this._iterationLimit) {
+          if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
             this._animate(callback, options, 'play')
           }
         }
@@ -402,7 +410,7 @@ export default class Animatable {
           case 'playing':
             this._computedIterations += 1
 
-            if (this.iterations < this._iterationLimit) {
+            if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
               this._animate(callback, options, 'play')
             } else {
               this._alternateCache.status = 'ready'
@@ -491,11 +499,12 @@ export default class Animatable {
     this._computedStatus = 'paused'
   }
 
-  stop () {
+  stop (/* callback, options */) {
     this._cancelAnimate()
     this._alternateCache.status = 'ready'
-    this._computedIterations = 0
     this._stopped()
+
+    // this.seek(0, callback, options)
 
     return this
   }
@@ -508,11 +517,16 @@ export default class Animatable {
   }
 
   seek (naiveTimeProgress, callback, options) { // Store time progress. Continue playing or reversing if applicable.
+    const iterations = Math.floor(naiveTimeProgress),
+          naiveIterationProgress = naiveTimeProgress - iterations
+
+    this._computedIterations = iterations
+
     let timeProgress
 
     if (this._alternates) {
-      if (naiveTimeProgress <= .5) {
-        timeProgress = naiveTimeProgress * 2
+      if (naiveIterationProgress <= .5) {
+        timeProgress = naiveIterationProgress * 2
         switch (this._alternateCache.status) {
         case 'playing':
           this._cancelAnimate()
@@ -533,7 +547,7 @@ export default class Animatable {
           break
         }
       } else {
-        timeProgress = (naiveTimeProgress - .5) * 2
+        timeProgress = (naiveIterationProgress - .5) * 2
         switch (this._alternateCache.status) {
         case 'playing':
           this._cancelAnimate()
@@ -555,7 +569,7 @@ export default class Animatable {
         }
       }
     } else {
-      timeProgress = naiveTimeProgress
+      timeProgress = naiveIterationProgress
 
       switch (this.status) {
       case 'playing':
