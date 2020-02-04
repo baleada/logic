@@ -334,14 +334,14 @@ export default class Animatable {
       return this._reversedKeyframes
     }
   }
-  _toEased = function (previousData, nextData, progress, easeOptions) {
+  _toEased (previousData, nextData, progress, easeOptions) {
     return Object.keys(previousData)
       .reduce(
         (easedData, property) => ({ ...easedData, [property]: this._ease(previousData[property], nextData[property], progress, easeOptions) }),
         {}
       )
   }
-  _ease = function (previousValue, nextValue, progress, options = {}) {
+  _ease (previousValue, nextValue, progress, options = {}) {
     let easedValue
     if (is.undefined(nextValue)) {
       easedValue = previousValue
