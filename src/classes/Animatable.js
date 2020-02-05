@@ -22,8 +22,8 @@ export default class Animatable {
       duration: 0,
       // delay can be handled by delayable
       timing: [
-        { x: 1 / 3, y: 1 / 3 },
-        { x: 2 / 3, y: 2 / 3 },
+        { x: 0, y: 0 },
+        { x: 1, y: 1 },
       ], // linear by default
       iterations: 1,
       alternates: false,
@@ -33,12 +33,13 @@ export default class Animatable {
 
     this._duration = options.duration
     this._timing = options.timing
+    this._reversedTiming = this._getReversedTiming(this._timing)
     this._iterationLimit = options.iterations
     this._alternates = options.alternates
     this._fillMode = options.fillMode
     
     this._toAnimationProgress = this._getToAnimationProgress(this._timing)
-    this._reversedToAnimationProgress = this._getToAnimationProgress(this._timing.reverse().map(({ x, y }) => ({ x: 1 - x, y: 1 - y })))
+    this._reversedToAnimationProgress = this._getToAnimationProgress(this._reversedTiming)
 
     this._computedIterations = 0
 
@@ -53,6 +54,9 @@ export default class Animatable {
     this._ready()
     this._resetTime()
     this._resetIterations()
+  }
+  _getReversedTiming (timing) {
+    return timing.reverse().map(({ x, y }) => ({ x: 1 - x, y: 1 - y }))
   }
   _getToAnimationProgress (timing) {
     const { 0: { x: p1x, y: p1y }, 1: { x: p2x, y: p2y } } = timing
@@ -92,7 +96,89 @@ export default class Animatable {
       .slice().reverse() // Reverse without mutating
       .map(({ progress, data }) => ({ progress: 1 - progress, data }))
 
+    this._properties = this._getProperties()
+    this._easables = this._getEasables()
+    this._reversedEasables = this._getReversedEasables()
+
     return this
+  }
+  _getProperties () {
+    return Array.from(
+      new Set(
+        this.keyframes.map(({ data }) => Object.keys(data)).flat()
+      )
+    )
+  }
+  _getEasables () {
+    return this._properties.reduce((easables, property) => {
+      const propertyKeyframes = this.keyframes.filter(({ data }) => data.hasOwnProperty(property)),
+            firstEasable = {
+              property,
+              value: { previous: propertyKeyframes[0].data[property], next: propertyKeyframes[0].data[property] },
+              progress: { start: -1, end: 0 },
+              toAnimationProgress: timeProgress => 1
+            },
+            propertyEasables = propertyKeyframes.reduce((propertyEasables, keyframe, index, array) => {
+              const previous = keyframe.data[property],
+                    next = index === array.length - 1 ? previous : array[index + 1].data[property],
+                    start = keyframe.progress,
+                    end = index === array.length - 1 ? 2 : array[index + 1].progress,
+                    toAnimationProgress = index === array.length - 1
+                      ? timeProgress => 1
+                      : this._getToAnimationProgress(keyframe.timing || this._timing)
+
+              return [
+                ...propertyEasables,
+                {
+                  property,
+                  value: { previous, next },
+                  progress: { start, end },
+                  toAnimationProgress
+                }
+              ]
+            }, [firstEasable])
+      
+      return [
+        ...easables,
+        ...propertyEasables,
+      ]
+    }, [])
+  }
+  _getReversedEasables () {
+    // TODO: abstract and make more DRY
+    return this._properties.reduce((easables, property) => {
+      const propertyKeyframes = this._reversedKeyframes.filter(({ data }) => data.hasOwnProperty(property)),
+            firstEasable = {
+              property,
+              value: { previous: propertyKeyframes[0].data[property], next: propertyKeyframes[0].data[property] },
+              progress: { start: -1, end: 0 },
+              toAnimationProgress: timeProgress => 1
+            },
+            propertyEasables = propertyKeyframes.reduce((propertyEasables, keyframe, index, array) => {
+              const previous = keyframe.data[property],
+                    next = index === array.length - 1 ? previous : array[index + 1].data[property],
+                    start = keyframe.progress,
+                    end = index === array.length - 1 ? 2 : array[index + 1].progress,
+                    toAnimationProgress = index === array.length - 1
+                      ? timeProgress => 1
+                      : this._getToAnimationProgress((array[index + 1].timing && this._getReversedTiming(array[index + 1].timing)) || this._reversedTiming)
+
+              return [
+                ...propertyEasables,
+                {
+                  property,
+                  value: { previous, next },
+                  progress: { start, end },
+                  toAnimationProgress
+                }
+              ]
+            }, [firstEasable])
+      
+      return [
+        ...easables,
+        ...propertyEasables,
+      ]
+    }, [])
   }
 
   play (callback, options) { // Play from current time progress
@@ -246,19 +332,13 @@ export default class Animatable {
             timeProgress = elapsedTime / this._duration,
             toAnimationProgress = this._toToAnimationProgress(type),
             animationProgress = toAnimationProgress(timeProgress),
-            keyframes = this._toKeyframes(type),
-            nextKeyframeIndex = timeProgress === 0
-              ? 1
-              : keyframes.findIndex(frame => frame.progress >= timeProgress),
-            nextKeyframe = keyframes[nextKeyframeIndex],
-            previousKeyframe = keyframes[nextKeyframeIndex - 1],
             frame = {
               time: { elapsed: elapsedTime, remaining: remainingTime, stamp: timestamp },
               progress: { time: timeProgress, animation: animationProgress },
-              data: this._toEased(previousKeyframe.data, nextKeyframe.data, animationProgress, easeOptions)
+              data: this._toEased(type, timeProgress, easeOptions)
             }
 
-      callback(frame) // Will error
+      callback(frame) // TODO: error message
 
       this._recurse(type, remainingTime, callback, options)
     })
@@ -342,31 +422,51 @@ export default class Animatable {
       return this._reversedKeyframes
     }
   }
-  _toEased (previousData, nextData, progress, easeOptions) {
-    return Object.keys(previousData)
-      .reduce(
-        (easedData, property) => ({ ...easedData, [property]: this._ease(previousData[property], nextData[property], progress, easeOptions) }),
-        {}
-      )
-  }
-  _ease (previousValue, nextValue, progress, options = {}) {
-    let easedValue
-    if (is.undefined(nextValue)) {
-      easedValue = previousValue
-    } else if (is.number(previousValue)) {
-      easedValue = (nextValue - previousValue) * progress + previousValue
-    } else if (is.string(previousValue)) {
-      const { colorMixMode } = options
-      easedValue = mix(previousValue, nextValue, progress, colorMixMode)
-    } else if (is.array(previousValue)) {
-      const sliceToExact = (nextValue.length - previousValue.length) * progress + previousValue.length,
-            nextValueIsLonger = nextValue.length > previousValue.length,
-            sliceTo = nextValueIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
-            shouldBeSliced = nextValueIsLonger ? nextValue : previousValue
-      easedValue = shouldBeSliced.slice(0, sliceTo)
+  _toEased (type, naiveTimeProgress, easeOptions) {
+    let easables
+
+    switch (type) {
+    case 'play':
+      easables = this._easables
+      break
+    case 'reverse':
+      easables = this._reversedEasables
+      break
     }
 
-    return easedValue
+    return easables
+      .filter(({ progress: { start, end } }) => start < naiveTimeProgress && end >= naiveTimeProgress)
+      .reduce((eased, { property, progress, value: { previous, next }, toAnimationProgress }) => {
+        const timeProgress = (naiveTimeProgress - progress.start) / (progress.end - progress.start),
+              animationProgress = toAnimationProgress(timeProgress)
+        
+        return {
+          ...eased,
+          [property]: this._ease(previous, next, animationProgress, easeOptions)
+        }
+      }, {})
+  }
+  _ease (previous, next, progress, options = {}) {
+    if (is.undefined(previous)) {
+      return next.value
+    } else {
+      let easedValue
+    
+      if (is.number(previousValue)) {
+        easedValue = (nextValue - previousValue) * progress + previousValue
+      } else if (is.string(previousValue)) {
+        const { colorMixMode } = options
+        easedValue = mix(previousValue, nextValue, progress, colorMixMode)
+      } else if (is.array(previousValue)) {
+        const sliceToExact = (nextValue.length - previousValue.length) * progress + previousValue.length,
+              nextValueIsLonger = nextValue.length > previousValue.length,
+              sliceTo = nextValueIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
+              shouldBeSliced = nextValueIsLonger ? nextValue : previousValue
+        easedValue = shouldBeSliced.slice(0, sliceTo)
+      }
+  
+      return easedValue
+    }
   }
   _recurse (type, remainingTime, callback, options) {
     switch (type) {
