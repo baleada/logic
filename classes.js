@@ -1,5 +1,4 @@
 export { default as Animatable } from './lib/classes/Animatable.js'
-export { default as AnimatableAnime } from './lib/classes/AnimatableAnime.js'
 export { default as Completable } from './lib/classes/Completable.js'
 export { default as Copiable } from './lib/classes/Copiable.js'
 export { default as Delayable } from './lib/classes/Delayable.js'

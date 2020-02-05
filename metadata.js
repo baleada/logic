@@ -6,11 +6,6 @@ module.exports = {
       "needsCleanup": true
     },
     {
-      "name": "AnimatableAnime",
-      "usesDOM": true,
-      "needsCleanup": false
-    },
-    {
       "name": "Completable",
       "usesDOM": false,
       "needsCleanup": false
