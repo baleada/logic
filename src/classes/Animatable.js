@@ -27,7 +27,6 @@ export default class Animatable {
       ], // linear by default
       iterations: 1,
       alternates: false,
-      fillMode: 'none',
       ...options
     }
 
