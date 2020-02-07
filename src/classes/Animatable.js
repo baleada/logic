@@ -40,8 +40,6 @@ export default class Animatable {
     this._toAnimationProgress = this._toToAnimationProgress(this._timing)
     this._reversedToAnimationProgress = this._toToAnimationProgress(this._reversedTiming)
 
-    this._computedIterations = 0
-
     this._playCache = {}
     this._reverseCache = {}
     this._pauseCache = {}
@@ -52,6 +50,7 @@ export default class Animatable {
     this.setKeyframes(keyframes)
     this._ready()
     this._resetTime()
+    this._resetProgress()
     this._resetIterations()
   }
   _toReversedTiming (timing) {
@@ -68,7 +67,12 @@ export default class Animatable {
     this._computedTime = {
       elapsed: 0,
       remaining: this._duration,
-      iterations: [],
+    }
+  }
+  _resetProgress () {
+    this._computedProgress = {
+      time: 0,
+      animation: 0,
     }
   }
   _resetIterations () {
@@ -83,6 +87,12 @@ export default class Animatable {
   }
   get request () {
     return this._computedRequest
+  }
+  get time () {
+    return this._computedTime
+  }
+  get progress () {
+    return this._computedProgress
   }
 
   setKeyframes (keyframes) {
@@ -332,20 +342,30 @@ export default class Animatable {
     this._computedRequest = window.requestAnimationFrame(timestamp => {
       this._setStartTimeAndStatus(type, timestamp)
 
-      const elapsedTime = Math.min(timestamp - this._startTime, this._duration), // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
-            remainingTime = this._duration - elapsedTime,
-            timeProgress = elapsedTime / this._duration,
+      const timeElapsed = Math.min(timestamp - this._startTime, this._duration), // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
+            timeRemaining = this._duration - timeElapsed,
+            timeProgress = timeElapsed / this._duration,
             toAnimationProgress = this._getToAnimationProgress(type),
-            animationProgress = toAnimationProgress(timeProgress),
-            frame = {
-              time: { elapsed: elapsedTime, remaining: remainingTime, stamp: timestamp },
-              progress: { time: timeProgress, animation: animationProgress },
-              data: this._getEasedData(type, timeProgress, easeOptions)
-            }
+            animationProgress = toAnimationProgress(timeProgress)
+
+      this._computedTime = {
+        elapsed: timeElapsed,
+        remaining: timeRemaining,
+      }
+
+      this._computedProgress = {
+        time: timeProgress,
+        animation: animationProgress,
+      }
+
+      const frame = {
+        data: this._getFrame(type, timeProgress, easeOptions),
+        // TODO: Leaving the door open to include progress objects for each property
+      }
 
       callback(frame) // TODO: error message
 
-      this._recurse(type, remainingTime, callback, options)
+      this._recurse(type, timeRemaining, callback, options)
     })
 
     return this
@@ -418,7 +438,7 @@ export default class Animatable {
       return this._reversedToAnimationProgress.bind(this)
     }
   }
-  _getEasedData (type, naiveTimeProgress, easeOptions) {
+  _getFrame (type, naiveTimeProgress, easeOptions) {
     let easables
 
     switch (type) {
@@ -433,12 +453,12 @@ export default class Animatable {
 
     return easables
       .filter(({ progress: { start, end } }) => start < naiveTimeProgress && end >= naiveTimeProgress)
-      .reduce((easedData, { property, progress, value: { previous, next }, hasCustomTiming, toAnimationProgress }) => {
+      .reduce((frame, { property, progress, value: { previous, next }, hasCustomTiming, toAnimationProgress }) => {
         const timeProgress = (naiveTimeProgress - progress.start) / (progress.end - progress.start),
               animationProgress = toAnimationProgress(timeProgress)
         
         return {
-          ...easedData,
+          ...frame,
           [property]: this._ease(previous, next, animationProgress, easeOptions)
         }
       }, {})
@@ -467,10 +487,10 @@ export default class Animatable {
       return eased
     }
   }
-  _recurse (type, remainingTime, callback, options) {
+  _recurse (type, timeRemaining, callback, options) {
     switch (type) {
     case 'play':
-      if (remainingTime <= 0) {
+      if (timeRemaining <= 0) {
         this._played()
 
         if (this._alternates) {
@@ -501,7 +521,7 @@ export default class Animatable {
       }
       break
     case 'reverse':
-      if (remainingTime <= 0) {
+      if (timeRemaining <= 0) {
         this._reversed()
 
         if (this._alternates) {
@@ -615,34 +635,44 @@ export default class Animatable {
     window.cancelAnimationFrame(this.request)
   }
 
-  seek (naiveTimeProgress, callback, options) { // Store time progress. Continue playing or reversing if applicable.
+  seek (naiveTimeProgress, naiveCallback, options) { // Store time progress. Continue playing or reversing if applicable.
     const iterations = Math.floor(naiveTimeProgress),
           naiveIterationProgress = naiveTimeProgress - iterations
 
     this._computedIterations = iterations
 
-    let timeProgress
+    let timeProgress, callback
 
     if (this._alternates) {
       if (naiveIterationProgress <= .5) {
         timeProgress = naiveIterationProgress * 2
+
         switch (this._alternateCache.status) {
         case 'playing':
           this._cancelAnimate()
           this._seekCache = { timeProgress }
           this._sought()
-          this.play(this._playCache.callback, this._playCache.options)
+
+          callback = is.function(naiveCallback) ? naiveCallback : this._playCache.callback
+          this.play(callback, this._playCache.options)
+
           break
         case 'reversing':
           this._cancelAnimate()
           this._seekCache = { timeProgress }
           this._sought()
-          this.reverse(this._reverseCache.callback, this._reverseCache.options)
+
+          callback = is.function(naiveCallback) ? naiveCallback : this._reverseCache.callback
+          this.reverse(callback, this._reverseCache.options)
+
           break
         default:
           this._seekCache = { timeProgress }
           this._sought()
+
+          callback = naiveCallback
           this._animate(callback, options, 'seek')
+
           break
         }
       } else {
@@ -652,18 +682,27 @@ export default class Animatable {
           this._cancelAnimate()
           this._seekCache = { timeProgress }
           this._sought()
-          this.reverse(this._reverseCache.callback, this._reverseCache.options)
+
+          callback = is.function(naiveCallback) ? naiveCallback : this._reverseCache.callback
+          this.reverse(callback, this._reverseCache.options)
+
           break
         case 'reversing':
           this._cancelAnimate()
           this._seekCache = { timeProgress }
           this._sought()
-          this.play(this._playCache.callback, this._playCache.options)
+
+          callback = is.function(naiveCallback) ? naiveCallback : this._playCache.callback
+          this.play(callback, this._playCache.options)
+
           break
         default:
           this._seekCache = { timeProgress }
           this._sought()
+
+          callback = naiveCallback
           this._animate(callback, options, 'seek')
+
           break
         }
       }
@@ -675,18 +714,27 @@ export default class Animatable {
         this._cancelAnimate()
         this._seekCache = { timeProgress }
         this._sought()
-        this.play(this._playCache.callback, this._playCache.options)
+
+        callback = is.function(naiveCallback) ? naiveCallback : this._playCache.callback
+        this.play(callback, this._playCache.options)
+
         break
       case 'reversing':
         this._cancelAnimate()
         this._seekCache = { timeProgress }
         this._sought()
-        this.reverse(this._reverseCache.callback, this._reverseCache.options)
+
+        callback = is.function(naiveCallback) ? naiveCallback : this._reverseCache.callback
+        this.reverse(callback, this._reverseCache.options)
+
         break
       default:
         this._seekCache = { timeProgress }
         this._sought()
+
+        callback = naiveCallback
         this._animate(callback, options, 'seek')
+
         break
       }    
     }
