@@ -13,7 +13,7 @@ import { warn, is, toDirection } from '../util'
 import { observers } from '../constants'
 
 // TODO: figure out why this was undefined when imported from constants
-const gestureListenerApi = {
+const recognizableListenerApi = {
   toDirection
 }
 
@@ -25,17 +25,16 @@ export default class Listenable {
     this.eventName = eventName
 
     /* Private properties */
-    this._recognizer = options.recognizer || undefined
-    this._isRecognizable = is.defined(this._recognizer)
+    this._recognizable = options.recognizable || undefined
     this._observer = observers[this.eventName]
-    this._isObservation = !!this._observer && !this._isRecognizable // custom recognizer always wins
-    this._isMediaQuery = /^\(.+\)$/.test(this.eventName) && !this._isRecognizable // custom recognizer always wins
-    this._isIdle = this.eventName === 'idle' && !this._isRecognizable // custom recognizer always wins
+
+    this._type = this._getType()
+
     this._computedActiveListeners = []
 
-    if (this._isRecognizable) {
+    if (this._type === 'recognizable') {
       warn('hasRequiredOptions', {
-        received: this._recognizer,
+        received: this._recognizable,
         required: ['setup', 'events', 'recognized'],
         every: true,
         subject: 'Listenable\'s gesture option',
@@ -44,6 +43,15 @@ export default class Listenable {
     }
 
     /* Dependency */
+  }
+
+  _getType () {
+    return (is.defined(this._recognizable) && 'recognizable') ||
+      (is.defined(this._observer) && 'observation') ||
+      (/^\(.+\)$/.test(this.eventName) && 'mediaQuery') ||
+      (this.eventName === 'idle' && 'idle') ||
+      (this.eventName === 'visibilitychange' && 'visibilitychange') ||
+      'event'
   }
 
   get activeListeners () {
@@ -57,77 +65,85 @@ export default class Listenable {
   }
 
   listen (listener, options = {}) {
-    switch (true) {
-    case this._isObservation:
-      return this._observationListen(listener, options)
-    case this._isMediaQuery:
-      return this._mediaQueryListen(listener, options)
-    case this._isIdle:
-      return this._idleListen(listener, options)
-    case this._isRecognizable:
-      return this._recognizableListen(listener, options)
-    default:
-      return this._eventListen(listener, options)
+    switch (this._type) {
+    case 'observation':
+      this._observationListen(listener, options)
+      break
+    case 'mediaQuery':
+      this._mediaQueryListen(listener, options)
+      break
+    case 'idle':
+      this._idleListen(listener, options)
+      break
+    case 'recognizable':
+      this._recognizableListen(listener, options)
+      break
+    case 'visibilitychange':
+      this._visibilityChangeListen(listener, options)
+      break
+    case 'event':
+      this._eventListen(listener, options)
+      break
     }
+
+    return this
   }
-  _observationListen = function(listener, options) {
+  _observationListen (listener, options) {
     const { observer: observerOptions, observe: observeOptions, target = document.querySelector('html') } = options,
           observerInstance = this._observer(listener, observerOptions)
 
     observerInstance.observe(target, observeOptions)
     this._computedActiveListeners.push({ target, id: observerInstance, type: 'observation' })
-
-    return this
   }
-  _mediaQueryListen = function(listener) {
+  _mediaQueryListen (listener) {
     const target = window.matchMedia(this.eventName)
 
     target.addListener(listener)
     this._computedActiveListeners.push({ target, id: listener, type: 'mediaQuery' })
-
-    return this
   }
-  _idleListen = function(listener, options) {
+  _idleListen (listener, options) {
     const { idle: idleOptions = {} } = options,
           id = window.requestIdleCallback(listener, idleOptions)
 
     this._computedActiveListeners.push({ id, type: 'idle' })
-
-    return this
   }
-  _recognizableListen = function(listener, options) {
-    const { recognizer: recognizerOptions } = options,
+  _recognizableListen (listener, options) {
+    const { recognize: recognizeOptions } = options,
           { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
-          { get, events, recognized } = this._recognizer,
-          recognizer = get(recognizerOptions),
+          { sequence, options: recognizableOptions } = this._recognizable,
+          recognizable = new Recognizable(sequence, recognizableOptions),
           eventListeners = events.map(name => {
             return [name, event => {
-              if (recognized(event, recognizer)) {
-                blackAndWhiteListedListener(event, recognizer, gestureListenerApi)
+              if (recognized(event, recognizable)) {
+                blackAndWhiteListedListener(event, recognizable, recognizableListenerApi)
               }
             }, ...listenerOptions]
           })
 
     this._addEventListeners(eventListeners, options)
-
-    return this
   }
-  _eventListen = function(listener, options) {
+  _visibilityChangeListen (listener, naiveOptions) {
+    const options = {
+      ...naiveOptions,
+      target: document,
+    }
+    
+    this._eventListen(listener, options)
+  }
+  _eventListen (listener, options) {
     const { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
           eventListeners = [[this.eventName, blackAndWhiteListedListener, ...listenerOptions]]
 
     this._addEventListeners(eventListeners, options)
-
-    return this
   }
-  _getAddEventListenerSetup = function(listener, options) {
+  _getAddEventListenerSetup (listener, options) {
     const { addEventListener, useCapture, wantsUntrusted } = options,
           blackAndWhiteListedListener = this._getBlackAndWhiteListedListener(listener, options),
           listenerOptions = [addEventListener || useCapture, wantsUntrusted]
 
     return { blackAndWhiteListedListener, listenerOptions }
   }
-  _getBlackAndWhiteListedListener = function(listener, options) {
+  _getBlackAndWhiteListedListener (listener, options) {
     const { blacklist = [], whitelist = [] } = options
 
     function blackAndWhiteListedListener (event) {
@@ -143,7 +159,7 @@ export default class Listenable {
 
     return blackAndWhiteListedListener.bind(this)
   }
-  _addEventListeners = function(eventListeners, options) {
+  _addEventListeners (eventListeners, options) {
     const { target = document } = options
 
     eventListeners.forEach(eventListener => {
