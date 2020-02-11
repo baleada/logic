@@ -5,7 +5,7 @@
  */
 
 /* Utils */
-import { emit, toPolarCoordinates } from '../util'
+import { emit, is, toPolarCoordinates } from '../util'
 
 /* Dependencies */
 import objectPath from 'object-path'
@@ -14,39 +14,62 @@ export default class Recognizable {
   constructor (sequence, options = {}) {
     /* Options */
     options = {
-      recognizesConsecutive: false,
-      maxSequenceLenth: false,
-      onRecognize: (newSequence, instance) => instance.setSequence(sequence),
-      onDeny: (newSequence, instance) => instance.setSequence(sequence),
+      maxSequenceLength: true,
+      onRecognize: (newSequence, instance) => instance.setSequence(newSequence),
+      onDeny: (newSequence, instance) => instance.setSequence(newSequence),
       initialMetadata: {},
       ...options,
     }
 
-    this._recognizesConsecutive = options.recognizesConsecutive
     this._maxSequenceLength = options.maxSequenceLength
     this._onRecognize = options.onRecognize
     this._onDeny = options.onDeny
-    this._handlers = options.handlers
-    this._initialMetadata = options.initialMetadata
+    this._handlers = options.handlers || {}
+
+    this._computedMetadata = objectPath(options.initialMetadata)
 
     this.sequence = sequence
 
     this._handlerApi = {
       toPolarCoordinates,
-      deny: () => this.deny(),
       recognized: () => this._recognized(),
-      setMetadata: (path, value) => this._setMetadata(path, value),
-      getMetadata: path => this.state[path],
+      denied: () => this._denied(),
+      getStatus: () => this.status,
+      getLastEvent: () => this.lastEvent,
+      getMetadata: () => this.metadata,
+      setMetadata: ({ path, value }) => this._setMetadata(path, value),
+      pushMetadata: ({ path, value }) => this._pushMetadata(path, value),
+      insertMetadata: ({ path, value, index }) => this._insertMetadata(path, value, index),
     }
 
     this._ready()
+  }
+  
+  _recognized () {
+    this._computedStatus = 'recognized'
+  }
+  _denied () {
+    this._computedMetadata = this._initialMetadata
+    this._computedStatus = 'denied'
+  }
+  _setMetadata (path, value) {
+    this._computedMetadata.set(path, value)
+  }
+  _pushMetadata (path, value) {
+    this._computedMetadata.push(path, value)
+  }
+  _insertMetadata (path, value, index) {
+    this._computedMetadata.insert(path, value, index)
+  }
+  _ready () {
+    this._computedStatus = 'ready'
   }
 
   get status () {
     return this._computedStatus
   }
-  get state () {
-    return this._computedMetadata
+  get metadata () {
+    return this._computedMetadata.get()
   }
   get lastEvent () {
     return this.sequence[this.sequence.length - 1]
@@ -56,56 +79,38 @@ export default class Recognizable {
     this.sequence = sequence
     return this
   }
-  recognize (event) {
-    // if (!this._recognizesConsecutive && this.status === 'recognized') {
-    //   return this.deny()
-    // }
 
+  recognize (event) {
     this._recognizing()
 
     const { type } = event,
-          excess = typeof this._maxSequenceLength === 'number'
+          excess = is.number(this._maxSequenceLength)
             ? Math.max(0, this.sequence.length - this._maxSequenceLength)
             : 0,
           newSequence = [ ...this.sequence.slice(excess), event ]
 
-    if (typeof this._handlers[type] === 'function') {
+    if (is.function(this._handlers[type])) {
       this._handlers[type](event, {
         ...this._handlerApi,
         sequence: newSequence,
       })
     }
 
-    switch (true) {
-    case this.status === 'denied':
-      emit(this._onRecognize, [], this)
+    switch (this.status) {
+    case 'denied':
+      emit(this._onDeny, [], this)
       break
-    case this.status === 'recognized':
+    case 'recognized':
       emit(this._onRecognize, newSequence, this)
+      break
+    default:
+      // do nothing. Status remains 'recognizing' until explicitly recognized or denied by the handler
       break
     }
 
-    emit(this._onRecognize, newSequence, this)
-
     return this
   }
-  deny = function() {
-    this._computedStatus = 'denied'
-    this._computedMetadata = this._initialMetadata
-  }
-  _ready = function() {
-    this._computedStatus = 'ready'
-  }
-  _recognizing = function() {
+  _recognizing () {
     this._computedStatus = 'recognizing'
-  }
-  _recognized = function() {
-    this._computedStatus = 'recognized'
-  }
-  _setMetadata = function(path, value) {
-    objectPath.set(this._computedMetadata, path, value)
-  }
-  _getMetadata = function(path) {
-    return objectPath.get(this._computedMetadata, path)
   }
 }
