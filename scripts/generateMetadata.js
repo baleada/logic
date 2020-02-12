@@ -28,14 +28,18 @@ function getName (file) {
   return file.match(/\w+\.js$/)[0].replace(/\.js$/, '')
 }
 
+const constructorRegexp = /constructor ?\(.*?\) ?\{((.|\r?\n)*?)\n\s\s\}/,
+      usesDomRegexp = /\/\/ METADATA: uses DOM/ // If the class constructor contains a 'METADATA: uses DOM' comment in its constructor, it uses the DOM
 function getUsesDOM (file) {
   const contents = fs.readFileSync(`./src/classes/${file}`, 'utf8'),
-        { 1: constructor = '' } = contents.match(/constructor ?\(.*?\) ?\{((.|\r?\n)*?)\n\s\s\}/) || []
+        { 1: constructor = '' } = contents.match(constructorRegexp) || []
 
-  return /(this\._?element|window|observers)/.test(constructor)
+  return usesDomRegexp.test(constructor)
 }
 
+const needsCleanupRegexp = /\n\s+stop ?\(.*?\) {/ // If the class has a `stop` method, it needs cleanup
 function getNeedsCleanup (file) {
   const contents = fs.readFileSync(`./src/classes/${file}`, 'utf8')
-  return /\n\s+stop ?\(.*?\) {/.test(contents)
+
+  return needsCleanupRegexp.test(contents)
 }
