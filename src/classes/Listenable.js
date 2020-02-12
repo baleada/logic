@@ -26,23 +26,11 @@ export default class Listenable {
 
     /* Private properties */
     this._recognizable = options.recognizable || undefined
-    this._observer = observers[this.eventName]
+    this._observer = observers[this.eventName] // METADATA: uses DOM
 
     this._type = this._getType()
 
     this._computedActiveListeners = []
-
-    if (this._type === 'recognizable') {
-      warn('hasRequiredOptions', {
-        received: this._recognizable,
-        required: ['setup', 'events', 'recognized'],
-        every: true,
-        subject: 'Listenable\'s gesture option',
-        docs: 'https://baleada.netlify.com/docs/logic/listenable',
-      })
-    }
-
-    /* Dependency */
   }
 
   _getType () {
