@@ -18,7 +18,7 @@ test.beforeEach(t => {
 test('editableState is state', t => {
   const instance = t.context.setup()
 
-  t.is(instance.editableState, instance.state)
+  t.deepEqual(instance.editableState, instance.state)
 })
 
 /* Methods */

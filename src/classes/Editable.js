@@ -4,6 +4,9 @@
  * Released under the MIT license
  */
 
+/* Dependencies */
+import cloneDeep from 'clone-deep'
+
 /* Util */
 import { is, warn, typedEmit, hasProperties } from '../util'
 import { editableTypes } from '../constants'
@@ -11,10 +14,8 @@ import { editableTypes } from '../constants'
 /* Factories */
 import renamable from '../factories/renamable'
 
-class Editable {
+export default class Editable {
   constructor (state, options = {}) {
-    editableTypes =
-
     /* Options */
     options = {
       onEdit: (newState, instance) => instance.setState(newState),
@@ -43,7 +44,7 @@ class Editable {
 
     /* Public properties */
     this.state = state
-    this.editableState = this.state
+    this.editableState = cloneDeep(this.state)
   }
 
   /* Public getters */
@@ -53,12 +54,12 @@ class Editable {
 
   /* Public methods */
   setState (state) {
-    this.state = state
+    this.state = cloneDeep(state)
     this.setEditableState(state)
     return this
   }
   setEditableState (state) {
-    this.editableState = state
+    this.editableState = cloneDeep(state)
     return this
   }
   cancel () {
@@ -119,7 +120,6 @@ class Editable {
     return this
   }
   _writeArray = function(options) {
-    // TODO: test this in a real app to see how the workflow feels.
     return options.hasOwnProperty('item')
       ? this.state.concat([options.item])
       : this.editableState
@@ -134,11 +134,12 @@ class Editable {
     warn('hasRequiredOptions', {
       received: options,
       required: ['value', 'rename'],
+      every: false,
       subject: 'Editable\'s write method',
       docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
 
-    let newState = this.state
+    let newState = cloneDeep(this.state)
     const key = options.key
 
     if (hasProperties({ object: options, properties: ['rename', 'value'] })) {
@@ -169,11 +170,12 @@ class Editable {
     warn('hasRequiredOptions', {
       received: options,
       required: ['value', 'rename'],
+      every: false,
       subject: 'Editable\'s write method',
       docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
 
-    const newState = this.state,
+    const newState = cloneDeep(this.state),
           key = options.key
 
     if (hasProperties({ object: options, properties: ['rename', 'value'] })) {
@@ -192,6 +194,7 @@ class Editable {
     warn('hasRequiredOptions', {
       received: options,
       required: ['item', 'last', 'all'],
+      every: false,
       subject: 'Editable\'s erase method',
       docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
@@ -219,11 +222,12 @@ class Editable {
     warn('hasRequiredOptions', {
       received: options,
       required: ['key', 'last', 'all'],
+      every: false,
       subject: 'Editable\'s erase method',
       docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
 
-    const newState = this.state
+    const newState = cloneDeep(this.state)
 
     if (options.hasOwnProperty('key') && is.string(options.key)) {
       newState.delete(options.key)
@@ -241,12 +245,13 @@ class Editable {
   _eraseObject = function(options) {
     warn('hasRequiredOptions', {
       received: options,
-      required: ['value', 'last', 'all'],
+      required: ['key', 'last', 'all'],
+      every: false,
       subject: 'Editable\'s erase method',
       docs: 'https://baleada.netlify.com/docs/logic/classes/Editable',
     })
 
-    let newState = this.state
+    let newState = cloneDeep(this.state)
 
     if (options.hasOwnProperty('key') && is.string(options.key)) {
       delete newState[options.key]
@@ -261,5 +266,3 @@ class Editable {
     return newState
   }
 }
-
-export default Editable

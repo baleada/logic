@@ -18,7 +18,7 @@ test.beforeEach(t => {
 test('editableState is state', t => {
   const instance = t.context.setup()
 
-  t.is(instance.editableState, instance.state)
+  t.deepEqual(instance.editableState, instance.state)
 })
 
 /* Methods */
@@ -59,7 +59,7 @@ test('write({ key, value }) emits new state with key set to value through onEdit
 test('erase({ key }) emits new state with key deleted through onEdit', t => {
   const instance = t.context.setup()
 
-  instance.erase({ key: 'description' })
+  instance.erase({ key: 'description', yay: 'hooray' })
 
   t.deepEqual(instance.state, { name: 'Baleada' })
 })
