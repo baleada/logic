@@ -1,5 +1,5 @@
 /*
- * Recognizable.js
+ * Recognizeable.js
  * (c) 2019-present Alex Vipond
  * Released under the MIT license
  */
@@ -10,7 +10,7 @@ import { emit, is, toPolarCoordinates } from '../util'
 /* Dependencies */
 import objectPath from 'object-path'
 
-export default class Recognizable {
+export default class Recognizeable {
   constructor (sequence, options = {}) {
     /* Options */
     options = {

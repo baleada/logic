@@ -1,10 +1,10 @@
 import test from 'ava'
-import Recognizable from '../../src/classes/Recognizable'
+import Recognizeable from '../../src/classes/Recognizeable'
 
 const eventTypeStub = 'example'
 
 test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Recognizable(
+  t.context.setup = (options = {}) => new Recognizeable(
     [],
     options
   )
@@ -182,5 +182,5 @@ test('can method chain', t => {
           .recognize({ type: eventTypeStub })
           .recognize({ type: eventTypeStub })
 
-  t.assert(chained instanceof Recognizable)
+  t.assert(chained instanceof Recognizeable)
 })

@@ -1,8 +1,8 @@
 import test from 'ava'
-import Navigable from '../../src/classes/Navigable'
+import Navigateable from '../../src/classes/Navigateable'
 
 test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Navigable(
+  t.context.setup = (options = {}) => new Navigateable(
     ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'],
     options
   )
@@ -175,5 +175,5 @@ test('can method chain', t => {
           .next(42)
           .prev(42)
 
-  t.assert(chained instanceof Navigable)
+  t.assert(chained instanceof Navigateable)
 })

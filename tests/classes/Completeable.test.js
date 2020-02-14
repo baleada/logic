@@ -1,8 +1,8 @@
 import test from 'ava'
-import Completable from '../../src/classes/Completable'
+import Completeable from '../../src/classes/Completeable'
 
 test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Completable(
+  t.context.setup = (options = {}) => new Completeable(
     'Baleada: a toolkit for building web apps',
     options
   )
@@ -177,5 +177,5 @@ test('can chain its public methods', t => {
           .setLocation(instance.string.length)
           .complete('Baleada: a toolkit for building web apps')
 
-  t.assert(chained instanceof Completable)
+  t.assert(chained instanceof Completeable)
 })
