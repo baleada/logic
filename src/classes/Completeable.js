@@ -1,5 +1,5 @@
 /*
- * Completable.js
+ * Completeable.js
  * (c) 2019-present Alex Vipond
  * Released under the MIT license
  */
@@ -7,7 +7,7 @@
 /* Util */
 import { lastMatch, emit } from '../util'
 
-class Completable {
+class Completeable {
   constructor (string, options = {}) {
     /* Options */
     options = {

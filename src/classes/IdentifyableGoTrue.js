@@ -1,5 +1,5 @@
 /*
- * IdentifiableGoTrue.js
+ * IdentifyableGoTrue.js
  * (c) 2019-present Alex Vipond
  * Released under the MIT license
  */
@@ -20,7 +20,7 @@ const oauthProvidersSupportedByNetlify = ['google', 'github', 'gitlab', 'bitbuck
         }
       }
 
-export default class IdentifiableGoTrue {
+export default class IdentifyableGoTrue {
   constructor (options = {}) {
     /* Options */
     options = {

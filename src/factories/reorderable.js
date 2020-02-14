@@ -1,47 +1,64 @@
 /*
- * Reorderable.js
+ * reorderable.js
  * (c) 2019-present Alex Vipond
  * Released under the MIT license
  */
 
+import { is } from '../util'
+
 export default function reorderable (array) {
-  const object = array
+  const object = new Array(...array)
 
-  function getSliceFromAndSliceItemCount (param) {
-    const sliceFrom = param.hasOwnProperty('start')
-            ? param.start
-            : Number(param),
-          sliceItemCount = param.hasOwnProperty('itemCount')
-            ? param.itemCount
-            : param.hasOwnProperty('start')
-              ? 0
-              : 1
+  // Adapted from Adam Wathan's Advanced Vue Component Design course
+  object.reorder = ({ from, to }) => {
+    const { itemsToMoveStartIndex, itemsToMoveCount } = getItemsToMoveStartIndexAndCount(from),
+          insertIndex = to
+          
+    // Guard against item ranges that overlap the insert index. Not possible to reorder in that way.
+    if (insertIndex > itemsToMoveStartIndex && insertIndex < itemsToMoveStartIndex + itemsToMoveCount) {
+      return object
+    }
+          
+    const itemsToMove = object.slice(itemsToMoveStartIndex, itemsToMoveStartIndex + itemsToMoveCount)
 
-    return { sliceFrom, sliceItemCount }
-  }
+    let reordered
+    if (itemsToMoveStartIndex < insertIndex) {
+      const beforeItemsToMove = itemsToMoveStartIndex === 0 ? [] : object.slice(0, itemsToMoveStartIndex),
+            betweenItemsToMoveAndInsertIndex = object.slice(itemsToMoveStartIndex + itemsToMoveCount, insertIndex + 1),
+            afterInsertIndex = object.slice(insertIndex + 1)
 
-  function getSpliceFrom ({ param, sliceFrom }) {
-    return param >= 0
-      ? param
-      : sliceFrom
-  }
+      reordered = [
+        ...beforeItemsToMove,
+        ...betweenItemsToMoveAndInsertIndex,
+        ...itemsToMove,
+        ...afterInsertIndex,
+      ]
+    } else if (itemsToMoveStartIndex > insertIndex) {
+      const beforeInsertion = insertIndex === 0 ? [] : object.slice(0, insertIndex),
+            betweenInsertionAndItemsToMove = object.slice(insertIndex, itemsToMoveStartIndex),
+            afterItemsToMove = object.slice(itemsToMoveStartIndex + itemsToMoveCount)
 
-  object.reorder = (itemsToMoveParam, itemsDestinationParam) => {
-    const { sliceFrom, sliceItemCount } = getSliceFromAndSliceItemCount(itemsToMoveParam),
-          spliceFrom = getSpliceFrom({ param: itemsDestinationParam, sliceFrom }),
-          itemsToMove = object.slice(sliceFrom, sliceFrom + sliceItemCount),
-          before = object.slice(0, sliceFrom),
-          middle = object.slice(sliceFrom + sliceItemCount, spliceFrom + 1),
-          after = object.slice(spliceFrom + 1),
-          reordered = [
-            ...before,
-            ...middle,
-            ...itemsToMove,
-            ...after,
-          ]
-
+      reordered = [
+        ...beforeInsertion,
+        ...itemsToMove,
+        ...betweenInsertionAndItemsToMove,
+        ...afterItemsToMove,
+      ]
+    }
+    
     return reorderable(reordered)
-  } // Adapted from Adam Wathan's Advanced Vue Component Design course
+  }
+
+  function getItemsToMoveStartIndexAndCount (from) {
+    const itemsToMoveStartIndex = is.object(from) // from can be an object or a number
+            ? from.start
+            : from,
+          itemsToMoveCount = is.object(from)
+            ? from.itemCount
+            : 1
+
+    return { itemsToMoveStartIndex, itemsToMoveCount }
+  }
 
   return object
 }

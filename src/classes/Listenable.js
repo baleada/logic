@@ -47,7 +47,7 @@ export default class Listenable {
   }
 
   setEventName (eventName) {
-    // TODO: stop listeners and re-add afterward?
+    this.stop()
     this.eventName = eventName
     return this
   }

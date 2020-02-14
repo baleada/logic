@@ -1,5 +1,5 @@
 /*
- * Navigable.js
+ * Navigateable.js
  * (c) 2019-present Alex Vipond
  * Released under the MIT license
  */
@@ -7,7 +7,7 @@
 // Utils
 import { typedEmit } from '../util'
 
-class Navigable {
+class Navigateable {
   constructor (array, options = {}) {
     /* Options */
     options = {
@@ -147,4 +147,4 @@ class Navigable {
   }
 }
 
-export default Navigable
+export default Navigateable

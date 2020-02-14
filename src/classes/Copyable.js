@@ -1,5 +1,5 @@
 /*
- * Copiable.js
+ * Copyable.js
  * (c) 2019-present Alex Vipond
  * Released under the MIT license
  */
@@ -8,7 +8,7 @@
 
 /* Util */
 
-export default class Copiable {
+export default class Copyable {
   constructor (string, options = {}) {
     /* Options */
 
