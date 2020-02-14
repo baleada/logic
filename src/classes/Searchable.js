@@ -5,55 +5,57 @@
  */
 
 /* Dependencies */
-import { SearchableLunr as Dependency } from '../wrappers'
+import { Searcher } from 'fast-fuzzy'
 
 /* Util */
 import { emit } from '../util'
 
 export default class Searchable {
-  constructor (array, options = {}) {
+  constructor (candidates, options = {}) {
     /* Options */
     options = {
-      resultsIncludePosition: false,
-      resultsIncludeItem: true,
       onSearch: (results, instance) => instance.setResults(results),
       ...options
     }
 
     this._onSearch = options.onSearch
+    this._searcherOptions = this._getSearcherOptions(options)
 
     /* Public properties */
-    this.array = array
-    this.results = []
+    this.setCandidates(candidates)
+    this.setResults([])
+  }
 
-    /* Dependency */
-    this._dependencyOptions = options
-    this._dependency = new Dependency(this.array, this._dependencyOptions)
+  _getSearcherOptions ({ onSearch, ...rest }) {
+    return rest
   }
 
   /* Public getters */
-  get index () {
-    return this._dependency.index
+  get trie () {
+    return this._searcher.trie
   }
 
   /* Public methods */
-  setArray (array) {
-    this.array = array
-    this._dependency = new Dependency(this.array, this._dependencyOptions)
+  setCandidates (candidates) {
+    this.candidates = candidates
+    this._searcher = this._getSearcher(candidates)
+
     return this
   }
+  _getSearcher (candidates) {
+    return new Searcher(candidates, this._searcherOptions)
+  }
+
   setResults (results) {
     this.results = results
-    return this
-  }
-  search (query) {
-    const results = this._dependency.search(query)
-    emit(this._onSearch, results, this)
+
     return this
   }
 
-  /* Private methods */
-  _getResults = function(matchData) {
-    // TODO: structure results in a more palatable format
+  search (query, options) {
+    const results = this._searcher.search(query, options)
+    emit(this._onSearch, results, this)
+
+    return this
   }
 }
