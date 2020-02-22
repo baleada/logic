@@ -17,7 +17,6 @@ export default class Recognizeable {
       maxSequenceLength: true,
       onRecognize: (newSequence, instance) => instance.setSequence(newSequence),
       onDeny: (newSequence, instance) => instance.setSequence(newSequence),
-      initialMetadata: {},
       ...options,
     }
 
@@ -26,7 +25,7 @@ export default class Recognizeable {
     this._onDeny = options.onDeny
     this._handlers = options.handlers || {}
 
-    this._computedMetadata = objectPath(options.initialMetadata)
+    this._resetComputedMetadata()
 
     this.sequence = sequence
 
@@ -44,12 +43,15 @@ export default class Recognizeable {
 
     this._ready()
   }
-  
+
+  _resetComputedMetadata () {
+    this._computedMetadata = objectPath({})
+  }
   _recognized () {
     this._computedStatus = 'recognized'
   }
   _denied () {
-    this._computedMetadata = this._initialMetadata
+    this._resetComputedMetadata()
     this._computedStatus = 'denied'
   }
   _setMetadata (path, value) {

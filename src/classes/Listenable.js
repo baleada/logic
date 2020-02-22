@@ -5,12 +5,14 @@
  */
 
 /* Dependencies */
+import Recognizeable from './Recognizeable'
 
 /* Utils */
 import { warn, is, toDirection } from '../util'
 
 /* Constants */
 import { observers } from '../constants'
+import getClicksHandlers from '../../../listenable-gestures/src/handler-getters/clicks'
 const keyComboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}([a-zA-Z]{1}?|shift|cmd|ctrl|alt|opt)$/,
       clickComboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
       letterRegexp = /^[a-zA-Z]$/,
@@ -23,7 +25,7 @@ const keyComboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}([a-zA-Z]{1}?|sh
       }
 
 // TODO: figure out why this was undefined when imported from constants
-const recognizableListenerApi = {
+const recognizeableListenerApi = {
   toDirection
 }
 
@@ -31,26 +33,25 @@ export default class Listenable {
   constructor (eventName, options = {}) {
     /* Options */
 
-    /* Public properties */
-    this.eventName = eventName
-
     /* Private properties */
-    this._recognizable = options.recognizable || undefined
+    this._recognizeable = options.recognizeable || undefined
     this._observer = observers[this.eventName]
 
     this._type = this._getType()
 
     this._computedActiveListeners = []
+
+    this.setEventName(eventName)
   }
 
   _getType () {
-    return (is.defined(this._recognizable) && 'recognizable') ||
+    return (is.defined(this._recognizeable) && 'recognizeable') ||
       (is.defined(this._observer) && 'observation') ||
-      (/^\(.+\)$/.test(this.eventName) && 'mediaQuery') ||
+      (/^\(.+\)$/.test(this.eventName) && 'mediaquery') ||
       (this.eventName === 'idle' && 'idle') ||
       (this.eventName === 'visibilitychange' && 'visibilitychange') ||
-      (keyComboRegexp.test(this.eventName) && 'keyCombo') ||
-      (clickComboRegexp.test(this.eventName) && 'clickCombo') ||
+      (keyComboRegexp.test(this.eventName) && 'keycombo') ||
+      (clickComboRegexp.test(this.eventName) && 'clickcombo') ||
       'event'
   }
 
@@ -69,22 +70,22 @@ export default class Listenable {
     case 'observation':
       this._observationListen(listener, options)
       break
-    case 'mediaQuery':
+    case 'mediaquery':
       this._mediaQueryListen(listener, options)
       break
     case 'idle':
       this._idleListen(listener, options)
       break
-    case 'recognizable':
-      this._recognizableListen(listener, options)
+    case 'recognizeable':
+      this._recognizeableListen(listener, options)
       break
     case 'visibilitychange':
       this._visibilityChangeListen(listener, options)
       break
-    case 'keyCombo':
+    case 'keycombo':
       this._keyComboListen(listener, options)
       break
-    case 'clickCombo':
+    case 'clickcombo':
       this._clickComboListen(listener, options)
       break
     case 'event':
@@ -105,7 +106,7 @@ export default class Listenable {
     const target = window.matchMedia(this.eventName)
 
     target.addListener(listener)
-    this._computedActiveListeners.push({ target, id: listener, type: 'mediaQuery' })
+    this._computedActiveListeners.push({ target, id: listener, type: 'mediaquery' })
   }
   _idleListen (listener, options) {
     const { idle: idleOptions = {} } = options,
@@ -113,15 +114,17 @@ export default class Listenable {
 
     this._computedActiveListeners.push({ id, type: 'idle' })
   }
-  _recognizableListen (listener, options) {
-    const { recognize: recognizeOptions } = options,
-          { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
-          { sequence, options: recognizableOptions } = this._recognizable,
-          recognizable = new Recognizable(sequence, recognizableOptions),
+  _recognizeableListen (listener, options) {
+    const { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
+          { sequence, options: recognizeableOptions } = this._recognizeable,
+          recognizeable = new Recognizeable(sequence, recognizeableOptions),
+          events = Object.keys(recognizeableOptions.handlers)
           eventListeners = events.map(name => {
             return [name, event => {
-              if (recognized(event, recognizable)) {
-                blackAndWhiteListedListener(event, recognizable, recognizableListenerApi)
+              recognizeable.recognize(event)
+
+              if (recognizeable.status === 'recognized') {
+                blackAndWhiteListedListener(event, recognizeable, recognizeableListenerApi)
               }
             }, ...listenerOptions]
           })
@@ -209,7 +212,7 @@ export default class Listenable {
       case type === 'observation':
         id.disconnect()
         break
-      case type === 'mediaQuery':
+      case type === 'mediaquery':
         t.removeListener(id)
         break
       case type === 'idle':
