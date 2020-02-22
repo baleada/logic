@@ -7,7 +7,7 @@
 /* Util */
 import { lastMatch, emit } from '../util'
 
-class Completeable {
+export default class Completeable {
   constructor (string, options = {}) {
     /* Options */
     options = {
@@ -71,5 +71,3 @@ class Completeable {
     return this._segmentsToLocation ? this.location : this.string.length
   }
 }
-
-export default Completable

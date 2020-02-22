@@ -1,17 +1,17 @@
 module.exports = {
   "classes": [
     {
-      "name": "Animatable",
+      "name": "Animateable",
       "usesDOM": false,
       "needsCleanup": true
     },
     {
-      "name": "Completable",
+      "name": "Completeable",
       "usesDOM": false,
       "needsCleanup": false
     },
     {
-      "name": "Copiable",
+      "name": "Copyable",
       "usesDOM": false,
       "needsCleanup": false
     },
@@ -21,17 +21,12 @@ module.exports = {
       "needsCleanup": true
     },
     {
-      "name": "Editable",
-      "usesDOM": false,
-      "needsCleanup": false
-    },
-    {
       "name": "Fetchable",
       "usesDOM": false,
       "needsCleanup": false
     },
     {
-      "name": "IdentifiableGoTrue",
+      "name": "IdentifyableGoTrue",
       "usesDOM": false,
       "needsCleanup": false
     },
@@ -41,12 +36,12 @@ module.exports = {
       "needsCleanup": true
     },
     {
-      "name": "Navigable",
+      "name": "Navigateable",
       "usesDOM": false,
       "needsCleanup": false
     },
     {
-      "name": "Recognizable",
+      "name": "Recognizeable",
       "usesDOM": false,
       "needsCleanup": false
     },
@@ -54,22 +49,26 @@ module.exports = {
       "name": "Searchable",
       "usesDOM": false,
       "needsCleanup": false
-    },
-    {
-      "name": "Togglable",
-      "usesDOM": false,
-      "needsCleanup": false
     }
   ],
   "factories": [
     {
+      "name": "deleteable"
+    },
+    {
+      "name": "insertable"
+    },
+    {
       "name": "markupable"
     },
     {
-      "name": "renamable"
+      "name": "renameable"
     },
     {
       "name": "reorderable"
+    },
+    {
+      "name": "replaceable"
     }
   ]
 }

@@ -19,6 +19,13 @@ test('delete({ item }) removes item from the array', t => {
   t.deepEqual([...result], ['tortilla', 'frijoles', 'aguacate', 'huevito'])
 })
 
+test('delete({ index, item }) ignores item and removes the item at index from the array', t => {
+  const instance = t.context.setup(),
+        result = instance.delete({ index: 0, item: 'mantequilla' })
+
+  t.deepEqual([...result], ['frijoles', 'mantequilla', 'aguacate', 'huevito'])
+})
+
 test('delete(...) returns deleteable', t => {
   const instance = t.context.setup(),
         result = instance.delete({ index: 2 })
