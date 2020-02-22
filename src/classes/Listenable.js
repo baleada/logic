@@ -8,11 +8,10 @@
 import Recognizeable from './Recognizeable'
 
 /* Utils */
-import { warn, is, toDirection } from '../util'
+import { is, toDirection } from '../util'
 
 /* Constants */
 import { observers } from '../constants'
-import getClicksHandlers from '../../../listenable-gestures/src/handler-getters/clicks'
 const keyComboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}([a-zA-Z]{1}?|shift|cmd|ctrl|alt|opt)$/,
       clickComboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
       letterRegexp = /^[a-zA-Z]$/,
@@ -34,7 +33,10 @@ export default class Listenable {
     /* Options */
 
     /* Private properties */
-    this._recognizeable = options.recognizeable || undefined
+    if (options.hasOwnProperty('recognizeable')) {
+      this._computedRecognizeable = new Recognizeable([], options.recognizeable)
+      this._computedRecognizeableEvents = Object.keys(options.recognizeable.handlers) // TODO: handle error for undefined handlers
+    }
     this._observer = observers[this.eventName]
 
     this._type = this._getType()
@@ -45,7 +47,7 @@ export default class Listenable {
   }
 
   _getType () {
-    return (is.defined(this._recognizeable) && 'recognizeable') ||
+    return (this._computedRecognizeable instanceof Recognizeable && 'recognizeable') ||
       (is.defined(this._observer) && 'observation') ||
       (/^\(.+\)$/.test(this.eventName) && 'mediaquery') ||
       (this.eventName === 'idle' && 'idle') ||
@@ -57,6 +59,9 @@ export default class Listenable {
 
   get activeListeners () {
     return this._computedActiveListeners
+  }
+  get recognizeable () {
+    return this._computedRecognizeable
   }
 
   setEventName (eventName) {
@@ -116,15 +121,12 @@ export default class Listenable {
   }
   _recognizeableListen (listener, options) {
     const { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
-          { sequence, options: recognizeableOptions } = this._recognizeable,
-          recognizeable = new Recognizeable(sequence, recognizeableOptions),
-          events = Object.keys(recognizeableOptions.handlers)
-          eventListeners = events.map(name => {
+          eventListeners = this._computedRecognizeableEvents.map(name => {
             return [name, event => {
-              recognizeable.recognize(event)
+              this._computedRecognizeable.recognize(event)
 
-              if (recognizeable.status === 'recognized') {
-                blackAndWhiteListedListener(event, recognizeable, recognizeableListenerApi)
+              if (this._computedRecognizeable.status === 'recognized') {
+                blackAndWhiteListedListener(event, recognizeableListenerApi)
               }
             }, ...listenerOptions]
           })

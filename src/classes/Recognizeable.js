@@ -36,6 +36,7 @@ export default class Recognizeable {
       getStatus: () => this.status,
       getLastEvent: () => this.lastEvent,
       getMetadata: () => this.metadata,
+      // TODO: require object with appropriate properties on all methods below
       setMetadata: ({ path, value }) => this._setMetadata(path, value),
       pushMetadata: ({ path, value }) => this._pushMetadata(path, value),
       insertMetadata: ({ path, value, index }) => this._insertMetadata(path, value, index),
@@ -47,6 +48,7 @@ export default class Recognizeable {
   _resetComputedMetadata () {
     this._computedMetadata = objectPath({})
   }
+  
   _recognized () {
     this._computedStatus = 'recognized'
   }
@@ -54,17 +56,26 @@ export default class Recognizeable {
     this._resetComputedMetadata()
     this._computedStatus = 'denied'
   }
+  _ready () {
+    this._computedStatus = 'ready'
+  }
+
   _setMetadata (path, value) {
     this._computedMetadata.set(path, value)
   }
   _pushMetadata (path, value) {
+    this._ensureArray(path, value)
+
     this._computedMetadata.push(path, value)
   }
   _insertMetadata (path, value, index) {
+    this._ensureArray(path, value)
     this._computedMetadata.insert(path, value, index)
   }
-  _ready () {
-    this._computedStatus = 'ready'
+  _ensureArray (path, value) {
+    if (!is.array(this._computedMetadata.get(path))) {
+      this,_setMetadata(path, [])
+    }
   }
 
   get status () {

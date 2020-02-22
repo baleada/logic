@@ -32,7 +32,7 @@ module.exports = {
     },
     {
       "name": "Listenable",
-      "usesDOM": true,
+      "usesDOM": false,
       "needsCleanup": true
     },
     {
