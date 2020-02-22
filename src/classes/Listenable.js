@@ -11,6 +11,16 @@ import { warn, is, toDirection } from '../util'
 
 /* Constants */
 import { observers } from '../constants'
+const keyComboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}([a-zA-Z]{1}?|shift|cmd|ctrl|alt|opt)$/,
+      clickComboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
+      letterRegexp = /^[a-zA-Z]$/,
+      keyAssertDictionary = {
+        shift: event => event.shiftKey,
+        cmd: event => event.metaKey,
+        ctrl: event => event.ctrlKey,
+        alt: event => event.altKey,
+        opt: event => event.altKey,
+      }
 
 // TODO: figure out why this was undefined when imported from constants
 const recognizableListenerApi = {
@@ -26,7 +36,7 @@ export default class Listenable {
 
     /* Private properties */
     this._recognizable = options.recognizable || undefined
-    this._observer = observers[this.eventName] // METADATA: uses DOM
+    this._observer = observers[this.eventName]
 
     this._type = this._getType()
 
@@ -39,6 +49,8 @@ export default class Listenable {
       (/^\(.+\)$/.test(this.eventName) && 'mediaQuery') ||
       (this.eventName === 'idle' && 'idle') ||
       (this.eventName === 'visibilitychange' && 'visibilitychange') ||
+      (keyComboRegexp.test(this.eventName) && 'keyCombo') ||
+      (clickComboRegexp.test(this.eventName) && 'clickCombo') ||
       'event'
   }
 
@@ -68,6 +80,12 @@ export default class Listenable {
       break
     case 'visibilitychange':
       this._visibilityChangeListen(listener, options)
+      break
+    case 'keyCombo':
+      this._keyComboListen(listener, options)
+      break
+    case 'clickCombo':
+      this._clickComboListen(listener, options)
       break
     case 'event':
       this._eventListen(listener, options)
@@ -115,6 +133,30 @@ export default class Listenable {
       ...naiveOptions,
       target: document,
     }
+    
+    this._eventListen(listener, options)
+  }
+  _keyComboListen (naiveListener, options) {
+    const keys = this.eventName.split('.'),
+          listener = event => {
+            const matches = event.type === 'keydown' && keys.every(key => letterRegexp.test(key) ? event.key === key.toUpperCase() : !keyAssertDictionary[key](event))
+
+            if (matches) {
+              naiveListener(event)
+            }
+          }
+    
+    this._eventListen(listener, options)
+  }
+  _clickComboListen (naiveListener, options) {
+    const keys = this.eventName.split('.'),
+          listener = event => {
+            const matches = event.type === 'click' && keys.every(key => !keyAssertDictionary[key](event))
+
+            if (matches) {
+              naiveListener(event)
+            }
+          }
     
     this._eventListen(listener, options)
   }
