@@ -22,7 +22,6 @@ export default class Recognizeable {
 
     this._maxSequenceLength = options.maxSequenceLength
     this._onRecognize = options.onRecognize
-    this._onDeny = options.onDeny
     this._handlers = options.handlers || {}
 
     this._resetComputedMetadata()
@@ -33,6 +32,7 @@ export default class Recognizeable {
       toPolarCoordinates,
       recognized: () => this._recognized(),
       denied: () => this._denied(),
+      getSequence: () => this.sequence,
       getStatus: () => this.status,
       getLastEvent: () => this.lastEvent,
       getMetadata: () => this.metadata,
@@ -111,13 +111,11 @@ export default class Recognizeable {
 
     switch (this.status) {
     case 'denied':
-      emit(this._onDeny, [], this)
+      emit(this._onRecognize, [], this)
       break
+    case 'recognizing':
     case 'recognized':
       emit(this._onRecognize, newSequence, this)
-      break
-    default:
-      // do nothing. Status remains 'recognizing' until explicitly recognized or denied by the handler
       break
     }
 
