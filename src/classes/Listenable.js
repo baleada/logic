@@ -12,8 +12,8 @@ import { is, toDirection } from '../util'
 
 /* Constants */
 import { observers } from '../constants'
-const keyComboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}([a-zA-Z]{1}?|shift|cmd|ctrl|alt|opt)$/,
-      clickComboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
+const keycomboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}([a-zA-Z]{1}?|shift|cmd|ctrl|alt|opt)$/,
+      clickcomboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
       letterRegexp = /^[a-zA-Z]$/,
       keyAssertDictionary = {
         shift: event => event.shiftKey,
@@ -39,21 +39,21 @@ export default class Listenable {
     }
     this._observer = observers[this.eventName]
 
-    this._type = this._getType()
+    this._type = this._getType(eventName)
 
     this._computedActiveListeners = []
 
     this.setEventName(eventName)
   }
 
-  _getType () {
+  _getType (eventName) {
     return (this._computedRecognizeable instanceof Recognizeable && 'recognizeable') ||
       (is.defined(this._observer) && 'observation') ||
-      (/^\(.+\)$/.test(this.eventName) && 'mediaquery') ||
-      (this.eventName === 'idle' && 'idle') ||
-      (this.eventName === 'visibilitychange' && 'visibilitychange') ||
-      (keyComboRegexp.test(this.eventName) && 'keycombo') ||
-      (clickComboRegexp.test(this.eventName) && 'clickcombo') ||
+      (/^\(.+\)$/.test(eventName) && 'mediaquery') ||
+      (eventName === 'idle' && 'idle') ||
+      (eventName === 'visibilitychange' && 'visibilitychange') ||
+      (keycomboRegexp.test(eventName) && 'keycombo') ||
+      (clickcomboRegexp.test(eventName) && 'clickcombo') ||
       'event'
   }
 
@@ -88,10 +88,10 @@ export default class Listenable {
       this._visibilityChangeListen(listener, options)
       break
     case 'keycombo':
-      this._keyComboListen(listener, options)
+      this._keycomboListen(listener, options)
       break
     case 'clickcombo':
-      this._clickComboListen(listener, options)
+      this._clickcomboListen(listener, options)
       break
     case 'event':
       this._eventListen(listener, options)
@@ -141,11 +141,20 @@ export default class Listenable {
     
     this._eventListen(listener, options)
   }
-  _keyComboListen (naiveListener, options) {
-    const keys = this.eventName.split('.'),
+  _keycomboListen (naiveListener, options) {
+    const keys = this.eventName.split('+'),
           listener = event => {
-            const matches = event.type === 'keydown' && keys.every(key => letterRegexp.test(key) ? event.key === key.toUpperCase() : !keyAssertDictionary[key](event))
-
+            const matches = keys.every(key => {
+              console.log({
+                key,
+                isletter: letterRegexp.test(key),
+                eventkey: event.key,
+                iskey: event.key === key.toUpperCase(),
+                asserted: keyAssertDictionary[key](event),
+              })
+              return letterRegexp.test(key) ? event.key === key.toUpperCase() : keyAssertDictionary[key](event)
+            })
+            
             if (matches) {
               naiveListener(event)
             }
@@ -153,10 +162,10 @@ export default class Listenable {
     
     this._eventListen(listener, options)
   }
-  _clickComboListen (naiveListener, options) {
-    const keys = this.eventName.split('.'),
+  _clickcomboListen (naiveListener, options) {
+    const keys = this.eventName.split('+'),
           listener = event => {
-            const matches = event.type === 'click' && keys.every(key => !keyAssertDictionary[key](event))
+            const matches = keys.every(key => !keyAssertDictionary[key](event))
 
             if (matches) {
               naiveListener(event)
@@ -166,8 +175,21 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _eventListen (listener, options) {
+    let eventName
+    switch (this._type) {
+    case 'keycombo':
+      eventName = 'keydown'
+      break
+    case 'clickcombo':
+      eventName = 'click'
+      break
+    default:
+      eventName = this.eventName
+      break
+    }
+
     const { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
-          eventListeners = [[this.eventName, blackAndWhiteListedListener, ...listenerOptions]]
+          eventListeners = [[eventName, blackAndWhiteListedListener, ...listenerOptions]]
 
     this._addEventListeners(eventListeners, options)
   }
