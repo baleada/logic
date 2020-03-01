@@ -144,16 +144,7 @@ export default class Listenable {
   _keycomboListen (naiveListener, options) {
     const keys = this.eventName.split('+'),
           listener = event => {
-            const matches = keys.every(key => {
-              console.log({
-                key,
-                isletter: letterRegexp.test(key),
-                eventkey: event.key,
-                iskey: event.key === key.toUpperCase(),
-                asserted: keyAssertDictionary[key](event),
-              })
-              return letterRegexp.test(key) ? event.key === key.toUpperCase() : keyAssertDictionary[key](event)
-            })
+            const matches = keys.every(key => letterRegexp.test(key) ? event.key === key.toLowerCase() : keyAssertDictionary[key](event))
             
             if (matches) {
               naiveListener(event)
@@ -165,7 +156,7 @@ export default class Listenable {
   _clickcomboListen (naiveListener, options) {
     const keys = this.eventName.split('+'),
           listener = event => {
-            const matches = keys.every(key => !keyAssertDictionary[key](event))
+            const matches = keys.every(key => key === 'click' || keyAssertDictionary[key](event))
 
             if (matches) {
               naiveListener(event)
