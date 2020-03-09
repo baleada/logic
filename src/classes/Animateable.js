@@ -7,6 +7,7 @@
 /* Dependencies */
 import BezierEasing from 'bezier-easing'
 import { mix } from 'chroma-js/chroma-light'
+import Listenable from './Listenable'
 
 /* Utils */
 import { is } from '../util'
@@ -30,7 +31,7 @@ export default class Animateable {
       ...options
     }
 
-    this._duration = options.duration
+    this._initialDuration = options.duration
     this._timing = options.timing
     this._reversedTiming = this._toReversedTiming(this._timing)
     this._iterationLimit = options.iterations
@@ -45,9 +46,10 @@ export default class Animateable {
     this._pauseCache = {}
     this._seekCache = {}
     this._alternateCache = { status: 'ready' }
-
-    /* Public properties */
+    this._visibilitychange = new Listenable('visibilitychange')
+    
     this.setKeyframes(keyframes)
+    this.setPlaybackRate(1)
     this._ready()
     this._resetTime()
     this._resetProgress()
@@ -79,6 +81,18 @@ export default class Animateable {
     this._computedIterations = 0
   }
 
+  get keyframes () {
+    return this._computedKeyframes
+  }
+  set keyframes (keyframes) {
+    this.setKeyframes(keyframes)
+  }
+  get playbackRate () {
+    return this._computedPlaybackRate
+  }
+  set playbackRate (playbackRate) {
+    this.setPlaybackRate(playbackRate)
+  }
   get status () {
     return this._computedStatus
   }
@@ -98,8 +112,7 @@ export default class Animateable {
   setKeyframes (keyframes) {
     this.stop()
 
-    this.keyframes = keyframes
-    this.keyframes.sort(byProgress)
+    this._computedKeyframes = Array.from(keyframes).sort(byProgress) // Sort without mutating original
 
     this._reversedKeyframes = this.keyframes
       .slice().reverse() // Reverse without mutating
@@ -196,11 +209,30 @@ export default class Animateable {
     }, [])
   }
 
+  setPlaybackRate (naivePlaybackRate) {
+    const playbackRate = Math.max(0, naivePlaybackRate) // negative playback rate is not possible
+    this._computedPlaybackRate = playbackRate
+    this._duration = (1 / playbackRate) * this._initialDuration
+
+    switch (this.status) {
+    case 'playing':
+    case 'reversing': 
+      this._totalTimeInvisible = (1 / playbackRate) * this._totalTimeInvisible
+      this.seek(this.progress.time)
+      
+      break
+    }
+
+    return this
+  }
+
   play (callback, options) { // Play from current time progress
     this._playCache = {
       callback,
       options,
     }
+
+    this._listenForVisibilitychange()
 
     if (this._alternates) {
       switch (this._alternateCache.status) {
@@ -272,6 +304,8 @@ export default class Animateable {
       options,
     }
 
+    this._listenForVisibilitychange()
+
     if (this._alternates) {
       switch (this._alternateCache.status) {
       case 'ready':
@@ -336,13 +370,30 @@ export default class Animateable {
     this._computedStatus = 'reversed'
   }
 
+  _listenForVisibilitychange () {
+    if (this._visibilitychange.activeListeners.length === 0) {
+      this._totalTimeInvisible = 0
+
+      this._visibilitychange.listen(({ timeStamp: timestamp }) => {
+        switch (document.visibilityState) {
+        case 'visible':
+          this._totalTimeInvisible += timestamp - this._invisibleAt
+          break
+        default:
+          this._invisibleAt = timestamp
+          break
+        }        
+      })
+    }
+  }
+
   _animate (callback, options = {}, type) {
     const { ease: easeOptions } = options
 
     this._computedRequest = window.requestAnimationFrame(timestamp => {
       this._setStartTimeAndStatus(type, timestamp)
 
-      const timeElapsed = Math.min(timestamp - this._startTime, this._duration), // TODO: selecting another browser tab screws with this. Should be possible to use visibility API (maybe via Listenable) to pause and resume
+      const timeElapsed = Math.min((timestamp - this._startTime) - this._totalTimeInvisible, this._duration), // Might need to multiply visibility offset by something to get correct playback rate
             timeRemaining = this._duration - timeElapsed,
             timeProgress = timeElapsed / this._duration,
             toAnimationProgress = this._getToAnimationProgress(type),
@@ -357,6 +408,15 @@ export default class Animateable {
         time: timeProgress,
         animation: animationProgress,
       }
+
+      // console.log({
+      //   invisibleTime: this._totalTimeInvisible,
+      //   timeElapsed,
+      //   timeRemaining,
+      //   timeProgress,
+      //   toAnimationProgress,
+      //   animationProgress,
+      // })
 
       const frame = {
         data: this._getFrame(type, timeProgress, easeOptions),
@@ -492,6 +552,7 @@ export default class Animateable {
     case 'play':
       if (timeRemaining <= 0) {
         this._played()
+        this._totalTimeInvisible = 0
 
         if (this._alternates) {
           switch (this._alternateCache.status) {
@@ -523,6 +584,7 @@ export default class Animateable {
     case 'reverse':
       if (timeRemaining <= 0) {
         this._reversed()
+        this._totalTimeInvisible = 0
 
         if (this._alternates) {
           switch (this._alternateCache.status) {
@@ -552,6 +614,7 @@ export default class Animateable {
       }
       break
     case 'seek':
+      this._totalTimeInvisible = 0
       // Do nothing
       break
     }
@@ -620,6 +683,7 @@ export default class Animateable {
 
   stop (/* callback, options */) {
     this._cancelAnimate()
+    this._visibilitychange.stop()
     this._alternateCache.status = 'ready'
     this._stopped()
 
