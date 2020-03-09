@@ -6,8 +6,6 @@
 
 import Animateable from './Animateable'
 
-const initialDuration = 1
-
 /**
  * Delayable is a library that enriches a function by:
  * - Giving it the methods necessary to execute itself after a delay or at regular intervals<
@@ -16,176 +14,157 @@ const initialDuration = 1
  */
 export default class Delayable {
   constructor (callback, options) {
-    this._animateable = new Animateable([
+    options = {
+      delay: 0,
+      executions: 1,
+      ...options
+    }
+
+    this._animateable = new Animateable(
+      [
+        { progress: 0, data: { progress: 0 } },
+        { progress: 1, data: { progress: 1 } }
+      ],
       {
-        progress: 0,
-        data: { progress: 0 }
-      },
-      {
-        progress: 1,
-        data: { progress: 1 }
+        duration: options.delay,
+        iterations: options.executions,
       }
-    ], { duration: initialDuration })
+    )
 
-    /* Public properties */
-    /**
-     * A shallow copy of the callback passed to the Delayable constructor
-     * @type {Function}
-     */
-    this.callback = callback
-
-    /* Private properties */
-    this._computedExecutions = 0
-    this._computedTime = {
-      start: undefined,
-      lastExecution: undefined,
-    }
-    this._computedTimeElapsed = {
-      total: 0,
-      sinceLastExecution: 0,
-    }
-    this._computedTimeRemaining = undefined
+    this.setCallback(callback)
+    this._ready()
+  }
+  _ready () {
+    this._computedStatus = 'ready'
   }
 
-  /* Public getters */
+  get callback () {
+    return this._computedCallback
+  }
+  set callback (callback) {
+    this.setCallback(callback)
+  }
   /**
    * The number of times the callback function has been executed
    * @type {Number}
    */
   get executions () {
-    return this._computedExecutions
+    return this._animateable.iterations
   }
   /**
    * The time (in milliseconds) that has elapsed since the callback function was initially delayed OR last executed, whichever is smaller
    * @type {Number}
    */
   get time () {
-    return this._computedTime
+    return this._animateable.time
   }
-  get timeElapsed () {
-    return this._computedTimeElapsed
+  get progress () {
+    return this._animateable.progress.time
   }
-  /**
-   * The time (in milliseconds) that remains until the callback function will be executed
-   * @type {Number}
-   */
-  get timeRemaining () {
-    return this._computedTimeRemaining
+  get status () {
+    return this._computedStatus
   }
 
-  /* Public methods */
   /**
    * Sets the Delayable instance's callback function
    * @param {Function} callback The new callback function
    */
-  setCallback (callback) {
-    this.callback = callback
+  setCallback (naiveCallback) {
+    function callback (frame) {
+      const { data: { progress }, timestamp } = frame
+
+      if (progress === 1) {
+        naiveCallback(timestamp)
+        this._delayed()
+      } else {
+        switch (this.status) {
+        case 'ready':
+        case 'paused':
+        case 'sought':
+        case 'delayed':
+          console.log('one more callback')
+          this._delaying()
+          break
+        }
+      }
+    }
+
+    this._computedCallback = callback
+
     return this
   }
+  _delaying () {
+    this._computedStatus = 'delaying'
+  }
+  _delayed () {
+    this._computedStatus = 'delayed'
+  }
+
+  /**
+   * Executes the callback function after the period of time specified by <code>delay</code>
+   */
+  delay () {
+    this.seek(0)
+    this._animateable.play(frame => this.callback(frame))
+
+    return this
+  }
+
+  pause () {
+    switch (this.status) {
+    case 'delaying':
+      this._animateable.pause()
+      this._paused()
+      console.log('here')
+      break
+    }
+    
+    return this
+  }
+  _paused () {
+    this._computedStatus = 'paused'
+  }
+
+  resume () {
+    switch (this.status) {
+    case 'paused':
+    case 'sought':
+      console.log('here')
+      this._animateable.play(frame => this.callback(frame))
+      break
+    }
+
+    return this
+  }
+
+  seek (timeProgress) {
+    const executions = Math.floor(timeProgress)
+
+    if (executions > 0) {
+      window.requestAnimationFrame(timestamp => {
+        for (let i = 0; i < executions; i++) {
+          this.callback({
+            data: { progress: 1 },
+            timestamp
+          })
+        }
+      })
+    }
+
+    this._animateable.seek(timeProgress, timestamp => this.callback(timestamp))
+    this._sought()
+
+    return this
+  }
+  _sought () {
+    this._computedStatus = 'sought'
+  }
+  
   /**
    * Stops the delayed callback function. The function won't be executed, but <code>timeElapsed</code> and <code>timeRemaining</code> will <b>not</b> be reset to their initial values.
    */
   stop () {
     this._animateable.stop()
     return this
-  }
-  /**
-   * Executes the callback function after the period of time specified by <code>delay</code>
-   */
-  timeout (options = {}) {
-    const { delay = 0 } = options,
-          playbackRate = delay <= 0 ? 0 : 1 / delay
-    this._animateable.setPlaybackRate(playbackRate)
-
-
-    // const { delay, parameters } = options
-
-    // this._setup({ delay: delay || 0, isInterval: false })
-    // this._id = this._setTimeout({ delay: delay || 0, parameters: parameters || [] })
-
-    return this
-  }
-  /**
-   * Repeatedly executes the callback function with a fixed time delay (specified by <code>delay</code>) between each execution
-   */
-  interval (options = {}) {
-    const { delay = 0 } = options
-
-    this._setup({ delay: delay || 0, isInterval: true })
-    this._id = this._setInterval({ delay: delay || 0, parameters: parameters || [] })
-
-    return this
-  }
-
-  _setup = function({ delay, isInterval }) {
-    this.stop()
-    this._computedExecutions = 0
-    this._computedTimeElapsed.sinceLastExecution = 0
-    this._computedTimeRemaining = delay
-    this._isFirstTick = true
-    this._startTick({ delay, isInterval })
-  }
-  _startTick = function({ delay, isInterval }) {
-    this._tickId = window.requestAnimationFrame(timestamp => this._tick({ timestamp, delay, isInterval }))
-  }
-  _tick = function({ timestamp, delay, isInterval }) {
-    if (this._isFirstTick) {
-      this._computedTime.start = timestamp
-      this._isFirstTick = false
-    }
-
-    this._setTimeElapsed({ timestamp, delay, isInterval })
-    this._setTimeRemaining({ delay })
-
-    if (this.timeElapsed.sinceLastExecution < delay) {
-      this._stopTick()
-      this._startTick({ delay, isInterval }) // Ticks recursively as shown in example at https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
-    }
-  }
-  _stopTick = function() {
-    window.cancelAnimationFrame(this._tickId)
-    this._isFirstTick = false
-  }
-  _setTimeElapsed = function({ timestamp, delay, isInterval }) {
-    const timeElapsed = timestamp - this.time.start
-    this._computedTimeElapsed.sinceLastExecution = isInterval
-      ? timeElapsed - delay * this.executions
-      : Math.min(timeElapsed, delay)
-
-    this._computedTimeElapsed.total = this.timeElapsed.sinceLastExecution + delay * this.executions
-
-    this._tickTimestamp = timestamp
-  }
-  _setTimeRemaining = function({ delay }) {
-    this._computedTimeRemaining = delay - this.timeElapsed.sinceLastExecution
-  }
-  _setTimeout = function({ delay, parameters }) {
-    return window.setTimeout(
-      ({ delay, parameters }) => {
-        this.callback(...parameters)
-        this._stopTick()
-        this._computedTimeElapsed.sinceLastExecution = delay // Set timeElapsed to delay in case the user has switched tabs (which pauses requestAnimationFrame)
-        this._computedTimeElapsed.total = delay
-        this._computedTime.lastExecution = this._tickTimestamp
-        this._computedExecutions = 1
-      },
-      delay,
-      { delay, parameters }
-    )
-  }
-  _setInterval = function({ delay, parameters }) {
-    return window.setInterval(
-      ({ delay, parameters }) => {
-        this.callback(...parameters)
-        this._stopTick()
-        this._computedTimeElapsed.sinceLastExecution = 0
-        this._computedExecutions++
-        this._computedTimeElapsed.total = delay * this.executions
-        this._computedTime.lastExecution = this._tickTimestamp
-        this._startTick({ delay, isInterval: true })
-      },
-      delay,
-      { delay, parameters }
-    )
   }
 }
