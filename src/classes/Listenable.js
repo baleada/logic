@@ -57,6 +57,12 @@ export default class Listenable {
       'event'
   }
 
+  get eventName () {
+    return this._computedEventName
+  }
+  set eventName (eventName) {
+    this.setEventName(eventName)
+  }
   get activeListeners () {
     return this._computedActiveListeners
   }
@@ -66,7 +72,7 @@ export default class Listenable {
 
   setEventName (eventName) {
     this.stop()
-    this.eventName = eventName
+    this._computedEventName = eventName
     return this
   }
 

@@ -13,31 +13,33 @@ import { emit } from '../util'
 export default class Searchable {
   constructor (candidates, options = {}) {
     /* Options */
-    options = {
-      onSearch: (results, instance) => instance.setResults(results),
-      ...options
-    }
-
-    this._onSearch = options.onSearch
     this._searcherOptions = this._getSearcherOptions(options)
 
     /* Public properties */
     this.setCandidates(candidates)
-    this.setResults([])
+    this._setResults([])
   }
 
   _getSearcherOptions ({ onSearch, ...rest }) {
     return rest
   }
 
-  /* Public getters */
+  get candidates () {
+    return this._computedCandidates
+  }
+  set candidates (candidates) {
+    this.setCandidates(candidates)
+  }
+  get results () {
+    return this._computedResults
+  }
   get trie () {
     return this._searcher.trie
   }
 
   /* Public methods */
   setCandidates (candidates) {
-    this.candidates = candidates
+    this._computedCandidates = candidates
     this._searcher = this._getSearcher(candidates)
 
     return this
@@ -46,15 +48,13 @@ export default class Searchable {
     return new Searcher(candidates, this._searcherOptions)
   }
 
-  setResults (results) {
-    this.results = results
-
-    return this
+  _setResults (results) {
+    this._computedResults = results
   }
 
   search (query, options) {
     const results = this._searcher.search(query, options)
-    emit(this._onSearch, results, this)
+    this._setResults(results)
 
     return this
   }

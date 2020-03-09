@@ -143,28 +143,28 @@ test('rand() navigates to a random location', t => {
   t.assert(instance.location >= 0 && instance.location <= instance.array.length)
 })
 
-test('typed emitters correctly emit', t => {
-  let onNavigate = 0,
-      onGoTo = 0,
-      onNext = 0,
-      onPrev = 0,
-      onRand = 0
+// test('typed emitters correctly emit', t => {
+//   let onNavigate = 0,
+//       onGoTo = 0,
+//       onNext = 0,
+//       onPrev = 0,
+//       onRand = 0
 
-  const instance = t.context.setup({
-    onNavigate: () => (onNavigate += 1),
-    onGoTo: () => (onGoTo += 1),
-    onNext: () => (onNext += 1),
-    onPrev: () => (onPrev += 1),
-    onRand: () => (onRand += 1)
-  })
+//   const instance = t.context.setup({
+//     onNavigate: () => (onNavigate += 1),
+//     onGoTo: () => (onGoTo += 1),
+//     onNext: () => (onNext += 1),
+//     onPrev: () => (onPrev += 1),
+//     onRand: () => (onRand += 1)
+//   })
 
-  instance.goTo(0)
-  instance.next()
-  instance.prev()
-  instance.rand()
+//   instance.goTo(0)
+//   instance.next()
+//   instance.prev()
+//   instance.rand()
 
-  t.deepEqual({ onNavigate, onGoTo, onNext, onPrev, onRand }, { onNavigate: 4, onGoTo: 1, onNext: 1, onPrev: 1, onRand: 1 })
-})
+//   t.deepEqual({ onNavigate, onGoTo, onNext, onPrev, onRand }, { onNavigate: 4, onGoTo: 1, onNext: 1, onPrev: 1, onRand: 1 })
+// })
 
 /* method chaining */
 test('can method chain', t => {

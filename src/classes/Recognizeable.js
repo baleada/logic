@@ -26,7 +26,7 @@ export default class Recognizeable {
 
     this._resetComputedMetadata()
 
-    this.sequence = sequence
+    this.setSequence(sequence)
 
     this._handlerApi = {
       toPolarCoordinates,
@@ -78,6 +78,12 @@ export default class Recognizeable {
     }
   }
 
+  get sequence () {
+    return this._computedSequence
+  }
+  set sequence (sequence) {
+    this.setSequence(sequence)
+  }
   get status () {
     return this._computedStatus
   }
@@ -89,7 +95,7 @@ export default class Recognizeable {
   }
 
   setSequence (sequence) {
-    this.sequence = sequence
+    this._computedSequence = sequence
     return this
   }
 

@@ -31,7 +31,7 @@ test('setCandidates constructs the searcher', t => {
 })
 
 /* search */
-test('search(query, options) updates results via default onSearch', t => {
+test('search(query, options) updates results', t => {
   const instance = t.context.setup()
 
   instance.search('tortilla')
@@ -39,24 +39,23 @@ test('search(query, options) updates results via default onSearch', t => {
   t.assert(instance.results.length > 0)
 })
 
-test('emitters correctly emit', t => {
-  let onSearch = 0
+// test('emitters correctly emit', t => {
+//   let onSearch = 0
 
-  const instance = t.context.setup({
-    onSearch: () => (onSearch += 1)
-  })
+//   const instance = t.context.setup({
+//     onSearch: () => (onSearch += 1)
+//   })
 
-  instance.search('tortilla')
+//   instance.search('tortilla')
 
-  t.deepEqual({ onSearch }, { onSearch: 1 })
-})
+//   t.deepEqual({ onSearch }, { onSearch: 1 })
+// })
 
 /* method chaining */
 test('can method chain', t => {
   const instance = t.context.setup(),
         chained = instance
           .setCandidates(['Baleada'])
-          .setResults(['Baleada'])
           .search('Baleada')
 
   t.assert(chained instanceof Searchable)

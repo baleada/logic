@@ -22,10 +22,18 @@ test('setString sets the string', t => {
   t.is(instance.string, 'Baleada')
 })
 
-test('initial location is the length of the string', t => {
+test('initial location is the length of the string by default', t => {
   const instance = t.context.setup()
 
   t.is(instance.location, instance.string.length)
+})
+
+test('initial location can be customized via options', t => {
+  const instance = t.context.setup({
+    initialLocation: 0,
+  })
+
+  t.is(instance.location, 0)
 })
 
 test('setLocation sets the location', t => {

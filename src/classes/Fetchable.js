@@ -4,42 +4,29 @@
  * Released under the MIT license
  */
 
-/* Dependencies */
-
-/* Util */
-import { emit } from '../util'
-
 export default class Fetchable {
-  /* Private properties */
-  // _onFetch
-  // _computedFetching
-  // _computedResponseJson
-  // _fetchOptions
-
   constructor (resource, options = {}) {
-    /* Options */
-    options = {
-      onFetch: (newResponse, instance) => instance.setResponse(newResponse),
-      ...options
-    }
-
-    this._onFetch = options.onFetch
-
-    /* Public properties */
-    this.resource = resource
-    this.response = {}
-
-    /* Private properties */
-    this._computedStatus = 'ready'
+    this.setResource(resource)
+    this._computedResponse = {}
     this._computedResponseJson = {}
-
-    /* Dependency */
-    this._fetchOptions = this._getFetchOptions(options)
+    this._ready()
+  }
+  _ready () {
+    this._computedStatus = {
+      response: 'ready',
+      responseJson: 'ready',
+    }
   }
 
-  _getFetchOptions = ({ onFetch, ...rest }) => ({ ...rest })
-
-  /* Public getters */
+  get resource () {
+    return this._computedResource
+  }
+  set resource (resource) {
+    this.setResource(resource)
+  }
+  get response () { 
+    return this._computedResponse
+  }
   get status () {
     return this._computedStatus
   }
@@ -49,31 +36,31 @@ export default class Fetchable {
 
   async updateResponseJson () {
     try {
-      this._computedStatus = 'updatingResponseJson'
+      this._computedStatus.responseJson = 'updating'
       this._computedResponseJson = await this.response.json()
-      this._computedStatus = 'responseJsonSuccess'
+      this._computedStatus.responseJson = 'updated'
     } catch (error) {
       this._computedResponseJson = error
-      this._computedStatus = 'respnseJsonError'
+      this._computedStatus.responseJson = 'errored'
     }
 
     return this
   }
 
   setResource (resource) {
-    this.resource = resource
+    this._computedResource = resource
     return this
   }
-  setResponse (response) {
+  _setResponse (response) {
     this.response = response
     this.updateResponseJson()
     return this
   }
-  async fetch () {
-    this._computedStatus = 'fetching'
-    const response = await fetch(this.resource, this._fetchOptions)
-    this._computedStatus = 'fetched'
-    emit(this._onFetch, response, this)
+  async fetch (options) {
+    this._computedStatus.response = 'fetching'
+    const response = await fetch(this.resource, options)
+    this._computedStatus.response = 'fetched'
+    this._setResponse(response)
 
     return this
   }

@@ -4,7 +4,9 @@
  * Released under the MIT license
  */
 
-/* Util */
+import Animateable from './Animateable'
+
+const initialDuration = 1
 
 /**
  * Delayable is a library that enriches a function by:
@@ -14,7 +16,16 @@
  */
 export default class Delayable {
   constructor (callback, options) {
-    /* Options */
+    this._animateable = new Animateable([
+      {
+        progress: 0,
+        data: { progress: 0 }
+      },
+      {
+        progress: 1,
+        data: { progress: 1 }
+      }
+    ], { duration: initialDuration })
 
     /* Public properties */
     /**
@@ -75,20 +86,22 @@ export default class Delayable {
    * Stops the delayed callback function. The function won't be executed, but <code>timeElapsed</code> and <code>timeRemaining</code> will <b>not</b> be reset to their initial values.
    */
   stop () {
-    window.clearTimeout(this._id)
-    window.clearInterval(this._id)
-    this._stopTick()
-    this._computedExecutions = 0
+    this._animateable.stop()
     return this
   }
   /**
    * Executes the callback function after the period of time specified by <code>delay</code>
    */
   timeout (options = {}) {
-    const { delay, parameters } = options
+    const { delay = 0 } = options,
+          playbackRate = delay <= 0 ? 0 : 1 / delay
+    this._animateable.setPlaybackRate(playbackRate)
 
-    this._setup({ delay: delay || 0, isInterval: false })
-    this._id = this._setTimeout({ delay: delay || 0, parameters: parameters || [] })
+
+    // const { delay, parameters } = options
+
+    // this._setup({ delay: delay || 0, isInterval: false })
+    // this._id = this._setTimeout({ delay: delay || 0, parameters: parameters || [] })
 
     return this
   }
@@ -96,7 +109,7 @@ export default class Delayable {
    * Repeatedly executes the callback function with a fixed time delay (specified by <code>delay</code>) between each execution
    */
   interval (options = {}) {
-    const { delay, parameters } = options
+    const { delay = 0 } = options
 
     this._setup({ delay: delay || 0, isInterval: true })
     this._id = this._setInterval({ delay: delay || 0, parameters: parameters || [] })

@@ -12,42 +12,43 @@ class Navigateable {
     /* Options */
     options = {
       initialLocation: 0,
-      onNavigate: (newLocation, instance) => instance.setLocation(newLocation),
       ...options
     }
 
-    this._onNavigate = options.onNavigate
-    this._onGoTo = options.onGoTo
-    this._onNext = options.onNext
-    this._onPrev = options.onPrev
-    this._onRand = options.onRand
-
-    /* Public properties */
-    this.array = array
-    this.location = options.initialLocation
-
-    /* Private properties */
-
-    /* Dependency */
+    this.setArray(array)
+    this.navigate(options.initialLocation)
   }
 
   /* Public getters */
+  get array () {
+    return this._computedArray
+  }
+  set array (value) {
+    this.setArray(value)
+  }
+  get location () {
+    return this._computedLocation
+  }
+  set location (location) {
+    this.setLocation(location)
+  }
   get item () {
     return this.array[this.location]
   }
 
   /* Public methods */
   setArray (array) {
-    this.array = array
+    this._computedArray = array
     return this
   }
 
-  setLocation (location) {
-    this.location = location
+  setLocation (newLocation) {
+    this.navigate(newLocation)
+
     return this
   }
 
-  goTo (newLocation, navigateType) {
+  navigate (newLocation) {
     switch (true) {
     case (newLocation > this.array.length):
       newLocation = this.array.length
@@ -61,9 +62,9 @@ class Navigateable {
       break
     }
 
-    navigateType = navigateType || 'goTo'
+    this._computedLocation = newLocation
 
-    return this._navigate(newLocation, navigateType)
+    return this
   }
 
   next (options = {}) {
@@ -93,7 +94,9 @@ class Navigateable {
       newLocation = this.location + increment
     }
 
-    return this.goTo(newLocation, 'next')
+    this.navigate(newLocation)
+
+    return this
   }
 
   prev (options = {}) {
@@ -121,27 +124,14 @@ class Navigateable {
       newLocation = this.location - decrement
     }
 
-    return this.goTo(newLocation, 'prev')
+    this.navigate(newLocation)
+
+    return this
   }
 
   rand () {
     const newLocation = Math.floor(Math.random() * (this.array.length))
-    return this.goTo(newLocation, 'rand')
-  }
-
-  _navigate = function(newLocation, type) {
-    typedEmit(
-      newLocation,
-      type,
-      this,
-      this._onNavigate,
-      [
-        { type: 'goTo', emitter: this._onGoTo },
-        { type: 'next', emitter: this._onNext },
-        { type: 'prev', emitter: this._onPrev },
-        { type: 'rand', emitter: this._onRand },
-      ]
-    )
+    this.navigate(newLocation)
 
     return this
   }
