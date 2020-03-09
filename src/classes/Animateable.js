@@ -621,9 +621,9 @@ export default class Animateable {
     if (this._alternates) {
       switch (this.status) {
       case 'playing':
-        window.requestAnimationFrame(timestamp => {
-          this._cancelAnimate()
+        this._cancelAnimate()
 
+        window.requestAnimationFrame(timestamp => {
           this._pauseCache = {
             status: this.status,
             timeProgress: (timestamp - this._startTime) / this._duration,
@@ -633,9 +633,9 @@ export default class Animateable {
         })
         break
       case 'reversing':
+        this._cancelAnimate()
+
         window.requestAnimationFrame(timestamp => {
-          this._cancelAnimate()
-    
           this._pauseCache = {
             status: this.status,
             timeProgress: (timestamp - this._startTime) / this._duration,
@@ -647,9 +647,9 @@ export default class Animateable {
     } else {
       switch (this.status) {
       case 'playing':
+        this._cancelAnimate()
+        
         window.requestAnimationFrame(timestamp => {
-          this._cancelAnimate()
-                
           this._pauseCache = {
             status: this.status,
             timeProgress: (timestamp - this._startTime) / this._duration,
@@ -659,9 +659,9 @@ export default class Animateable {
         })
         break
       case 'reversing':
+        this._cancelAnimate()
+        
         window.requestAnimationFrame(timestamp => {
-          this._cancelAnimate()
-    
           this._pauseCache = {
             status: this.status,
             timeProgress: (timestamp - this._startTime) / this._duration,

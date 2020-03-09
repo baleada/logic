@@ -82,7 +82,6 @@ export default class Delayable {
         case 'paused':
         case 'sought':
         case 'delayed':
-          console.log('one more callback')
           this._delaying()
           break
         }
@@ -115,7 +114,6 @@ export default class Delayable {
     case 'delaying':
       this._animateable.pause()
       this._paused()
-      console.log('here')
       break
     }
     
@@ -129,7 +127,6 @@ export default class Delayable {
     switch (this.status) {
     case 'paused':
     case 'sought':
-      console.log('here')
       this._animateable.play(frame => this.callback(frame))
       break
     }
