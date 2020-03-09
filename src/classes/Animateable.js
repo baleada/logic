@@ -409,18 +409,9 @@ export default class Animateable {
         animation: animationProgress,
       }
 
-      // console.log({
-      //   invisibleTime: this._totalTimeInvisible,
-      //   timeElapsed,
-      //   timeRemaining,
-      //   timeProgress,
-      //   toAnimationProgress,
-      //   animationProgress,
-      // })
-
       const frame = {
-        data: this._getFrame(type, timeProgress, easeOptions),
-        // TODO: Leaving the door open to include progress objects for each property
+        ...this._getFrame(type, timeProgress, easeOptions),
+        timestamp,
       }
 
       callback(frame) // TODO: error message
@@ -518,10 +509,16 @@ export default class Animateable {
               animationProgress = toAnimationProgress(timeProgress)
         
         return {
-          ...frame,
-          [property]: this._ease(previous, next, animationProgress, easeOptions)
+          data: {
+            ...frame.data,
+            [property]: this._ease(previous, next, animationProgress, easeOptions)
+          },
+          progress: {
+            ...frame.progress,
+            [property]: { time: timeProgress, animation: animationProgress },
+          }
         }
-      }, {})
+      }, { data: {}, progress: {} })
   }
   _ease (previous, next, progress, options = {}) {
     if (is.undefined(previous)) {
