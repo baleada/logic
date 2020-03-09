@@ -25,6 +25,10 @@ export default class Completeable {
 
     this.setString(string)
     this.setLocation(options.hasOwnProperty('initialLocation') ? options.initialLocation : string.length)
+    this._ready()
+  }
+  _ready () {
+    this._computedStatus = 'ready'
   }
 
   get string () {
@@ -32,6 +36,9 @@ export default class Completeable {
   }
   get location () {
     return this._computedLocation
+  }
+  get status () {
+    return this._computedStatus
   }
   get segment () {
     return this.string.slice(
@@ -69,6 +76,11 @@ export default class Completeable {
     this.setString(completedString)
     this.setLocation(newLocation)
 
+    this._completed()
+
     return this
+  }
+  _completed () {
+    this._computedStatus = 'completed'
   }
 }
