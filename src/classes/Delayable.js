@@ -44,6 +44,9 @@ export default class Delayable {
   set callback (callback) {
     this.setCallback(callback)
   }
+  get status () {
+    return this._computedStatus
+  }
   /**
    * The number of times the callback function has been executed
    * @type {Number}
@@ -61,15 +64,14 @@ export default class Delayable {
   get progress () {
     return this._animateable.progress.time
   }
-  get status () {
-    return this._computedStatus
-  }
 
   /**
    * Sets the Delayable instance's callback function
    * @param {Function} callback The new callback function
    */
   setCallback (naiveCallback) {
+    this.stop()
+
     function callback (frame) {
       const { data: { progress }, timestamp } = frame
 
@@ -82,6 +84,7 @@ export default class Delayable {
         case 'paused':
         case 'sought':
         case 'delayed':
+        case 'stopped':
           this._delaying()
           break
         }
@@ -103,8 +106,20 @@ export default class Delayable {
    * Executes the callback function after the period of time specified by <code>delay</code>
    */
   delay () {
-    this.seek(0)
-    this._animateable.play(frame => this.callback(frame))
+    switch (this.status) {
+    case 'delaying':
+      this._animateable.restart()
+      break
+    case 'sought':
+      this.seek(0)
+      this._animateable.play(frame => this.callback(frame))
+      break
+    case 'ready':
+    case 'paused':
+    case 'delayed':
+    case 'stopped':
+      this._animateable.play(frame => this.callback(frame))
+    }    
 
     return this
   }
@@ -129,6 +144,12 @@ export default class Delayable {
     case 'sought':
       this._animateable.play(frame => this.callback(frame))
       break
+    case 'ready':
+    case 'delaying':
+    case 'delayed':
+    case 'stopped':
+      // Do nothing
+      break
     }
 
     return this
@@ -137,8 +158,7 @@ export default class Delayable {
   seek (timeProgress) {
     const executions = Math.floor(timeProgress)
 
-    if (executions > 0) {
-      window.requestAnimationFrame(timestamp => {
+  if (executions > 0) {case '      window':.requestAnimationFrame(timestamp => {
         for (let i = 0; i < executions; i++) {
           this.callback({
             data: { progress: 1 },
@@ -162,6 +182,11 @@ export default class Delayable {
    */
   stop () {
     this._animateable.stop()
+    this._stopped()
+
     return this
+  }
+  _stopped () {
+    this._computedStatus = 'stopped'
   }
 }
