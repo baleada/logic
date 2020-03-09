@@ -18,6 +18,10 @@ export default class Searchable {
     /* Public properties */
     this.setCandidates(candidates)
     this._setResults([])
+    this._ready()
+  }
+  _ready () {
+    this._computedStatus = 'ready'
   }
 
   _getSearcherOptions ({ onSearch, ...rest }) {
@@ -30,6 +34,9 @@ export default class Searchable {
   set candidates (candidates) {
     this.setCandidates(candidates)
   }
+  get status () {
+    return this._computedStatus
+  }
   get results () {
     return this._computedResults
   }
@@ -39,8 +46,8 @@ export default class Searchable {
 
   /* Public methods */
   setCandidates (candidates) {
-    this._computedCandidates = candidates
-    this._searcher = this._getSearcher(candidates)
+    this._computedCandidates = Array.from(candidates)
+    this._searcher = this._getSearcher(this.candidates)
 
     return this
   }
@@ -56,6 +63,15 @@ export default class Searchable {
     const results = this._searcher.search(query, options)
     this._setResults(results)
 
+    switch (this.status) {
+    case 'ready':
+      this._searched()
+      break
+    }
+
     return this
+  }
+  _searched () {
+    this._computedStatus = 'searched'
   }
 }
