@@ -57,8 +57,8 @@ class Navigateable {
 
   navigate (newLocation) {
     switch (true) {
-    case (newLocation > this.array.length):
-      newLocation = this.array.length
+    case (newLocation > this.array.length - 1):
+      newLocation = this.array.length - 1
       // TODO: decide whether or not to show warnings
       // console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
       break
@@ -81,20 +81,20 @@ class Navigateable {
 
   next (options = {}) {
     options = {
-      increment: 1,
+      distance: 1,
       loops: true,
       ...options,
     }
 
-    const { increment, loops } = options
+    const { distance, loops } = options
 
     let newLocation
     const lastLocation = this.array.length - 1
 
-    if (this.location + increment > lastLocation) {
+    if (this.location + distance > lastLocation) {
       switch (true) {
       case (loops):
-        newLocation = this.location + increment
+        newLocation = this.location + distance
         while (newLocation > lastLocation) {
           newLocation -= this.array.length
         }
@@ -103,7 +103,7 @@ class Navigateable {
         newLocation = lastLocation
       }
     } else {
-      newLocation = this.location + increment
+      newLocation = this.location + distance
     }
 
     this.navigate(newLocation)
@@ -113,18 +113,18 @@ class Navigateable {
 
   previous (options = {}) {
     options = {
-      decrement: 1,
+      distance: 1,
       loops: true,
       ...options,
     }
-    const { decrement, loops } = options
+    const { distance, loops } = options
 
     let newLocation
 
-    if (this.location - decrement < 0) {
+    if (this.location - distance < 0) {
       switch (true) {
       case (loops):
-        newLocation = this.location - decrement
+        newLocation = this.location - distance
         while (newLocation < 0) {
           newLocation += this.array.length
         }
@@ -133,7 +133,7 @@ class Navigateable {
         newLocation = 0
       }
     } else {
-      newLocation = this.location - decrement
+      newLocation = this.location - distance
     }
 
     this.navigate(newLocation)
