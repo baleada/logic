@@ -9,10 +9,6 @@ test('reorder({ from: index, to: index }) moves `from` index forward to `to` ind
   const instance = t.context.setup(),
         result = instance.reorder({ from: 1, to: 3 })
 
-  console.log({
-    result
-  })
-
   t.deepEqual([...result], ['tortilla', 'mantequilla', 'aguacate', 'frijoles', 'huevito'])
 })
 

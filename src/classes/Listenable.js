@@ -12,7 +12,8 @@ import { is, toDirection } from '../util'
 
 /* Constants */
 import { observers } from '../constants'
-const keycomboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}([a-zA-Z]{1}?|shift|cmd|ctrl|alt|opt)$/,
+const mediaQueryRegexp = /^\(.+\)$/,
+      keycomboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}([a-zA-Z]{1}?|shift|cmd|ctrl|alt|opt)$/,
       clickcomboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
       letterRegexp = /^[a-zA-Z]$/,
       keyAssertDictionary = {
@@ -30,14 +31,11 @@ const recognizeableListenerApi = {
 
 export default class Listenable {
   constructor (eventName, options = {}) {
-    /* Options */
-
-    /* Private properties */
     if (options.hasOwnProperty('recognizeable')) {
       this._computedRecognizeable = new Recognizeable([], options.recognizeable)
       this._computedRecognizeableEvents = Object.keys(options.recognizeable.handlers) // TODO: handle error for undefined handlers
     }
-    this._observer = observers[this.eventName]
+    this._observer = observers[eventName]
 
     this._type = this._getType(eventName)
 
@@ -53,7 +51,7 @@ export default class Listenable {
   _getType (eventName) {
     return (this._computedRecognizeable instanceof Recognizeable && 'recognizeable') ||
       (is.defined(this._observer) && 'observation') ||
-      (/^\(.+\)$/.test(eventName) && 'mediaquery') ||
+      (mediaQueryRegexp.test(eventName) && 'mediaquery') ||
       (eventName === 'idle' && 'idle') ||
       (eventName === 'visibilitychange' && 'visibilitychange') ||
       (keycomboRegexp.test(eventName) && 'keycombo') ||

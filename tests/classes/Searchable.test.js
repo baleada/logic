@@ -37,6 +37,12 @@ test('setCandidates constructs the searcher', t => {
   t.assert(instance._searcher instanceof Searcher)
 })
 
+test('results is empty after construction', t => {
+  const instance = t.context.setup()
+
+  t.deepEqual(instance.results, [])
+})
+
 /* search */
 test('search(query, options) updates results', t => {
   const instance = t.context.setup()
