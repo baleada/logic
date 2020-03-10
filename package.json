@@ -1,6 +1,6 @@
 {
   "name": "@baleada/logic",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "description": "UI logic for the Baleada toolkit",
   "main": "classes.js",
   "scripts": {
@@ -47,7 +47,7 @@
     "eslint-plugin-ava": "^7.1.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-node": "^9.2.0",
-    "eslint-plugin-nuxt": "^0.4.3",
+    "eslint-plugin-nuxt": "^0.5.1",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "fast-async": "^6.3.8",
