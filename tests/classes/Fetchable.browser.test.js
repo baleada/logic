@@ -1,15 +1,15 @@
-import test from 'ava'
-import withPage from '../test-util/withPage'
+// import test from 'ava'
+// import withPage from '../test-util/withPage'
 
-test('stores the response', withPage, 'Fetchable', true, async (t, page) => {
-  await page.evaluate(async () => {
-    const instance = new Fetchable('https://httpbin.org/get', { method: 'get' })
+// test('stores the response', withPage, 'Fetchable', true, async (t, page) => {
+//   await page.evaluate(async () => {
+//     const instance = new Fetchable('https://httpbin.org/get', { method: 'get' })
 
-    await instance.fetch()
+//     await instance.fetch()
 
-    await window.assert(instance.response.ok)
-  })
-})
+//     await window.assert(instance.response.ok)
+//   })
+// })
 
 // test('stores the error', withPage, 'Fetchable', true, async (t, page) => {
 //   await page.evaluate(async () => {

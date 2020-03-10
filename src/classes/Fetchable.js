@@ -24,17 +24,17 @@ export default class Fetchable {
   set resource (resource) {
     this.setResource(resource)
   }
-  get response () { 
-    return this._computedResponse
-  }
   get status () {
     return this._computedStatus
+  }
+  get response () { 
+    return this._computedResponse
   }
   get responseJson () {
     return this._computedResponseJson
   }
 
-  async updateResponseJson () {
+  async _updateResponseJson () {
     try {
       this._computedStatus.responseJson = 'updating'
       this._computedResponseJson = await this.response.json()
@@ -53,9 +53,10 @@ export default class Fetchable {
   }
   _setResponse (response) {
     this.response = response
-    this.updateResponseJson()
+    this._updateResponseJson()
     return this
   }
+  
   async fetch (options) {
     this._computedStatus.response = 'fetching'
     const response = await fetch(this.resource, options)

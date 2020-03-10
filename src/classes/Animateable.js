@@ -677,21 +677,6 @@ export default class Animateable {
   _paused () {
     this._computedStatus = 'paused'
   }
-
-  stop (/* callback, options */) {
-    this._cancelAnimate()
-    this._visibilitychange.stop()
-    this._alternateCache.status = 'ready'
-    this._stopped()
-
-    // this.seek(0, callback, options)
-
-    return this
-  }
-  _stopped () {
-    this._computedStatus = 'stopped'
-  }
-
   _cancelAnimate () {
     window.cancelAnimationFrame(this.request)
   }
@@ -836,5 +821,25 @@ export default class Animateable {
     }
 
     return this
+  }
+  
+  stop () {
+    switch (this.status) {
+    case 'ready':
+    case undefined:
+      // Do nothing. Don't use web APIs during construction or before doing anything else.
+      break
+    default:
+      this._cancelAnimate()
+      this._visibilitychange.stop()
+      this._alternateCache.status = 'ready'
+      this._stopped()
+      break
+    }
+    
+    return this
+  }
+  _stopped () {
+    this._computedStatus = 'stopped'
   }
 }

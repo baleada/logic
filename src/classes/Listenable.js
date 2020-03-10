@@ -44,6 +44,10 @@ export default class Listenable {
     this._computedActiveListeners = []
 
     this.setEventName(eventName)
+    this._ready()
+  }
+  _ready () {
+    this._computedStatus = 'ready'
   }
 
   _getType (eventName) {
@@ -62,6 +66,9 @@ export default class Listenable {
   }
   set eventName (eventName) {
     this.setEventName(eventName)
+  }
+  get status () {
+    return this._computedStatus
   }
   get activeListeners () {
     return this._computedActiveListeners
@@ -103,6 +110,8 @@ export default class Listenable {
       this._eventListen(listener, options)
       break
     }
+
+    this._listening()
 
     return this
   }
@@ -221,30 +230,48 @@ export default class Listenable {
       this._computedActiveListeners.push({ target, id: eventListener, type: 'event' })
     })
   }
+  _listening () {
+    this._computedStatus = 'listening'
+  }
 
   stop (options = {}) {
-    const { target } = options,
-          activeListeners = this._isMediaQuery
-            ? this.activeListeners
-            : this.activeListeners.filter(({ target: t }) => !target || t === target) // Not using .isSameNode() here because it needs to handle MediaQueryLists too
+    switch (this.status) {
+    case 'ready':
+    case undefined:
+      // Do nothing. Don't use web APIs during construction or before doing anything else.
+      break
+    default:
+      const { target } = options,
+            stoppable = is.defined(target)
+              ? this.activeListeners.filter(({ target: t }) => t === target) // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
+              : this.activeListeners
 
-    activeListeners.forEach(({ target: t, id, type }) => {
-      switch (true) {
-      case type === 'observation':
-        id.disconnect()
-        break
-      case type === 'mediaquery':
-        t.removeListener(id)
-        break
-      case type === 'idle':
-        window.cancelIdleCallback(id)
-        break
-      case type === 'event':
-        t.removeEventListener(...id)
-        break
+      stoppable.forEach(({ target: t, id, type }) => {
+        switch (true) {
+        case type === 'observation':
+          id.disconnect()
+          break
+        case type === 'mediaquery':
+          t.removeListener(id)
+          break
+        case type === 'idle':
+          window.cancelIdleCallback(id)
+          break
+        case type === 'event':
+          t.removeEventListener(...id)
+          break
+        }
+      })
+      
+      if (stoppable.length = this.activeListeners.length) {
+        this._stopped()
       }
-    })
+      break
+    }
 
     return this
+  }
+  _stopped () {
+    this._computedStatus = 'stopped'
   }
 }

@@ -15,8 +15,6 @@ export default class Recognizeable {
     /* Options */
     options = {
       maxSequenceLength: true,
-      onRecognize: (newSequence, instance) => instance.setSequence(newSequence),
-      onDeny: (newSequence, instance) => instance.setSequence(newSequence),
       ...options,
     }
 
@@ -32,9 +30,7 @@ export default class Recognizeable {
       toPolarCoordinates,
       recognized: () => this._recognized(),
       denied: () => this._denied(),
-      getSequence: () => this.sequence,
       getStatus: () => this.status,
-      getLastEvent: () => this.lastEvent,
       getMetadata: () => this.metadata,
       // TODO: require object with appropriate properties on all methods below
       setMetadata: ({ path, value }) => this._setMetadata(path, value),
@@ -74,7 +70,7 @@ export default class Recognizeable {
   }
   _ensureArray (path, value) {
     if (!is.array(this._computedMetadata.get(path))) {
-      this,_setMetadata(path, [])
+      this._setMetadata(path, [])
     }
   }
 
@@ -111,17 +107,18 @@ export default class Recognizeable {
     if (is.function(this._handlers[type])) {
       this._handlers[type](event, {
         ...this._handlerApi,
-        sequence: newSequence,
+        getSequence: () => newSequence,
+        getLastEvent: () => newSequence[newSequence.length - 1]
       })
     }
 
     switch (this.status) {
     case 'denied':
-      emit(this._onRecognize, [], this)
+      this.setSequence([])
       break
     case 'recognizing':
     case 'recognized':
-      emit(this._onRecognize, newSequence, this)
+      this.setSequence(newSequence)
       break
     }
 

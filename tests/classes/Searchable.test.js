@@ -16,6 +16,13 @@ test('stores the candidates', t => {
   t.deepEqual(instance.candidates, ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'])
 })
 
+test('assignment sets the candidates', t => {
+  const instance = t.context.setup()
+  instance.candidates = ['Baleada']
+
+  t.deepEqual(instance.candidates, ['Baleada'])
+})
+
 test('setCandidates sets the candidates', t => {
   const instance = t.context.setup()
   instance.setCandidates(['Baleada'])
@@ -39,17 +46,20 @@ test('search(query, options) updates results', t => {
   t.assert(instance.results.length > 0)
 })
 
-// test('emitters correctly emit', t => {
-//   let onSearch = 0
+/* status */
+test('status is "ready" after construction', t => {
+  const instance = t.context.setup()
 
-//   const instance = t.context.setup({
-//     onSearch: () => (onSearch += 1)
-//   })
+  t.is(instance.status, 'ready')
+})
 
-//   instance.search('tortilla')
+test('status is "searched" after search(...) is called at least once', t => {
+  const instance = t.context.setup()
 
-//   t.deepEqual({ onSearch }, { onSearch: 1 })
-// })
+  instance.search('Baleada')
+
+  t.is(instance.status, 'searched')
+})
 
 /* method chaining */
 test('can method chain', t => {

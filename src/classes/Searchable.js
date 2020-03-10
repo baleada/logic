@@ -7,13 +7,10 @@
 /* Dependencies */
 import { Searcher } from 'fast-fuzzy'
 
-/* Util */
-import { emit } from '../util'
-
 export default class Searchable {
   constructor (candidates, options = {}) {
     /* Options */
-    this._searcherOptions = this._getSearcherOptions(options)
+    this._searcherOptions = options
 
     /* Public properties */
     this.setCandidates(candidates)
@@ -22,10 +19,6 @@ export default class Searchable {
   }
   _ready () {
     this._computedStatus = 'ready'
-  }
-
-  _getSearcherOptions ({ onSearch, ...rest }) {
-    return rest
   }
 
   get candidates () {

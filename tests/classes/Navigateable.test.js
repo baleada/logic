@@ -8,11 +8,17 @@ test.beforeEach(t => {
   )
 })
 
-/* Basic */
 test('stores the array', t => {
   const instance = t.context.setup()
 
   t.deepEqual(instance.array, ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'])
+})
+
+test('assignment sets the array', t => {
+  const instance = t.context.setup()
+  instance.array = ['Baleada']
+
+  t.deepEqual(instance.array, ['Baleada'])
 })
 
 test('setArray sets the array', t => {
@@ -22,27 +28,57 @@ test('setArray sets the array', t => {
   t.deepEqual(instance.array, ['Baleada'])
 })
 
-/* goTo */
-test('goTo(newLocation) navigates to the length of the array when newLocation is greater than the length of the array', t => {
+test('initial location is 0 by default', t => {
   const instance = t.context.setup()
-
-  instance.goTo(42)
-
-  t.is(instance.location, instance.array.length)
-})
-
-test('goTo(newLocation) navigates to 0 when newLocation is less than 0', t => {
-  const instance = t.context.setup()
-
-  instance.goTo(-42)
 
   t.is(instance.location, 0)
 })
 
-test('goTo(newLocation) navigates to newLocation', t => {
+test('initial location can be customized via options', t => {
+  const instance = t.context.setup({
+    initialLocation: 1,
+  })
+
+  t.is(instance.location, 1)
+})
+
+test('assignment sets the location', t => {
   const instance = t.context.setup()
 
-  instance.goTo(1)
+  instance.location = 1
+
+  t.is(instance.location, 1)
+})
+
+test('setLocation sets the location', t => {
+  const instance = t.context.setup()
+
+  instance.setLocation(1)
+
+  t.is(instance.location, 1)
+})
+
+/* navigate */
+test('navigate(newLocation) navigates to the length of the array when newLocation is greater than the length of the array', t => {
+  const instance = t.context.setup()
+
+  instance.navigate(42)
+
+  t.is(instance.location, instance.array.length)
+})
+
+test('navigate(newLocation) navigates to 0 when newLocation is less than 0', t => {
+  const instance = t.context.setup()
+
+  instance.navigate(-42)
+
+  t.is(instance.location, 0)
+})
+
+test('navigate(newLocation) navigates to newLocation', t => {
+  const instance = t.context.setup()
+
+  instance.navigate(1)
 
   t.is(instance.location, 1)
 })
@@ -67,7 +103,7 @@ test('next() increments the current location by increment when increment is not 
 test('next() loops back through the array by default when the current location is greater than the last location', t => {
   const instance = t.context.setup()
 
-  instance.goTo(instance.array.length - 1)
+  instance.navigate(instance.array.length - 1)
   instance.next()
 
   t.is(instance.location, 0)
@@ -84,96 +120,94 @@ test('next() loops recursively through the array by default until current locati
 test('next() stops at the last location when loops is false AND incremented location is greater than the last location', t => {
   const instance = t.context.setup()
 
-  instance.goTo(instance.array.length - 1)
+  instance.navigate(instance.array.length - 1)
   instance.next({ loops: false })
 
   t.is(instance.location, instance.array.length - 1)
 })
 
 /* prev */
-test('prev() decrements the current location by 1 when decrement is default', t => {
+test('previous() decrements the current location by 1 when decrement is default', t => {
   const instance = t.context.setup({
     initialLocation: 1
   })
 
-  instance.prev()
+  instance.previous()
 
   t.is(instance.location, 0)
 })
 
-test('prev() decrements the current location by decrement when decrement is not default', t => {
+test('previous() decrements the current location by decrement when decrement is not default', t => {
   const instance = t.context.setup({
     initialLocation: 2,
   })
 
-  instance.prev({ decrement: 2 })
+  instance.previous({ decrement: 2 })
 
   t.is(instance.location, 0)
 })
 
-test('prev() loops back through the array by default when the current location is less than 0', t => {
+test('previous() loops back through the array by default when the current location is less than 0', t => {
   const instance = t.context.setup()
 
-  instance.prev()
+  instance.previous()
 
   t.is(instance.location, instance.array.length - 1)
 })
 
-test('prev() loops recursively through the array by default until current location is greater than or equal to 0', t => {
+test('previous() loops recursively through the array by default until current location is greater than or equal to 0', t => {
   const instance = t.context.setup()
 
-  instance.prev({ decrement: 15 })
+  instance.previous({ decrement: 15 })
 
   t.is(instance.location, 0)
 })
 
-test('prev() stops at 0 when loops is false AND decremented location is less than 0', t => {
+test('previous() stops at 0 when loops is false AND decremented location is less than 0', t => {
   const instance = t.context.setup()
 
-  instance.prev({ loops: false })
+  instance.previous({ loops: false })
 
   t.is(instance.location, 0)
 })
 
-test('rand() navigates to a random location', t => {
+test('random() navigates to a random location', t => {
   const instance = t.context.setup()
 
-  instance.rand()
+  instance.random()
 
   t.assert(instance.location >= 0 && instance.location <= instance.array.length)
 })
 
-// test('typed emitters correctly emit', t => {
-//   let onNavigate = 0,
-//       onGoTo = 0,
-//       onNext = 0,
-//       onPrev = 0,
-//       onRand = 0
+/* status */
+test('status is "ready" after construction', t => {
+  const instance = t.context.setup()
 
-//   const instance = t.context.setup({
-//     onNavigate: () => (onNavigate += 1),
-//     onGoTo: () => (onGoTo += 1),
-//     onNext: () => (onNext += 1),
-//     onPrev: () => (onPrev += 1),
-//     onRand: () => (onRand += 1)
-//   })
+  t.is(instance.status, 'ready')
+})
 
-//   instance.goTo(0)
-//   instance.next()
-//   instance.prev()
-//   instance.rand()
+test('status is "navigated" after any navigation function is called at least once', t => {
+  const navigate = t.context.setup(),
+        next = t.context.setup(),
+        previous = t.context.setup(),
+        random = t.context.setup()
 
-//   t.deepEqual({ onNavigate, onGoTo, onNext, onPrev, onRand }, { onNavigate: 4, onGoTo: 1, onNext: 1, onPrev: 1, onRand: 1 })
-// })
+  navigate.random()
+  next.random()
+  previous.random()
+  random.random()
+
+  t.assert([navigate, next, previous, random].every(instance => instance.status === 'navigated'))
+})
 
 /* method chaining */
 test('can method chain', t => {
   const instance = t.context.setup(),
         chained = instance
           .setArray(['Baleada'])
-          .goTo(42)
+          .navigate(42)
           .next(42)
-          .prev(42)
+          .previous(42)
 
   t.assert(chained instanceof Navigateable)
 })

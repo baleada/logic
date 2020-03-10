@@ -1,7 +1,8 @@
 import test from 'ava'
 import Recognizeable from '../../src/classes/Recognizeable'
 
-const eventTypeStub = 'example'
+const eventTypeStub = 'example',
+      eventStub = { type: eventTypeStub }
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Recognizeable(
@@ -17,18 +18,25 @@ test('stores the sequence', t => {
   t.deepEqual(instance.sequence, [])
 })
 
+test('assignment sets the sequence', t => {
+  const instance = t.context.setup()
+  instance.sequence = [eventStub]
+
+  t.deepEqual(instance.sequence, [eventStub])
+})
+
 test('setSequence sets the sequence', t => {
   const instance = t.context.setup()
-  instance.setSequence([{ type: eventTypeStub }])
+  instance.setSequence([eventStub])
 
-  t.deepEqual(instance.sequence, [{ type: eventTypeStub }])
+  t.deepEqual(instance.sequence, [eventStub])
 })
 
 /* recognize */
 test('first recognize(event) sets status to recognizing', t => {
   const instance = t.context.setup()
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.is(instance.status, 'recognizing')
 })
@@ -42,7 +50,7 @@ test('recognize(event) calls handler', t => {
     }
   })
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.is(handlerWasCalled, true)
 })
@@ -54,7 +62,7 @@ test('handler API recognized() sets status', t => {
     }
   })
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.is(instance.status, 'recognized')
 })
@@ -66,9 +74,23 @@ test('handler API denied() sets status', t => {
     }
   })
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.is(instance.status, 'denied')
+})
+
+test('handler API getSequence() gets new sequence', t => {
+  let value
+
+  const instance = t.context.setup({
+    handlers: {
+      [eventTypeStub]: (event, { getSequence }) => (value = getSequence())
+    }
+  })
+
+  instance.recognize(eventStub)
+
+  t.deepEqual(value, [eventStub])
 })
 
 test('handler API getStatus() gets status', t => {
@@ -80,12 +102,12 @@ test('handler API getStatus() gets status', t => {
     }
   })
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.is(value, instance.status)
 })
 
-test('handler API getLastEvent() gets last event', t => {
+test('handler API getLastEvent() gets new last event', t => {
   let value
 
   const instance = t.context.setup({
@@ -94,7 +116,7 @@ test('handler API getLastEvent() gets last event', t => {
     }
   })
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.deepEqual(value, instance.lastEvent)
 })
@@ -108,7 +130,7 @@ test('handler API getMetadata() gets metadata', t => {
     }
   })
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.deepEqual(value, instance.metadata)
 })
@@ -120,7 +142,7 @@ test('handler API setMetadata() sets metadata', t => {
     }
   })
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.is('baleada', instance.metadata.example.path)
 })
@@ -132,7 +154,7 @@ test('handler API pushMetadata() pushes metadata', t => {
     }
   })
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.deepEqual(['baleada'], instance.metadata.example.path)
 })
@@ -147,31 +169,24 @@ test('handler API insertMetadata() inserts metadata', t => {
     }
   })
 
-  instance.recognize({ type: eventTypeStub })
+  instance.recognize(eventStub)
 
   t.deepEqual(['baleada', 'toolkit'], instance.metadata.example.path)
 })
 
+/* status */
+test('status is "ready" after construction', t => {
+  const instance = t.context.setup()
 
+  t.is(instance.status, 'ready')
+})
 
+test('status is "recognizing" after recognize(...) is called at least once and handlers did not call recognized or denied', t => {
+  const instance = t.context.setup()
 
-test('emitters correctly emit', t => {
-  let onDeny = 0,
-      onRecognize = 0
+  instance.recognize(eventStub)
 
-  const instance = t.context.setup({
-    onRecognize: () => (onRecognize += 1),
-    onDeny: () => (onDeny += 1),
-    handlers: {
-      recognize: (event, { recognized }) => recognized(),
-      deny: (event, { denied }) => denied()
-    }
-  })
-
-  instance.recognize({ type: 'recognize' })
-  instance.recognize({ type: 'deny' })
-
-  t.deepEqual({ onRecognize, onDeny }, { onRecognize: 1, onDeny: 1 })
+  t.is(instance.status, 'recognizing')
 })
 
 /* method chaining */
@@ -179,8 +194,8 @@ test('can method chain', t => {
   const instance = t.context.setup(),
         chained = instance
           .setSequence(['Baleada'])
-          .recognize({ type: eventTypeStub })
-          .recognize({ type: eventTypeStub })
+          .recognize(eventStub)
+          .recognize(eventStub)
 
   t.assert(chained instanceof Recognizeable)
 })

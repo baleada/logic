@@ -8,11 +8,18 @@ test.beforeEach(t => {
   )
 })
 
-/* Basic */
+
 test('stores the string', t => {
   const instance = t.context.setup()
 
   t.is(instance.string, 'Baleada: a toolkit for building web apps')
+})
+
+test('assignment sets the string', t => {
+  const instance = t.context.setup()
+  instance.string = 'Baleada'
+
+  t.is(instance.string, 'Baleada')
 })
 
 test('setString sets the string', t => {
@@ -34,6 +41,14 @@ test('initial location can be customized via options', t => {
   })
 
   t.is(instance.location, 0)
+})
+
+test('assignment sets the location', t => {
+  const instance = t.context.setup()
+
+  instance.location = 'Baleada: a toolkit'.length
+
+  t.is(instance.location, 'Baleada: a toolkit'.length)
 })
 
 test('setLocation sets the location', t => {
@@ -175,6 +190,21 @@ test('complete(completion, options) does not update location when locatesAfterCo
   instance.complete('Baleada', { locatesAfterCompletion: false })
 
   t.is(instance.location, originalLocation)
+})
+
+/* status */
+test('status is "ready" after construction', t => {
+  const instance = t.context.setup()
+
+  t.is(instance.status, 'ready')
+})
+
+test('status is "completed" after complete(...) is called at least once', t => {
+  const instance = t.context.setup()
+
+  instance.complete('Baleada')
+
+  t.is(instance.status, 'completed')
 })
 
 /* method chaining */

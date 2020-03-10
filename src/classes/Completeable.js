@@ -34,8 +34,14 @@ export default class Completeable {
   get string () {
     return this._computedString
   }
+  set string (string) {
+    this.setString(string)
+  }
   get location () {
     return this._computedLocation
+  }
+  set location (location) {
+    this.setLocation(location)
   }
   get status () {
     return this._computedStatus

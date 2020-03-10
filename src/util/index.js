@@ -1,6 +1,7 @@
 export { default as capitalize } from './capitalize.js'
 export { default as emit } from './emit.js'
 export { default as error } from './error.js'
+export { default as guardUntilDelayed } from './guardUntilDelayed.js'
 export { default as hasProperties } from './hasProperties.js'
 export { default as is } from './is.js'
 export { default as lastMatch } from './lastMatch.js'

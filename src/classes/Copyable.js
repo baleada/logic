@@ -4,10 +4,6 @@
  * Released under the MIT license
  */
 
-/* Dependencies */
-
-/* Util */
-
 export default class Copyable {
   constructor (string, options = {}) {
     this.setString(string)

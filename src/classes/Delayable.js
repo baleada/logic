@@ -6,6 +6,9 @@
 
 import Animateable from './Animateable'
 
+// Util
+import { guardUntilDelayed } from '../util'
+
 export default class Delayable {
   constructor (callback, options) {
     options = {
@@ -54,26 +57,7 @@ export default class Delayable {
   setCallback (naiveCallback) {
     this.stop()
 
-    function callback (frame) {
-      const { data: { progress }, timestamp } = frame
-
-      if (progress === 1) {
-        naiveCallback(timestamp)
-        this._delayed()
-      } else {
-        switch (this.status) {
-        case 'ready':
-        case 'paused':
-        case 'sought':
-        case 'delayed':
-        case 'stopped':
-          this._delaying()
-          break
-        }
-      }
-    }
-
-    this._computedCallback = callback
+    this._computedCallback = guardUntilDelayed(naiveCallback)
 
     return this
   }

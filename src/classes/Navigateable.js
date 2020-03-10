@@ -17,6 +17,10 @@ class Navigateable {
 
     this.setArray(array)
     this.navigate(options.initialLocation)
+    this._ready()
+  }
+  _ready () {
+    this._computedStatus = 'ready'
   }
 
   /* Public getters */
@@ -31,6 +35,9 @@ class Navigateable {
   }
   set location (location) {
     this.setLocation(location)
+  }
+  get status () {
+    return this._computedStatus
   }
   get item () {
     return this.array[this.location]
@@ -64,7 +71,12 @@ class Navigateable {
 
     this._computedLocation = newLocation
 
+    this._navigated()
+
     return this
+  }
+  _navigated () {
+    this._computedStatus = 'navigated'
   }
 
   next (options = {}) {
@@ -99,7 +111,7 @@ class Navigateable {
     return this
   }
 
-  prev (options = {}) {
+  previous (options = {}) {
     options = {
       decrement: 1,
       loops: true,
@@ -129,7 +141,7 @@ class Navigateable {
     return this
   }
 
-  rand () {
+  random () {
     const newLocation = Math.floor(Math.random() * (this.array.length))
     this.navigate(newLocation)
 

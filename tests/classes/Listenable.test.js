@@ -1,3 +1,5 @@
+/* INFORMAL */
+
 // stores the event name
 // setEventName sets the event name
 // listen adds event listener
