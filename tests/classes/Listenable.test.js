@@ -67,19 +67,25 @@ test('guesses visibilitychange type', t => {
 })
 
 test('guesses keycombo type', t => {
-  const zeroModifiers = new Listenable('m'),
-        oneModifier = new Listenable('cmd+m'),
-        twoModifier = new Listenable('shift+cmd+m'),
-        threeModifier = new Listenable('shift+alt+cmd+m'),
-        fourModifier = new Listenable('shift+ctrl+alt+cmd+m'),
+  const oneModifier = new Listenable('cmd+b'),
+        twoModifier = new Listenable('shift+cmd+b'),
+        threeModifier = new Listenable('shift+alt+cmd+b'),
+        fourModifier = new Listenable('shift+ctrl+alt+cmd+b'),
         up = new Listenable('up'),
         down = new Listenable('down'),
         left = new Listenable('left'),
-        right = new Listenable('right')
+        right = new Listenable('right'),
+        enter = new Listenable('enter'),
+        backspace = new Listenable('backspace'),
+        tab = new Listenable('tab'),
+        number = new Listenable('1'),
+        letter = new Listenable('b')
 
   const instances = [
-    zeroModifiers, oneModifier, twoModifier, threeModifier, fourModifier,
+    oneModifier, twoModifier, threeModifier, fourModifier,
     up, down, left, right,
+    enter, backspace, tab,
+    number, letter,
   ]
   
   t.assert(instances.every(instance => instance._type === 'keycombo'))
@@ -115,6 +121,10 @@ test('status is "ready" after construction', t => {
 //   down
 //   left
 //   right
+//   enter
+//   backspace
+//   tab
+//   number
 
 
 // status is "listening" after listen(...) is called at least once

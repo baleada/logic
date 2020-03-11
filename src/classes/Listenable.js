@@ -13,10 +13,11 @@ import { is, toDirection } from '../util'
 /* Constants */
 import { observers } from '../constants'
 const mediaQueryRegexp = /^\(.+\)$/,
-      keycomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}(?:[a-zA-Z]|up|right|down|left)$/,
+      keycomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}(?:[a-zA-Z0-9]|tab|up|right|down|left|enter|backspace)$/,
       clickcomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
-      letterRegexp = /^[a-zA-Z]$/,
+      letterNumberRegexp = /^[a-zA-Z0-9]$/,
       arrowRegexp = /^(?:up|down|right|left)$/,
+      enterBackspaceTabRegexp = /^(?:enter|backspace|tab)$/,
       modifierRegexp = /^(?:cmd|shift|ctrl|alt|opt)$/,
       modifierAssertDictionary = {
         shift: event => event.shiftKey,
@@ -35,7 +36,7 @@ export default class Listenable {
   constructor (eventName, options = {}) {
     if (options.hasOwnProperty('recognizeable')) {
       this._computedRecognizeable = new Recognizeable([], options.recognizeable)
-      this._computedRecognizeableEvents = Object.keys(options.recognizeable.handlers) // TODO: handle error for undefined handlers
+      this._computedRecognizeableEvents = Object.keys(options.recognizeable.handlers || {}) // TODO: handle error for undefined handlers
     }
     this._observer = observers[eventName]
 
@@ -129,8 +130,8 @@ export default class Listenable {
     this._computedActiveListeners.push({ target, id: listener, type: 'mediaquery' })
   }
   _idleListen (listener, options) {
-    const { idle: idleOptions = {} } = options,
-          id = window.requestIdleCallback(listener, idleOptions)
+    const { requestIdleCallback = {} } = options,
+          id = window.requestIdleCallback(listener, requestIdleCallback)
 
     this._computedActiveListeners.push({ id, type: 'idle' })
   }
@@ -141,7 +142,7 @@ export default class Listenable {
               this._computedRecognizeable.recognize(event)
 
               if (this._computedRecognizeable.status === 'recognized') {
-                blackAndWhiteListedListener(event, recognizeableListenerApi)
+                blackAndWhiteListedListener(event, this.recognizeable, recognizeableListenerApi)
               }
             }, ...listenerOptions]
           })
@@ -165,6 +166,7 @@ export default class Listenable {
               let matches
               switch (type) {
               case 'letter':
+              case 'enterBackspaceTab':
                 matches = event.key.toLowerCase() === name.toLowerCase()
                 break
               case 'arrow':
@@ -186,13 +188,15 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _getKeyType (name) {
-    return letterRegexp.test(name)
+    return letterNumberRegexp.test(name)
             ? 'letter'
             : arrowRegexp.test(name)
               ? 'arrow'
-              : modifierRegexp.test(name)
-                ? 'modifier'
-                : false // shouldn't be possible
+              : enterBackspaceTabRegexp.test(name)
+                ? 'enterBackspaceTab'
+                : modifierRegexp.test(name)
+                  ? 'modifier'
+                  : false // shouldn't be possible
   }
   _clickcomboListen (naiveListener, options) {
     const keys = this.eventName.split('+'),
@@ -233,15 +237,15 @@ export default class Listenable {
     return { blackAndWhiteListedListener, listenerOptions }
   }
   _getBlackAndWhiteListedListener (listener, options) {
-    const { blacklist = [], whitelist = [] } = options
+    const { except = [], only = [] } = options
 
     function blackAndWhiteListedListener (event) {
       const { target } = event,
-            [isWhitelisted, isBlacklisted] = [whitelist, blacklist].map(selectors => selectors.some(selector => target.matches(selector)))
+            [isWhitelisted, isBlacklisted] = [only, except].map(selectors => selectors.some(selector => target.matches(selector)))
 
       if (isWhitelisted) { // Whitelist always wins
         listener(...arguments)
-      } else if (whitelist.length === 0 && !isBlacklisted) {
+      } else if (whitelist.length === 0 && !isBlacklisted) { // Ignore blacklist when whitelist has elements
         listener(...arguments)
       }
     }
@@ -260,15 +264,14 @@ export default class Listenable {
     this._computedStatus = 'listening'
   }
 
-  stop (options = {}) {
+  stop (target) {
     switch (this.status) {
     case 'ready':
     case undefined:
       // Do nothing. Don't use web APIs during construction or before doing anything else.
       break
     default:
-      const { target } = options,
-            stoppable = is.defined(target)
+      const stoppable = is.defined(target)
               ? this.activeListeners.filter(({ target: t }) => t === target) // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
               : this.activeListeners
 
