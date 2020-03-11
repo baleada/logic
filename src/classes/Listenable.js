@@ -13,8 +13,8 @@ import { is, toDirection } from '../util'
 /* Constants */
 import { observers } from '../constants'
 const mediaQueryRegexp = /^\(.+\)$/,
-      keycomboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}([a-zA-Z]{1}?|shift|cmd|ctrl|alt|opt)$/,
-      clickcomboRegexp = /^(cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
+      keycomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}(?:[a-zA-Z])$/,
+      clickcomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
       letterRegexp = /^[a-zA-Z]$/,
       keyAssertDictionary = {
         shift: event => event.shiftKey,
@@ -157,7 +157,7 @@ export default class Listenable {
   _keycomboListen (naiveListener, options) {
     const keys = this.eventName.split('+'),
           listener = event => {
-            const matches = keys.every(key => letterRegexp.test(key) ? event.key === key.toLowerCase() : keyAssertDictionary[key](event))
+            const matches = keys.every(key => letterRegexp.test(key) ? event.key.toLowerCase() === key.toLowerCase() : keyAssertDictionary[key](event))
             
             if (matches) {
               naiveListener(event)

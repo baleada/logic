@@ -67,12 +67,13 @@ test('guesses visibilitychange type', t => {
 })
 
 test('guesses keycombo type', t => {
-  const oneModifier = new Listenable('cmd+m'),
+  const zeroModifiers = new Listenable('m'),
+        oneModifier = new Listenable('cmd+m'),
         twoModifier = new Listenable('shift+cmd+m'),
         threeModifier = new Listenable('shift+alt+cmd+m'),
         fourModifier = new Listenable('shift+ctrl+alt+cmd+m')
   
-  t.assert([oneModifier, twoModifier, threeModifier, fourModifier].every(instance => instance._type === 'keycombo'))
+  t.assert([zeroModifiers, oneModifier, twoModifier, threeModifier, fourModifier].every(instance => instance._type === 'keycombo'))
 })
 
 test('guesses clickcombo type', t => {
@@ -95,6 +96,12 @@ test('status is "ready" after construction', t => {
 /* INFORMAL */
 
 
+// keycombo
+//   zero modifiers
+//   one modifier
+//   two modifiers
+//   three modifiers
+//   four modifiers
 
 // status is "listening" after listen(...) is called at least once
 // status is "listening" after some active listeners are stopped
