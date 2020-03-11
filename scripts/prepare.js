@@ -8,7 +8,7 @@ function prepare () {
   generateIndex('src/factories', { importPath: 'lib/factories', outfile: 'factories' })
   generateIndex('src/constants')
   generateIndex('src/util')
-  generateIndex('src/wrappers')
+  // generateIndex('src/wrappers')
 
   /* Generate metadata */
   generateMetadata()

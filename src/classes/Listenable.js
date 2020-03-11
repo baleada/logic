@@ -13,10 +13,12 @@ import { is, toDirection } from '../util'
 /* Constants */
 import { observers } from '../constants'
 const mediaQueryRegexp = /^\(.+\)$/,
-      keycomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}(?:[a-zA-Z])$/,
+      keycomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}(?:[a-zA-Z]|up|right|down|left)$/,
       clickcomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
       letterRegexp = /^[a-zA-Z]$/,
-      keyAssertDictionary = {
+      arrowRegexp = /^(?:up|down|right|left)$/,
+      modifierRegexp = /^(?:cmd|shift|ctrl|alt|opt)$/,
+      modifierAssertDictionary = {
         shift: event => event.shiftKey,
         cmd: event => event.metaKey,
         ctrl: event => event.ctrlKey,
@@ -155,9 +157,26 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _keycomboListen (naiveListener, options) {
-    const keys = this.eventName.split('+'),
+    const keys = this.eventName
+            .split('+')
+            .map(name => ({ name, type: this._getKeyType(name) })),
           listener = event => {
-            const matches = keys.every(key => letterRegexp.test(key) ? event.key.toLowerCase() === key.toLowerCase() : keyAssertDictionary[key](event))
+            const matches = keys.every(({ name, type }) => {
+              let matches
+              switch (type) {
+              case 'letter':
+                matches = event.key.toLowerCase() === name.toLowerCase()
+                break
+              case 'arrow':
+                matches = event.key.toLowerCase() === `arrow${name.toLowerCase()}`
+                break
+              case 'modifier':
+                matches = modifierAssertDictionary[name](event)
+                break
+              }
+
+              return matches
+            })
             
             if (matches) {
               naiveListener(event)
@@ -166,10 +185,19 @@ export default class Listenable {
     
     this._eventListen(listener, options)
   }
+  _getKeyType (name) {
+    return letterRegexp.test(name)
+            ? 'letter'
+            : arrowRegexp.test(name)
+              ? 'arrow'
+              : modifierRegexp.test(name)
+                ? 'modifier'
+                : false // shouldn't be possible
+  }
   _clickcomboListen (naiveListener, options) {
     const keys = this.eventName.split('+'),
           listener = event => {
-            const matches = keys.every(key => key === 'click' || keyAssertDictionary[key](event))
+            const matches = keys.every(key => key === 'click' || modifierAssertDictionary[key](event))
 
             if (matches) {
               naiveListener(event)

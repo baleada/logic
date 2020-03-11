@@ -71,9 +71,18 @@ test('guesses keycombo type', t => {
         oneModifier = new Listenable('cmd+m'),
         twoModifier = new Listenable('shift+cmd+m'),
         threeModifier = new Listenable('shift+alt+cmd+m'),
-        fourModifier = new Listenable('shift+ctrl+alt+cmd+m')
+        fourModifier = new Listenable('shift+ctrl+alt+cmd+m'),
+        up = new Listenable('up'),
+        down = new Listenable('down'),
+        left = new Listenable('left'),
+        right = new Listenable('right')
+
+  const instances = [
+    zeroModifiers, oneModifier, twoModifier, threeModifier, fourModifier,
+    up, down, left, right,
+  ]
   
-  t.assert([zeroModifiers, oneModifier, twoModifier, threeModifier, fourModifier].every(instance => instance._type === 'keycombo'))
+  t.assert(instances.every(instance => instance._type === 'keycombo'))
 })
 
 test('guesses clickcombo type', t => {
@@ -102,6 +111,11 @@ test('status is "ready" after construction', t => {
 //   two modifiers
 //   three modifiers
 //   four modifiers
+//   up
+//   down
+//   left
+//   right
+
 
 // status is "listening" after listen(...) is called at least once
 // status is "listening" after some active listeners are stopped
