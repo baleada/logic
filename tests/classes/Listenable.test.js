@@ -7,24 +7,24 @@ test.beforeEach(t => {
   t.context.setup = (options = {}) => new Listenable('click', options)
 })
 
-test('stores the eventName', t => {
+test('stores the eventType', t => {
   const instance = t.context.setup()
 
-  t.is(instance.eventName, 'click')
+  t.is(instance.eventType, 'click')
 })
 
-test('assignment sets the eventName', t => {
+test('assignment sets the eventType', t => {
   const instance = t.context.setup()
-  instance.eventName = 'keydown'
+  instance.eventType = 'keydown'
 
-  t.is(instance.eventName, 'keydown')
+  t.is(instance.eventType, 'keydown')
 })
 
-test('setEventName sets the eventName', t => {
+test('setEventType sets the eventType', t => {
   const instance = t.context.setup()
-  instance.setEventName('keydown')
+  instance.setEventType('keydown')
 
-  t.is(instance.eventName, 'keydown')
+  t.is(instance.eventType, 'keydown')
 })
 
 test('activeListeners is empty after construction', t => {
