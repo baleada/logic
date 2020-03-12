@@ -14,11 +14,13 @@ import { is, toDirection } from '../util'
 import { observers } from '../constants'
 const mediaQueryRegexp = /^\(.+\)$/,
       keycomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}(?:[a-zA-Z0-9]|tab|up|right|down|left|enter|backspace)$/,
-      clickcomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){1,4}click$/,
+      leftclickcomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}click$/,
+      rightclickcomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}rightclick$/,
       letterNumberRegexp = /^[a-zA-Z0-9]$/,
       arrowRegexp = /^(?:up|down|right|left)$/,
       enterBackspaceTabRegexp = /^(?:enter|backspace|tab)$/,
       modifierRegexp = /^(?:cmd|shift|ctrl|alt|opt)$/,
+      clickRegexp = /^(?:right)?click$/,
       modifierAssertDictionary = {
         shift: event => event.shiftKey,
         cmd: event => event.metaKey,
@@ -58,7 +60,8 @@ export default class Listenable {
       (eventName === 'idle' && 'idle') ||
       (eventName === 'visibilitychange' && 'visibilitychange') ||
       (keycomboRegexp.test(eventName) && 'keycombo') ||
-      (clickcomboRegexp.test(eventName) && 'clickcombo') ||
+      (leftclickcomboRegexp.test(eventName) && 'leftclickcombo') ||
+      (rightclickcomboRegexp.test(eventName) && 'rightclickcombo') ||
       'event'
   }
 
@@ -104,7 +107,8 @@ export default class Listenable {
     case 'keycombo':
       this._keycomboListen(listener, options)
       break
-    case 'clickcombo':
+    case 'leftclickcombo':
+    case 'rightclickcombo':
       this._clickcomboListen(listener, options)
       break
     case 'event':
@@ -201,7 +205,7 @@ export default class Listenable {
   _clickcomboListen (naiveListener, options) {
     const keys = this.eventName.split('+'),
           listener = event => {
-            const matches = keys.every(key => key === 'click' || modifierAssertDictionary[key](event))
+            const matches = keys.every(key => clickRegexp.test(key) || modifierAssertDictionary[key](event))
 
             if (matches) {
               naiveListener(event)
@@ -216,8 +220,11 @@ export default class Listenable {
     case 'keycombo':
       eventName = 'keydown'
       break
-    case 'clickcombo':
+    case 'leftclickcombo':
       eventName = 'click'
+      break
+    case 'rightclickcombo':
+      eventName = 'contextmenu'
       break
     default:
       eventName = this.eventName
@@ -245,7 +252,7 @@ export default class Listenable {
 
       if (isWhitelisted) { // Whitelist always wins
         listener(...arguments)
-      } else if (whitelist.length === 0 && !isBlacklisted) { // Ignore blacklist when whitelist has elements
+      } else if (only.length === 0 && !isBlacklisted) { // Ignore blacklist when whitelist has elements
         listener(...arguments)
       }
     }

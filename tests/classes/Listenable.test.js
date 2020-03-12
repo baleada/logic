@@ -91,13 +91,24 @@ test('guesses keycombo type', t => {
   t.assert(instances.every(instance => instance._type === 'keycombo'))
 })
 
-test('guesses clickcombo type', t => {
-  const oneModifier = new Listenable('cmd+click'),
+test('guesses leftclickcombo type', t => {
+  const leftclick = new Listenable('click'),
+        oneModifier = new Listenable('cmd+click'),
         twoModifier = new Listenable('shift+cmd+click'),
         threeModifier = new Listenable('shift+alt+cmd+click'),
         fourModifier = new Listenable('shift+ctrl+alt+cmd+click')
   
-  t.assert([oneModifier, twoModifier, threeModifier, fourModifier].every(instance => instance._type === 'clickcombo'))
+  t.assert([leftclick, oneModifier, twoModifier, threeModifier, fourModifier].every(instance => instance._type === 'leftclickcombo'))
+})
+
+test('guesses rightclickcombo type', t => {
+  const rightclick = new Listenable('cmd+rightclick'),
+        oneModifier = new Listenable('cmd+rightclick'),
+        twoModifier = new Listenable('shift+cmd+rightclick'),
+        threeModifier = new Listenable('shift+alt+cmd+rightclick'),
+        fourModifier = new Listenable('shift+ctrl+alt+cmd+rightclick')
+  
+  t.assert([rightclick, oneModifier, twoModifier, threeModifier, fourModifier].every(instance => instance._type === 'rightclickcombo'))
 })
 
 
