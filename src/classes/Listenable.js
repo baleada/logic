@@ -146,7 +146,7 @@ export default class Listenable {
               this._computedRecognizeable.recognize(event)
 
               if (this._computedRecognizeable.status === 'recognized') {
-                blackAndWhiteListedListener(event, this.recognizeable, recognizeableListenerApi)
+                blackAndWhiteListedListener({ event, recognizeable: this.recognizeable, api: recognizeableListenerApi })
               }
             }, ...listenerOptions]
           })
@@ -246,9 +246,18 @@ export default class Listenable {
   _getBlackAndWhiteListedListener (listener, options) {
     const { except = [], only = [] } = options
 
-    function blackAndWhiteListedListener (event) {
-      const { target } = event,
-            [isWhitelisted, isBlacklisted] = [only, except].map(selectors => selectors.some(selector => target.matches(selector)))
+    function blackAndWhiteListedListener (eventOrRecognizeableCallbackObject) {
+      let target
+      switch (this._type) {
+      case 'recognizeable':
+        target = eventOrRecognizeableCallbackObject.event.target
+        break
+      default:
+        target = eventOrRecognizeableCallbackObject.target
+        break
+      }
+      
+      const [isWhitelisted, isBlacklisted] = [only, except].map(selectors => selectors.some(selector => target.matches(selector)))
 
       if (isWhitelisted) { // Whitelist always wins
         listener(...arguments)
