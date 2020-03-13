@@ -30,6 +30,7 @@
   },
   "homepage": "https://baleada.netlify.com",
   "devDependencies": {
+    "@ava/babel": "^1.0.1",
     "@babel/cli": "^7.7.4",
     "@babel/core": "^7.7.4",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
@@ -39,7 +40,7 @@
     "@babel/runtime-corejs3": "^7.7.4",
     "@baleada/prepare": "0.0.2",
     "@nuxtjs/eslint-config": "^1.1.2",
-    "ava": "^2.4.0",
+    "ava": "^3.5.0",
     "babel-eslint": "^10.0.3",
     "core-js": "^3.4.5",
     "eslint": "^6.7.2",

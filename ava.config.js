@@ -1,15 +1,14 @@
 export default {
   files: [ 'tests/**/*.test.js' ],
-  helpers: [
-    'src/**/*.js',
-    // 'node_modules/@baleada/gesture/**/*.js',
-    'tests/test-util/*.js',
-  ],
   verbose: true,
   require: [
     './tests/test-util/setup.js'
   ],
   babel: {
+    compileAsTests: [
+      'src/**/*.js',
+      'tests/test-util/*.js',
+    ],
     testOptions: {
       presets: [
         [
@@ -22,8 +21,8 @@ export default {
         ],
       ],
       plugins: [
-        '@babel/plugin-proposal-class-properties',
-        '@babel/plugin-proposal-private-methods'
+        // '@babel/plugin-proposal-class-properties',
+        // '@babel/plugin-proposal-private-methods'
       ]
     }
   }
