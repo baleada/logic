@@ -5,12 +5,16 @@
  */
 
 /* Dependencies */
-import BezierEasing from 'bezier-easing'
-import { mix } from 'chroma-js/chroma-light'
 import Listenable from './Listenable'
 
 /* Utils */
-import { is } from '../util'
+import {
+  is,
+  toControlPoints,
+  toReversedControlPoints,
+  toToAnimationProgress,
+  ease,
+} from '../util'
 
 function byProgress ({ progress: progressA }, { progress: progressB }) {
   return progressA - progressB
@@ -24,9 +28,9 @@ const linearTiming = [
         duration: 0,
         // delay can be handled by delayable
         timing: [
-          { x: 0, y: 0 },
-          { x: 1, y: 1 },
-        ], // linear by default
+          0, 0,
+          1, 1,
+        ], // linear by default. Instinct was to do this as an array of two objects with x and y properties, but instead I'm matching CSS's and the internet's chosen format to make copy/pasting control points easier
         iterations: 1,
         alternates: false,
       }
@@ -34,14 +38,14 @@ const linearTiming = [
 export default class Animateable {
   constructor (keyframes, options = {}) {
     this._initialDuration = is.defined(options.duration) ? options.duration : defaultOptions.duration
-    this._timing = is.defined(options.timing) ? options.timing : defaultOptions.timing
+    this._controlPoints = is.defined(options.timing) ? toControlPoints(options.timing) : toControlPoints(defaultOptions.timing)
     this._iterationLimit = is.defined(options.iterations) ? options.iterations : defaultOptions.iterations
     this._alternates = is.defined(options.alternates) ? options.alternates : defaultOptions.alternates
 
-    this._reversedTiming = this._toReversedTiming(this._timing)
+    this._reversedControlPoints = toReversedControlPoints(this._controlPoints)
     
-    this._toAnimationProgress = this._toToAnimationProgress(this._timing)
-    this._reversedToAnimationProgress = this._toToAnimationProgress(this._reversedTiming)
+    this._toAnimationProgress = toToAnimationProgress(this._controlPoints)
+    this._reversedToAnimationProgress = toToAnimationProgress(this._reversedControlPoints)
 
     this._playCache = {}
     this._reverseCache = {}
@@ -56,13 +60,6 @@ export default class Animateable {
     this._resetTime()
     this._resetProgress()
     this._resetIterations()
-  }
-  _toReversedTiming (timing) {
-    return timing.reverse().map(({ x, y }) => ({ x: 1 - x, y: 1 - y }))
-  }
-  _toToAnimationProgress (timing) {
-    const { 0: { x: p1x, y: p1y }, 1: { x: p2x, y: p2y } } = timing
-    return BezierEasing(p1x, p1y, p2x, p2y)
   }
   _ready () {
     this._computedStatus = 'ready'
@@ -116,8 +113,7 @@ export default class Animateable {
 
     this._computedKeyframes = Array.from(keyframes).sort(byProgress) // Sort without mutating original
 
-    this._reversedKeyframes = this.keyframes
-      .slice().reverse() // Reverse without mutating
+    this._reversedKeyframes = Array.from(this.keyframes).reverse() // Reverse without mutating
       .map(({ progress, data }) => ({ progress: 1 - progress, data }))
 
     this._properties = this._getProperties()
@@ -144,7 +140,7 @@ export default class Animateable {
                     hasCustomTiming = is.defined(keyframe.timing),
                     toAnimationProgress = index === array.length - 1
                       ? timeProgress => 1
-                      : this._toToAnimationProgress((hasCustomTiming && keyframe.timing) || this._timing)
+                      : toToAnimationProgress((hasCustomTiming && toControlPoints(keyframe.timing)) || this._controlPoints)
 
               return [
                 ...propertyEaseables,
@@ -183,7 +179,7 @@ export default class Animateable {
                     hasCustomTiming = is.defined(keyframe.timing),
                     toAnimationProgress = index === array.length - 1
                       ? timeProgress => 1
-                      : this._toToAnimationProgress((hasCustomTiming && this._toReversedTiming(array[index + 1].timing)) || this._reversedTiming)
+                      : toToAnimationProgress((hasCustomTiming && toReversedControlPoints(toControlPoints(array[index + 1].timing))) || this._reversedControlPoints)
 
               return [
                 ...propertyEaseables,
@@ -513,7 +509,7 @@ export default class Animateable {
         return {
           data: {
             ...frame.data,
-            [property]: this._ease(previous, next, animationProgress, easeOptions)
+            [property]: ease(previous, next, animationProgress, easeOptions)
           },
           progress: {
             ...frame.progress,
@@ -521,30 +517,6 @@ export default class Animateable {
           }
         }
       }, { data: {}, progress: {} })
-  }
-  _ease (previous, next, progress, options = {}) {
-    if (is.undefined(previous)) {
-      return next
-    } else {
-      let eased
-    
-      // TODO validate matching previous and next types
-
-      if (is.number(previous)) {
-        eased = (next - previous) * progress + previous
-      } else if (is.string(previous)) {
-        const { colorMixMode } = options
-        eased = mix(previous, next, progress, colorMixMode)
-      } else if (is.array(previous)) {
-        const sliceToExact = (next.length - previous.length) * progress + previous.length,
-              nextIsLonger = next.length > previous.length,
-              sliceTo = nextIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
-              shouldBeSliced = nextIsLonger ? next : previous
-        eased = shouldBeSliced.slice(0, sliceTo)
-      }
-  
-      return eased
-    }
   }
   _recurse (type, timeRemaining, callback, options) {
     switch (type) {
