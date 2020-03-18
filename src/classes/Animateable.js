@@ -16,27 +16,29 @@ function byProgress ({ progress: progressA }, { progress: progressB }) {
   return progressA - progressB
 }
 
-export default class Animateable {
-  constructor (keyframes, options = {}) {
-    /* Options */
-    options = {
-      duration: 0,
-      // delay can be handled by delayable
-      timing: [
+const linearTiming = [
         { x: 0, y: 0 },
         { x: 1, y: 1 },
-      ], // linear by default
-      iterations: 1,
-      alternates: false,
-      ...options
-    }
+      ],
+      defaultOptions = {
+        duration: 0,
+        // delay can be handled by delayable
+        timing: [
+          { x: 0, y: 0 },
+          { x: 1, y: 1 },
+        ], // linear by default
+        iterations: 1,
+        alternates: false,
+      }
 
-    this._initialDuration = options.duration
-    this._timing = options.timing
+export default class Animateable {
+  constructor (keyframes, options = {}) {
+    this._initialDuration = is.defined(options.duration) ? options.duration : defaultOptions.duration
+    this._timing = is.defined(options.timing) ? options.timing : defaultOptions.timing
+    this._iterationLimit = is.defined(options.iterations) ? options.iterations : defaultOptions.iterations
+    this._alternates = is.defined(options.alternates) ? options.alternates : defaultOptions.alternates
+
     this._reversedTiming = this._toReversedTiming(this._timing)
-    this._iterationLimit = options.iterations
-    this._alternates = options.alternates
-    this._fillMode = options.fillMode
     
     this._toAnimationProgress = this._toToAnimationProgress(this._timing)
     this._reversedToAnimationProgress = this._toToAnimationProgress(this._reversedTiming)
