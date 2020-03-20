@@ -53,7 +53,6 @@ export default class Recognizeable {
     this._computedStatus = 'recognized'
   }
   _denied () {
-    this._resetComputedMetadata()
     this._computedStatus = 'denied'
   }
   _ready () {
@@ -114,7 +113,8 @@ export default class Recognizeable {
 
     switch (this.status) {
     case 'denied':
-      this.setSequence([]) // This specific line makes me think Recognizeable doesn't belong with the other classes
+      this._resetComputedMetadata()
+      this.setSequence([])
       break
     case 'recognizing':
     case 'recognized':
