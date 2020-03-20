@@ -52,7 +52,7 @@ export default class Fetchable {
     return this
   }
   _setResponse (response) {
-    this.response = response
+    this._computedResponse = response
     this._updateResponseJson()
     return this
   }
