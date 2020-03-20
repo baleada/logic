@@ -92,7 +92,7 @@ export default class Recognizeable {
   }
 
   setSequence (sequence) {
-    this._computedSequence = sequence
+    this._computedSequence = Array.from(sequence)
     return this
   }
 
