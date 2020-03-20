@@ -10,6 +10,11 @@ import { emit, is, toPolarCoordinates } from '../util'
 /* Dependencies */
 import objectPath from 'object-path'
 
+const defaultOptions = {
+  maxSequenceLength: true,
+  handlers: {},
+}
+
 export default class Recognizeable {
   constructor (sequence, options = {}) {
     /* Options */
@@ -18,9 +23,8 @@ export default class Recognizeable {
       ...options,
     }
 
-    this._maxSequenceLength = options.maxSequenceLength
-    this._onRecognize = options.onRecognize
-    this._handlers = options.handlers || {}
+    this._maxSequenceLength = is.defined(options.maxSequenceLength) ? options.maxSequenceLength : defaultOptions.maxSequenceLength
+    this._handlers = is.defined(options.handlers) ? options.handlers : defaultOptions.handlers
 
     this._resetComputedMetadata()
 
@@ -28,14 +32,14 @@ export default class Recognizeable {
 
     this._handlerApi = {
       toPolarCoordinates,
-      recognized: () => this._recognized(),
-      denied: () => this._denied(),
       getStatus: () => this.status,
       getMetadata: () => this.metadata,
       // TODO: require object with appropriate properties on all methods below
       setMetadata: ({ path, value }) => this._setMetadata(path, value),
       pushMetadata: ({ path, value }) => this._pushMetadata(path, value),
       insertMetadata: ({ path, value, index }) => this._insertMetadata(path, value, index),
+      recognized: () => this._recognized(),
+      denied: () => this._denied(),
     }
 
     this._ready()
@@ -86,9 +90,6 @@ export default class Recognizeable {
   get metadata () {
     return this._computedMetadata.get()
   }
-  get lastEvent () {
-    return this.sequence[this.sequence.length - 1]
-  }
 
   setSequence (sequence) {
     this._computedSequence = sequence
@@ -105,16 +106,15 @@ export default class Recognizeable {
           newSequence = [ ...this.sequence.slice(excess), event ]
 
     if (is.function(this._handlers[type])) {
-      this._handlers[type](event, {
+      this._handlers[type]({ event,
         ...this._handlerApi,
         getSequence: () => newSequence,
-        getLastEvent: () => newSequence[newSequence.length - 1]
       })
     }
 
     switch (this.status) {
     case 'denied':
-      this.setSequence([])
+      this.setSequence([]) // This specific line makes me think Recognizeable doesn't belong with the other classes
       break
     case 'recognizing':
     case 'recognized':

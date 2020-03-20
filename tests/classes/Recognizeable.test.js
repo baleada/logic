@@ -58,7 +58,7 @@ test('recognize(event) calls handler', t => {
 test('handler API recognized() sets status', t => {
   const instance = t.context.setup({
     handlers: {
-      [eventTypeStub]: (event, { recognized }) => recognized()
+      [eventTypeStub]: ({ recognized }) => recognized()
     }
   })
 
@@ -70,7 +70,7 @@ test('handler API recognized() sets status', t => {
 test('handler API denied() sets status', t => {
   const instance = t.context.setup({
     handlers: {
-      [eventTypeStub]: (event, { denied }) => denied()
+      [eventTypeStub]: ({ denied }) => denied()
     }
   })
 
@@ -84,7 +84,7 @@ test('handler API getSequence() gets new sequence', t => {
 
   const instance = t.context.setup({
     handlers: {
-      [eventTypeStub]: (event, { getSequence }) => (value = getSequence())
+      [eventTypeStub]: ({ getSequence }) => (value = getSequence())
     }
   })
 
@@ -98,7 +98,7 @@ test('handler API getStatus() gets status', t => {
 
   const instance = t.context.setup({
     handlers: {
-      [eventTypeStub]: (event, { getStatus }) => (value = getStatus())
+      [eventTypeStub]: ({ getStatus }) => (value = getStatus())
     }
   })
 
@@ -107,26 +107,12 @@ test('handler API getStatus() gets status', t => {
   t.is(value, instance.status)
 })
 
-test('handler API getLastEvent() gets new last event', t => {
-  let value
-
-  const instance = t.context.setup({
-    handlers: {
-      [eventTypeStub]: (event, { getLastEvent }) => (value = getLastEvent())
-    }
-  })
-
-  instance.recognize(eventStub)
-
-  t.deepEqual(value, instance.lastEvent)
-})
-
 test('handler API getMetadata() gets metadata', t => {
   let value
 
   const instance = t.context.setup({
     handlers: {
-      [eventTypeStub]: (event, { getMetadata }) => (value = getMetadata())
+      [eventTypeStub]: ({ getMetadata }) => (value = getMetadata())
     }
   })
 
@@ -138,7 +124,7 @@ test('handler API getMetadata() gets metadata', t => {
 test('handler API setMetadata() sets metadata', t => {
   const instance = t.context.setup({
     handlers: {
-      [eventTypeStub]: (event, { setMetadata }) => (setMetadata({ path: 'example.path', value: 'baleada' }))
+      [eventTypeStub]: ({ setMetadata }) => (setMetadata({ path: 'example.path', value: 'baleada' }))
     }
   })
 
@@ -150,7 +136,7 @@ test('handler API setMetadata() sets metadata', t => {
 test('handler API pushMetadata() pushes metadata', t => {
   const instance = t.context.setup({
     handlers: {
-      [eventTypeStub]: (event, { pushMetadata }) => (pushMetadata({ path: 'example.path', value: 'baleada' }))
+      [eventTypeStub]: ({ pushMetadata }) => (pushMetadata({ path: 'example.path', value: 'baleada' }))
     }
   })
 
@@ -162,7 +148,7 @@ test('handler API pushMetadata() pushes metadata', t => {
 test('handler API insertMetadata() inserts metadata', t => {
   const instance = t.context.setup({
     handlers: {
-      [eventTypeStub]: (event, { pushMetadata, insertMetadata }) => {
+      [eventTypeStub]: ({ pushMetadata, insertMetadata }) => {
         pushMetadata({ path: 'example.path', value: 'toolkit' })
         insertMetadata({ path: 'example.path', value: 'baleada', index: 0 })
       }
