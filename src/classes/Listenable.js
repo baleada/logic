@@ -8,7 +8,7 @@
 import Recognizeable from './Recognizeable'
 
 /* Utils */
-import { is, toDirection } from '../util'
+import { is } from '../util'
 
 /* Constants */
 import { observers } from '../constants'
@@ -28,11 +28,6 @@ const mediaQueryRegexp = /^\(.+\)$/,
         alt: event => event.altKey,
         opt: event => event.altKey,
       }
-
-// TODO: figure out why this was undefined when imported from constants
-const recognizeableListenerApi = {
-  toDirection
-}
 
 export default class Listenable {
   constructor (eventType, options = {}) {
@@ -146,7 +141,7 @@ export default class Listenable {
               this._computedRecognizeable.recognize(event)
 
               if (this._computedRecognizeable.status === 'recognized') {
-                blackAndWhiteListedListener({ event, recognizeable: this.recognizeable, api: recognizeableListenerApi })
+                blackAndWhiteListedListener({ event, recognizeable: this.recognizeable })
               }
             }, ...listenerOptions]
           })

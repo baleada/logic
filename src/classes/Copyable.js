@@ -1,8 +1,8 @@
 /*
- * Copyable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
+* Copyable.js
+* (c) 2019-present Alex Vipond
+* Released under the MIT license
+*/
 
 export default class Copyable {
   constructor (string, options = {}) {
@@ -22,13 +22,21 @@ export default class Copyable {
   get status () {
     return this._computedStatus
   }
-
+  // TODO: Test this, including in firefox
+  // get clipboardText () {
+  //   return navigator.clipboard.readText()
+  //     .then(text => {
+  //       this._computedClipboardText = text
+  //       return this._computedClipboardText
+  //     })
+  // }
+  
   setString (string) {
     this._computedString = string
     return this
   }
-
-  async copy (options = {}) {
+  
+  async copy (options = {}) {    
     const { usesFallback } = options
     
     if (usesFallback) {
@@ -40,7 +48,7 @@ export default class Copyable {
       await navigator.clipboard.writeText(this.string)
       this._copied()
     }
-
+    
     return this
   }
   _copying () {
@@ -53,11 +61,11 @@ export default class Copyable {
     const input = document.createElement('input')
     input.type = 'text'
     input.value = this.string
-
+    
     document.body.appendChild(input)
     input.select()
     document.execCommand('copy')
-
+    
     document.body.removeChild(input)
   }
 }
