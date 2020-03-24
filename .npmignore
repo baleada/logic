@@ -4,6 +4,4 @@
 # Except these files
 # !dist/**/*.js
 !lib/**/*.js
-!classes.js
-!factories.js
 !metadata.js

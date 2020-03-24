@@ -1,8 +1,8 @@
 const fs = require('fs')
 
 module.exports = function() {
-  const classes = fs.readdirSync('./src/classes'),
-        factories = fs.readdirSync('./src/factories'),
+  const classes = fs.readdirSync('./src/classes').filter(file => !/index\.js$/.test(file)),
+        factories = fs.readdirSync('./src/factories').filter(file => !/index\.js$/.test(file)),
         classMetadata = getClassMetadata(classes),
         subclassMetadata = getFactoriesMetadata(factories),
         metadata = {

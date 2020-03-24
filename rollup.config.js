@@ -19,18 +19,6 @@ const external = [
 export default [
   {
     external,
-    input: 'src/classes/index.js',
-    output: { file: 'classes/index.js', format: 'esm' },
-    plugins,
-  },
-  {
-    external,
-    input: 'src/factories/index.js',
-    output: { file: 'factories/index.js', format: 'esm' },
-    plugins,
-  },
-  {
-    external,
     input: 'src/index.js',
     output: { file: 'lib/index.js', format: 'esm' },
     plugins,
