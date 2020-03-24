@@ -1,0 +1,6 @@
+export { default as deleteable } from './deleteable.js'
+export { default as insertable } from './insertable.js'
+export { default as markupable } from './markupable.js'
+export { default as renameable } from './renameable.js'
+export { default as reorderable } from './reorderable.js'
+export { default as replaceable } from './replaceable.js'

@@ -1,21 +1,30 @@
-const generateIndex = require('./generateIndex'),
+const { empty, generateIndex } = require('@baleada/prepare'),
       generateMetadata = require('./generateMetadata'),
-      babelify = require('./babelify')
+      compile = require('./compile')
 
 function prepare () {
+  empty('lib')
+
   /* Index all */
-  generateIndex('src/classes', { importPath: 'lib/classes', outfile: 'classes' })
-  generateIndex('src/factories', { importPath: 'lib/factories', outfile: 'factories' })
+  generateIndex('src/classes')
+  generateIndex('src/factories')
   generateIndex('src/constants')
   generateIndex('src/util')
-  // generateIndex('src/wrappers')
+
+  /* Top level index */
+  generateIndex(
+    ['src/classes', 'src/factories'],
+    { outfile: 'src/index' }
+  )
 
   /* Generate metadata */
   generateMetadata()
 
   /* Transform files */
-  babelify()
+  // babelify()
   // browserify()
+
+  compile()
 }
 
 prepare()

@@ -1,6 +1,0 @@
-export { default as deleteable } from './lib/factories/deleteable.js'
-export { default as insertable } from './lib/factories/insertable.js'
-export { default as markupable } from './lib/factories/markupable.js'
-export { default as renameable } from './lib/factories/renameable.js'
-export { default as reorderable } from './lib/factories/reorderable.js'
-export { default as replaceable } from './lib/factories/replaceable.js'

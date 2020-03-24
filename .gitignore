@@ -90,3 +90,7 @@ sw.*
 lib
 browser-lib
 dist
+classes
+factories
+!src/classes
+!src/factories
