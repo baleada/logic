@@ -3,7 +3,7 @@
 const is = {
   undefined: a => typeof a === 'undefined',
   defined: a => typeof a !== 'undefined',
-  // null: a => a === null,
+  null: a => a === null,
   string: a => typeof a === 'string',
   number: a => typeof a === 'number',
   // boolean: a => typeof a === 'boolean',

@@ -16,7 +16,6 @@ export default class Storeable {
     this._type = is.defined(options.type) ? options.type : defaultOptions.type
 
     this.setKey(key)
-    this._computedStatusKey = `${this.key}.status`
     this._computedError = {}
     this._ready()
   }
@@ -24,7 +23,9 @@ export default class Storeable {
     this._computedStatus = 'ready'
 
     if (domIsAvailable()) {
-      this._storeStatus()
+      if (is.null(this.storage.getItem(this._computedStatusKey))) {
+        this._storeStatus()
+      }
     }
   }
 
@@ -35,9 +36,14 @@ export default class Storeable {
     this.setKey(key)
   }
   get status () {
-    return domIsAvailable()
-      ? this.storage.getItem(this._computedStatusKey)
-      : this._computedStatus
+    if (domIsAvailable()) {
+      const storedStatus = this.storage.getItem(this._computedStatusKey)
+      if (this._computedStatus !== storedStatus) {
+        this._computedStatus = storedStatus
+      }
+    }
+
+    return this._computedStatus
   }
   get storage () {
     switch (this._type) {
@@ -65,7 +71,7 @@ export default class Storeable {
     case 'stored':
       string = this.string
       this.remove()
-      this._removeStatus(this._computedStatusKey)
+      this.removeStatus(this._computedStatusKey)
       this._computedKey = key
       this._computedStatusKey = `${key}.status`
       this.store(string)
