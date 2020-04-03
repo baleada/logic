@@ -1,4 +1,5 @@
 export { default as capitalize } from './capitalize.js'
+export { default as domIsAvailable } from './domIsAvailable.js'
 export { default as ease } from './ease.js'
 export { default as emit } from './emit.js'
 export { default as error } from './error.js'

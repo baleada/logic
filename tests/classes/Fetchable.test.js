@@ -48,4 +48,9 @@ test('status.responseJson is "ready" after construction', t => {
 // responseJson
 
 // fetch
+// get
+// patch
+// post
+// put
+// delete
 

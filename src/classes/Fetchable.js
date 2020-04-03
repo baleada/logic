@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-export default class Fetchable {
+ export default class Fetchable {
   constructor (resource, options = {}) {
     this.setResource(resource)
     this._computedResponse = {}
@@ -63,6 +63,26 @@ export default class Fetchable {
     this._computedStatus.response = 'fetched'
     this._setResponse(response)
 
+    return this
+  }
+  async get (options = {}) {
+    await this.fetch({ ...options, method: 'get' })
+    return this
+  }
+  async patch (options = {}) {
+    await this.fetch({ ...options, method: 'patch' })
+    return this
+  }
+  async post (options = {}) {
+    await this.fetch({ ...options, method: 'post' })
+    return this
+  }
+  async put (options = {}) {
+    await this.fetch({ ...options, method: 'put' })
+    return this
+  }
+  async delete (options = {}) {
+    await this.fetch({ ...options, method: 'delete' })
     return this
   }
 }
