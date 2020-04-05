@@ -1,10 +1,25 @@
-/*
- * Fetchable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
+/**
+* Fetchable.js
+* (c) 2019-present Alex Vipond
+* Released under the MIT license
+**/
 
- export default class Fetchable {
+import { is } from '../util'
+
+function resolveOptions (options) {
+  return is.function(options)
+    ? options({ withJson })
+    : options
+}
+
+function withJson (data) {
+  return {
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' },
+  }
+}
+
+export default class Fetchable {
   constructor (resource, options = {}) {
     this.setResource(resource)
     this._computedResponse = {}
@@ -58,6 +73,7 @@
   }
   
   async fetch (options) {
+    options = resolveOptions(options)
     this._computedStatus.response = 'fetching'
     const response = await fetch(this.resource, options)
     this._computedStatus.response = 'fetched'
