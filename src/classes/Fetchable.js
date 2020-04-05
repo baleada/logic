@@ -106,22 +106,27 @@ export default class Fetchable {
     return this
   }
   async get (options = {}) {
+    options = resolveOptions(options)
     await this.fetch({ ...options, method: 'get' })
     return this
   }
   async patch (options = {}) {
+    options = resolveOptions(options)
     await this.fetch({ ...options, method: 'patch' })
     return this
   }
   async post (options = {}) {
+    options = resolveOptions(options)
     await this.fetch({ ...options, method: 'post' })
     return this
   }
   async put (options = {}) {
+    options = resolveOptions(options)
     await this.fetch({ ...options, method: 'put' })
     return this
   }
   async delete (options = {}) {
+    options = resolveOptions(options)
     await this.fetch({ ...options, method: 'delete' })
     return this
   }
