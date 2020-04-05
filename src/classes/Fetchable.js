@@ -4,6 +4,8 @@
 * Released under the MIT license
 **/
 
+import Resolveable from './Resolveable'
+
 import { is } from '../util'
 
 function resolveOptions (options) {
@@ -15,7 +17,10 @@ function resolveOptions (options) {
 function withJson (data) {
   return {
     body: JSON.stringify(data),
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
   }
 }
 
@@ -23,14 +28,17 @@ export default class Fetchable {
   constructor (resource, options = {}) {
     this.setResource(resource)
     this._computedResponse = {}
-    this._computedResponseJson = {}
+
+    this._computedArrayBuffer = new Resolveable(() => this.response.arrayBuffer())
+    this._computedBlob = new Resolveable(() => this.response.blob())
+    this._computedFormData = new Resolveable(() => this.response.formData())
+    this._computedJson = new Resolveable(() => this.response.json())
+    this._computedText = new Resolveable(() => this.response.text())
+
     this._ready()
   }
   _ready () {
-    this._computedStatus = {
-      response: 'ready',
-      responseJson: 'ready',
-    }
+    this._computedStatus = 'ready'
   }
 
   get resource () {
@@ -45,21 +53,38 @@ export default class Fetchable {
   get response () { 
     return this._computedResponse
   }
-  get responseJson () {
-    return this._computedResponseJson
+  get arrayBuffer () {
+    return this._getUsedBody(this._computedArrayBuffer)
+  }
+  get blob () {
+    return this._getUsedBody(this._computedBlob)
+  }
+  get formData () {
+    return this._getUsedBody(this._computedFormData)
+  }
+  get json () {
+    return this._getUsedBody(this._computedJson)
+  }
+  get text () {
+    return this._getUsedBody(this._computedText)
   }
 
-  async _updateResponseJson () {
-    try {
-      this._computedStatus.responseJson = 'updating'
-      this._computedResponseJson = await this.response.json()
-      this._computedStatus.responseJson = 'updated'
-    } catch (error) {
-      this._computedResponseJson = error
-      this._computedStatus.responseJson = 'errored'
+  _getUsedBody (resolveable) {
+    if (!this.response.bodyUsed) {
+      return resolveable.resolve()
+    } else {
+      switch (resolveable.status) {
+      case 'ready':
+        // Unreachable state
+        break
+      case 'resolving':
+        // warn?
+        break
+      case 'resolved':
+      case 'errored':
+        return resolveable
+      }
     }
-
-    return this
   }
 
   setResource (resource) {
@@ -68,16 +93,15 @@ export default class Fetchable {
   }
   _setResponse (response) {
     this._computedResponse = response
-    this._updateResponseJson()
     return this
   }
   
   async fetch (options) {
     options = resolveOptions(options)
-    this._computedStatus.response = 'fetching'
+    this._computedStatus = 'fetching'
     const response = await fetch(this.resource, options)
-    this._computedStatus.response = 'fetched'
-    this._setResponse(response)
+    this._computedResponse = response
+    this._computedStatus = 'fetched'
 
     return this
   }

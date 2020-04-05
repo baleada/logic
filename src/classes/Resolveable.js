@@ -26,6 +26,9 @@
   get response () { 
     return this._computedResponse
   }
+  get error () {
+    return this._computedError
+  }
 
   setPromiseGetter (promiseGetter) {
     this._computedPromiseGetter = promiseGetter
@@ -35,9 +38,14 @@
   
   async resolve () {
     this._computedStatus = 'resolving'
-    const response = await this.promiseGetter(...arguments)
-    this._computedResponse = response
-    this._computedStatus = 'resolved'
+    try {
+      const response = await this.promiseGetter(...arguments)
+      this._computedResponse = response
+      this._computedStatus = 'resolved'
+    } catch (error) {
+      this._computedError = error
+      this._computedStatus = 'errored'
+    }
     
     return this
   }
