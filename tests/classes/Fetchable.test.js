@@ -30,22 +30,20 @@ test('setResource sets the resource', t => {
   t.is(instance.resource, 'http://httpbin.org/post')
 })
 
-test('status.response is "ready" after construction', t => {
+test('status is "ready" after construction', t => {
   const instance = t.context.setup()
 
-  t.is(instance.status.response, 'ready')
-})
-
-test('status.responseJson is "ready" after construction', t => {
-  const instance = t.context.setup()
-
-  t.is(instance.status.responseJson, 'ready')
+  t.is(instance.status, 'ready')
 })
 
 /* INFORMAL */
 
 // response
-// responseJson
+// arrayBuffer
+// blob
+// formData
+// json
+// text
 
 // fetch
 // get

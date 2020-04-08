@@ -38,8 +38,9 @@
   
   async resolve () {
     this._computedStatus = 'resolving'
+    let response
     try {
-      const response = await this.promiseGetter(...arguments)
+      response = await this.promiseGetter(...arguments)
       this._computedResponse = response
       this._computedStatus = 'resolved'
     } catch (error) {
