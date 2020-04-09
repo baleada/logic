@@ -34,6 +34,7 @@
     "@babel/cli": "^7.7.4",
     "@babel/core": "^7.7.4",
     "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-optional-chaining": "^7.9.0",
     "@babel/plugin-proposal-private-methods": "^7.7.4",
     "@babel/plugin-transform-regenerator": "^7.7.4",
     "@babel/preset-env": "^7.7.4",
@@ -52,7 +53,7 @@
     "eslint-plugin-nuxt": "^0.5.1",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "fast-async": "^6.3.8",
+    "fast-async": "^7.0.6",
     "puppeteer": "^1.20.0",
     "regenerator-runtime": "^0.13.3",
     "rollup-plugin-babel": "^4.4.0"

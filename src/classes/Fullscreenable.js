@@ -15,7 +15,7 @@
   }
 
   get elementGetter () {
-    return this._computedResource
+    return this._computedElementGetter
   }
   set elementGetter (elementGetter) {
     this.setElementGetter(elementGetter)
@@ -31,7 +31,7 @@
   }
 
   setElementGetter (elementGetter) {
-    this._computedResource = () => elementGetter()
+    this._computedElementGetter = () => elementGetter()
     return this
   }
 
@@ -55,7 +55,7 @@
     this._computedStatus = 'fullscreened'
   }
   _fullscreenErrored () {
-    this._computedStatus = '_fullscreenErrored'
+    this._computedStatus = 'fullscreenErrored'
   }
 
   async exit () {
@@ -73,6 +73,6 @@
     this._computedStatus = 'exited'
   }
   _exitErrored () {
-    this._computedStatus = '_exitErrored'
+    this._computedStatus = 'exitErrored'
   }
 }
