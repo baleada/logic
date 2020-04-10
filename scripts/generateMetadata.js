@@ -17,11 +17,19 @@ module.exports = function() {
 }
 
 function getClassMetadata (classes) {
-  return classes.map(file => ({ name: getName(file), usesDOM: getUsesDOM(file), needsCleanup: getNeedsCleanup(file) }))
+  return classes.map(file => ({
+    name: getName(file),
+    usesDOM: getUsesDOM(file),
+    needsCleanup: getNeedsCleanup(file),
+    external: getExternal(file, 'classes'),
+  }))
 }
 
 function getFactoriesMetadata (factories) {
-  return factories.map(file => ({ name: getName(file) }))
+  return factories.map(file => ({
+    name: getName(file),
+    external: getExternal(file, 'factories'),
+  }))
 }
 
 function getName (file) {
@@ -35,6 +43,16 @@ function getUsesDOM (file) {
         { 1: constructor = '' } = contents.match(constructorRegexp) || []
 
   return usesDomRegexp.test(constructor)
+}
+
+const externalRegexp = /\/\/ METADATA: EXTERNAL (.+)/ // If a class or factory has external dependencies, they will be pipe-separated in a 'METADATA: EXTERNAL' comment
+function getExternal (file, type) {
+  const contents = fs.readFileSync(`./src/${type}/${file}`, 'utf8'),
+        { 1: external = '' } = contents.match(externalRegexp) || []
+        
+  return external
+    ? external.split('|')
+    : []
 }
 
 const needsCleanupRegexp = /\n\s+stop ?\(.*?\) {/ // If the class has a `stop` method, it needs cleanup

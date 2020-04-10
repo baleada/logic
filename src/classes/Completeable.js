@@ -5,7 +5,7 @@
  */
 
 /* Util */
-import { lastMatch, emit } from '../util'
+import lastMatch from '../util/lastMatch'
 
 export default class Completeable {
   constructor (string, options = {}) {

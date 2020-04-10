@@ -5,10 +5,12 @@
  */
 
 /* Utils */
-import { emit, is, toPolarCoordinates } from '../util'
+import is from '../util/is'
+import toPolarCoordinates from '../util/toPolarCoordinates'
 
 /* Dependencies */
 import objectPath from 'object-path'
+// METADATA: EXTERNAL object-path
 
 const defaultOptions = {
   maxSequenceLength: true,

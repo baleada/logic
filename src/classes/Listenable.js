@@ -6,12 +6,13 @@
 
 /* Dependencies */
 import Recognizeable from './Recognizeable'
+// METADATA: EXTERNAL object-path
 
 /* Utils */
-import { is } from '../util'
+import is from '../util/is.js'
 
 /* Constants */
-import { observers } from '../constants'
+import observers from '../constants/observers'
 const mediaQueryRegexp = /^\(.+\)$/,
       keycomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}(?:[a-zA-Z0-9]|tab|up|right|down|left|enter|backspace)$/,
       leftclickcomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}click$/,

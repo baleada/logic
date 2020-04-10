@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import { is } from '../util'
+import is from '../util/is.js'
 
 export default function deleteable (array) {
   const object = new Array(...array)

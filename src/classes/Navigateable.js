@@ -5,8 +5,6 @@
  */
 
 // Utils
-import { typedEmit } from '../util'
-
 class Navigateable {
   constructor (array, options = {}) {
     /* Options */

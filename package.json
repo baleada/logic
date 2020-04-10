@@ -1,8 +1,8 @@
 {
   "name": "@baleada/logic",
-  "version": "0.15.3",
+  "version": "0.15.7",
   "description": "UI logic for the Baleada toolkit",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {
     "prepare": "node scripts/prepare.js",
     "test": "npm run prepare && ava"
@@ -61,7 +61,6 @@
   "dependencies": {
     "bezier-easing": "^2.1.0",
     "chroma-js": "^2.1.0",
-    "clone-deep": "^4.0.1",
     "fast-fuzzy": "^1.9.1",
     "markdown-it": "^10.0.0",
     "object-path": "^0.11.4"

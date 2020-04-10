@@ -5,6 +5,7 @@
  */
 
 import MarkdownIt from 'markdown-it'
+// METADATA: EXTERNAL markdown-it
 
 export default function markupable (markdown, options = {}) {
   const markdownItOptions = options.markdownIt,

@@ -5,7 +5,8 @@
 **/
 
 /* Utils */
-import { is, domIsAvailable } from '../util'
+import is from '../util/is'
+import domIsAvailable from '../util/domIsAvailable'
 
 const defaultOptions = {
   type: 'local'

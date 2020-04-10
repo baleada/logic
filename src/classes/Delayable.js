@@ -5,9 +5,10 @@
  */
 
 import Animateable from './Animateable'
+// METADATA: EXTERNAL bezier-easing|chroma-js/chroma-light|object-path
 
 // Util
-import { guardUntilDelayed } from '../util'
+import guardUntilDelayed from '../util/guardUntilDelayed'
 
 export default class Delayable {
   constructor (callback, options) {

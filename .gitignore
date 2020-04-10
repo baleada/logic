@@ -87,7 +87,13 @@ sw.*
 .DS_Store
 
 # Published version
-lib
 browser-lib
 dist
 metadata.js
+index.js
+classes
+factories
+!src/classes
+!src/factories
+!tests/classes
+!tests/factories

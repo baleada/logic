@@ -1,9 +1,11 @@
 const { empty, generateIndex } = require('@baleada/prepare'),
       generateMetadata = require('./generateMetadata'),
-      compile = require('./compile')
+      compile = require('./compile'),
+      fs = require('fs')
 
 function prepare () {
-  empty('lib')
+  empty('classes')
+  empty('factories')
 
   /* Index all */
   generateIndex('src/classes')

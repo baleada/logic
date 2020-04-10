@@ -6,15 +6,14 @@
 
 /* Dependencies */
 import Listenable from './Listenable'
+// METADATA: EXTERNAL bezier-easing|chroma-js/chroma-light|object-path
 
 /* Utils */
-import {
-  is,
-  toControlPoints,
-  toReversedControlPoints,
-  toToAnimationProgress,
-  ease,
-} from '../util'
+import is from '../util/is'
+import toControlPoints from '../util/toControlPoints'
+import toReversedControlPoints from '../util/toReversedControlPoints'
+import toToAnimationProgress from '../util/toToAnimationProgress'
+import ease from '../util/ease'
 
 function byProgress ({ progress: progressA }, { progress: progressB }) {
   return progressA - progressB

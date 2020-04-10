@@ -6,7 +6,7 @@
 
 import Resolveable from './Resolveable'
 
-import { is } from '../util'
+import is from '../util/is.js'
 
 function resolveOptions (options) {
   return is.function(options)
