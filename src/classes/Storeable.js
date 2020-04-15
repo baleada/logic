@@ -14,11 +14,15 @@ const defaultOptions = {
 
 export default class Storeable {
   constructor (key, options = {}) {
+    this._constructing()
     this._type = is.defined(options.type) ? options.type : defaultOptions.type
 
     this.setKey(key)
     this._computedError = {}
     this._ready()
+  }
+  _constructing () {
+    this._computedStatus = 'constructing'
   }
   _ready () {
     this._computedStatus = 'ready'
@@ -64,7 +68,7 @@ export default class Storeable {
   setKey (key) {
     let string
     switch (this.status) {
-    case undefined:
+    case 'constructing':
     case 'ready':
       this._computedKey = key
       this._computedStatusKey = `${key}.status`
@@ -92,6 +96,7 @@ export default class Storeable {
   store (string) {
     try {
       this.storage.setItem(this.key, string)
+      this._computedString = string // This assignment allows reactivity tools to detect data change
       this._stored()
     } catch (error) {
       this._computedError = error
