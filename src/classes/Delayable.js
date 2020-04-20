@@ -9,23 +9,23 @@ import Animateable from './Animateable'
 
 // Util
 import guardUntilDelayed from '../util/guardUntilDelayed'
+import is from '../util/is'
+
+const defaultOptions = {
+  delay: 0,
+  executions: 1,
+}
 
 export default class Delayable {
   constructor (callback, options) {
-    options = {
-      delay: 0,
-      executions: 1,
-      ...options
-    }
-
     this._animateable = new Animateable(
       [
         { progress: 0, data: { progress: 0 } },
         { progress: 1, data: { progress: 1 } }
       ],
       {
-        duration: options.delay,
-        iterations: options.executions,
+        duration: is.defined(options.delay) ? options.delay : defaultOptions.delay,
+        iterations: is.defined(options.executions) ? options.executions : defaultOptions.executions,
       }
     )
 

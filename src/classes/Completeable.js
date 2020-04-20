@@ -6,21 +6,20 @@
 
 /* Util */
 import lastMatch from '../util/lastMatch'
+import is from '../util/is'
+
+const defaultOptions = {
+  segmentsFromDivider: false,
+  segmentsToLocation: false,
+  divider: /\s/,
+  // initialLocation
+}
 
 export default class Completeable {
-  constructor (string, options = {}) {
-    /* Options */
-    options = {
-      segmentsFromDivider: false,
-      segmentsToLocation: false,
-      divider: /\s/,
-      // initialLocation
-      ...options
-    }
-    
-    this._segmentsFromDivider = options.segmentsFromDivider
-    this._segmentsToLocation = options.segmentsToLocation
-    this._divider = options.divider
+  constructor (string, options = {}) {    
+    this._segmentsFromDivider = is.defined(options.segmentsFromDivider) ? options.segmentsFromDivider : defaultOptions.segmentsFromDivider
+    this._segmentsToLocation = is.defined(options.segmentsToLocation) ? options.segmentsToLocation : defaultOptions.segmentsToLocation
+    this._divider = is.defined(options.divider) ? options.divider : defaultOptions.divider
     // this._matchDirection = matchDirection TODO: is there a use case for nextMatch instead of lastMatch?
 
     this.setString(string)

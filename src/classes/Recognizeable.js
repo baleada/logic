@@ -19,12 +19,6 @@ const defaultOptions = {
 
 export default class Recognizeable {
   constructor (sequence, options = {}) {
-    /* Options */
-    options = {
-      maxSequenceLength: true,
-      ...options,
-    }
-
     this._maxSequenceLength = is.defined(options.maxSequenceLength) ? options.maxSequenceLength : defaultOptions.maxSequenceLength
     this._handlers = is.defined(options.handlers) ? options.handlers : defaultOptions.handlers
 

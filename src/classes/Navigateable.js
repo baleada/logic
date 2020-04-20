@@ -5,16 +5,16 @@
  */
 
 // Utils
+import is from '../util/is'
+
+const defaultOptions = {
+  initialLocation: 0,
+}
+
 class Navigateable {
   constructor (array, options = {}) {
-    /* Options */
-    options = {
-      initialLocation: 0,
-      ...options
-    }
-
     this.setArray(array)
-    this.navigate(options.initialLocation)
+    this.navigate(is.defined(options.initialLocation) ? options.initialLocation : defaultOptions.initialLocation)
     this._ready()
   }
   _ready () {

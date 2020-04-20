@@ -8,7 +8,6 @@ const external = [
         'bezier-easing',
         'chroma-js/chroma-light',
         'fast-fuzzy',
-        'markdown-it',
         'object-path',
       ],
       plugins = [
