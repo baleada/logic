@@ -1,20 +1,23 @@
-function lastMatch (string, regexp, fromIndex) {
-  if (fromIndex === undefined || fromIndex > string.length) fromIndex = string.length - 1
-  let indexOf
+import nextMatch from './nextMatch'
 
-  if (!regexp.test(string.slice(0, fromIndex)) || fromIndex === 0) {
+export default function lastMatch ({ string, expression, from }) {
+  // VALIDATE: from is 0...string.length
+
+  let indexOf
+  if (!expression.test(string.slice(0, from)) || from === 0) {
     indexOf = -1
   } else {
-    let i = fromIndex - 1
-    while (i > -1 && indexOf === undefined) {
-      indexOf = (regexp.test(string[i])) ? i : undefined
-      i--
-    }
-
-    if (indexOf === undefined) indexOf = -1
+    const reversedStringBeforeFrom = string
+            .slice(0, from)
+            .split('')
+            .reverse()
+            .join(''),
+          nextMatchIndex = nextMatch({ string: reversedStringBeforeFrom, expression, from: 0 })
+    
+    indexOf = nextMatchIndex === -1
+      ? -1
+      : (reversedStringBeforeFrom.length - 1) - nextMatchIndex
   }
 
   return indexOf
 }
-
-export default lastMatch

@@ -29,84 +29,76 @@ test('setString sets the string', t => {
   t.is(instance.string, 'Baleada')
 })
 
-test('initial location is the length of the string by default', t => {
+test('initial selection is at the end of the string by default', t => {
   const instance = t.context.setup()
 
-  t.is(instance.location, instance.string.length)
+  t.deepEqual(instance.selection, { start: instance.string.length, end: instance.string.length })
 })
 
-test('initial location can be customized via options', t => {
+test('initial selection can be customized via options', t => {
   const instance = t.context.setup({
-    initialLocation: 0,
+    initialSelection: { start: 0, end: 0 },
   })
 
-  t.is(instance.location, 0)
+  t.deepEqual(instance.selection, { start: 0, end: 0 })
 })
 
-test('assignment sets the location', t => {
+test('assignment sets the selection', t => {
   const instance = t.context.setup()
 
-  instance.location = 'Baleada: a toolkit'.length
+  instance.selection = { start: 0, end: 0 }
 
-  t.is(instance.location, 'Baleada: a toolkit'.length)
+  t.deepEqual(instance.selection, { start: 0, end: 0 })
 })
 
-test('setLocation sets the location', t => {
+test('setSelection sets the selection', t => {
   const instance = t.context.setup()
 
-  instance.setLocation('Baleada: a toolkit'.length)
+  instance.setSelection({ start: 0, end: 0 })
 
-  t.is(instance.location, 'Baleada: a toolkit'.length)
+  t.deepEqual(instance.selection, { start: 0, end: 0 })
 })
 
 /* segment */
-test('correctly segments when all options are defaults', t => {
+test('segments from start to end by default', t => {
   const instance = t.context.setup()
 
   t.is(instance.segment, instance.string)
 })
 
-test('correctly segments when segmentsFromDivider is true', t => {
-  const instance = t.context.setup({
-    segmentsFromDivider: true,
-  })
+test('segments from selection start when options.segment.from is "selection"', t => {
+  const instance = t.context.setup({ segment: { from: 'selection' } })
 
-  instance.setLocation('Baleada: a toolkit'.length)
+  instance.setSelection({ start: 'Baleada: a tool'.length, end: 0 }) // end is ignored when options.segment.to is default
+
+  t.is(instance.segment, 'kit for building web apps')
+})
+
+test('segments from divider when options.segment.from is "divider"', t => {
+  const instance = t.context.setup({ segment: { from: 'divider' } })
+
+  instance.setSelection({ start: 'Baleada: a tool'.length, end: 0 }) // end is ignored when options.segment.to is default
 
   t.is(instance.segment, 'toolkit for building web apps')
 })
 
-test('correctly segments when segmentsToLocation is true', t => {
-  const instance = t.context.setup({
-    segmentsToLocation: true,
-  })
+test('segments to selection end when options.segment.to is "selection"', t => {
+  const instance = t.context.setup({ segment: { to: 'selection' } })
 
-  instance.setLocation('Baleada: a toolkit'.length)
+  instance.setSelection({ start: 0, end: 'Baleada: a tool'.length - 1 }) // start is ignored when options.segment.from is default
+
+  t.is(instance.segment, 'Baleada: a tool')
+})
+
+test('segments to divider when options.segment.to is "divider"', t => {
+  const instance = t.context.setup({ segment: { to: 'divider' } })
+
+  instance.setSelection({ start: 0, end: 'Baleada: a tool'.length }) // start is ignored when options.segment.from is default
 
   t.is(instance.segment, 'Baleada: a toolkit')
 })
 
-test('correctly segments when segmentsFromDivider and segmentsToLocation are true', t => {
-  const instance = t.context.setup({
-    segmentsFromDivider: true,
-    segmentsToLocation: true,
-  })
 
-  instance.setLocation('Baleada: a toolkit'.length)
-
-  t.is(instance.segment, 'toolkit')
-})
-
-test('correctly segments when segmentsFromDivider is true AND divider is set to /:/', t => {
-  const instance = t.context.setup({
-    divider: /:/,
-    segmentsFromDivider: true
-  })
-
-  t.is(instance.segment, ' a toolkit for building web apps')
-})
-
-/* complete(completion) string */
 test('complete(completion) correctly inserts completion when all options are defaults', t => {
   const instance = t.context.setup()
 
@@ -115,82 +107,82 @@ test('complete(completion) correctly inserts completion when all options are def
   t.is(instance.string, 'Baleada')
 })
 
-test('complete(completion) correctly inserts completion when segmentsFromDivider is true', t => {
-  const instance = t.context.setup({
-    segmentsFromDivider: true,
-  })
+test('complete(completion) correctly inserts completion when options.segment.from is "selection"', t => {
+  const instance = t.context.setup({ segment: { from: 'selection' } })
 
-  instance.complete('applications')
+  // end is ignored when options.segment.to is default
+  // instance.segment is 'kit for building web apps' after this
+  instance.setSelection({ start: 'Baleada: a tool'.length, end: 0 })
 
-  t.is(instance.string, 'Baleada: a toolkit for building web applications')
+  instance.complete('kit')
+
+  t.is(instance.string, 'Baleada: a toolkit')
 })
 
-test('complete(completion) correctly inserts completion when segmentsToLocation is true', t => {
-  const instance = t.context.setup({
-    segmentsToLocation: true,
-  })
+test('complete(completion) correctly inserts completion when options.segment.from is "divider"', t => {
+  const instance = t.context.setup({ segment: { from: 'divider' } })
 
-  instance.setLocation('Baleada: a toolkit'.length)
-  instance.complete('Buena Baleada: a toolkit')
+  // end is ignored when options.segment.to is default
+  // instance.segment is 'toolkit for building web apps' after this
+  instance.setSelection({ start: 'Baleada: a tool'.length, end: 0 })
 
-  t.is(instance.string, 'Buena Baleada: a toolkit for building web apps')
+  instance.complete('toolkit')
+
+  t.is(instance.string, 'Baleada: a toolkit')
 })
 
-test('complete(completion) correctly inserts completion when segmentsFromDivider is true AND segmentsToLocation is true', t => {
-  const instance = t.context.setup({
-    segmentsFromDivider: true,
-    segmentsToLocation: true
-  })
+test('complete(completion) correctly inserts completion when options.segment.to is "selection"', t => {
+  const instance = t.context.setup({ segment: { to: 'selection' } })
 
-  instance.complete('Baleada')
+  // start is ignored when options.segment.from is default
+  // instance.segment is 'Baleada: a tool' after this
+  instance.setSelection({ start: 0, end: 'Baleada: a tool'.length - 1 }) // start is ignored when options.segment.from is default
 
-  t.is(instance.string, 'Baleada: a toolkit for building web Baleada')
+  instance.complete('tool')
+
+  t.is(instance.string, 'toolkit for building web apps')
 })
 
-/* complete location */
-test('complete(completion) correctly updates location when all options are defaults', t => {
+test('complete(completion) correctly inserts completion when options.segment.to is "divider"', t => {
+  const instance = t.context.setup({ segment: { to: 'divider' } })
+
+  // start is ignored when options.segment.from is default
+  // instance.segment is 'Baleada: a toolkit' after this
+  instance.setSelection({ start: 0, end: 'Baleada: a tool'.length }) // start is ignored when options.segment.from is default
+
+  instance.complete('toolkit')
+
+  t.is(instance.string, 'toolkit for building web apps')
+})
+
+test('complete(completion, options) correctly computes new selection when options.newSelection is the default "completionEnd"', t => {
   const instance = t.context.setup()
+
   instance.complete('Baleada')
 
-  t.is(instance.location, 'Baleada'.length)
+  t.deepEqual(instance.selection, { start: 'Baleada'.length - 1, end: 'Baleada'.length - 1 })
 })
 
-test('complete(completion) correctly updates location when segmentsFromDivider is true', t => {
-  const instance = t.context.setup({
-    segmentsFromDivider: true,
-  })
-  instance.complete('applications')
+test('complete(completion, options) correctly computes new selection when options.newSelection is "completion"', t => {
+  const instance = t.context.setup()
 
-  t.is(instance.location, 'Baleada: a toolkit for building web applications'.length)
+  instance.complete('Baleada', { newSelection: 'completion' })
+
+  t.deepEqual(instance.selection, { start: 0, end: 'Baleada'.length - 1 })
 })
 
-test('complete(completion) correctly updates location when segmentsToLocation is true', t => {
-  const instance = t.context.setup({
-    segmentsToLocation: true,
-  })
-  instance.setLocation('Baleada: a toolkit'.length)
-  instance.complete('Buena Baleada: a toolkit')
+test('complete(completion, options) correctly computes new selection when options.newSelection is "completion" and segment is not start to end', t => {
+  const instance = t.context.setup({ segment: { from: 'divider', to: 'divider' } })
 
-  t.is(instance.location, 'Buena Baleada: a toolkit'.length)
+  // instance.segment is 'toolkit for' after this
+  instance.setSelection({ start: 'Baleada: a tool'.length - 1, end: 'Baleada: a toolkit f'.length - 1 }) // start is ignored when options.segment.from is default
+
+  // instance.string is 'Baleada: a t00lk1t 4 building web apps' after this
+  instance.complete('t00lk1t 4', { newSelection: 'completion' })
+
+  t.deepEqual(instance.selection, { start: 'Baleada: a '.length, end: 'Baleada: a t00lk1t 4'.length - 1 })
 })
 
-test('complete(completion) correctly updates location when segmentsFromDivider is true AND segmentsToLocation is true', t => {
-  const instance = t.context.setup({
-    segmentsFromDivider: true,
-    segmentsToLocation: true
-  })
-  instance.complete('Baleada')
-
-  t.is(instance.location, 'Baleada: a toolkit for building web Baleada'.length)
-})
-
-test('complete(completion, options) does not update location when locatesAfterCompletion is false', t => {
-  const instance = t.context.setup(),
-        originalLocation = instance.location
-  instance.complete('Baleada', { locatesAfterCompletion: false })
-
-  t.is(instance.location, originalLocation)
-})
 
 /* status */
 test('status is "ready" after construction', t => {
@@ -212,7 +204,7 @@ test('can chain its public methods', t => {
   const instance = t.context.setup(),
         chained = instance
           .setString('Baleada: a toolkit')
-          .setLocation(instance.string.length)
+          .setSelection({ start: 0, end: 0 })
           .complete('Baleada: a toolkit for building web apps')
 
   t.assert(chained instanceof Completeable)
