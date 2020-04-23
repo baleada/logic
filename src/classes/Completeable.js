@@ -41,7 +41,7 @@ export default class Completeable {
     this._segmentTo = getSegmentTo(options)
     this._divider = is.defined(options.divider) ? options.divider : defaultOptions.divider
 
-    this._dividerIndices = { before: 0, after: 0 }
+    this._computedDividerIndices = { before: 0, after: 0 }
 
     this.setString(string)
     this.setSelection(options.hasOwnProperty('initialSelection') ? options.initialSelection : { start: string.length, end: string.length })
@@ -75,6 +75,9 @@ export default class Completeable {
       this._computeSegmentEndIndex()
     )
   }
+  get dividerIndices () {
+    return this._computedDividerIndices
+  }
   _computeSegmentStartIndex () {
     let index
     switch (this._segmentFrom) {
@@ -85,7 +88,7 @@ export default class Completeable {
       index = this.selection.start // No arithmetic needed, because the first character of the selection should be included
       break
     case 'divider':
-      index = this._dividerIndices.before + 1 // segment starts at the character after the divider
+      index = this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, lastMatch returns -1, and this becomes 0
     }
     
     return index
@@ -100,7 +103,7 @@ export default class Completeable {
       index = this.selection.end + 1 // Make sure the segment includes the end of the selection. Test in browser to make sure that's what happens
       break
     case 'divider':
-      index = this._dividerIndices.after // No arithmetic needed, because segment ends before the divider index, so the divider index should be the second arg for slice
+      index = this.dividerIndices.after // No arithmetic needed, because segment ends before the divider index, so the divider index should be the second arg for slice. -1 edge case is handled by setDividerIndices
     }
     
     return index
@@ -113,22 +116,34 @@ export default class Completeable {
     case 'constructing':
       // do nothing. Can't set divider indices before selection has been set.
       break
+    case 'completing':
+      this._setDividerIndices()
+      break
     default:
       this._setDividerIndices()
+      this._set()
       break
     }
     
     return this
   }
+  _set () {
+    this._computedStatus = 'set'
+  }
+
   setSelection (selection) {
+    // VALIDATE: selection can only have start, end, and direction properties
+
     this._computedSelection = selection
     this._setDividerIndices()
 
     return this
   }
   _setDividerIndices () {
-    this._dividerIndices.before = this._lastMatch({ expression: this._divider, from: this.selection.start })
-    this._dividerIndices.after = this._nextMatch({ expression: this._divider, from: this.selection.end })
+    this._computedDividerIndices.before = this._lastMatch({ expression: this._divider, from: this.selection.start })
+
+    const after = this._nextMatch({ expression: this._divider, from: this.selection.end })
+    this._computedDividerIndices.after = after === -1 ? this.string.length + 1 : after
   }
   _lastMatch ({ expression, from }) {
     return lastMatch({ string: this.string, expression, from })
@@ -138,6 +153,8 @@ export default class Completeable {
   }
 
   complete (completion, options = {}) {
+    this._completing()
+
     options = {
       newSelection: 'completionEnd', // completion|completionEnd
       ...options
@@ -153,13 +170,13 @@ export default class Completeable {
     case 'completion':
       newSelection = {
         start: textBefore.length,
-        end: `${textBefore}${completion}`.length - 1 // Unsure about the arithmetic. test in browser to find desired result.
+        end: `${textBefore}${completion}`.length // Unsure about the arithmetic. test in browser to find desired result.
       }
       break
     case 'completionEnd':
       newSelection = {
-        start: `${textBefore}${completion}`.length - 1,
-        end: `${textBefore}${completion}`.length - 1,
+        start: `${textBefore}${completion}`.length,
+        end: `${textBefore}${completion}`.length,
       }
       break
     }
@@ -181,7 +198,7 @@ export default class Completeable {
       text = this.string.slice(0, this.selection.start)
       break
     case 'divider':
-      text = this.string.slice(0, this._dividerIndices.before + 1) // Add 1 to make sure the divider is included
+      text = this.string.slice(0, this.dividerIndices.before + 1) // Add 1 to make sure the divider is included
       break
     }
 
@@ -197,11 +214,14 @@ export default class Completeable {
       text = this.string.slice(this.selection.end + 1)
       break
     case 'divider':
-      text = this.string.slice(this._dividerIndices.after)
+      text = this.string.slice(this.dividerIndices.after)
       break
     }
 
     return text
+  }
+  _completing () {
+    this._computedStatus = 'completing'
   }
   _completed () {
     this._computedStatus = 'completed'

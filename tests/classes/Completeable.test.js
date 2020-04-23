@@ -8,7 +8,6 @@ test.beforeEach(t => {
   )
 })
 
-
 test('stores the string', t => {
   const instance = t.context.setup()
 
@@ -82,6 +81,14 @@ test('segments from divider when options.segment.from is "divider"', t => {
   t.is(instance.segment, 'toolkit for building web apps')
 })
 
+test('segments from start when options.segment.from is "divider" and no divider is found', t => {
+  const instance = t.context.setup({ segment: { from: 'divider' } })
+
+  instance.setSelection({ start: 'Baleada'.length, end: 0 }) // end is ignored when options.segment.to is defau
+
+  t.is(instance.segment, 'Baleada: a toolkit for building web apps')
+})
+
 test('segments to selection end when options.segment.to is "selection"', t => {
   const instance = t.context.setup({ segment: { to: 'selection' } })
 
@@ -98,6 +105,13 @@ test('segments to divider when options.segment.to is "divider"', t => {
   t.is(instance.segment, 'Baleada: a toolkit')
 })
 
+test('segments to end when options.segment.to is "divider" and no divider is found', t => {
+  const instance = t.context.setup({ segment: { to: 'divider' } })
+
+  instance.setSelection({ start: 0, end: 'Baleada: a toolkit for building web a'.length }) // start is ignored when options.segment.from is default
+
+  t.is(instance.segment, 'Baleada: a toolkit for building web apps')
+})
 
 test('complete(completion) correctly inserts completion when all options are defaults', t => {
   const instance = t.context.setup()
@@ -160,7 +174,7 @@ test('complete(completion, options) correctly computes new selection when option
 
   instance.complete('Baleada')
 
-  t.deepEqual(instance.selection, { start: 'Baleada'.length - 1, end: 'Baleada'.length - 1 })
+  t.deepEqual(instance.selection, { start: 'Baleada'.length, end: 'Baleada'.length })
 })
 
 test('complete(completion, options) correctly computes new selection when options.newSelection is "completion"', t => {
@@ -168,19 +182,19 @@ test('complete(completion, options) correctly computes new selection when option
 
   instance.complete('Baleada', { newSelection: 'completion' })
 
-  t.deepEqual(instance.selection, { start: 0, end: 'Baleada'.length - 1 })
+  t.deepEqual(instance.selection, { start: 0, end: 'Baleada'.length })
 })
 
 test('complete(completion, options) correctly computes new selection when options.newSelection is "completion" and segment is not start to end', t => {
   const instance = t.context.setup({ segment: { from: 'divider', to: 'divider' } })
 
   // instance.segment is 'toolkit for' after this
-  instance.setSelection({ start: 'Baleada: a tool'.length - 1, end: 'Baleada: a toolkit f'.length - 1 }) // start is ignored when options.segment.from is default
+  instance.setSelection({ start: 'Baleada: a tool'.length, end: 'Baleada: a toolkit f'.length }) // start is ignored when options.segment.from is default
 
   // instance.string is 'Baleada: a t00lk1t 4 building web apps' after this
   instance.complete('t00lk1t 4', { newSelection: 'completion' })
 
-  t.deepEqual(instance.selection, { start: 'Baleada: a '.length, end: 'Baleada: a t00lk1t 4'.length - 1 })
+  t.deepEqual(instance.selection, { start: 'Baleada: a '.length, end: 'Baleada: a t00lk1t 4'.length })
 })
 
 
@@ -197,6 +211,14 @@ test('status is "completed" after complete(...) is called at least once', t => {
   instance.complete('Baleada')
 
   t.is(instance.status, 'completed')
+})
+
+test('status is "set" after setString(...) is called', t => {
+  const instance = t.context.setup()
+
+  instance.setString('Baleada')
+
+  t.is(instance.status, 'set')
 })
 
 /* method chaining */
