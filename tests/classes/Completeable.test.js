@@ -213,14 +213,6 @@ test('status is "completed" after complete(...) is called at least once', t => {
   t.is(instance.status, 'completed')
 })
 
-test('status is "set" after setString(...) is called', t => {
-  const instance = t.context.setup()
-
-  instance.setString('Baleada')
-
-  t.is(instance.status, 'set')
-})
-
 /* method chaining */
 test('can chain its public methods', t => {
   const instance = t.context.setup(),

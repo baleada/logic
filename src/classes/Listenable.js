@@ -158,6 +158,7 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _keycomboListen (naiveListener, options) {
+    // TODO: Support ! to negate a key or modifier
     const keys = this.eventType
             .split('+')
             .map(name => ({ name, type: this._getKeyType(name) })),

@@ -116,19 +116,12 @@ export default class Completeable {
     case 'constructing':
       // do nothing. Can't set divider indices before selection has been set.
       break
-    case 'completing':
-      this._setDividerIndices()
-      break
     default:
       this._setDividerIndices()
-      this._set()
       break
     }
     
     return this
-  }
-  _set () {
-    this._computedStatus = 'set'
   }
 
   setSelection (selection) {
