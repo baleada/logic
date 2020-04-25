@@ -14,13 +14,13 @@ import is from '../util/is.js'
 /* Constants */
 import observers from '../constants/observers'
 const mediaQueryRegexp = /^\(.+\)$/,
-      keycomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}(?:[a-zA-Z0-9]|tab|up|right|down|left|enter|backspace)$/,
-      leftclickcomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}click$/,
-      rightclickcomboRegexp = /^(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+){0,4}rightclick$/,
+      keycomboRegexp = /^(?:!?(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+)){0,4}(?:[a-zA-Z0-9]|tab|arrow|vertical|horizontal|up|right|down|left|enter|backspace|cmd|shift|ctrl|alt|opt)?$/,
+      leftclickcomboRegexp = /^(?:!?(cmd\+|shift\+|ctrl\+|alt\+|opt\+)){0,4}click$/,
+      rightclickcomboRegexp = /^(?:!?(cmd\+|shift\+|ctrl\+|alt\+|opt\+)){0,4}rightclick$/,
       letterNumberRegexp = /^[a-zA-Z0-9]$/,
-      arrowRegexp = /^(?:up|down|right|left)$/,
+      arrowRegexp = /^(?:arrow|vertical|horizontal|up|down|right|left)$/,
       enterBackspaceTabRegexp = /^(?:enter|backspace|tab)$/,
-      modifierRegexp = /^(?:cmd|shift|ctrl|alt|opt)$/,
+      modifierRegexp = /^!?(?:cmd|shift|ctrl|alt|opt)$/,
       clickRegexp = /^(?:right)?click$/,
       modifierAssertDictionary = {
         shift: event => event.shiftKey,
@@ -171,10 +171,24 @@ export default class Listenable {
                 matches = event.key.toLowerCase() === name.toLowerCase()
                 break
               case 'arrow':
-                matches = event.key.toLowerCase() === `arrow${name.toLowerCase()}`
+                switch (name) {
+                case 'arrow':
+                  matches = ['arrowup', 'arrowright', 'arrowdown', 'arrowleft'].includes(event.key.toLowerCase())
+                  break
+                case 'vertical':
+                  matches = ['arrowup', 'arrowdown'].includes(event.key.toLowerCase())
+                  break
+                case 'horizontal':
+                  matches = ['arrowright', 'arrowleft'].includes(event.key.toLowerCase())
+                  break
+                default:
+                  matches = event.key.toLowerCase() === `arrow${name.toLowerCase()}`
+                }
                 break
               case 'modifier':
-                matches = modifierAssertDictionary[name](event)
+                matches = name.startsWith('!')
+                  ? !modifierAssertDictionary[name](event)
+                  : modifierAssertDictionary[name](event)
                 break
               }
 
@@ -202,7 +216,7 @@ export default class Listenable {
   _clickcomboListen (naiveListener, options) {
     const keys = this.eventType.split('+'),
           listener = event => {
-            const matches = keys.every(key => clickRegexp.test(key) || modifierAssertDictionary[key](event))
+            const matches = keys.every(key => clickRegexp.test(key) || (!key.startsWith('!') && modifierAssertDictionary[key](event)) || (key.startsWith('!') && !modifierAssertDictionary[key](event)))
 
             if (matches) {
               naiveListener(event)

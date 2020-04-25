@@ -71,6 +71,11 @@ test('guesses keycombo type', t => {
         twoModifier = new Listenable('shift+cmd+b'),
         threeModifier = new Listenable('shift+alt+cmd+b'),
         fourModifier = new Listenable('shift+ctrl+alt+cmd+b'),
+        negatedModifier = new Listenable('!shift+b'),
+        loneModifier = new Listenable('cmd'),
+        arrow = new Listenable('arrow'),
+        horizontal = new Listenable('horizontal'),
+        vertical = new Listenable('vertical'),
         up = new Listenable('up'),
         down = new Listenable('down'),
         left = new Listenable('left'),
@@ -82,8 +87,8 @@ test('guesses keycombo type', t => {
         letter = new Listenable('b')
 
   const instances = [
-    oneModifier, twoModifier, threeModifier, fourModifier,
-    up, down, left, right,
+    oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier, loneModifier,
+    arrow, horizontal, vertical, up, down, left, right,
     enter, backspace, tab,
     number, letter,
   ]
@@ -96,9 +101,10 @@ test('guesses leftclickcombo type', t => {
         oneModifier = new Listenable('cmd+click'),
         twoModifier = new Listenable('shift+cmd+click'),
         threeModifier = new Listenable('shift+alt+cmd+click'),
-        fourModifier = new Listenable('shift+ctrl+alt+cmd+click')
+        fourModifier = new Listenable('shift+ctrl+alt+cmd+click'),
+        negatedModifier = new Listenable('!shift+click')
   
-  t.assert([leftclick, oneModifier, twoModifier, threeModifier, fourModifier].every(instance => instance._type === 'leftclickcombo'))
+  t.assert([leftclick, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance._type === 'leftclickcombo'))
 })
 
 test('guesses rightclickcombo type', t => {
@@ -106,9 +112,10 @@ test('guesses rightclickcombo type', t => {
         oneModifier = new Listenable('cmd+rightclick'),
         twoModifier = new Listenable('shift+cmd+rightclick'),
         threeModifier = new Listenable('shift+alt+cmd+rightclick'),
-        fourModifier = new Listenable('shift+ctrl+alt+cmd+rightclick')
+        fourModifier = new Listenable('shift+ctrl+alt+cmd+rightclick'),
+        negatedModifier = new Listenable('!shift+rightclick')
   
-  t.assert([rightclick, oneModifier, twoModifier, threeModifier, fourModifier].every(instance => instance._type === 'rightclickcombo'))
+  t.assert([rightclick, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance._type === 'rightclickcombo'))
 })
 
 

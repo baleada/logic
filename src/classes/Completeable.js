@@ -100,7 +100,7 @@ export default class Completeable {
       index = this.string.length
       break
     case 'selection':
-      index = this.selection.end + 1 // Make sure the segment includes the end of the selection. Test in browser to make sure that's what happens
+      index = this.selection.end // No arithmetic needed, because the browser sets selection end as the first character not highlighted in the selection
       break
     case 'divider':
       index = this.dividerIndices.after // No arithmetic needed, because segment ends before the divider index, so the divider index should be the second arg for slice. -1 edge case is handled by setDividerIndices
@@ -204,7 +204,7 @@ export default class Completeable {
       text = ''
       break
     case 'selection':
-      text = this.string.slice(this.selection.end + 1)
+      text = this.string.slice(this.selection.end)
       break
     case 'divider':
       text = this.string.slice(this.dividerIndices.after)

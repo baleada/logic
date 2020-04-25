@@ -92,7 +92,7 @@ test('segments from start when options.segment.from is "divider" and no divider 
 test('segments to selection end when options.segment.to is "selection"', t => {
   const instance = t.context.setup({ segment: { to: 'selection' } })
 
-  instance.setSelection({ start: 0, end: 'Baleada: a tool'.length - 1 }) // start is ignored when options.segment.from is default
+  instance.setSelection({ start: 0, end: 'Baleada: a tool'.length }) // start is ignored when options.segment.from is default
 
   t.is(instance.segment, 'Baleada: a tool')
 })
@@ -150,7 +150,7 @@ test('complete(completion) correctly inserts completion when options.segment.to 
 
   // start is ignored when options.segment.from is default
   // instance.segment is 'Baleada: a tool' after this
-  instance.setSelection({ start: 0, end: 'Baleada: a tool'.length - 1 }) // start is ignored when options.segment.from is default
+  instance.setSelection({ start: 0, end: 'Baleada: a tool'.length }) // start is ignored when options.segment.from is default
 
   instance.complete('tool')
 
