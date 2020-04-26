@@ -35,7 +35,7 @@ test('activeListeners is empty after construction', t => {
 
 /* guess type */
 test('guesses recognizeable type', t => {
-  const instance = new Listenable('anything', { recognizeable: { handlers: {} } })
+  const instance = new Listenable('recognizeable', { recognizeable: { handlers: {} } })
 
   t.is(instance._type, 'recognizeable')
 })
