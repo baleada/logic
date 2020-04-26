@@ -86,6 +86,7 @@ test('guesses keycombo type', t => {
         loneModifier = new Listenable('cmd'),
         multipleNonModifiers = new Listenable('1+a+enter'),
         punctuation = new Listenable('/'),
+        plus = new Listenable('+'),
         negatedLetter = new Listenable('!a'),
         negatedNumber = new Listenable('!1'),
         negatedSpecial = new Listenable('!enter'),
@@ -101,7 +102,7 @@ test('guesses keycombo type', t => {
     number, letter,
     multipleNonModifiers,
     loneModifier,
-    punctuation,
+    punctuation, plus,
     negatedModifier, negatedArrow, negatedSpecial, negatedNumber, negatedLetter, negatedPunctuation, negatedExclamation
   ]
   

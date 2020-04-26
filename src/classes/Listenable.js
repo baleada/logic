@@ -11,6 +11,9 @@ import Recognizeable from './Recognizeable'
 /* Utils */
 import is from '../util/is.js'
 
+/* Factories */
+import uniqueable from '../factories/uniqueable'
+
 /* Constants */
 import observers from '../constants/observers'
 const mediaQueryRegexp = /^\(.+\)$/,
@@ -172,9 +175,9 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _keycomboListen (naiveListener, options) {
-    const keys = this.eventType
-            .split('+')
-            .map(name => ({ name, type: this._getKeyType(name) })),
+    const keys = uniqueable(this.eventType.split('+'))
+            .unique()
+            .map(name => ({ name: name === '' ? '+' : name, type: this._getKeyType(name) })),
           listener = event => {
             const matches = keys.every(({ name, type }, index) => {
               let matches
@@ -265,7 +268,7 @@ export default class Listenable {
       eventType = `key${this._keycomboType}`
       break
     case 'leftclickcombo':
-      eventType = this.eventName.match(/\+(\w+)$/)[1]
+      eventType = this.eventType.match(/(\w+)$/)[1]
       break
     case 'rightclickcombo':
       eventType = 'contextmenu'
