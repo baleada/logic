@@ -14,20 +14,30 @@ import is from '../util/is.js'
 /* Constants */
 import observers from '../constants/observers'
 const mediaQueryRegexp = /^\(.+\)$/,
-      keycomboRegexp = /^(?:!?(?:cmd\+|shift\+|ctrl\+|alt\+|opt\+)){0,4}(?:[a-zA-Z0-9]|tab|arrow|vertical|horizontal|up|right|down|left|enter|backspace|cmd|shift|ctrl|alt|opt)?$/,
-      leftclickcomboRegexp = /^(?:!?(cmd\+|shift\+|ctrl\+|alt\+|opt\+)){0,4}click$/,
-      rightclickcomboRegexp = /^(?:!?(cmd\+|shift\+|ctrl\+|alt\+|opt\+)){0,4}rightclick$/,
-      letterNumberRegexp = /^[a-zA-Z0-9]$/,
-      arrowRegexp = /^(?:arrow|vertical|horizontal|up|down|right|left)$/,
-      enterBackspaceTabRegexp = /^(?:enter|backspace|tab)$/,
-      modifierRegexp = /^!?(?:cmd|shift|ctrl|alt|opt)$/,
-      clickRegexp = /^(?:right)?click$/,
+      keycomboRegexp = /^((!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|arrow|vertical|horizontal|up|right|down|left|enter|backspace|cmd|shift|ctrl|alt|opt))\+)*(!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|arrow|vertical|horizontal|up|right|down|left|enter|backspace|cmd|shift|ctrl|alt|opt))$/,
+      leftclickcomboRegexp = /^(!?((cmd|shift|ctrl|alt|opt))\+){0,4}(click|mousedown|mouseup)$/,
+      rightclickcomboRegexp = /^(!?((cmd|shift|ctrl|alt|opt))\+){0,4}rightclick$/,
+      singleCharacter = /^!?[a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]$/,
+      arrowRegexp = /^!?(arrow|vertical|horizontal|up|down|right|left)$/,
+      enterBackspaceTabRegexp = /^!?(enter|backspace|tab)$/,
+      modifierRegexp = /^!?(cmd|shift|ctrl|alt|opt)$/,
+      clickRegexp = /^(rightclick|click|mousedown|mouseup)$/,
       modifierAssertDictionary = {
         shift: event => event.shiftKey,
         cmd: event => event.metaKey,
         ctrl: event => event.ctrlKey,
         alt: event => event.altKey,
         opt: event => event.altKey,
+      },
+      modifierAliasDictionary = {
+        shift: 'shift',
+        cmd: 'meta',
+        ctrl: 'control',
+        alt: 'alt',
+        opt: 'alt',
+      },
+      defaultOptions = {
+        keycombo: 'down',
       }
 
 export default class Listenable {
@@ -36,6 +46,10 @@ export default class Listenable {
       this._computedRecognizeable = new Recognizeable([], options.recognizeable)
       this._computedRecognizeableEvents = Object.keys(options.recognizeable.handlers || {}) // TODO: handle error for undefined handlers
     }
+
+    // Has no effect if the type is not detected as keycombo
+    this._keycomboType = is.defined(options.keycombo) ? options.keycombo : defaultOptions.keycombo
+
     this._observer = observers[eventType]
 
     this._type = this._getType(eventType)
@@ -136,13 +150,13 @@ export default class Listenable {
     this._computedActiveListeners.push({ id, type: 'idle' })
   }
   _recognizeableListen (listener, options) {
-    const { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
+    const { exceptAndOnlyListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
           eventListeners = this._computedRecognizeableEvents.map(name => {
             return [name, event => {
               this._computedRecognizeable.recognize(event)
 
               if (this._computedRecognizeable.status === 'recognized') {
-                blackAndWhiteListedListener({ event, recognizeable: this.recognizeable })
+                exceptAndOnlyListener({ event, recognizeable: this.recognizeable })
               }
             }, ...listenerOptions]
           })
@@ -158,37 +172,56 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _keycomboListen (naiveListener, options) {
-    // TODO: Support ! to negate a key or modifier
     const keys = this.eventType
             .split('+')
             .map(name => ({ name, type: this._getKeyType(name) })),
           listener = event => {
-            const matches = keys.every(({ name, type }) => {
+            const matches = keys.every(({ name, type }, index) => {
               let matches
               switch (type) {
-              case 'letter':
+              case 'singleCharacter':
               case 'enterBackspaceTab':
-                matches = event.key.toLowerCase() === name.toLowerCase()
+                matches = name.startsWith('!') && name.length === 2
+                  ? event.key.toLowerCase() !== name.toLowerCase()
+                  : event.key.toLowerCase() === name.toLowerCase()
                 break
               case 'arrow':
                 switch (name) {
                 case 'arrow':
-                  matches = ['arrowup', 'arrowright', 'arrowdown', 'arrowleft'].includes(event.key.toLowerCase())
+                case '!arrow':
+                  matches = name.startsWith('!')
+                    ? !['arrowup', 'arrowright', 'arrowdown', 'arrowleft'].includes(event.key.toLowerCase())
+                    : ['arrowup', 'arrowright', 'arrowdown', 'arrowleft'].includes(event.key.toLowerCase())
                   break
                 case 'vertical':
-                  matches = ['arrowup', 'arrowdown'].includes(event.key.toLowerCase())
+                case '!vertical':
+                  matches = name.startsWith('!')
+                    ? !['arrowup', 'arrowdown'].includes(event.key.toLowerCase())
+                    : ['arrowup', 'arrowdown'].includes(event.key.toLowerCase())
                   break
                 case 'horizontal':
-                  matches = ['arrowright', 'arrowleft'].includes(event.key.toLowerCase())
+                case '!horizontal':
+                  matches = name.startsWith('!')
+                    ? !['arrowright', 'arrowleft'].includes(event.key.toLowerCase())
+                    : ['arrowright', 'arrowleft'].includes(event.key.toLowerCase())
                   break
                 default:
-                  matches = event.key.toLowerCase() === `arrow${name.toLowerCase()}`
+                  matches = name.startsWith('!')
+                    ? event.key.toLowerCase() !== `arrow${name.toLowerCase()}`
+                    : event.key.toLowerCase() === `arrow${name.toLowerCase()}`
                 }
                 break
               case 'modifier':
-                matches = name.startsWith('!')
-                  ? !modifierAssertDictionary[name](event)
-                  : modifierAssertDictionary[name](event)
+                if (index === keys.length - 1) {
+                  matches = name.startsWith('!')
+                    ? event.key.toLowerCase() !== modifierAliasDictionary[name].toLowerCase()
+                    : event.key.toLowerCase() === modifierAliasDictionary[name].toLowerCase()
+                } else {
+                  matches = name.startsWith('!')
+                    ? !modifierAssertDictionary[name](event)
+                    : modifierAssertDictionary[name](event)
+                }
+                
                 break
               }
 
@@ -203,15 +236,15 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _getKeyType (name) {
-    return letterNumberRegexp.test(name)
-            ? 'letter'
+    return singleCharacter.test(name)
+            ? 'singleCharacter'
             : arrowRegexp.test(name)
               ? 'arrow'
               : enterBackspaceTabRegexp.test(name)
                 ? 'enterBackspaceTab'
                 : modifierRegexp.test(name)
                   ? 'modifier'
-                  : false // shouldn't be possible
+                  : false // unreachable
   }
   _clickcomboListen (naiveListener, options) {
     const keys = this.eventType.split('+'),
@@ -229,10 +262,10 @@ export default class Listenable {
     let eventType
     switch (this._type) {
     case 'keycombo':
-      eventType = 'keydown'
+      eventType = `key${this._keycomboType}`
       break
     case 'leftclickcombo':
-      eventType = 'click'
+      eventType = this.eventName.match(/\+(\w+)$/)[1]
       break
     case 'rightclickcombo':
       eventType = 'contextmenu'
@@ -242,22 +275,22 @@ export default class Listenable {
       break
     }
 
-    const { blackAndWhiteListedListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
-          eventListeners = [[eventType, blackAndWhiteListedListener, ...listenerOptions]]
+    const { exceptAndOnlyListener, listenerOptions } = this._getAddEventListenerSetup(listener, options),
+          eventListeners = [[eventType, exceptAndOnlyListener, ...listenerOptions]]
 
     this._addEventListeners(eventListeners, options)
   }
   _getAddEventListenerSetup (listener, options) {
     const { addEventListener, useCapture, wantsUntrusted } = options,
-          blackAndWhiteListedListener = this._getBlackAndWhiteListedListener(listener, options),
+          exceptAndOnlyListener = this._getExceptAndOnlyListener(listener, options),
           listenerOptions = [addEventListener || useCapture, wantsUntrusted]
 
-    return { blackAndWhiteListedListener, listenerOptions }
+    return { exceptAndOnlyListener, listenerOptions }
   }
-  _getBlackAndWhiteListedListener (listener, options) {
+  _getExceptAndOnlyListener (listener, options) {
     const { except = [], only = [] } = options
 
-    function blackAndWhiteListedListener (eventOrRecognizeableCallbackObject) {
+    function exceptAndOnlyListener (eventOrRecognizeableCallbackObject) {
       let target
       switch (this._type) {
       case 'recognizeable':
@@ -268,16 +301,16 @@ export default class Listenable {
         break
       }
       
-      const [isWhitelisted, isBlacklisted] = [only, except].map(selectors => selectors.some(selector => target.matches(selector)))
+      const [isOnly, isExcept] = [only, except].map(selectors => selectors.some(selector => target.matches(selector)))
 
-      if (isWhitelisted) { // Whitelist always wins
+      if (isOnly) { // Whitelist always wins
         listener(...arguments)
-      } else if (only.length === 0 && !isBlacklisted) { // Ignore blacklist when whitelist has elements
+      } else if (only.length === 0 && !isExcept) { // Ignore blacklist when whitelist has elements
         listener(...arguments)
       }
     }
 
-    return blackAndWhiteListedListener.bind(this)
+    return exceptAndOnlyListener.bind(this)
   }
   _addEventListeners (eventListeners, options) {
     const { target = document } = options
