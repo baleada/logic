@@ -1,4 +1,4 @@
-import { mix } from 'chroma-js/chroma-light'
+import mix from 'mix-css-color'
 import is from './is'
 
 export default function ease (previous, next, progress, options = {}) {
@@ -12,8 +12,7 @@ export default function ease (previous, next, progress, options = {}) {
     if (is.number(previous)) {
       eased = (next - previous) * progress + previous
     } else if (is.string(previous)) {
-      const { colorMixMode } = options
-      eased = mix(previous, next, progress, colorMixMode)
+      eased = mix(previous, next, progress * 100)
     } else if (is.array(previous)) {
       const sliceToExact = (next.length - previous.length) * progress + previous.length,
             nextIsLonger = next.length > previous.length,

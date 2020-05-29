@@ -6,7 +6,7 @@ console.log(metadata)
 
 const external = [
         'bezier-easing',
-        'chroma-js/chroma-light',
+        'mix-css-color',
         'fast-fuzzy',
         'object-path',
       ],

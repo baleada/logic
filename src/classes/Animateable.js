@@ -6,7 +6,7 @@
 
 /* Dependencies */
 import Listenable from './Listenable'
-// METADATA: EXTERNAL bezier-easing|chroma-js/chroma-light|object-path
+// METADATA: EXTERNAL bezier-easing|mix-css-color|object-path
 
 /* Utils */
 import is from '../util/is'

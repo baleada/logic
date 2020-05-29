@@ -1,6 +1,6 @@
 {
   "name": "@baleada/logic",
-  "version": "0.15.9",
+  "version": "0.15.10",
   "description": "UI logic for the Baleada toolkit",
   "main": "index.js",
   "scripts": {
@@ -61,8 +61,8 @@
   },
   "dependencies": {
     "bezier-easing": "^2.1.0",
-    "chroma-js": "^2.1.0",
     "fast-fuzzy": "^1.9.1",
+    "mix-css-color": "^0.1.1",
     "object-path": "^0.11.4"
   },
   "sideEffects": false
