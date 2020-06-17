@@ -2,8 +2,6 @@ import babel from 'rollup-plugin-babel'
 import resolve from '@rollup/plugin-node-resolve'
 const metadata = require('./metadata.js')
 
-console.log(metadata)
-
 const external = [
         'bezier-easing',
         'mix-css-color',
@@ -21,7 +19,10 @@ export default [
   {
     external,
     input: 'src/index.js',
-    output: { file: 'index.js', format: 'esm' },
+    output: [
+      { file: 'index.js', format: 'cjs' },
+      { file: 'index.esm.js', format: 'esm' }
+    ],
     plugins,
   },
   ...metadata.classes.map(tool => ({

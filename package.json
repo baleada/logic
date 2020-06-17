@@ -3,6 +3,7 @@
   "version": "0.15.10",
   "description": "UI logic for the Baleada toolkit",
   "main": "index.js",
+  "module": "index.esm.js",
   "scripts": {
     "prepare": "node scripts/prepare.js",
     "test": "npm run prepare && ava"

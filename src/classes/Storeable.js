@@ -71,21 +71,21 @@ export default class Storeable {
     case 'constructing':
     case 'ready':
       this._computedKey = key
-      this._computedStatusKey = `${key}.status`
+      this._computedStatusKey = `${key}_status`
       break
     case 'stored':
       string = this.string
       this.remove()
       this.removeStatus(this._computedStatusKey)
       this._computedKey = key
-      this._computedStatusKey = `${key}.status`
+      this._computedStatusKey = `${key}_status`
       this.store(string)
       break
     case 'removed':
       status = this.status
       this.removeStatus()
       this._computedKey = key
-      this._computedStatusKey = `${key}.status`
+      this._computedStatusKey = `${key}_status`
       this._removed()
       break
     }

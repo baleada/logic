@@ -17,24 +17,24 @@ test.beforeEach(t => {
   )
 })
 
-test('stores the promiseGetter', t => {
+test('stores the getPromise', t => {
   const instance = t.context.setup()
 
-  t.assert(instance.promiseGetter instanceof Function)
+  t.assert(instance.getPromise instanceof Function)
 })
 
-test('assignment sets the promiseGetter', t => {
+test('assignment sets the getPromise', t => {
   const instance = t.context.setup()
-  instance.promiseGetter = () => 'poopy'
+  instance.getPromise = () => 'poopy'
 
-  t.assert(instance.promiseGetter instanceof Function)
+  t.assert(instance.getPromise instanceof Function)
 })
 
-test('setPromiseGetter sets the promiseGetter', t => {
+test('setGetPromise sets the getPromise', t => {
   const instance = t.context.setup()
-  instance.setPromiseGetter(() => 'poopy')
+  instance.setGetPromise(() => 'poopy')
 
-  t.assert(instance.promiseGetter instanceof Function)
+  t.assert(instance.getPromise instanceof Function)
 })
 
 test('status is "ready" after construction', t => {

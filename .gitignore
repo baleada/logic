@@ -91,6 +91,7 @@ browser-lib
 dist
 metadata.js
 index.js
+index.esm.js
 classes
 factories
 !src/classes

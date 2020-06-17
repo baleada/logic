@@ -5,20 +5,21 @@
  */
 
  export default class Resolveable {
-  constructor (promiseGetter, options = {}) {
-    this.setPromiseGetter(promiseGetter)
+  constructor (getPromise, options = {}) {
+    this.setGetPromise(getPromise)
     this._computedResponse = {}
+    this._computedError = {}
     this._ready()
   }
   _ready () {
     this._computedStatus = 'ready'
   }
 
-  get promiseGetter () {
-    return this._computedPromiseGetter
+  get getPromise () {
+    return this._computedGetPromise
   }
-  set promiseGetter (promiseGetter) {
-    this.setPromiseGetter(promiseGetter)
+  set getPromise (getPromise) {
+    this.setGetPromise(getPromise)
   }
   get status () {
     return this._computedStatus
@@ -30,8 +31,8 @@
     return this._computedError
   }
 
-  setPromiseGetter (promiseGetter) {
-    this._computedPromiseGetter = promiseGetter
+  setGetPromise (getPromise) {
+    this._computedGetPromise = getPromise
 
     return this
   }
@@ -40,7 +41,7 @@
     this._computedStatus = 'resolving'
     let response
     try {
-      response = await this.promiseGetter(...arguments)
+      response = await this.getPromise(...arguments)
       this._computedResponse = response
       this._computedStatus = 'resolved'
     } catch (error) {
