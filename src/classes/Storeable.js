@@ -41,11 +41,18 @@ export default class Storeable {
     this.setKey(key)
   }
   get status () {
-    if (domIsAvailable()) {
-      const storedStatus = this.storage.getItem(this._computedStatusKey)
-      if (this._computedStatus !== storedStatus) {
-        this._computedStatus = storedStatus
+    switch (this._computedStatus) {
+    case 'constructing':
+      // do nothing
+      break
+    default:
+      if (domIsAvailable()) {
+        const storedStatus = this.storage.getItem(this._computedStatusKey)
+        if (this._computedStatus !== storedStatus) {
+          this._computedStatus = storedStatus
+        }
       }
+      break
     }
 
     return this._computedStatus
@@ -82,7 +89,6 @@ export default class Storeable {
       this.store(string)
       break
     case 'removed':
-      status = this.status
       this.removeStatus()
       this._computedKey = key
       this._computedStatusKey = `${key}_status`
@@ -95,12 +101,6 @@ export default class Storeable {
 
   store (string) {
     try {
-      console.log(({
-        setKey: {
-          key: this.key,
-          string: string,
-        }
-      }))
       this.storage.setItem(this.key, string)
       this._computedString = string // This assignment allows reactivity tools to detect data change
       this._stored()
@@ -120,12 +120,6 @@ export default class Storeable {
     this._storeStatus()
   }
   _storeStatus () {
-    console.log(({
-      storeStatus: {
-        key: this._computedStatusKey,
-        string: this._computedStatus,
-      }
-    }))
     this.storage.setItem(this._computedStatusKey, this._computedStatus)
   }
 
