@@ -41,18 +41,11 @@ export default class Storeable {
     this.setKey(key)
   }
   get status () {
-    switch (this._computedStatus) {
-    case 'constructing':
-      // do nothing
-      break
-    default:
-      if (domIsAvailable()) {
-        const storedStatus = this.storage.getItem(this._computedStatusKey)
-        if (this._computedStatus !== storedStatus) {
-          this._computedStatus = storedStatus
-        }
+    if (domIsAvailable()) {
+      const storedStatus = this.storage.getItem(this._computedStatusKey)
+      if (this._computedStatus !== storedStatus && is.string(storedStatus)) {
+        this._computedStatus = storedStatus
       }
-      break
     }
 
     return this._computedStatus
