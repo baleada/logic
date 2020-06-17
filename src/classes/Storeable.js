@@ -95,6 +95,12 @@ export default class Storeable {
 
   store (string) {
     try {
+      console.log(({
+        setKey: {
+          key: this.key,
+          string: string,
+        }
+      }))
       this.storage.setItem(this.key, string)
       this._computedString = string // This assignment allows reactivity tools to detect data change
       this._stored()
@@ -114,6 +120,12 @@ export default class Storeable {
     this._storeStatus()
   }
   _storeStatus () {
+    console.log(({
+      storeStatus: {
+        key: this._computedStatusKey,
+        string: this._computedStatus,
+      }
+    }))
     this.storage.setItem(this._computedStatusKey, this._computedStatus)
   }
 
