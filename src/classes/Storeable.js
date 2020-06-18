@@ -9,13 +9,15 @@ import is from '../util/is'
 import domIsAvailable from '../util/domIsAvailable'
 
 const defaultOptions = {
-  type: 'local'
+  type: 'local',
+  statusKeySuffix: '_status',
 }
 
 export default class Storeable {
   constructor (key, options = {}) {
     this._constructing()
     this._type = is.defined(options.type) ? options.type : defaultOptions.type
+    this._statusKeySuffix = is.defined(options.statusKeySuffix) ? options.statusKeySuffix : defaultOptions.statusKeySuffix
 
     this.setKey(key)
     this._computedError = {}
@@ -71,20 +73,20 @@ export default class Storeable {
     case 'constructing':
     case 'ready':
       this._computedKey = key
-      this._computedStatusKey = `${key}_status`
+      this._computedStatusKey = `${key}${this._statusKeySuffix}`
       break
     case 'stored':
       string = this.string
       this.remove()
       this.removeStatus(this._computedStatusKey)
       this._computedKey = key
-      this._computedStatusKey = `${key}_status`
+      this._computedStatusKey = `${key}${this._statusKeySuffix}`
       this.store(string)
       break
     case 'removed':
       this.removeStatus()
       this._computedKey = key
-      this._computedStatusKey = `${key}_status`
+      this._computedStatusKey = `${key}${this._statusKeySuffix}`
       this._removed()
       break
     }

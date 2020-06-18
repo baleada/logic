@@ -2,10 +2,11 @@ import test from 'ava'
 import Storeable from '../../src/classes/Storeable'
 
 console.log('WARNING: Storeable requires informal testing')
+console.log('WARNING: Storeable is testing a private property')
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Storeable(
-    'stub',
+    'baleada',
     options
   )
 })
@@ -13,27 +14,39 @@ test.beforeEach(t => {
 test('stores the key', t => {
   const instance = t.context.setup()
 
-  t.is(instance.key, 'stub')
+  t.is(instance.key, 'baleada')
 })
 
 test('assignment sets the key', t => {
   const instance = t.context.setup()
-  instance.key = 'example'
+  instance.key = 'toolkit'
 
-  t.is(instance.key, 'example')
+  t.is(instance.key, 'toolkit')
 })
 
 test('setKey sets the key', t => {
   const instance = t.context.setup()
-  instance.setKey('example')
+  instance.setKey('toolkit')
 
-  t.is(instance.key, 'example')
+  t.is(instance.key, 'toolkit')
 })
 
 test('status is "ready" after construction and before DOM is available', t => {
   const instance = t.context.setup()
 
   t.is(instance.status, 'ready')
+})
+
+test('_computedStatusKey is `${key}_status` by default', t => {
+  const instance = t.context.setup()
+
+  t.is(instance._computedStatusKey, 'baleada_status')
+})
+
+test('_computedStatusKey respects statusKeySuffix option', t => {
+  const instance = t.context.setup({ statusKeySuffix: '-status' })
+
+  t.is(instance._computedStatusKey, 'baleada-status')
 })
 
 /* INFORMAL */
