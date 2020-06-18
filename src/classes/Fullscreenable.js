@@ -5,8 +5,8 @@
  */
 
  export default class Fullscreenable {
-  constructor (elementGetter, options = {}) {
-    this.setElementGetter(elementGetter)
+  constructor (getElement, options = {}) {
+    this.setGetElement(getElement)
     this._computedError = {}
     this._ready()
   }
@@ -14,24 +14,24 @@
     this._computedStatus = 'ready'
   }
 
-  get elementGetter () {
-    return this._computedElementGetter
+  get getElement () {
+    return this._computedGetElement
   }
-  set elementGetter (elementGetter) {
-    this.setElementGetter(elementGetter)
+  set getElement (getElement) {
+    this.setGetElement(getElement)
   }
   get status () {
     return this._computedStatus
   }
   get element () {
-    return this.elementGetter()
+    return this.getElement()
   }
   get error () {
     return this._computedError
   }
 
-  setElementGetter (elementGetter) {
-    this._computedElementGetter = () => elementGetter()
+  setGetElement (getElement) {
+    this._computedGetElement = () => getElement()
     return this
   }
 
