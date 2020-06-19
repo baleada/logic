@@ -36,10 +36,10 @@ const linearTiming = [
 
 export default class Animateable {
   constructor (keyframes, options = {}) {
-    this._initialDuration = is.defined(options.duration) ? options.duration : defaultOptions.duration
-    this._controlPoints = is.defined(options.timing) ? toControlPoints(options.timing) : toControlPoints(defaultOptions.timing)
-    this._iterationLimit = is.defined(options.iterations) ? options.iterations : defaultOptions.iterations
-    this._alternates = is.defined(options.alternates) ? options.alternates : defaultOptions.alternates
+    this._initialDuration = options?.duration || defaultOptions.duration
+    this._controlPoints = toControlPoints(options?.timing || defaultOptions.timing)
+    this._iterationLimit = options?.iterations || defaultOptions.iterations
+    this._alternates = options?.alternates || defaultOptions.alternates
 
     this._reversedControlPoints = toReversedControlPoints(this._controlPoints)
     
@@ -136,7 +136,7 @@ export default class Animateable {
                     next = index === array.length - 1 ? previous : array[index + 1].data[property],
                     start = keyframe.progress,
                     end = index === array.length - 1 ? 2 : array[index + 1].progress,
-                    hasCustomTiming = is.defined(keyframe.timing),
+                    hasCustomTiming = !!keyframe?.timing,
                     toAnimationProgress = index === array.length - 1
                       ? timeProgress => 1
                       : toToAnimationProgress((hasCustomTiming && toControlPoints(keyframe.timing)) || this._controlPoints)
@@ -167,7 +167,7 @@ export default class Animateable {
     }, [])
   }
   _getReversedEaseables () {
-    // TODO: abstract and make more DRY
+    // TODO: abstract and make DRYer
     return this._properties.reduce((easeables, property) => {
       const propertyKeyframes = this._reversedKeyframes.filter(({ data }) => data.hasOwnProperty(property)),
             propertyEaseables = propertyKeyframes.reduce((propertyEaseables, keyframe, index, array) => {
@@ -175,7 +175,7 @@ export default class Animateable {
                     next = index === array.length - 1 ? previous : array[index + 1].data[property],
                     start = keyframe.progress,
                     end = index === array.length - 1 ? 2 : array[index + 1].progress,
-                    hasCustomTiming = is.defined(keyframe.timing),
+                    hasCustomTiming = !!keyframe?.timing,
                     toAnimationProgress = index === array.length - 1
                       ? timeProgress => 1
                       : toToAnimationProgress((hasCustomTiming && toReversedControlPoints(toControlPoints(array[index + 1].timing))) || this._reversedControlPoints)

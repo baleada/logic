@@ -24,8 +24,8 @@ export default class Delayable {
         { progress: 1, data: { progress: 1 } }
       ],
       {
-        duration: is.defined(options.delay) ? options.delay : defaultOptions.delay,
-        iterations: is.defined(options.executions) ? options.executions : defaultOptions.executions,
+        duration: options?.delay || defaultOptions.delay,
+        iterations: options?.executions || defaultOptions.executions,
       }
     )
 

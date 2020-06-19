@@ -16,8 +16,8 @@ const defaultOptions = {
 export default class Storeable {
   constructor (key, options = {}) {
     this._constructing()
-    this._type = is.defined(options.type) ? options.type : defaultOptions.type
-    this._statusKeySuffix = is.defined(options.statusKeySuffix) ? options.statusKeySuffix : defaultOptions.statusKeySuffix
+    this._type = options?.type || defaultOptions.type
+    this._statusKeySuffix = options?.statusKeySuffix || defaultOptions.statusKeySuffix
 
     this.setKey(key)
     this._computedError = {}

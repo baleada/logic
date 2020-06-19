@@ -14,7 +14,7 @@ const defaultOptions = {
 class Navigateable {
   constructor (array, options = {}) {
     this.setArray(array)
-    this.navigate(is.defined(options.initialLocation) ? options.initialLocation : defaultOptions.initialLocation)
+    this.navigate(options?.initialLocation || defaultOptions.initialLocation)
     this._ready()
   }
   _ready () {

@@ -51,7 +51,7 @@ export default class Listenable {
     }
 
     // Has no effect if the type is not detected as keycombo
-    this._keycomboType = is.defined(options.keycombo) ? options.keycombo : defaultOptions.keycombo
+    this._keycomboType = options?.keycombo || defaultOptions.keycombo
 
     this._observer = observers[eventType]
 
@@ -68,7 +68,7 @@ export default class Listenable {
 
   _getType (eventType) {
     return (this._computedRecognizeable instanceof Recognizeable && 'recognizeable') ||
-      (is.defined(this._observer) && 'observation') ||
+      (!!this._observer && 'observation') ||
       (mediaQueryRegexp.test(eventType) && 'mediaquery') ||
       (eventType === 'idle' && 'idle') ||
       (eventType === 'visibilitychange' && 'visibilitychange') ||
@@ -334,7 +334,7 @@ export default class Listenable {
       // Do nothing. Don't use web APIs during construction or before doing anything else.
       break
     default:
-      const stoppable = is.defined(target)
+      const stoppable = !!target
               ? this.activeListeners.filter(({ target: t }) => t === target) // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
               : this.activeListeners
 

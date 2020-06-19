@@ -18,33 +18,19 @@ const defaultOptions = {
   // initialSelection
 }
 
-function getSegmentFrom (options) {
-  if (options.hasOwnProperty('segment')) {
-    return is.defined(options.segment.from) ? options.segment.from : defaultOptions.segment.from
-  } else {
-    return defaultOptions.segment.from
-  }
-}
-
-function getSegmentTo (options) {
-  if (options.hasOwnProperty('segment')) {
-    return is.defined(options.segment.to) ? options.segment.to : defaultOptions.segment.to
-  } else {
-    return defaultOptions.segment.to
-  }
-}
-
 export default class Completeable {
   constructor (string, options = {}) {
     this._constructing()
-    this._segmentFrom = getSegmentFrom(options)
-    this._segmentTo = getSegmentTo(options)
-    this._divider = is.defined(options.divider) ? options.divider : defaultOptions.divider
+    this._segmentFrom = options?.segment?.from || defaultOptions.segment.from
+    this._segmentTo = options?.segment?.to || defaultOptions.segment.to
+    this._divider = options?.divider || defaultOptions.divider
+
+    console.log(this._divider)
 
     this._computedDividerIndices = { before: 0, after: 0 }
 
     this.setString(string)
-    this.setSelection(options.hasOwnProperty('initialSelection') ? options.initialSelection : { start: string.length, end: string.length })
+    this.setSelection(options?.initialSelection || { start: string.length, end: string.length })
     this._ready()
   }
   _constructing () {
