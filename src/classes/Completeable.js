@@ -25,8 +25,6 @@ export default class Completeable {
     this._segmentTo = options?.segment?.to || defaultOptions.segment.to
     this._divider = options?.divider || defaultOptions.divider
 
-    console.log(this._divider)
-
     this._computedDividerIndices = { before: 0, after: 0 }
 
     this.setString(string)
