@@ -17,12 +17,12 @@ import uniqueable from '../factories/uniqueable'
 /* Constants */
 import observers from '../constants/observers'
 const mediaQueryRegexp = /^\(.+\)$/,
-      keycomboRegexp = /^((!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|arrow|vertical|horizontal|up|right|down|left|enter|backspace|cmd|shift|ctrl|alt|opt))\+)*(!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|arrow|vertical|horizontal|up|right|down|left|enter|backspace|cmd|shift|ctrl|alt|opt))$/,
+      keycomboRegexp = /^((!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|space|arrow|vertical|horizontal|up|right|down|left|enter|backspace|cmd|shift|ctrl|alt|opt))\+)*(!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|space|arrow|vertical|horizontal|up|right|down|left|enter|backspace|cmd|shift|ctrl|alt|opt))$/,
       leftclickcomboRegexp = /^(!?((cmd|shift|ctrl|alt|opt))\+){0,4}(click|mousedown|mouseup)$/,
       rightclickcomboRegexp = /^(!?((cmd|shift|ctrl|alt|opt))\+){0,4}rightclick$/,
       singleCharacter = /^!?[a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]$/,
       arrowRegexp = /^!?(arrow|vertical|horizontal|up|down|right|left)$/,
-      enterBackspaceTabRegexp = /^!?(enter|backspace|tab)$/,
+      enterBackspaceTabSpaceRegexp = /^!?(enter|backspace|tab|space)$/,
       modifierRegexp = /^!?(cmd|shift|ctrl|alt|opt)$/,
       clickRegexp = /^(rightclick|click|mousedown|mouseup)$/,
       modifierAssertDictionary = {
@@ -183,7 +183,7 @@ export default class Listenable {
               let matches
               switch (type) {
               case 'singleCharacter':
-              case 'enterBackspaceTab':
+              case 'enterBackspaceTabSpace':
                 matches = name.startsWith('!') && name.length === 2
                   ? event.key.toLowerCase() !== name.toLowerCase()
                   : event.key.toLowerCase() === name.toLowerCase()
@@ -243,8 +243,8 @@ export default class Listenable {
             ? 'singleCharacter'
             : arrowRegexp.test(name)
               ? 'arrow'
-              : enterBackspaceTabRegexp.test(name)
-                ? 'enterBackspaceTab'
+              : enterBackspaceTabSpaceRegexp.test(name)
+                ? 'enterBackspaceTabSpace'
                 : modifierRegexp.test(name)
                   ? 'modifier'
                   : false // unreachable

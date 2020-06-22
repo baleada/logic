@@ -81,6 +81,7 @@ test('guesses keycombo type', t => {
         enter = new Listenable('enter'),
         backspace = new Listenable('backspace'),
         tab = new Listenable('tab'),
+        space = new Listenable('space'),
         number = new Listenable('1'),
         letter = new Listenable('b'),
         loneModifier = new Listenable('cmd'),
@@ -98,7 +99,7 @@ test('guesses keycombo type', t => {
   const instances = [
     oneModifier, twoModifier, threeModifier, fourModifier,
     arrow, horizontal, vertical, up, down, left, right,
-    enter, backspace, tab,
+    enter, backspace, tab, space,
     number, letter,
     multipleNonModifiers,
     loneModifier,
