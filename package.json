@@ -1,6 +1,6 @@
 {
   "name": "@baleada/logic",
-  "version": "0.15.15",
+  "version": "0.15.16",
   "description": "UI logic for the Baleada toolkit",
   "main": "index.js",
   "module": "index.esm.js",
