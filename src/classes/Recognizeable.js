@@ -4,13 +4,26 @@
  * Released under the MIT license
  */
 
+import { insertable as insertableFactory } from '../factories'
+
 /* Utils */
 import is from '../util/is'
 import toPolarCoordinates from '../util/toPolarCoordinates'
 
 /* Dependencies */
-import objectPath from 'object-path'
-// METADATA: EXTERNAL object-path
+import { get, set } from 'lodash-es'
+// METADATA: EXTERNAL lodash
+
+function push (object, path, value) {
+  const array = get(object, path)
+  set(object, path, [...array, value])
+}
+
+function insert (object, path, value, index) {
+  const insertable = insertableFactory(get(object, path)),
+        inserted = insertable.insert({ item: value, index })
+  set(object, path, [...inserted])
+}
 
 const defaultOptions = {
   maxSequenceLength: true,
@@ -42,7 +55,7 @@ export default class Recognizeable {
   }
 
   _resetComputedMetadata () {
-    this._computedMetadata = objectPath({})
+    this._computedMetadata = {}
   }
   
   _recognized () {
@@ -56,19 +69,18 @@ export default class Recognizeable {
   }
 
   _setMetadata (path, value) {
-    this._computedMetadata.set(path, value)
+    set(this._computedMetadata, path, value)
   }
   _pushMetadata (path, value) {
     this._ensureArray(path, value)
-
-    this._computedMetadata.push(path, value)
+    push(this._computedMetadata, path, value)
   }
   _insertMetadata (path, value, index) {
     this._ensureArray(path, value)
-    this._computedMetadata.insert(path, value, index)
+    insert(this._computedMetadata, path, value, index)
   }
   _ensureArray (path, value) {
-    if (!is.array(this._computedMetadata.get(path))) {
+    if (!is.array(get(this._computedMetadata, path))) {
       this._setMetadata(path, [])
     }
   }
@@ -83,7 +95,7 @@ export default class Recognizeable {
     return this._computedStatus
   }
   get metadata () {
-    return this._computedMetadata.get()
+    return this._computedMetadata
   }
 
   setSequence (sequence) {

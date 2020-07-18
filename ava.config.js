@@ -8,6 +8,7 @@ export default {
     compileAsTests: [
       'src/**/*.js',
       'tests/test-util/*.js',
+      'node_modules/lodash-es/**/*.js'
     ],
     testOptions: {
       presets: [

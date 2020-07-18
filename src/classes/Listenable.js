@@ -6,7 +6,7 @@
 
 /* Dependencies */
 import Recognizeable from './Recognizeable'
-// METADATA: EXTERNAL object-path
+// METADATA: EXTERNAL lodash
 
 /* Utils */
 import is from '../util/is.js'

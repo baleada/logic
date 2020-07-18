@@ -6,7 +6,8 @@ const external = [
         'bezier-easing',
         'mix-css-color',
         'fast-fuzzy',
-        'object-path',
+        'lodash-es/get',
+        'lodash-es/set',
       ],
       plugins = [
         babel({
