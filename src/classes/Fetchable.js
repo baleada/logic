@@ -7,6 +7,7 @@
 import Resolveable from './Resolveable'
 
 import is from '../util/is.js'
+import domIsAvailable from '../util/domIsAvailable'
 
 function resolveOptions (options) {
   return is.function(options)
@@ -46,6 +47,13 @@ export default class Fetchable {
   }
   set resource (resource) {
     this.setResource(resource)
+  }
+  get abortController () {
+    if (!this._computedAbortController) {
+      this._computedAbortController = new AbortController()
+    }
+
+    return this._computedAbortController
   }
   get status () {
     return this._computedStatus
@@ -97,37 +105,71 @@ export default class Fetchable {
   }
   
   async fetch (options) {
-    options = resolveOptions(options)
+    options = {
+      signal: this.abortController.signal,
+      ...resolveOptions(options),
+    }
+
     this._computedStatus = 'fetching'
-    const response = await fetch(this.resource, options)
-    this._computedResponse = response
-    this._computedStatus = 'fetched'
+
+    try {
+      this._computedResponse = await fetch(this.resource, options)
+      this._computedStatus = 'fetched'
+    } catch (error) {
+      this._computedResponse = error
+      
+      switch (error?.name) {
+      case 'AbortError':
+        this._computedStatus = 'aborted'
+      default:
+        this._computedStatus = 'errored'
+      }
+    }
 
     return this
   }
   async get (options = {}) {
-    options = resolveOptions(options)
+    options = {
+      signal: this.abortController.signal,
+      ...resolveOptions(options),
+    }
     await this.fetch({ ...options, method: 'get' })
     return this
   }
   async patch (options = {}) {
-    options = resolveOptions(options)
+    options = {
+      signal: this.abortController.signal,
+      ...resolveOptions(options),
+    }
     await this.fetch({ ...options, method: 'patch' })
     return this
   }
   async post (options = {}) {
-    options = resolveOptions(options)
+    options = {
+      signal: this.abortController.signal,
+      ...resolveOptions(options),
+    }
     await this.fetch({ ...options, method: 'post' })
     return this
   }
   async put (options = {}) {
-    options = resolveOptions(options)
+    options = {
+      signal: this.abortController.signal,
+      ...resolveOptions(options),
+    }
     await this.fetch({ ...options, method: 'put' })
     return this
   }
   async delete (options = {}) {
-    options = resolveOptions(options)
+    options = {
+      signal: this.abortController.signal,
+      ...resolveOptions(options),
+    }
     await this.fetch({ ...options, method: 'delete' })
+    return this
+  }
+  abort () {
+    this.abortController.abort()
     return this
   }
 }

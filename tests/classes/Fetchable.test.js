@@ -52,3 +52,4 @@ test('status is "ready" after construction', t => {
 // put
 // delete
 
+// abort
