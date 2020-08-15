@@ -7,7 +7,6 @@
 /* Util */
 import lastMatch from '../util/lastMatch'
 import nextMatch from '../util/nextMatch'
-import is from '../util/is'
 
 const defaultOptions = {
   segment: {

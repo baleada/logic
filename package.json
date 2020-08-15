@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/baleada/logic.git"
+    "url": "git+https://github.com/baleada/logic.git"
   },
   "keywords": [
     "baleada",
@@ -27,7 +27,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/baleada/logic/issues"
+    "url": "https://github.com/baleada/logic/issues"
   },
   "homepage": "https://baleada.netlify.com",
   "devDependencies": {
