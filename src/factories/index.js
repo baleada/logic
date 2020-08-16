@@ -1,3 +1,4 @@
+export { default as clipable } from './clipable.js'
 export { default as deleteable } from './deleteable.js'
 export { default as insertable } from './insertable.js'
 export { default as renameable } from './renameable.js'
