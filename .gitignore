@@ -98,3 +98,7 @@ factories
 !src/factories
 !tests/classes
 !tests/factories
+
+# Docs
+docs
+docs-json
