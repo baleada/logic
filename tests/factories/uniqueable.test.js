@@ -1,5 +1,5 @@
 import test from 'ava'
-import uniqueable from '../../src/factories/uniqueable'
+import { uniqueable } from '../../lib/index.esm.js'
 
 test.beforeEach(t => {
   t.context.setup = () => uniqueable(['baleada', 'baleada', 'toolkit', 'toolkit'])

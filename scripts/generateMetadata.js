@@ -1,4 +1,5 @@
-const fs = require('fs')
+const fs = require('fs'),
+      { parse } = require('path')
 
 module.exports = function() {
   const classes = fs.readdirSync('./src/classes').filter(file => !/index\.js$/.test(file)),
@@ -35,7 +36,7 @@ function getFactoriesMetadata (factories) {
 }
 
 function getName (file) {
-  return file.match(/\w+\.js$/)[0].replace(/\.js$/, '')
+  return parse(file).name
 }
 
 const constructorRegexp = /constructor ?\(.*?\) ?\{((.|\r?\n)*?)\n\s\s\}/,

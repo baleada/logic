@@ -1,5 +1,5 @@
 import test from 'ava'
-import renameable from '../../src/factories/renameable'
+import { renameable } from '../../lib/index.esm.js'
 
 test.beforeEach(t => {
   t.context.setup = () => renameable([['one', 'value'], ['two', 'value']])

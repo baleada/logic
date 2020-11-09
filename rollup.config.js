@@ -1,5 +1,6 @@
 import babel from '@rollup/plugin-babel'
 import resolve from '@rollup/plugin-node-resolve'
+import sizes from '@atomico/rollup-plugin-sizes'
 import virtual from '@baleada/rollup-plugin-virtual'
 import getFilesToIndex from '@baleada/source-transform-files-to-index'
 import metadata from './metadata/index.esm.js'
@@ -29,10 +30,7 @@ const external = [
         //   }
         // },
         virtual({
-          transform: ({ id }) => {
-            console.log(srcFilesToIndex({ id }))
-            return srcFilesToIndex({ id })
-          },
+          transform: ({ id }) => srcFilesToIndex({ id }),
           test: ({ id }) => id.endsWith('src/index.js'),
         }),
         virtual({
@@ -56,6 +54,7 @@ const external = [
           exclude: 'node_modules/**',
           babelHelpers: 'runtime',
         }),
+        sizes(10),
       ]
 
 export default [

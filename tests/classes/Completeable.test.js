@@ -1,5 +1,5 @@
 import test from 'ava'
-import Completeable from '../../src/classes/Completeable'
+import { Completeable } from '../../lib/index.esm.js'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Completeable(

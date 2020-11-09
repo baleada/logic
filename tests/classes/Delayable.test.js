@@ -1,8 +1,8 @@
 import test from 'ava'
-import Delayable from '../../src/classes/Delayable'
+import { Delayable } from '../../lib/index.esm.js'
 import guardUntilDelayed from '../../src/util/guardUntilDelayed'
 
-console.log('WARNING: Delayable requires informal testing')
+console.log('WARNING: Delayable requires browser testing')
 
 const callback = timestamp => 1 + 1,
       differentCallback = timestamp => 2 + 2

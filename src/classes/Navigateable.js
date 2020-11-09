@@ -4,14 +4,11 @@
  * Released under the MIT license
  */
 
-// Utils
-import is from '../util/is'
-
 const defaultOptions = {
   initialLocation: 0,
 }
 
-class Navigateable {
+export default class Navigateable {
   constructor (array, options = {}) {
     this.setArray(array)
     this.navigate(options?.initialLocation || defaultOptions.initialLocation)
@@ -41,32 +38,23 @@ class Navigateable {
     return this.array[this.location]
   }
 
-  /* Public methods */
   setArray (array) {
     this._computedArray = array
     return this
   }
-
   setLocation (newLocation) {
     this.navigate(newLocation)
 
     return this
   }
 
-  navigate (newLocation) {
-    switch (true) {
-    case (newLocation > this.array.length - 1):
-      newLocation = this.array.length - 1
-      // TODO: decide whether or not to show warnings
-      // console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
-      break
-    case (newLocation < 0):
-      newLocation = 0
-      // TODO: decide whether or not to show warnings
-      // console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
-      break
-    }
-
+  navigate (rawNewLocation) {
+    const newLocation = rawNewLocation < 0
+      ? 0 // WARNING: console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
+      : rawNewLocation > this.array.length - 1
+        ? this.array.length - 1 // WARNING: console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
+        : rawNewLocation
+      
     this._computedLocation = newLocation
 
     this._navigated()
@@ -84,25 +72,27 @@ class Navigateable {
       ...options,
     }
 
-    const { distance, loops } = options
+    const { distance, loops } = options,
+          lastLocation = this.array.length - 1,
+          newLocation = (() => {
+            if (this.location + distance <= lastLocation) {
+              return this.location + distance
+            }
 
-    let newLocation
-    const lastLocation = this.array.length - 1
+            // Next location is now proven to be past the end of the array.
 
-    if (this.location + distance > lastLocation) {
-      switch (true) {
-      case (loops):
-        newLocation = this.location + distance
-        while (newLocation > lastLocation) {
-          newLocation -= this.array.length
-        }
-        break
-      default:
-        newLocation = lastLocation
-      }
-    } else {
-      newLocation = this.location + distance
-    }
+            if (!loops) {
+              return lastLocation
+            }
+
+            return (() => {
+              let newLocation = this.location + distance
+              while (newLocation > lastLocation) {
+                newLocation -= this.array.length
+              }
+              return newLocation
+            })()
+          })()
 
     this.navigate(newLocation)
 
@@ -115,24 +105,26 @@ class Navigateable {
       loops: true,
       ...options,
     }
-    const { distance, loops } = options
+    const { distance, loops } = options,
+          newLocation = (() => {
+            if (this.location - distance >= 0) {
+              return this.location - distance
+            }
 
-    let newLocation
+            // Previous location is now proven to be less than 0.
 
-    if (this.location - distance < 0) {
-      switch (true) {
-      case (loops):
-        newLocation = this.location - distance
-        while (newLocation < 0) {
-          newLocation += this.array.length
-        }
-        break
-      default:
-        newLocation = 0
-      }
-    } else {
-      newLocation = this.location - distance
-    }
+            if (!loops) {
+              return 0
+            }
+
+            return (() => {
+              let newLocation = this.location - distance
+              while (newLocation < 0) {
+                newLocation += this.array.length
+              }
+              return newLocation
+            })()
+          })()
 
     this.navigate(newLocation)
 
@@ -146,5 +138,3 @@ class Navigateable {
     return this
   }
 }
-
-export default Navigateable

@@ -1,7 +1,7 @@
 import test from 'ava'
-import Listenable from '../../src/classes/Listenable'
+import { Listenable } from '../../lib/index.esm.js'
 
-console.log('WARNING: Listenable requires informal testing')
+console.log('WARNING: Listenable requires browser testing')
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Listenable('click', options)

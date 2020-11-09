@@ -1,5 +1,5 @@
 import test from 'ava'
-import Navigateable from '../../src/classes/Navigateable'
+import { Navigateable } from '../../lib/index.esm.js'
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Navigateable(
@@ -109,7 +109,7 @@ test('next() loops back through the array by default when the current location i
   t.is(instance.location, 0)
 })
 
-test('next() loops recursively through the array by default until current location is less than or equal to the last location', t => {
+test('next() loops continuously through the array by default until current location is less than or equal to the last location', t => {
   const instance = t.context.setup()
 
   instance.next({ distance: 15 })
@@ -155,7 +155,7 @@ test('previous() loops back through the array by default when the current locati
   t.is(instance.location, instance.array.length - 1)
 })
 
-test('previous() loops recursively through the array by default until current location is greater than or equal to 0', t => {
+test('previous() loops continuously through the array by default until current location is greater than or equal to 0', t => {
   const instance = t.context.setup()
 
   instance.previous({ distance: 15 })

@@ -1,7 +1,7 @@
 import test from 'ava'
-import Fullscreenable from '../../src/classes/Fullscreenable'
+import { Fullscreenable } from '../../lib/index.esm.js'
 
-console.log('WARNING: Fullscreenable requires informal testing')
+console.log('WARNING: Fullscreenable requires browser testing')
 
 const elementStub = {}
 

@@ -62,31 +62,25 @@ export default class Completeable {
     return this._computedDividerIndices
   }
   _computeSegmentStartIndex () {
-    let index
     switch (this._segmentFrom) {
-    case 'start':
-      index = 0
-      break
-    case 'selection':
-      index = this.selection.start // No arithmetic needed, because the first character of the selection should be included
-      break
-    case 'divider':
-      index = this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, lastMatch returns -1, and this becomes 0
+      case 'start':
+        return 0
+      case 'selection':
+        return this.selection.start // No arithmetic needed, because the first character of the selection should be included
+      case 'divider':
+        return this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, lastMatch returns -1, and this becomes 0
     }
     
     return index
   }
   _computeSegmentEndIndex () {
-    let index
     switch (this._segmentTo) {
-    case 'end':
-      index = this.string.length
-      break
-    case 'selection':
-      index = this.selection.end // No arithmetic needed, because the browser sets selection end as the first character not highlighted in the selection
-      break
-    case 'divider':
-      index = this.dividerIndices.after // No arithmetic needed, because segment ends before the divider index, so the divider index should be the second arg for slice. -1 edge case is handled by setDividerIndices
+      case 'end':
+        return this.string.length
+      case 'selection':
+        return this.selection.end // No arithmetic needed, because the browser sets selection end as the first character not highlighted in the selection
+      case 'divider':
+        return this.dividerIndices.after // No arithmetic needed, because segment ends before the divider index, so the divider index should be the second arg for slice. -1 edge case is handled by setDividerIndices
     }
     
     return index
@@ -136,26 +130,24 @@ export default class Completeable {
       ...options
     }
 
-    const { newSelection: ns } = options,
+    const { newSelection: newSelectionOption } = options,
           textBefore = this._getTextBefore(),
           textAfter = this._getTextAfter(),
-          completedString = textBefore + completion + textAfter
-    
-    let newSelection
-    switch (ns) {
-    case 'completion':
-      newSelection = {
-        start: textBefore.length,
-        end: `${textBefore}${completion}`.length // Unsure about the arithmetic. test in browser to find desired result.
-      }
-      break
-    case 'completionEnd':
-      newSelection = {
-        start: `${textBefore}${completion}`.length,
-        end: `${textBefore}${completion}`.length,
-      }
-      break
-    }
+          completedString = textBefore + completion + textAfter,
+          newSelection = (() => {
+            switch (newSelectionOption) {
+              case 'completion':
+                return {
+                  start: textBefore.length,
+                  end: `${textBefore}${completion}`.length
+                }
+              case 'completionEnd':
+                return {
+                  start: `${textBefore}${completion}`.length,
+                  end: `${textBefore}${completion}`.length,
+                }
+            }
+          })()
 
     this.setString(completedString)
     this.setSelection(newSelection)
@@ -165,34 +157,24 @@ export default class Completeable {
     return this
   }
   _getTextBefore () {
-    let text
     switch (this._segmentFrom) {
-    case 'start':
-      text = ''
-      break
-    case 'selection':
-      text = this.string.slice(0, this.selection.start)
-      break
-    case 'divider':
-      text = this.string.slice(0, this.dividerIndices.before + 1) // Add 1 to make sure the divider is included
-      break
+      case 'start':
+        return ''
+      case 'selection':
+        return this.string.slice(0, this.selection.start)
+      case 'divider':
+        return this.string.slice(0, this.dividerIndices.before + 1) // Add 1 to make sure the divider is included
     }
-
-    return text
   }
   _getTextAfter () {
-    let text
     switch (this._segmentTo) {
-    case 'end':
-      text = ''
-      break
-    case 'selection':
-      text = this.string.slice(this.selection.end)
-      break
-    case 'divider':
-      text = this.string.slice(this.dividerIndices.after)
-      break
-    }
+      case 'end':
+        return ''
+      case 'selection':
+        return this.string.slice(this.selection.end)
+      case 'divider':
+        return this.string.slice(this.dividerIndices.after)
+      }
 
     return text
   }

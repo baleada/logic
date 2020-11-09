@@ -7,9 +7,8 @@
 import Resolveable from './Resolveable'
 
 import is from '../util/is.js'
-import domIsAvailable from '../util/domIsAvailable'
 
-function resolveOptions (options) {
+function ensureOptions (options) {
   return is.function(options)
     ? options({ withJson })
     : options
@@ -107,7 +106,7 @@ export default class Fetchable {
   async fetch (options) {
     options = {
       signal: this.abortController.signal,
-      ...resolveOptions(options),
+      ...ensureOptions(options),
     }
 
     this._computedStatus = 'fetching'
@@ -131,7 +130,7 @@ export default class Fetchable {
   async get (options = {}) {
     options = {
       signal: this.abortController.signal,
-      ...resolveOptions(options),
+      ...ensureOptions(options),
     }
     await this.fetch({ ...options, method: 'get' })
     return this
@@ -139,7 +138,7 @@ export default class Fetchable {
   async patch (options = {}) {
     options = {
       signal: this.abortController.signal,
-      ...resolveOptions(options),
+      ...ensureOptions(options),
     }
     await this.fetch({ ...options, method: 'patch' })
     return this
@@ -147,7 +146,7 @@ export default class Fetchable {
   async post (options = {}) {
     options = {
       signal: this.abortController.signal,
-      ...resolveOptions(options),
+      ...ensureOptions(options),
     }
     await this.fetch({ ...options, method: 'post' })
     return this
@@ -155,7 +154,7 @@ export default class Fetchable {
   async put (options = {}) {
     options = {
       signal: this.abortController.signal,
-      ...resolveOptions(options),
+      ...ensureOptions(options),
     }
     await this.fetch({ ...options, method: 'put' })
     return this
@@ -163,7 +162,7 @@ export default class Fetchable {
   async delete (options = {}) {
     options = {
       signal: this.abortController.signal,
-      ...resolveOptions(options),
+      ...ensureOptions(options),
     }
     await this.fetch({ ...options, method: 'delete' })
     return this

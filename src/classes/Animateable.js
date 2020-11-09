@@ -13,7 +13,7 @@ import is from '../util/is'
 import toControlPoints from '../util/toControlPoints'
 import toReversedControlPoints from '../util/toReversedControlPoints'
 import toToAnimationProgress from '../util/toToAnimationProgress'
-import ease from '../util/ease'
+import toInterpolated from '../util/toInterpolated'
 
 function byProgress ({ progress: progressA }, { progress: progressB }) {
   return progressA - progressB
@@ -385,7 +385,7 @@ export default class Animateable {
   }
 
   _animate (callback, options = {}, type) {
-    const { ease: easeOptions } = options
+    const { interpolate: interpolateOptions } = options
 
     this._computedRequest = window.requestAnimationFrame(timestamp => {
       this._setStartTimeAndStatus(type, timestamp)
@@ -407,7 +407,7 @@ export default class Animateable {
       }
 
       const frame = {
-        ...this._getFrame(type, timeProgress, easeOptions),
+        ...this._getFrame(type, timeProgress, interpolateOptions),
         timestamp,
       }
 
@@ -486,18 +486,16 @@ export default class Animateable {
       return this._reversedToAnimationProgress.bind(this)
     }
   }
-  _getFrame (type, naiveTimeProgress, easeOptions) {
-    let easeables
-
-    switch (type) {
-    case 'play':
-    case 'seek':
-      easeables = this._easeables
-      break
-    case 'reverse':
-      easeables = this._reversedEaseables
-      break
-    }
+  _getFrame (type, naiveTimeProgress, interpolateOptions) {
+    const easeables = (() => {
+      switch (type) {
+        case 'play':
+        case 'seek':
+          return this._easeables
+        case 'reverse':
+          return this._reversedEaseables
+        }
+    })()
 
     return easeables
       .filter(({ progress: { start, end } }) => start < naiveTimeProgress && end >= naiveTimeProgress)
@@ -508,7 +506,7 @@ export default class Animateable {
         return {
           data: {
             ...frame.data,
-            [property]: ease(previous, next, animationProgress, easeOptions)
+            [property]: toInterpolated({ previous, next, progress: animationProgress }, interpolateOptions)
           },
           progress: {
             ...frame.progress,

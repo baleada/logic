@@ -1,5 +1,5 @@
 import test from 'ava'
-import deleteable from '../../src/factories/deleteable'
+import { deleteable } from '../../lib/index.esm.js'
 
 test.beforeEach(t => {
   t.context.setup = () => deleteable(['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'])

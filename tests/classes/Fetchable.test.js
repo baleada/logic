@@ -1,7 +1,7 @@
 import test from 'ava'
-import Fetchable from '../../src/classes/Fetchable'
+import { Fetchable } from '../../lib/index.esm.js'
 
-console.log('WARNING: Fetchable requires informal testing')
+console.log('WARNING: Fetchable requires browser testing')
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Fetchable(

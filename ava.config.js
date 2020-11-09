@@ -6,9 +6,11 @@ export default {
   ],
   babel: {
     compileAsTests: [
-      'src/**/*.js',
-      'tests/test-util/*.js',
-      'node_modules/lodash-es/**/*.js'
+      'lib/**/*',
+      'src/**/*',
+      'tests/test-util/*',
+      'node_modules/lodash-es/**/*',
+      'node_modules/@babel/runtime/**/*',
     ],
     testOptions: {
       presets: [

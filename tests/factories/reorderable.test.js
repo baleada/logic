@@ -1,5 +1,5 @@
 import test from 'ava'
-import reorderable from '../../src/factories/reorderable'
+import { reorderable } from '../../lib/index.esm.js'
 
 test.beforeEach(t => {
   t.context.setup = () => reorderable(['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'])

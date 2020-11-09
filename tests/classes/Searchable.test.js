@@ -1,5 +1,5 @@
 import test from 'ava'
-import Searchable from '../../src/classes/Searchable'
+import { Searchable } from '../../lib/index.esm.js'
 import { Searcher } from 'fast-fuzzy'
 
 test.beforeEach(t => {

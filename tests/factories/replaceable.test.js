@@ -1,5 +1,5 @@
 import test from 'ava'
-import replaceable from '../../src/factories/replaceable'
+import { replaceable } from '../../lib/index.esm.js'
 
 test.beforeEach(t => {
   t.context.setup = () => replaceable(['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'])

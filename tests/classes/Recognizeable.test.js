@@ -1,5 +1,5 @@
 import test from 'ava'
-import Recognizeable from '../../src/classes/Recognizeable'
+import { Recognizeable } from '../../lib/index.esm.js'
 
 const eventTypeStub = 'example',
       eventStub = { type: eventTypeStub }

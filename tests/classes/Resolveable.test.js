@@ -1,7 +1,7 @@
 import test from 'ava'
-import Resolveable from '../../src/classes/Resolveable'
+import { Resolveable } from '../../lib/index.esm.js'
 
-console.log('WARNING: Resolveable requires informal testing') // It shouldn't, but I think something in Babel is interfering.
+console.log('WARNING: Resolveable requires browser testing') // It shouldn't, but I think something in Babel is interfering.
 
 const responseStub = 'stub',
       promiseStub = new Promise(function(resolve, reject) {

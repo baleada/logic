@@ -1,7 +1,7 @@
 import test from 'ava'
-import Storeable from '../../src/classes/Storeable'
+import { Storeable } from '../../lib/index.esm.js'
 
-console.log('WARNING: Storeable requires informal testing')
+console.log('WARNING: Storeable requires browser testing')
 console.log('WARNING: Storeable is testing a private property')
 
 test.beforeEach(t => {

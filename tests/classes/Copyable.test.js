@@ -1,7 +1,7 @@
 import test from 'ava'
-import Copyable from '../../src/classes/Copyable'
+import { Copyable } from '../../lib/index.esm.js'
 
-console.log('WARNING: Copyable requires informal testing')
+console.log('WARNING: Copyable requires browser testing')
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Copyable(

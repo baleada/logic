@@ -1,5 +1,5 @@
 import test from 'ava'
-import insertable from '../../src/factories/insertable'
+import { insertable } from '../../lib/index.esm.js'
 
 test.beforeEach(t => {
   t.context.setup = () => insertable(['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'])

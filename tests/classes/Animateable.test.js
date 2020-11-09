@@ -1,7 +1,7 @@
 import test from 'ava'
-import Animateable from '../../src/classes/Animateable'
+import { Animateable } from '../../lib/index.esm.js'
 
-console.log('WARNING: Animateable requires informal testing')
+console.log('WARNING: Animateable requires browser testing')
 
 test.beforeEach(t => {
   t.context.setup = (options = {}) => new Animateable(

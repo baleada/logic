@@ -1,5 +1,5 @@
 import test from 'ava'
-import clipable from '../../src/factories/clipable'
+import { clipable } from '../../lib/index.esm.js'
 
 test.beforeEach(t => {
   t.context.setup = () => clipable('Baleada: a toolkit for building web apps')
