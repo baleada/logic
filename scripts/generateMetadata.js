@@ -11,9 +11,11 @@ module.exports = function() {
         }
 
   fs.writeFileSync(
-    './metadata.js',
-    `module.exports = ${JSON.stringify(metadata, null, 2)}`
+    './metadata/index.esm.js',
+    `export default ${JSON.stringify(metadata, null, 2)}`
   )
+
+  console.log('Scraped metadata')
 }
 
 function getClassMetadata (classes) {

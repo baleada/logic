@@ -15,6 +15,12 @@ const presets = [
         '@babel/plugin-proposal-private-methods',
         '@babel/plugin-proposal-optional-chaining',
         'module:fast-async',
+        [
+          '@babel/plugin-transform-runtime',
+          {
+            useESModules: true,
+          },
+        ],
       ]
 
 module.exports = { presets, plugins }

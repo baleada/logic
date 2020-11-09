@@ -12,7 +12,7 @@ import toPolarCoordinates from '../util/toPolarCoordinates'
 
 /* Dependencies */
 import { get, set } from 'lodash-es'
-// METADATA: EXTERNAL lodash
+// METADATA: EXTERNAL lodash-es
 
 function push (object, path, value) {
   const array = get(object, path)

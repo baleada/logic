@@ -1,7 +1,0 @@
-export { default as clipable } from './clipable.js'
-export { default as deleteable } from './deleteable.js'
-export { default as insertable } from './insertable.js'
-export { default as renameable } from './renameable.js'
-export { default as reorderable } from './reorderable.js'
-export { default as replaceable } from './replaceable.js'
-export { default as uniqueable } from './uniqueable.js'
