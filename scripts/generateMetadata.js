@@ -1,11 +1,11 @@
 const fs = require('fs'),
       { parse } = require('path')
 
-module.exports = function() {
+function generateMetadata () {
   const classes = fs.readdirSync('./src/classes').filter(file => !/index\.js$/.test(file)),
         factories = fs.readdirSync('./src/factories').filter(file => !/index\.js$/.test(file)),
-        classMetadata = getClassMetadata(classes),
-        subclassMetadata = getFactoriesMetadata(factories),
+        classMetadata = toClassMetadata(classes),
+        subclassMetadata = toFactoriesMetadata(factories),
         metadata = {
           classes: classMetadata,
           factories: subclassMetadata,
@@ -19,48 +19,64 @@ module.exports = function() {
   console.log('Scraped metadata')
 }
 
-function getClassMetadata (classes) {
+function toClassMetadata (classes) {
   return classes.map(file => ({
-    name: getName(file),
-    usesDOM: getUsesDOM(file),
-    needsCleanup: getNeedsCleanup(file),
-    external: getExternal(file, 'classes'),
+    name: toName(file),
+    usesDOM: toUsesDOM(file),
+    needsCleanup: toNeedsCleanup(file),
+    external: toExternal(file, 'classes'),
   }))
 }
 
-function getFactoriesMetadata (factories) {
+function toFactoriesMetadata (factories) {
   return factories.map(file => ({
-    name: getName(file),
-    external: getExternal(file, 'factories'),
+    name: toName(file),
+    external: toExternal(file, 'factories'),
   }))
 }
 
-function getName (file) {
+function toName (file) {
   return parse(file).name
 }
 
-const constructorRegexp = /constructor ?\(.*?\) ?\{((.|\r?\n)*?)\n\s\s\}/,
-      usesDomRegexp = /\/\/ METADATA: uses DOM/ // If the class constructor contains a 'METADATA: uses DOM' comment in its constructor, it uses the DOM
-function getUsesDOM (file) {
+const constructorRE = /constructor ?\(.*?\) ?\{((.|\r?\n)*?)\n\s\s\}/,
+      usesDomRE = /\/\/ METADATA: uses DOM/ // If the class constructor contains a 'METADATA: uses DOM' comment in its constructor, it uses the DOM
+function toUsesDOM (file) {
   const contents = fs.readFileSync(`./src/classes/${file}`, 'utf8'),
-        { 1: constructor = '' } = contents.match(constructorRegexp) || []
+        { 1: constructor = '' } = contents.match(constructorRE) || []
 
-  return usesDomRegexp.test(constructor)
+  return usesDomRE.test(constructor)
 }
 
-const externalRegexp = /\/\/ METADATA: EXTERNAL (.+)/ // If a class or factory has external dependencies, they will be pipe-separated in a 'METADATA: EXTERNAL' comment
-function getExternal (file, type) {
+const externalRE = /\/\/ METADATA: EXTERNAL (.+)/ // If a class or factory has external dependencies, they will be pipe-separated in a 'METADATA: EXTERNAL' comment
+function toExternal (file, type) {
   const contents = fs.readFileSync(`./src/${type}/${file}`, 'utf8'),
-        { 1: external = '' } = contents.match(externalRegexp) || []
+        { 1: metadata = '' } = contents.match(externalRE) || []
         
-  return external
-    ? external.split('|')
+  return metadata
+    ? toDependencies(metadata, file)
     : []
 }
 
-const needsCleanupRegexp = /\n\s+stop ?\(.*?\) {/ // If the class has a `stop` method, it needs cleanup
-function getNeedsCleanup (file) {
+function toDependencies (metadata, file) { // External dependencies can be written as plain string or regular expressions
+  return metadata
+    .split('|')
+    .map(metadatum => {
+      // Handle simple strings
+      if (!/^\/.+\/$/.test(metadatum)) {
+        return metadatum
+      }
+
+      // Handle REs
+      return new RegExp(metadatum.replace(/(^\/|\/$)/g, ''))
+    })
+}
+
+const needsCleanupRE = /\n\s+stop ?\(.*?\) {/ // If the class has a `stop` method, it needs cleanup
+function toNeedsCleanup (file) {
   const contents = fs.readFileSync(`./src/classes/${file}`, 'utf8')
 
-  return needsCleanupRegexp.test(contents)
+  return needsCleanupRE.test(contents)
 }
+
+module.exports = generateMetadata

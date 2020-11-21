@@ -3,16 +3,7 @@ const { empty } = require('@baleada/prepare'),
 
 function prepare () {
   empty('lib')
-  empty('classes')
-  empty('factories')
-
-  /* Generate metadata */
   generateMetadata()
-
-  /* Transform files */
-  // babelify()
-  // browserify()
-
 }
 
 prepare()

@@ -5,5 +5,3 @@
 # !dist/**/*.js
 !lib/**/*.js
 !metadata/**/*.js
-!classes/**/*.js
-!factories/**/*.js
