@@ -6,7 +6,6 @@
 
 /* Dependencies */
 import { Searcher } from 'fast-fuzzy'
-// METADATA: EXTERNAL fast-fuzzy
 
 export default class Searchable {
   constructor (candidates, options = {}) {

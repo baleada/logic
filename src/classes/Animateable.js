@@ -6,7 +6,6 @@
 
 /* Dependencies */
 import Listenable from './Listenable'
-// METADATA: EXTERNAL bezier-easing|mix-css-color|object-path|/lodash-es/
 
 /* Utils */
 import is from '../util/is'

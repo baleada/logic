@@ -5,11 +5,9 @@
  */
 
 import Animateable from './Animateable'
-// METADATA: EXTERNAL bezier-easing|mix-css-color|object-path|/lodash-es/
 
 // Util
 import guardUntilDelayed from '../util/guardUntilDelayed'
-import is from '../util/is'
 
 const defaultOptions = {
   delay: 0,
