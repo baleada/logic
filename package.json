@@ -5,11 +5,17 @@
   "main": "lib/index.esm.js",
   "module": "lib/index.esm.js",
   "exports": {
-    "require": "./lib/index.js",
-    "import": "./lib/index.esm.js"
+    ".": {
+      "require": "./lib/index.js",
+      "import": "./lib/index.esm.js"
+    },
+    "./metadata": {
+      "require": "./metadata/index.js",
+      "import": "./metadata/index.esm.js"
+    }
   },
   "scripts": {
-    "prepare": "node scripts/prepare.js && rollup --config rollup.config.js",
+    "prepare": "rollup --config rollup.config.js",
     "test": "npm run prepare && ava"
   },
   "repository": {
@@ -35,41 +41,10 @@
   },
   "homepage": "https://baleada.netlify.com",
   "devDependencies": {
-    "@atomico/rollup-plugin-sizes": "^1.1.4",
-    "@ava/babel": "^1.0.1",
-    "@babel/cli": "^7.7.4",
-    "@babel/core": "^7.7.4",
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
-    "@babel/plugin-proposal-optional-chaining": "^7.9.0",
-    "@babel/plugin-proposal-private-methods": "^7.7.4",
-    "@babel/plugin-transform-regenerator": "^7.7.4",
-    "@babel/plugin-transform-runtime": "^7.12.1",
-    "@babel/preset-env": "^7.7.4",
-    "@babel/runtime-corejs3": "^7.7.4",
-    "@baleada/prepare": "^0.1.1",
-    "@baleada/rollup-plugin-virtual": "0.0.5",
-    "@baleada/source-transform-files-to-index": "^0.2.2",
-    "@nuxtjs/eslint-config": "^1.1.2",
-    "@rollup/plugin-babel": "^5.2.1",
-    "@rollup/plugin-node-resolve": "^7.1.1",
-    "@rollup/pluginutils": "^3.0.8",
-    "ava": "^3.10.1",
-    "babel-eslint": "^10.0.3",
-    "bundlesize": "^0.18.0",
-    "core-js": "^3.4.5",
-    "eslint": "^6.7.2",
-    "eslint-config-standard": "^13.0.1",
-    "eslint-plugin-ava": "^7.1.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-node": "^9.2.0",
-    "eslint-plugin-nuxt": "^0.5.1",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "fast-async": "^7.0.6",
-    "markdown-it-link-attributes": "^3.0.0",
-    "regenerator-runtime": "^0.13.3",
-    "rollup": "^2.22.0",
-    "rollup-plugin-analyzer": "^3.3.0"
+    "@baleada/prepare": "^0.3.3",
+    "esm": "^3.2.25",
+    "rollup": "^2.33.3",
+    "uvu": "^0.5.0"
   },
   "dependencies": {
     "@babel/runtime": "^7.12.1",

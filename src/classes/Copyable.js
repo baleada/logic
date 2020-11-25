@@ -57,7 +57,7 @@ export default class Copyable {
   _copied () {
     this._computedStatus = 'copied'
   }
-  _writeTextFallback = function() {
+  _writeTextFallback () {
     const input = document.createElement('input')
     input.type = 'text'
     input.value = this.string
