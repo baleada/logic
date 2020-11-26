@@ -87,15 +87,11 @@ sw.*
 .DS_Store
 
 # Published version
-dist
 metadata
 lib
-classes
-factories
-!src/classes
-!src/factories
-!tests/classes
-!tests/factories
+
+# Test bundle
+tests/fixtures/index.js
 
 # Docs
 docs
