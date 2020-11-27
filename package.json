@@ -17,7 +17,7 @@
   },
   "scripts": {
     "prepare": "rollup --config rollup.config.js",
-    "test": "npx uvu -r esm tests/node .test.js$"
+    "test": "npx uvu tests/node .test.js$"
   },
   "repository": {
     "type": "git",

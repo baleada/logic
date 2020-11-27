@@ -1,72 +1,75 @@
-import test from 'ava'
-import { Listenable } from '../../lib/index.esm.js'
+import { suite as createSuite } from 'uvu'
+import * as assert from 'uvu/assert'
+import { Listenable } from '../fixtures/index.js'
 
 console.log('WARNING: Listenable requires browser testing')
 
-test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Listenable('click', options)
+const suite = createSuite('Listenable')
+
+suite.before.each(context => {
+  context.setup = (options = {}) => new Listenable('click', options)
 })
 
-test('stores the eventType', t => {
-  const instance = t.context.setup()
+suite('stores the eventType', context => {
+  const instance = context.setup()
 
-  t.is(instance.eventType, 'click')
+  assert.is(instance.eventType, 'click')
 })
 
-test('assignment sets the eventType', t => {
-  const instance = t.context.setup()
+suite('assignment sets the eventType', context => {
+  const instance = context.setup()
   instance.eventType = 'keydown'
 
-  t.is(instance.eventType, 'keydown')
+  assert.is(instance.eventType, 'keydown')
 })
 
-test('setEventType sets the eventType', t => {
-  const instance = t.context.setup()
+suite('setEventType sets the eventType', context => {
+  const instance = context.setup()
   instance.setEventType('keydown')
 
-  t.is(instance.eventType, 'keydown')
+  assert.is(instance.eventType, 'keydown')
 })
 
-test('activeListeners is empty after construction', t => {
-  const instance = t.context.setup()
+suite('activeListeners is empty after construction', context => {
+  const instance = context.setup()
 
-  t.deepEqual(instance.activeListeners, [])
+  assert.equal(instance.activeListeners, [])
 })
 
 /* guess type */
-test('guesses recognizeable type', t => {
+suite('guesses recognizeable type', context => {
   const instance = new Listenable('recognizeable', { recognizeable: { handlers: {} } })
 
-  t.is(instance._type, 'recognizeable')
+  assert.is(instance._type, 'recognizeable')
 })
 
-test('guesses observation type', t => {
+suite('guesses observation type', context => {
   const intersect = new Listenable('intersect'),
         mutate = new Listenable('mutate'),
         resize = new Listenable('resize')
   
-  t.assert([intersect, mutate, resize].every(instance => instance._type === 'observation'))
+  assert.ok([intersect, mutate, resize].every(instance => instance._type === 'observation'))
 })
 
-test('guesses mediaquery type', t => {
+suite('guesses mediaquery type', context => {
   const instance = new Listenable('(min-width: 600px)')
   
-  t.is(instance._type, 'mediaquery')
+  assert.is(instance._type, 'mediaquery')
 })
 
-test('guesses idle type', t => {
+suite('guesses idle type', context => {
   const instance = new Listenable('idle')
   
-  t.is(instance._type, 'idle')
+  assert.is(instance._type, 'idle')
 })
 
-test('guesses visibilitychange type', t => {
+suite('guesses visibilitychange type', context => {
   const instance = new Listenable('visibilitychange')
   
-  t.is(instance._type, 'visibilitychange')
+  assert.is(instance._type, 'visibilitychange')
 })
 
-test('guesses keycombo type', t => {
+suite('guesses keycombo type', context => {
   const oneModifier = new Listenable('cmd+b'),
         twoModifier = new Listenable('shift+cmd+b'),
         threeModifier = new Listenable('shift+alt+cmd+b'),
@@ -107,10 +110,10 @@ test('guesses keycombo type', t => {
     negatedModifier, negatedArrow, negatedSpecial, negatedNumber, negatedLetter, negatedPunctuation, negatedExclamation
   ]
   
-  t.assert(instances.every(instance => instance._type === 'keycombo'))
+  assert.ok(instances.every(instance => instance._type === 'keycombo'))
 })
 
-test('guesses leftclickcombo type', t => {
+suite('guesses leftclickcombo type', context => {
   const leftclick = new Listenable('click'),
         mousedown = new Listenable('mousedown'),
         mouseup = new Listenable('mouseup'),
@@ -120,10 +123,10 @@ test('guesses leftclickcombo type', t => {
         fourModifier = new Listenable('shift+ctrl+alt+cmd+click'),
         negatedModifier = new Listenable('!shift+click')
   
-  t.assert([leftclick, mousedown, mouseup, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance._type === 'leftclickcombo'))
+  assert.ok([leftclick, mousedown, mouseup, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance._type === 'leftclickcombo'))
 })
 
-test('guesses rightclickcombo type', t => {
+suite('guesses rightclickcombo type', context => {
   const rightclick = new Listenable('cmd+rightclick'),
         oneModifier = new Listenable('cmd+rightclick'),
         twoModifier = new Listenable('shift+cmd+rightclick'),
@@ -131,15 +134,15 @@ test('guesses rightclickcombo type', t => {
         fourModifier = new Listenable('shift+ctrl+alt+cmd+rightclick'),
         negatedModifier = new Listenable('!shift+rightclick')
   
-  t.assert([rightclick, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance._type === 'rightclickcombo'))
+  assert.ok([rightclick, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance._type === 'rightclickcombo'))
 })
 
 
 /* status */
-test('status is "ready" after construction', t => {
-  const instance = t.context.setup()
+suite('status is "ready" after construction', context => {
+  const instance = context.setup()
 
-  t.is(instance.status, 'ready')
+  assert.is(instance.status, 'ready')
 })
 
 /* INFORMAL */
@@ -164,3 +167,5 @@ test('status is "ready" after construction', t => {
 // status is "listening" after listen(...) is called at least once
 // status is "listening" after some active listeners are stopped
 // status is "stopped" after all active listeners are stopped
+
+suite.run()

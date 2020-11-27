@@ -1,20 +1,22 @@
-import test from 'ava'
-import { Delayable } from '../../lib/index.esm.js'
-import guardUntilDelayed from '../../src/util/guardUntilDelayed'
+import { suite as createSuite } from 'uvu'
+import * as assert from 'uvu/assert'
+import { Delayable } from '../fixtures/index.js'
 
 console.log('WARNING: Delayable requires browser testing')
+
+const suite = createSuite('Delayable')
 
 const callback = timestamp => 1 + 1,
       differentCallback = timestamp => 2 + 2
 
-test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Delayable(callback, options)
+suite.before.each(context => {
+  context.setup = (options = {}) => new Delayable(callback, options)
 })
 
-test('status is "ready" after construction', t => {
-  const instance = t.context.setup()
+suite('status is "ready" after construction', context => {
+  const instance = context.setup()
 
-  t.is(instance.status, 'ready')
+  assert.is(instance.status, 'ready')
 })
 
 
@@ -36,3 +38,5 @@ test('status is "ready" after construction', t => {
 // seek -> resume
 
 // stop
+
+suite.run()

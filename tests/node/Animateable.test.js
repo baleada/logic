@@ -1,10 +1,13 @@
-import test from 'ava'
-import { Animateable } from '../../lib/index.esm.js'
+import { suite as createSuite } from 'uvu'
+import * as assert from 'uvu/assert'
+import { Animateable } from '../fixtures/index.js'
 
 console.log('WARNING: Animateable requires browser testing')
 
-test.beforeEach(t => {
-  t.context.setup = (options = {}) => new Animateable(
+const suite = createSuite('Animateable')
+
+suite.before.each(context => {
+  context.setup = (options = {}) => new Animateable(
     [
       { progress: 0, data: { example: 0 } },
       { progress: 1, data: { example: 1 } }
@@ -14,30 +17,30 @@ test.beforeEach(t => {
 })
 
 /* Basic */
-test('initial playbackRate is 1', t => {
-  const instance = t.context.setup()
+suite('initial playbackRate is 1', context => {
+  const instance = context.setup()
 
-  t.is(instance.playbackRate, 1)
+  assert.is(instance.playbackRate, 1)
 })
 
-test('assignment sets the playback rate', t => {
-  const instance = t.context.setup()
+suite('assignment sets the playback rate', context => {
+  const instance = context.setup()
   instance.playbackRate = 2
 
-  t.is(instance.playbackRate, 2)
+  assert.is(instance.playbackRate, 2)
 })
 
-test('setPlaybackRate sets the playback rate', t => {
-  const instance = t.context.setup()
+suite('setPlaybackRate sets the playback rate', context => {
+  const instance = context.setup()
   instance.setPlaybackRate(2)
 
-  t.is(instance.playbackRate, 2)
+  assert.is(instance.playbackRate, 2)
 })
 
-test('status is "ready" after construction', t => {
-  const instance = t.context.setup()
+suite('status is "ready" after construction', context => {
+  const instance = context.setup()
 
-  t.is(instance.status, 'ready')
+  assert.is(instance.status, 'ready')
 })
 
 
@@ -80,3 +83,5 @@ test('status is "ready" after construction', t => {
 // iterations -> seek
 
 // method chaining
+
+suite.run()
