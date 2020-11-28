@@ -6,7 +6,219 @@ const suite = withBrowseable(
   createSuite('Storeable (browser)')
 )
 
+suite.before(context => {
+  context.key = 'baleada'
+})
 
+suite.before.each(async ({ page }) => {
+  await page.goto('http://localhost:3000/Logic')
+  await page.waitForSelector('h1')
+})
+
+suite(`status is stored in browser when DOM is available`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          
+          const value = JSON.parse(JSON.stringify(instance.storage))
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = { [`${key}_status`]: 'ready' }
+    
+  assert.equal(value, expected)
+})
+
+suite(`status is 'stored' after successful store(...)`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          instance.store('baleada')
+          
+          const value = instance.status
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = 'stored'
+    
+  assert.is(value, expected)
+})
+
+suite(`status is 'removed' after successful remove(...)`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          instance.store('baleada')
+          instance.remove()
+          
+          const value = instance.status
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = 'removed'
+    
+  assert.is(value, expected)
+})
+
+suite.skip(`status is 'errored' after unsuccessful store(...)`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          // Not sure how to force a storage error
+        }, key),
+        expected = 'error'
+    
+  assert.is(value, expected)
+})
+
+suite(`status is not stored in browser after successful removeStatus(...)`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          instance.removeStatus()
+          
+          const value = instance.storage.getItem(`${key}_status`)
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = null
+    
+  assert.is(value, expected)
+})
+
+suite(`setKey(...) updates browser storage keys when status is 'stored'`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          instance
+            .store('baleada')
+            .setKey('stub')
+          
+          const value = JSON.parse(JSON.stringify(instance.storage))
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = { stub: 'baleada', stub_status: 'stored' }
+    
+  assert.equal(value, expected)
+})
+
+suite(`setKey(...) updates browser storage keys when status is 'removed'`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          instance
+            .store('baleada')
+            .remove()
+            .setKey('stub')
+          
+          const value = JSON.parse(JSON.stringify(instance.storage))
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = { stub_status: 'removed' }
+    
+  assert.equal(value, expected)
+})
+
+suite(`store(...) stores item in browser storage`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          instance.store('baleada')
+          
+          const value = JSON.parse(JSON.stringify(instance.storage))
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = { [`${key}`]: 'baleada', [`${key}_status`]: 'stored' }
+    
+  assert.equal(value, expected)
+})
+
+suite(`string accesses stored item`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          instance.store('baleada')
+          
+          const value = instance.string 
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = 'baleada'
+    
+  assert.equal(value, expected)
+})
+
+suite(`remove(...) removes item from browser storage`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          instance
+            .store('baleada')
+            .remove()
+          
+          const value = JSON.parse(JSON.stringify(instance.storage))
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = { [`${key}_status`]: 'removed' }
+    
+  assert.equal(value, expected)
+})
+
+suite(`respects statusKeySuffix option`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key, { statusKeySuffix: '_stub' })
+          
+          const value = JSON.parse(JSON.stringify(instance.storage))
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = { [`${key}_stub`]: 'ready' }
+    
+  assert.equal(value, expected)
+})
+
+suite(`respects type option`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          new window.Logic.Storeable(key, { type: 'session' })
+  
+          const value = JSON.parse(JSON.stringify(window.sessionStorage))
+        
+          window.sessionStorage.clear()
+          
+          return value
+        }, key),
+        expected = { [`${key}_status`]: 'ready' }
+    
+  assert.equal(value, expected)
+})
+
+suite(`type defaults to localStorage`, async ({ page, key }) => {
+  const value = await page.evaluate(async key => {
+          new window.Logic.Storeable(key)
+  
+          const value = JSON.parse(JSON.stringify(window.localStorage))
+        
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = { [`${key}_status`]: 'ready' }
+    
+  assert.equal(value, expected)
+})
 
 
 suite.run()

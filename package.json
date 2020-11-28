@@ -19,7 +19,7 @@
     "prepare": "rollup --config rollup.config.js",
     "test:only": "run() { npx uvu tests/$2 $1.test.js$; }; run",
     "test": "npm run test:only .",
-    "test:dev": "cd tests/stubs/app && npm run dev"
+    "dev:test": "cd tests/stubs/app && npm run dev"
   },
   "repository": {
     "type": "git",

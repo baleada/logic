@@ -46,7 +46,7 @@ export default class Listenable {
   constructor (eventType, options = {}) {
     if (eventType === 'recognizeable') {
       this._computedRecognizeable = new Recognizeable([], options.recognizeable)
-      this._computedRecognizeableEvents = Object.keys(options.recognizeable.handlers || {}) // TODO: handle error for undefined handlers
+      this._computedRecognizeableEvents = Object.keys(options.recognizeable?.handlers || {})
     }
 
     // Has no effect if the type is not detected as keycombo

@@ -16,8 +16,8 @@ const defaultOptions = {
 export default class Storeable {
   constructor (key, options = {}) {
     this._constructing()
-    this._type = options?.type || defaultOptions.type
-    this._statusKeySuffix = options?.statusKeySuffix || defaultOptions.statusKeySuffix
+    this._type = options.type ?? defaultOptions.type
+    this._statusKeySuffix = options.statusKeySuffix ?? defaultOptions.statusKeySuffix
 
     this.setKey(key)
     this._computedError = {}
@@ -78,7 +78,7 @@ export default class Storeable {
     case 'stored':
       string = this.string
       this.remove()
-      this.removeStatus(this._computedStatusKey)
+      this.removeStatus()
       this._computedKey = key
       this._computedStatusKey = `${key}${this._statusKeySuffix}`
       this.store(string)
