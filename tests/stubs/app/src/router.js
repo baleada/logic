@@ -6,7 +6,7 @@ export default createRouter({
   history,
   strict: true,
   routes: [
-    { path: '/Fetchable', component: import('./Fetchable.stub.vue') }
+    { path: '/Logic', component: import('./Logic.stub.vue') }
   ],
 })
 
