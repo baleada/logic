@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Resolveable } from '../fixtures/index.js'
+import { Resolveable } from '../fixtures/TEST_BUNDLE.js'
 
 const suite = createSuite('Resolveable (node)')
 
@@ -28,14 +28,14 @@ suite('assignment sets the getPromise', context => {
   const instance = context.setup()
   instance.getPromise = () => 'poopy'
 
-  assert.ok(instance.getPromise instanceof Function)
+  assert.ok(typeof instance.getPromise === 'function')
 })
 
 suite('setGetPromise sets the getPromise', context => {
   const instance = context.setup()
   instance.setGetPromise(() => 'poopy')
 
-  assert.ok(instance.getPromise instanceof Function)
+  assert.ok(typeof instance.getPromise === 'function')
 })
 
 suite('status is "ready" after construction', context => {
@@ -44,25 +44,25 @@ suite('status is "ready" after construction', context => {
   assert.is(instance.status, 'ready')
 })
 
-// test('status is "resolving" while resolving', context => {
-//   const instance = context.setup()
-//   instance.resolve()
+suite('status is "resolving" while resolving', context => {
+  const instance = context.setup()
+  instance.resolve()
 
-//   assert.is(instance.status, 'resolving')
-// })
+  assert.is(instance.status, 'resolving')
+})
 
-// test('status is "resolved" after resolving', async t => {
-//   const instance = context.setup()
-//   await instance.resolve()
+suite('status is "resolved" after resolving', async context => {
+  const instance = context.setup()
+  await instance.resolve()
 
-//   assert.is(instance.status, 'resolved')
-// })
+  assert.is(instance.status, 'resolved')
+})
 
-// test('stores the response', async t => {
-//   const instance = context.setup()
-//   await instance.resolve()
+suite('stores the response', async context => {
+  const instance = context.setup()
+  await instance.resolve()
 
-//   assert.is(instance.response, responseStub)
-// })
+  assert.is(instance.response, responseStub)
+})
 
 suite.run()

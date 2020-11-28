@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Fullscreenable } from '../fixtures/index.js'
+import { Fullscreenable } from '../fixtures/TEST_BUNDLE.js'
 
 console.log('WARNING: Fullscreenable requires browser testing')
 

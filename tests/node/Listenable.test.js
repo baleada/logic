@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Listenable } from '../fixtures/index.js'
+import { Listenable } from '../fixtures/TEST_BUNDLE.js'
 
 console.log('WARNING: Listenable requires browser testing')
 

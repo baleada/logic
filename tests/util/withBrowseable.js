@@ -4,7 +4,6 @@ export default function withBrowseable (suite) {
   suite.before(async context => {
     const browser = await puppeteer.launch({
             product: 'chrome',
-            headless: false,
             executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
           }),
           page = await browser.newPage()

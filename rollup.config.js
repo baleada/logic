@@ -28,21 +28,21 @@ const shared = configureable()
         .resolve()
 
 export default [
-  // shared
-  //   .delete({ targets: 'lib/*', verbose: true })
-  //   .esm({ file: 'lib/index.esm.js', target: 'browser' })
-  //   .analyze()
-  //   .configure(),
-  // shared
-  //   .cjs({ file: 'lib/index.js' })
-  //   .configure(),
-  // metadataShared    
-  //   .delete({ targets: 'metadata/*', verbose: true })
-  //   .esm({ file: 'metadata/index.esm.js', target: 'node' })
-  //   .configure(),
-  // metadataShared    
-  //   .cjs({ file: 'metadata/index.js' })
-  //   .configure(),
+  shared
+    .delete({ targets: 'lib/*', verbose: true })
+    .esm({ file: 'lib/index.esm.js', target: 'browser' })
+    .analyze()
+    .configure(),
+  shared
+    .cjs({ file: 'lib/index.js' })
+    .configure(),
+  metadataShared    
+    .delete({ targets: 'metadata/*', verbose: true })
+    .esm({ file: 'metadata/index.esm.js', target: 'node' })
+    .configure(),
+  metadataShared    
+    .cjs({ file: 'metadata/index.js' })
+    .configure(),
   {
     ...configureable()
       .input('src/index.js')
@@ -56,7 +56,8 @@ export default [
       })
       .plugin(json())
       .plugin(commonjs()) //{ requireReturnsDefault: 'auto' }
-      .esm({ file: 'tests/stubs/app/src/testable.js', target: 'browser' })
+      .esm({ file: 'tests/fixtures/TEST_BUNDLE.js', target: 'node' })
+      .esm({ file: 'tests/stubs/app/src/TEST_BUNDLE.js', target: 'browser' })
       .virtualIndex('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id) })
       .virtualIndex('src/classes')
       .virtualIndex('src/constants')

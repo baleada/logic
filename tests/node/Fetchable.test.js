@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Fetchable } from '../fixtures/index.js'
+import { Fetchable } from '../fixtures/TEST_BUNDLE.js'
 
 console.log('WARNING: Fetchable requires browser testing')
 
@@ -48,13 +48,5 @@ suite('status is "ready" after construction', context => {
 // json
 // text
 
-// fetch
-// get
-// patch
-// post
-// put
-// delete
-
-// abort
 
 suite.run()

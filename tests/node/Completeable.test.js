@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Completeable } from '../fixtures/index.js'
+import { Completeable } from '../fixtures/TEST_BUNDLE.js'
 
 const suite = createSuite('Completeable (node)')
 

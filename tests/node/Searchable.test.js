@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Searchable } from '../fixtures/index.js'
+import { Searchable } from '../fixtures/TEST_BUNDLE.js'
 import { Searcher } from 'fast-fuzzy'
 
 const suite = createSuite('Searchable (node)')
@@ -37,9 +37,7 @@ suite('setCandidates constructs the searcher', context => {
   const instance = context.setup()
   instance.setCandidates(['Baleada'])
 
-  console.log(instance._searcher)
-
-  assert.instance(instance._searcher, Searcher)
+  assert.ok(instance.trie)
 })
 
 suite('results is empty after construction', context => {

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import { Fetchable } from './testable'
+import { Fetchable } from './TEST_BUNDLE.js'
 export default {
   setup () {
     window.Fetchable = Fetchable

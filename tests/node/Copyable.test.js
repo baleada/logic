@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Copyable } from '../fixtures/index.js'
+import { Copyable } from '../fixtures/TEST_BUNDLE.js'
 
 const suite = createSuite('Delayable (node)')
 

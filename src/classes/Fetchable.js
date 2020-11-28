@@ -116,13 +116,10 @@ export default class Fetchable {
       this._computedStatus = 'fetched'
     } catch (error) {
       this._computedResponse = error
-      
-      switch (error?.name) {
-      case 'AbortError':
-        this._computedStatus = 'aborted'
-      default:
-        this._computedStatus = 'errored'
-      }
+
+      this._computedStatus = error.name === 'AbortError'
+        ? 'aborted'
+        : 'errored'
     }
 
     return this

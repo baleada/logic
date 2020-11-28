@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Storeable } from '../fixtures/index.js'
+import { Storeable } from '../fixtures/TEST_BUNDLE.js'
 
 console.log('WARNING: Storeable requires browser testing')
 console.log('WARNING: Storeable is testing a private property')

@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Navigateable } from '../fixtures/index.js'
+import { Navigateable } from '../fixtures/TEST_BUNDLE.js'
 
 const suite = createSuite('Navigateable (node)')
 
