@@ -4,7 +4,7 @@ import { Fullscreenable } from '../fixtures/index.js'
 
 console.log('WARNING: Fullscreenable requires browser testing')
 
-const suite = createSuite('Fullscreenable')
+const suite = createSuite('Fullscreenable (node)')
 
 const elementStub = {}
 

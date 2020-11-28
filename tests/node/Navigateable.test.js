@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Navigateable } from '../fixtures/index.js'
 
-const suite = createSuite('Navigateable')
+const suite = createSuite('Navigateable (node)')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Navigateable(

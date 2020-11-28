@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { Searchable } from '../fixtures/index.js'
 import { Searcher } from 'fast-fuzzy'
 
-const suite = createSuite('Searchable')
+const suite = createSuite('Searchable (node)')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Searchable(

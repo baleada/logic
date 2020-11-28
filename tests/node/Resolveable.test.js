@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Resolveable } from '../fixtures/index.js'
 
-const suite = createSuite('Resolveable')
+const suite = createSuite('Resolveable (node)')
 
 const responseStub = 'stub',
       promiseStub = new Promise(function(resolve, reject) {

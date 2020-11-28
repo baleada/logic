@@ -4,7 +4,7 @@ import { Animateable } from '../fixtures/index.js'
 
 console.log('WARNING: Animateable requires browser testing')
 
-const suite = createSuite('Animateable')
+const suite = createSuite('Animateable (node)')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Animateable(

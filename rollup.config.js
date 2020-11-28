@@ -43,23 +43,26 @@ export default [
   // metadataShared    
   //   .cjs({ file: 'metadata/index.js' })
   //   .configure(),
-  configureable()
-    .input('src/index.js')
-    .resolve()
-    .sourceTransform({
-      test: ({ source }) => source === '',
-      transform: ({ id, source }) => {
-        console.log(id)
-        return readFileSync(id, 'utf8')
-      }
-    })
-    .plugin(json())
-    .plugin(commonjs()) //{ requireReturnsDefault: 'auto' }
-    .esm({ file: 'tests/fixtures/index.js', target: 'browser' })
-    .virtualIndex('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id) })
-    .virtualIndex('src/classes')
-    .virtualIndex('src/constants')
-    .virtualIndex('src/factories')
-    .virtualIndex('src/util')
-    .configure(),
+  {
+    ...configureable()
+      .input('src/index.js')
+      .resolve()
+      .sourceTransform({
+        test: ({ source }) => source === '',
+        transform: ({ id, source }) => {
+          console.log(id)
+          return readFileSync(id, 'utf8')
+        }
+      })
+      .plugin(json())
+      .plugin(commonjs()) //{ requireReturnsDefault: 'auto' }
+      .esm({ file: 'tests/stubs/app/src/testable.js', target: 'browser' })
+      .virtualIndex('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id) })
+      .virtualIndex('src/classes')
+      .virtualIndex('src/constants')
+      .virtualIndex('src/factories')
+      .virtualIndex('src/util')
+      .configure(),
+      external: [],
+    }
 ]

@@ -5,7 +5,7 @@ import { Storeable } from '../fixtures/index.js'
 console.log('WARNING: Storeable requires browser testing')
 console.log('WARNING: Storeable is testing a private property')
 
-const suite = createSuite('Storeable')
+const suite = createSuite('Storeable (node)')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Storeable(

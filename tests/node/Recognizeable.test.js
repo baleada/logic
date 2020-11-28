@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Recognizeable } from '../fixtures/index.js'
 
-const suite = createSuite('Recognizeable')
+const suite = createSuite('Recognizeable (node)')
 
 const eventTypeStub = 'example',
       eventStub = { type: eventTypeStub }

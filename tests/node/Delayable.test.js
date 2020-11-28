@@ -4,7 +4,7 @@ import { Delayable } from '../fixtures/index.js'
 
 console.log('WARNING: Delayable requires browser testing')
 
-const suite = createSuite('Delayable')
+const suite = createSuite('Delayable (node)')
 
 const callback = timestamp => 1 + 1,
       differentCallback = timestamp => 2 + 2

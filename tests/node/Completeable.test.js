@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Completeable } from '../fixtures/index.js'
 
-const suite = createSuite('Completeable')
+const suite = createSuite('Completeable (node)')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Completeable(

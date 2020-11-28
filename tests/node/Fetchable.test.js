@@ -4,7 +4,7 @@ import { Fetchable } from '../fixtures/index.js'
 
 console.log('WARNING: Fetchable requires browser testing')
 
-const suite = createSuite('Fetchable')
+const suite = createSuite('Fetchable (node)')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Fetchable(

@@ -17,7 +17,10 @@
   },
   "scripts": {
     "prepare": "rollup --config rollup.config.js",
-    "test": "npx uvu tests/node .test.js$"
+    "test-node": "npx uvu tests/node .test.js$",
+    "test-browser": "npx uvu tests/browser .test.js$",
+    "test": "test-node && test-browser",
+    "test-dev": "cd tests/stubs/app && npm run dev"
   },
   "repository": {
     "type": "git",
@@ -45,11 +48,8 @@
     "@baleada/prepare": "^0.3.3",
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-json": "^4.1.0",
-    "babel-plugin-transform-commonjs": "^1.1.6",
-    "cjstoesm": "^0.1.3",
-    "esm": "^3.2.25",
+    "puppeteer-core": "^5.5.0",
     "rollup": "^2.33.3",
-    "rollup-plugin-cjs-es": "^1.0.1",
     "uvu": "^0.5.0"
   },
   "dependencies": {

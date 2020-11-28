@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Copyable } from '../fixtures/index.js'
 
-const suite = createSuite('Delayable')
+const suite = createSuite('Delayable (node)')
 
 console.log('WARNING: Copyable requires browser testing')
 

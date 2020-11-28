@@ -4,7 +4,7 @@ import { Listenable } from '../fixtures/index.js'
 
 console.log('WARNING: Listenable requires browser testing')
 
-const suite = createSuite('Listenable')
+const suite = createSuite('Listenable (node)')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Listenable('click', options)
