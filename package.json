@@ -17,10 +17,9 @@
   },
   "scripts": {
     "prepare": "rollup --config rollup.config.js",
-    "test-node": "npx uvu tests/node .test.js$",
-    "test-browser": "npx uvu tests/browser .test.js$",
-    "test": "npm run test-node && npm run test-browser",
-    "test-dev": "cd tests/stubs/app && npm run dev"
+    "test:only": "run() { npx uvu tests/$2 $1.test.js$; }; run",
+    "test": "npm run test:only .",
+    "test:dev": "cd tests/stubs/app && npm run dev"
   },
   "repository": {
     "type": "git",
