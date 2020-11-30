@@ -30,18 +30,18 @@ const shared = configureable()
 export default [
   shared
     .delete({ targets: 'lib/*', verbose: true })
-    .esm({ file: 'lib/index.esm.js', target: 'browser' })
+    .esm({ file: 'lib/index.js', target: 'browser' })
     .analyze()
     .configure(),
   shared
-    .cjs({ file: 'lib/index.js' })
+    .cjs({ file: 'lib/index.cjs' })
     .configure(),
   metadataShared    
     .delete({ targets: 'metadata/*', verbose: true })
-    .esm({ file: 'metadata/index.esm.js', target: 'node' })
+    .esm({ file: 'metadata/index.js', target: 'node' })
     .configure(),
   metadataShared    
-    .cjs({ file: 'metadata/index.js' })
+    .cjs({ file: 'metadata/index.cjs' })
     .configure(),
   {
     ...configureable()

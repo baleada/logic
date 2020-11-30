@@ -1,5 +1,5 @@
 import mix from 'mix-css-color'
-import is from './is'
+import is from './is.js'
 
 export default function toInterpolated ({ previous, next, progress }, options = {}) {
   if (is.undefined(previous)) {

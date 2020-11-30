@@ -4,4 +4,6 @@
 # Except these files
 # !dist/**/*.js
 !lib/**/*.js
+!lib/**/*.cjs
 !metadata/**/*.js
+!metadata/**/*.cjs

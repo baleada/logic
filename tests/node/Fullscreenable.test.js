@@ -2,8 +2,6 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Fullscreenable } from '../fixtures/TEST_BUNDLE.js'
 
-console.log('WARNING: Fullscreenable requires browser testing')
-
 const suite = createSuite('Fullscreenable (node)')
 
 const elementStub = {}
@@ -23,14 +21,14 @@ suite('stores the getElement', context => {
 
 suite('assignment sets the getElement', context => {
   const instance = context.setup()
-  instance.getElement = () => 'poopy'
+  instance.getElement = () => 'stub'
 
   assert.ok(instance.getElement instanceof Function)
 })
 
 suite('setGetElement sets the getElement', context => {
   const instance = context.setup()
-  instance.setGetElement(() => 'poopy')
+  instance.setGetElement(() => 'stub')
 
   assert.ok(instance.getElement instanceof Function)
 })

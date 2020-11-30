@@ -1,6 +1,6 @@
-import nextMatch from './nextMatch'
+import toNextMatch from './toNextMatch.js'
 
-export default function lastMatch ({ string, expression, from }) {
+export default function toLastMatch ({ string, expression, from }) {
   // VALIDATE: from is 0...string.length
 
   let indexOf
@@ -12,11 +12,11 @@ export default function lastMatch ({ string, expression, from }) {
             .split('')
             .reverse()
             .join(''),
-          nextMatchIndex = nextMatch({ string: reversedStringBeforeFrom, expression, from: 0 })
+          toNextMatchIndex = toNextMatch({ string: reversedStringBeforeFrom, expression, from: 0 })
     
-    indexOf = nextMatchIndex === -1
+    indexOf = toNextMatchIndex === -1
       ? -1
-      : (reversedStringBeforeFrom.length - 1) - nextMatchIndex
+      : (reversedStringBeforeFrom.length - 1) - toNextMatchIndex
   }
 
   return indexOf

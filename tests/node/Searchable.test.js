@@ -1,7 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Searchable } from '../fixtures/TEST_BUNDLE.js'
-import { Searcher } from 'fast-fuzzy'
 
 const suite = createSuite('Searchable (node)')
 

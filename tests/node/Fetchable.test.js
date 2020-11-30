@@ -2,8 +2,6 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Fetchable } from '../fixtures/TEST_BUNDLE.js'
 
-console.log('WARNING: Fetchable requires browser testing')
-
 const suite = createSuite('Fetchable (node)')
 
 suite.before.each(context => {

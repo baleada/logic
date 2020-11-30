@@ -5,8 +5,8 @@
  */
 
 /* Util */
-import lastMatch from '../util/lastMatch'
-import nextMatch from '../util/nextMatch'
+import toLastMatch from '../util/toLastMatch'
+import toNextMatch from '../util/toNextMatch'
 
 const defaultOptions = {
   segment: {
@@ -68,7 +68,7 @@ export default class Completeable {
       case 'selection':
         return this.selection.start // No arithmetic needed, because the first character of the selection should be included
       case 'divider':
-        return this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, lastMatch returns -1, and this becomes 0
+        return this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, toLastMatch returns -1, and this becomes 0
     }
     
     return index
@@ -110,16 +110,16 @@ export default class Completeable {
     return this
   }
   _setDividerIndices () {
-    this._computedDividerIndices.before = this._lastMatch({ expression: this._divider, from: this.selection.start })
+    this._computedDividerIndices.before = this._toLastMatch({ expression: this._divider, from: this.selection.start })
 
-    const after = this._nextMatch({ expression: this._divider, from: this.selection.end })
+    const after = this._toNextMatch({ expression: this._divider, from: this.selection.end })
     this._computedDividerIndices.after = after === -1 ? this.string.length + 1 : after
   }
-  _lastMatch ({ expression, from }) {
-    return lastMatch({ string: this.string, expression, from })
+  _toLastMatch ({ expression, from }) {
+    return toLastMatch({ string: this.string, expression, from })
   }
-  _nextMatch ({ expression, from }) {
-    return nextMatch({ string: this.string, expression, from })
+  _toNextMatch ({ expression, from }) {
+    return toNextMatch({ string: this.string, expression, from })
   }
 
   complete (completion, options = {}) {

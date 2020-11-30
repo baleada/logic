@@ -1,4 +1,4 @@
-export default function nextMatch ({ string, expression, from }) {
+export default function toNextMatch ({ string, expression, from }) {
   // VALIDATE: from is 0...string.length
 
   const searchResult = string.slice(from).search(expression),

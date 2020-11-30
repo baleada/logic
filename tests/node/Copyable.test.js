@@ -4,8 +4,6 @@ import { Copyable } from '../fixtures/TEST_BUNDLE.js'
 
 const suite = createSuite('Delayable (node)')
 
-console.log('WARNING: Copyable requires browser testing')
-
 suite.before.each(context => {
   context.setup = (options = {}) => new Copyable(
     'Baleada: a toolkit for building web apps',

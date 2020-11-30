@@ -26,14 +26,14 @@ suite('stores the getPromise', context => {
 
 suite('assignment sets the getPromise', context => {
   const instance = context.setup()
-  instance.getPromise = () => 'poopy'
+  instance.getPromise = () => 'stub'
 
   assert.ok(typeof instance.getPromise === 'function')
 })
 
 suite('setGetPromise sets the getPromise', context => {
   const instance = context.setup()
-  instance.setGetPromise(() => 'poopy')
+  instance.setGetPromise(() => 'stub')
 
   assert.ok(typeof instance.getPromise === 'function')
 })

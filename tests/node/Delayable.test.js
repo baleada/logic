@@ -2,8 +2,6 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Delayable } from '../fixtures/TEST_BUNDLE.js'
 
-console.log('WARNING: Delayable requires browser testing')
-
 const suite = createSuite('Delayable (node)')
 
 const callback = timestamp => 1 + 1,

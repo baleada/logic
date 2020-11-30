@@ -3,16 +3,16 @@
   "version": "0.15.21",
   "description": "UI logic for the Baleada toolkit",
   "type": "module",
-  "main": "lib/index.esm.js",
-  "module": "lib/index.esm.js",
+  "main": "lib/index.cjs",
+  "module": "lib/index.js",
   "exports": {
     ".": {
-      "require": "./lib/index.js",
-      "import": "./lib/index.esm.js"
+      "require": "./lib/index.cjs",
+      "import": "./lib/index.js"
     },
     "./metadata": {
-      "require": "./metadata/index.js",
-      "import": "./metadata/index.esm.js"
+      "require": "./metadata/index.cjs",
+      "import": "./metadata/index.js"
     }
   },
   "scripts": {
@@ -44,10 +44,7 @@
   },
   "homepage": "https://baleada.netlify.com",
   "devDependencies": {
-    "@baleada/prepare": "^0.3.3",
-    "@rollup/plugin-commonjs": "^16.0.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "puppeteer-core": "^5.5.0",
+    "@baleada/prepare": "^0.3.6",
     "rollup": "^2.33.3",
     "uvu": "^0.5.0"
   },

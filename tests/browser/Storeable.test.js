@@ -1,8 +1,8 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import withBrowseable from '../util/withBrowseable.js'
+import { withPuppeteer } from '@baleada/prepare'
 
-const suite = withBrowseable(
+const suite = withPuppeteer(
   createSuite('Storeable (browser)')
 )
 
@@ -10,12 +10,12 @@ suite.before(context => {
   context.key = 'baleada'
 })
 
-suite.before.each(async ({ page }) => {
+suite.before.each(async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/Logic')
   await page.waitForSelector('h1')
 })
 
-suite(`status is stored in browser when DOM is available`, async ({ page, key }) => {
+suite(`status is stored in browser when DOM is available`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key)
           
@@ -30,7 +30,7 @@ suite(`status is stored in browser when DOM is available`, async ({ page, key })
   assert.equal(value, expected)
 })
 
-suite(`status is 'stored' after successful store(...)`, async ({ page, key }) => {
+suite(`status is 'stored' after successful store(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key)
           instance.store('baleada')
@@ -46,7 +46,7 @@ suite(`status is 'stored' after successful store(...)`, async ({ page, key }) =>
   assert.is(value, expected)
 })
 
-suite(`status is 'removed' after successful remove(...)`, async ({ page, key }) => {
+suite(`status is 'removed' after successful remove(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key)
           instance.store('baleada')
@@ -63,7 +63,7 @@ suite(`status is 'removed' after successful remove(...)`, async ({ page, key }) 
   assert.is(value, expected)
 })
 
-suite.skip(`status is 'errored' after unsuccessful store(...)`, async ({ page, key }) => {
+suite.skip(`status is 'errored' after unsuccessful store(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           // Not sure how to force a storage error
         }, key),
@@ -72,7 +72,7 @@ suite.skip(`status is 'errored' after unsuccessful store(...)`, async ({ page, k
   assert.is(value, expected)
 })
 
-suite(`status is not stored in browser after successful removeStatus(...)`, async ({ page, key }) => {
+suite(`status is not stored in browser after successful removeStatus(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key)
           instance.removeStatus()
@@ -88,7 +88,7 @@ suite(`status is not stored in browser after successful removeStatus(...)`, asyn
   assert.is(value, expected)
 })
 
-suite(`setKey(...) updates browser storage keys when status is 'stored'`, async ({ page, key }) => {
+suite(`setKey(...) updates browser storage keys when status is 'stored'`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key)
           instance
@@ -106,7 +106,7 @@ suite(`setKey(...) updates browser storage keys when status is 'stored'`, async 
   assert.equal(value, expected)
 })
 
-suite(`setKey(...) updates browser storage keys when status is 'removed'`, async ({ page, key }) => {
+suite(`setKey(...) updates browser storage keys when status is 'removed'`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key)
           instance
@@ -125,7 +125,7 @@ suite(`setKey(...) updates browser storage keys when status is 'removed'`, async
   assert.equal(value, expected)
 })
 
-suite(`store(...) stores item in browser storage`, async ({ page, key }) => {
+suite(`store(...) stores item in browser storage`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key)
           instance.store('baleada')
@@ -141,7 +141,7 @@ suite(`store(...) stores item in browser storage`, async ({ page, key }) => {
   assert.equal(value, expected)
 })
 
-suite(`string accesses stored item`, async ({ page, key }) => {
+suite(`string accesses stored item`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key)
           instance.store('baleada')
@@ -157,7 +157,7 @@ suite(`string accesses stored item`, async ({ page, key }) => {
   assert.equal(value, expected)
 })
 
-suite(`remove(...) removes item from browser storage`, async ({ page, key }) => {
+suite(`remove(...) removes item from browser storage`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key)
           instance
@@ -175,7 +175,7 @@ suite(`remove(...) removes item from browser storage`, async ({ page, key }) => 
   assert.equal(value, expected)
 })
 
-suite(`respects statusKeySuffix option`, async ({ page, key }) => {
+suite(`respects statusKeySuffix option`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new window.Logic.Storeable(key, { statusKeySuffix: '_stub' })
           
@@ -190,7 +190,22 @@ suite(`respects statusKeySuffix option`, async ({ page, key }) => {
   assert.equal(value, expected)
 })
 
-suite(`respects type option`, async ({ page, key }) => {
+suite(`statusKeySuffix defaults to '_status'`, async ({ puppeteer: { page }, key }) => {
+  const value = await page.evaluate(async key => {
+          const instance = new window.Logic.Storeable(key)
+          
+          const value = JSON.parse(JSON.stringify(instance.storage))
+          
+          window.localStorage.clear()
+          
+          return value
+        }, key),
+        expected = { [`${key}_status`]: 'ready' }
+    
+  assert.equal(value, expected)
+})
+
+suite(`respects type option`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           new window.Logic.Storeable(key, { type: 'session' })
   
@@ -205,7 +220,7 @@ suite(`respects type option`, async ({ page, key }) => {
   assert.equal(value, expected)
 })
 
-suite(`type defaults to localStorage`, async ({ page, key }) => {
+suite(`type defaults to localStorage`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           new window.Logic.Storeable(key)
   

@@ -2,8 +2,6 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Animateable } from '../fixtures/TEST_BUNDLE.js'
 
-console.log('WARNING: Animateable requires browser testing')
-
 const suite = createSuite('Animateable (node)')
 
 suite.before.each(context => {
