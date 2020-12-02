@@ -1,10 +1,7 @@
-import commonjs from '@rollup/plugin-commonjs'
-import json from '@rollup/plugin-json'
-import { readFileSync } from 'fs'
 import { configureable } from '@baleada/prepare'
 import toMetadata from './source-transforms/toMetadata'
 
-const shared = configureable()
+const shared = configureable('rollup')
         .input('src/index.js')
         .virtualIndex('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id) })
         .virtualIndex('src/classes')
@@ -19,7 +16,7 @@ const shared = configureable()
           /lodash-es/,
           /@babel\/runtime/,
         ]),
-      metadataShared = configureable()
+      metadataShared = configureable('rollup')
         .input('src/metadata.js')
         .virtual({
           test: ({ id }) => id.endsWith('src/metadata.js'),
@@ -42,28 +39,5 @@ export default [
     .configure(),
   metadataShared    
     .cjs({ file: 'metadata/index.cjs' })
-    .configure(),
-  {
-    ...configureable()
-      .input('src/index.js')
-      .resolve()
-      .sourceTransform({
-        test: ({ source }) => source === '',
-        transform: ({ id, source }) => {
-          console.log(id)
-          return readFileSync(id, 'utf8')
-        }
-      })
-      .plugin(json())
-      .plugin(commonjs()) //{ requireReturnsDefault: 'auto' }
-      .esm({ file: 'tests/fixtures/TEST_BUNDLE.js', target: 'node' })
-      .esm({ file: 'tests/stubs/app/src/TEST_BUNDLE.js', target: 'browser' })
-      .virtualIndex('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id) })
-      .virtualIndex('src/classes')
-      .virtualIndex('src/constants')
-      .virtualIndex('src/factories')
-      .virtualIndex('src/util')
-      .configure(),
-      external: [],
-    }
+    .configure()
 ]

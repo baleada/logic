@@ -11,8 +11,7 @@ suite.before(context => {
 })
 
 suite.before.each(async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/Logic')
-  await page.waitForSelector('h1')
+  await page.goto('http://localhost:3000')
 })
 
 suite(`status is 'fetching' immediately after fetch(...)`, async ({ puppeteer: { page }, resource }) => {

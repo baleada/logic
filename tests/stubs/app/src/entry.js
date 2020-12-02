@@ -1,7 +1,3 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
+import * as Logic from '/@src/index.js'
 
-createApp(App)
-  .use(router)
-  .mount('#app')
+window.Logic = Logic

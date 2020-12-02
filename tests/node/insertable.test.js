@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { insertable } from '../fixtures/TEST_BUNDLE.js'
+import { insertable } from '../../lib/index.js'
 
 const suite = createSuite('insertable (node)')
 

@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { clipable } from '../fixtures/TEST_BUNDLE.js'
+import { clipable } from '../../lib/index.js'
 
 const suite = createSuite('clipable (node)')
 

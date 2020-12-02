@@ -90,9 +90,6 @@ sw.*
 metadata
 lib
 
-# Test bundle
-TEST_BUNDLE.js
-
 # Docs
 docs
 docs-json

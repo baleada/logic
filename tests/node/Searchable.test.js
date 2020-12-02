@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Searchable } from '../fixtures/TEST_BUNDLE.js'
+import { Searchable } from '../../lib/index.js'
 
 const suite = createSuite('Searchable (node)')
 

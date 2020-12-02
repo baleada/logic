@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { deleteable } from '../fixtures/TEST_BUNDLE.js'
+import { deleteable } from '../../lib/index.js'
 
 const suite = createSuite('deleteable (node)')
 

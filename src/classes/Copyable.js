@@ -4,9 +4,12 @@
 * Released under the MIT license
 */
 
+import Resolveable from './Resolveable.js'
+
 export default class Copyable {
   constructor (string, options = {}) {
     this.setString(string)
+    this._computedCopied = new Resolveable(() => navigator.clipboard.readText())
     this._ready()
   }
   _ready () {
@@ -23,13 +26,9 @@ export default class Copyable {
     return this._computedStatus
   }
   // TODO: Test this, including in firefox
-  // get clipboardText () {
-  //   return navigator.clipboard.readText()
-  //     .then(text => {
-  //       this._computedClipboardText = text
-  //       return this._computedClipboardText
-  //     })
-  // }
+  get copied () {
+    return this._computedCopied.resolve()
+  }
   
   setString (string) {
     this._computedString = string
@@ -37,9 +36,13 @@ export default class Copyable {
   }
   
   async copy (options = {}) {    
-    const { usesFallback } = options
+    const { type = '' } = options
+
+    switch (type) {
+
+    }
     
-    if (usesFallback) {
+    if (type) {
       this._copying()
       this._writeTextFallback()
       this._copied()

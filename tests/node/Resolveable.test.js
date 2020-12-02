@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Resolveable } from '../fixtures/TEST_BUNDLE.js'
+import { Resolveable } from '../../lib/index.js'
 
 const suite = createSuite('Resolveable (node)')
 

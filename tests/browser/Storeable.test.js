@@ -11,8 +11,7 @@ suite.before(context => {
 })
 
 suite.before.each(async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/Logic')
-  await page.waitForSelector('h1')
+  await page.goto('http://localhost:3000')
 })
 
 suite(`status is stored in browser when DOM is available`, async ({ puppeteer: { page }, key }) => {

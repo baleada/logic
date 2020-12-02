@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Animateable } from '../fixtures/TEST_BUNDLE.js'
+import { Animateable } from '../../lib/index.js'
 
 const suite = createSuite('Animateable (node)')
 

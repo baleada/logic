@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { reorderable } from '../fixtures/TEST_BUNDLE.js'
+import { reorderable } from '../../lib/index.js'
 
 const suite = createSuite('reorderable (node)')
 

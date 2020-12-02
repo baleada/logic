@@ -19,7 +19,7 @@
     "prepare": "rollup --config rollup.config.js",
     "test:only": "run() { npx uvu tests/$2 $1.test.js$; }; run",
     "test": "npm run test:only .",
-    "dev:test": "cd tests/stubs/app && npm run dev"
+    "dev": "vite"
   },
   "repository": {
     "type": "git",
@@ -44,9 +44,10 @@
   },
   "homepage": "https://baleada.netlify.com",
   "devDependencies": {
-    "@baleada/prepare": "^0.3.6",
+    "@baleada/prepare": "^0.4.6",
     "rollup": "^2.33.3",
-    "uvu": "^0.5.0"
+    "uvu": "^0.5.0",
+    "vite": "^1.0.0-rc.13"
   },
   "dependencies": {
     "@babel/runtime": "^7.12.1",

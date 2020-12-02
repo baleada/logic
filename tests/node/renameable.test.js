@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { renameable } from '../fixtures/TEST_BUNDLE.js'
+import { renameable } from '../../lib/index.js'
 
 const suite = createSuite('renameable (node)')
 
