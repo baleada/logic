@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import reorderable from './reorderable'
+import reorderable from './reorderable.js'
 
 export default function insertable (array) {
   const object = new Array(...array)

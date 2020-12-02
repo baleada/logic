@@ -2,9 +2,9 @@ import { configureable } from '@baleada/prepare'
 
 export default {
   ...configureable('vite')
-    .alias(({ basePath }) => ({
+    .alias({
       '/@src/': `/src`,
-    }))
+    })
     .koa(configureable => 
       configureable
         .virtualIndex('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id), importType: 'relativeFromRoot' })

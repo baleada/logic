@@ -4,25 +4,15 @@
  * Released under the MIT license
  */
 
-import { insertable as insertableFactory } from '../factories'
-
 /* Utils */
-import is from '../util/is'
-import toPolarCoordinates from '../util/toPolarCoordinates'
-
-/* Dependencies */
-import { get, set } from 'lodash-es'
-
-function push (object, path, value) {
-  const array = get(object, path)
-  set(object, path, [...array, value])
-}
-
-function insert (object, path, value, index) {
-  const insertable = insertableFactory(get(object, path)),
-        inserted = insertable.insert({ item: value, index })
-  set(object, path, [...inserted])
-}
+import {
+  is,
+  toPolarCoordinates,
+  get,
+  set,
+  push,
+  insert,
+} from '../util'
 
 const defaultOptions = {
   maxSequenceLength: true,
@@ -42,10 +32,9 @@ export default class Recognizeable {
       toPolarCoordinates,
       getStatus: () => this.status,
       getMetadata: () => this.metadata,
-      // TODO: require object with appropriate properties on all methods below
-      setMetadata: ({ path, value }) => this._setMetadata(path, value),
-      pushMetadata: ({ path, value }) => this._pushMetadata(path, value),
-      insertMetadata: ({ path, value, index }) => this._insertMetadata(path, value, index),
+      setMetadata: (...args) => this._setMetadata(...args),
+      pushMetadata: (...args) => this._pushMetadata(...args),
+      insertMetadata: (...args) => this._insertMetadata(...args),
       recognized: () => this._recognized(),
       denied: () => this._denied(),
     }
@@ -67,20 +56,28 @@ export default class Recognizeable {
     this._computedStatus = 'ready'
   }
 
-  _setMetadata (path, value) {
-    set(this._computedMetadata, path, value)
+  _setMetadata ({ path, value }) {
+    set({ object: this._computedMetadata, path, value })
   }
-  _pushMetadata (path, value) {
-    this._ensureArray(path, value)
-    push(this._computedMetadata, path, value)
+  _pushMetadata ({ path, value }) {
+    this._ensureArray({ path })
+    push({ object: this._computedMetadata, path, value })
   }
-  _insertMetadata (path, value, index) {
-    this._ensureArray(path, value)
-    insert(this._computedMetadata, path, value, index)
+  _insertMetadata ({ path, value, index }) {
+    this._ensureArray({ path })
+    insert({ object: this._computedMetadata, path, value, index })
   }
-  _ensureArray (path, value) {
-    if (!is.array(get(this._computedMetadata, path))) {
-      this._setMetadata(path, [])
+  _ensureArray ({ path }) {
+    const currentValue = (() => {
+      try {
+        return get({ object: this._computedMetadata, path })
+      } catch (error) {
+        return undefined
+      }
+    })()
+
+    if (!is.array(currentValue)) {
+      this._setMetadata({ path, value: [] })
     }
   }
 

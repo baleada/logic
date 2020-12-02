@@ -13,7 +13,6 @@ const shared = configureable('rollup')
           'bezier-easing',
           'mix-css-color',
           'fast-fuzzy',
-          /lodash-es/,
           /@babel\/runtime/,
         ]),
       metadataShared = configureable('rollup')

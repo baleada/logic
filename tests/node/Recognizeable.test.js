@@ -127,7 +127,7 @@ suite('handler API getMetadata() gets metadata', context => {
 suite('handler API setMetadata() sets metadata', context => {
   const instance = context.setup({
     handlers: {
-      [eventTypeStub]: ({ setMetadata }) => (setMetadata({ path: 'example.path', value: 'baleada' }))
+      [eventTypeStub]: ({ setMetadata }) => setMetadata({ path: 'example.path', value: 'baleada' })
     }
   })
 
@@ -139,7 +139,7 @@ suite('handler API setMetadata() sets metadata', context => {
 suite('handler API pushMetadata() pushes metadata', context => {
   const instance = context.setup({
     handlers: {
-      [eventTypeStub]: ({ pushMetadata }) => (pushMetadata({ path: 'example.path', value: 'baleada' }))
+      [eventTypeStub]: ({ pushMetadata }) => pushMetadata({ path: 'example.path', value: 'baleada' })
     }
   })
 
