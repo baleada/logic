@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Copyable } from '../../lib/index.js'
 
-const suite = createSuite('Delayable (node)')
+const suite = createSuite('Copyable (node)')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Copyable(
