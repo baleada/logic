@@ -5,15 +5,21 @@ import { Resolveable } from '../../lib/index.js'
 const suite = createSuite('Resolveable (node)')
 
 const responseStub = 'stub',
-      promiseStub = new Promise(function(resolve, reject) {
+      errorMessageStub = 'error',
+      withSuccessStub = () => new Promise(function(resolve, reject) {
         setTimeout(function() {
           resolve(responseStub)
+        }, 100)
+      }),
+      withErrorStub = () => new Promise(function(resolve, reject) {
+        setTimeout(function() {
+          reject(new Error(errorMessageStub))
         }, 100)
       })
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Resolveable(
-    () => promiseStub,
+    () => withSuccessStub(),
     options
   )
 })
@@ -58,11 +64,25 @@ suite('status is "resolved" after resolving', async context => {
   assert.is(instance.status, 'resolved')
 })
 
+suite('status is "errored" after resolving', async context => {
+  const instance = new Resolveable(() => withErrorStub())
+  await instance.resolve()
+
+  assert.is(instance.status, 'errored')
+})
+
 suite('stores the response', async context => {
   const instance = context.setup()
   await instance.resolve()
 
   assert.is(instance.response, responseStub)
+})
+
+suite('stores the error', async context => {
+  const instance = new Resolveable(() => withErrorStub())
+  await instance.resolve()
+
+  assert.equal(instance.response.message, errorMessageStub)
 })
 
 suite.run()

@@ -10,6 +10,7 @@ export default class Copyable {
   constructor (string, options = {}) {
     this.setString(string)
     this._computedCopied = new Resolveable(() => navigator.clipboard.readText())
+    this._computedResponse = {}
     this._ready()
   }
   _ready () {
@@ -29,6 +30,9 @@ export default class Copyable {
   get copied () {
     return this._computedCopied.resolve()
   }
+  get response () {
+    return this._computedResponse
+  }
   
   setString (string) {
     this._computedString = string
@@ -36,20 +40,34 @@ export default class Copyable {
   }
   
   async copy (options = {}) {    
-    const { type = '' } = options
+    this._copying()
+    
+    const { type = 'clipboard' } = options
 
     switch (type) {
+      case 'clipboard':
+        try {
+          this._computedResponse = await navigator.clipboard.writeText(this.string)
+          this._copied()
+        } catch (error) {
+          this._computedResponse = error
+          this._errored()
+        }
+        
+        break
+      case 'element':
+        const input = document.createElement('input')
+        input.type = 'text'
+        input.value = this.string
+        
+        document.body.appendChild(input)
+        input.select()
+        document.execCommand('copy')
+        
+        document.body.removeChild(input)
 
-    }
-    
-    if (type) {
-      this._copying()
-      this._writeTextFallback()
-      this._copied()
-    } else {
-      this._copying()
-      await navigator.clipboard.writeText(this.string)
-      this._copied()
+        this._copied()
+        break
     }
     
     return this
@@ -60,15 +78,7 @@ export default class Copyable {
   _copied () {
     this._computedStatus = 'copied'
   }
-  _writeTextFallback () {
-    const input = document.createElement('input')
-    input.type = 'text'
-    input.value = this.string
-    
-    document.body.appendChild(input)
-    input.select()
-    document.execCommand('copy')
-    
-    document.body.removeChild(input)
+  _errored () {
+    this._computedStatus = 'errored'
   }
 }

@@ -8,7 +8,6 @@
   constructor (getPromise, options = {}) {
     this.setGetPromise(getPromise)
     this._computedResponse = {}
-    this._computedError = {}
     this._ready()
   }
   _ready () {
@@ -27,9 +26,6 @@
   get response () { 
     return this._computedResponse
   }
-  get error () {
-    return this._computedError
-  }
 
   setGetPromise (getPromise) {
     this._computedGetPromise = getPromise
@@ -38,17 +34,24 @@
   }
   
   async resolve () {
-    this._computedStatus = 'resolving'
-    let response
+    this._resolving()
     try {
-      response = await this.getPromise(...arguments)
-      this._computedResponse = response
-      this._computedStatus = 'resolved'
+      this._computedResponse = await this.getPromise(...arguments)
+      this._resolved()    
     } catch (error) {
-      this._computedError = error
-      this._computedStatus = 'errored'
+      this._computedResponse = error
+      this._errored()    
     }
     
     return this
+  }
+  _resolving () {
+    this._computedStatus = 'resolving'
+  }
+  _resolved () {
+    this._computedStatus = 'resolved'
+  }
+  _errored () {
+    this._computedStatus = 'errored'
   }
 }

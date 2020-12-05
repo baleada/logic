@@ -39,14 +39,4 @@ suite('status is "ready" after construction', context => {
   assert.is(instance.status, 'ready')
 })
 
-
-/* INFORMAL */
-
-// element
-// error
-
-// enter
-// fullscreen
-// exit
-
 suite.run()
