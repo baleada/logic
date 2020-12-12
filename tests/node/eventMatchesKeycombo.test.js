@@ -219,4 +219,98 @@ suite(`predicates arrows`, context => {
   }))
 })
 
+suite(`predicates modifiers as keys`, context => {
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'Shift' },
+    combo: [{ name: 'shift', type: 'modifier' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A' },
+    combo: [{ name: '!shift', type: 'modifier' }]
+  }))
+  
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'Meta' },
+    combo: [{ name: 'cmd', type: 'modifier' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A' },
+    combo: [{ name: '!cmd', type: 'modifier' }]
+  }))
+  
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'Control' },
+    combo: [{ name: 'ctrl', type: 'modifier' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A' },
+    combo: [{ name: '!ctrl', type: 'modifier' }]
+  }))
+  
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'Alt' },
+    combo: [{ name: 'alt', type: 'modifier' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A' },
+    combo: [{ name: '!alt', type: 'modifier' }]
+  }))
+  
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'Alt' },
+    combo: [{ name: 'opt', type: 'modifier' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A' },
+    combo: [{ name: '!opt', type: 'modifier' }]
+  }))
+})
+
+suite(`predicates modifiers as modifiers`, context => {
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', shiftKey: true },
+    combo: [{ name: 'shift', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', shiftKey: false },
+    combo: [{ name: '!shift', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+  
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', metaKey: true },
+    combo: [{ name: 'cmd', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', metaKey: false },
+    combo: [{ name: '!cmd', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+  
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', ctrlKey: true },
+    combo: [{ name: 'ctrl', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', ctrlKey: false },
+    combo: [{ name: '!ctrl', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+  
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', altKey: true },
+    combo: [{ name: 'alt', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', altKey: false },
+    combo: [{ name: '!alt', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+  
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', altKey: true },
+    combo: [{ name: 'opt', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A', altKey: false },
+    combo: [{ name: '!opt', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
+  }))
+})
+
 suite.run()

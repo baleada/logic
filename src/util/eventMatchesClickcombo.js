@@ -5,8 +5,8 @@ export default function eventMatchesClickcombo ({ event, combo }) {
   return combo.every(name => (
     re.click.test(name)
     ||
-    (isModified({ alias: name, event }) && !name.startsWith('!'))
+    (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))
     ||
-    (!isModified({ alias: name, event }) && name.startsWith('!'))
+    (!name.startsWith('!') && isModified({ alias: name, event }))
   ))
 }

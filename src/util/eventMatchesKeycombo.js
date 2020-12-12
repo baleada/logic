@@ -18,12 +18,12 @@ export default function eventMatchesKeycombo ({ event, combo }) {
       case 'modifier':
         if (index === combo.length - 1) {
           return name.startsWith('!')
-            ? event.key.toLowerCase() !== toModifier(name).toLowerCase()
+            ? event.key.toLowerCase() !== toModifier(name.slice(1)).toLowerCase()
             : event.key.toLowerCase() === toModifier(name).toLowerCase()
         }
 
         return name.startsWith('!')
-          ? !isModified({ event, alias: name })
+          ? !isModified({ event, alias: name.slice(1) })
           : isModified({ event, alias: name })
     }
   })
