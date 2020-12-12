@@ -6,12 +6,14 @@
 
 /* Utils */
 import {
-  is,
   toPolarCoordinates,
   get,
   set,
   push,
   insert,
+  isArray,
+  isNumber,
+  isFunction,
 } from '../util'
 
 const defaultOptions = {
@@ -76,7 +78,7 @@ export default class Recognizeable {
       }
     })()
 
-    if (!is.array(currentValue)) {
+    if (!isArray(currentValue)) {
       this._setMetadata({ path, value: [] })
     }
   }
@@ -103,12 +105,12 @@ export default class Recognizeable {
     this._recognizing()
 
     const { type } = event,
-          excess = is.number(this._maxSequenceLength)
+          excess = isNumber(this._maxSequenceLength)
             ? Math.max(0, this.sequence.length - this._maxSequenceLength)
             : 0,
           newSequence = [ ...this.sequence.slice(excess), event ]
 
-    if (is.function(this._handlers[type])) {
+    if (isFunction(this._handlers[type])) {
       this._handlers[type]({ event,
         ...this._handlerApi,
         getSequence: () => newSequence,

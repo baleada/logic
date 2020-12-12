@@ -34,40 +34,40 @@ suite('activeListeners is empty after construction', context => {
   assert.equal(instance.activeListeners, [])
 })
 
-/* guess type */
-suite('guesses recognizeable type', context => {
+/* guess category */
+suite('infers recognizeable category', context => {
   const instance = new Listenable('recognizeable', { recognizeable: { handlers: {} } })
 
-  assert.is(instance._type, 'recognizeable')
+  assert.is(instance.category, 'recognizeable')
 })
 
-suite('guesses observation type', context => {
+suite('infers observation category', context => {
   const intersect = new Listenable('intersect'),
         mutate = new Listenable('mutate'),
         resize = new Listenable('resize')
   
-  assert.ok([intersect, mutate, resize].every(instance => instance._type === 'observation'))
+  assert.ok([intersect, mutate, resize].every(instance => instance.category === 'observation'))
 })
 
-suite('guesses mediaquery type', context => {
+suite('infers mediaquery category', context => {
   const instance = new Listenable('(min-width: 600px)')
   
-  assert.is(instance._type, 'mediaquery')
+  assert.is(instance.category, 'mediaquery')
 })
 
-suite('guesses idle type', context => {
+suite('infers idle category', context => {
   const instance = new Listenable('idle')
   
-  assert.is(instance._type, 'idle')
+  assert.is(instance.category, 'idle')
 })
 
-suite('guesses visibilitychange type', context => {
+suite('infers visibilitychange category', context => {
   const instance = new Listenable('visibilitychange')
   
-  assert.is(instance._type, 'visibilitychange')
+  assert.is(instance.category, 'visibilitychange')
 })
 
-suite('guesses keycombo type', context => {
+suite('infers keycombo category', context => {
   const oneModifier = new Listenable('cmd+b'),
         twoModifier = new Listenable('shift+cmd+b'),
         threeModifier = new Listenable('shift+alt+cmd+b'),
@@ -108,10 +108,10 @@ suite('guesses keycombo type', context => {
     negatedModifier, negatedArrow, negatedSpecial, negatedNumber, negatedLetter, negatedPunctuation, negatedExclamation
   ]
   
-  assert.ok(instances.every(instance => instance._type === 'keycombo'))
+  assert.ok(instances.every(instance => instance.category === 'keycombo'))
 })
 
-suite('guesses leftclickcombo type', context => {
+suite('infers leftclickcombo category', context => {
   const leftclick = new Listenable('click'),
         mousedown = new Listenable('mousedown'),
         mouseup = new Listenable('mouseup'),
@@ -121,10 +121,10 @@ suite('guesses leftclickcombo type', context => {
         fourModifier = new Listenable('shift+ctrl+alt+cmd+click'),
         negatedModifier = new Listenable('!shift+click')
   
-  assert.ok([leftclick, mousedown, mouseup, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance._type === 'leftclickcombo'))
+  assert.ok([leftclick, mousedown, mouseup, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance.category === 'leftclickcombo'))
 })
 
-suite('guesses rightclickcombo type', context => {
+suite('infers rightclickcombo category', context => {
   const rightclick = new Listenable('cmd+rightclick'),
         oneModifier = new Listenable('cmd+rightclick'),
         twoModifier = new Listenable('shift+cmd+rightclick'),
@@ -132,7 +132,7 @@ suite('guesses rightclickcombo type', context => {
         fourModifier = new Listenable('shift+ctrl+alt+cmd+rightclick'),
         negatedModifier = new Listenable('!shift+rightclick')
   
-  assert.ok([rightclick, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance._type === 'rightclickcombo'))
+  assert.ok([rightclick, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance.category === 'rightclickcombo'))
 })
 
 

@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import is from '../util/is.js'
+import is from '../util'
 
 export default function reorderable (array) {
   const object = new Array(...array)
@@ -50,10 +50,10 @@ export default function reorderable (array) {
   }
 
   function getItemsToMoveStartIndexAndCount (from) {
-    const itemsToMoveStartIndex = is.object(from) // from can be an object or a number
+    const itemsToMoveStartIndex = isObject(from) // from can be an object or a number
             ? from.start
             : from,
-          itemsToMoveCount = is.object(from)
+          itemsToMoveCount = isObject(from)
             ? from.itemCount
             : 1
 

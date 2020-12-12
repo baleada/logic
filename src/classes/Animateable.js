@@ -8,11 +8,13 @@
 import Listenable from './Listenable'
 
 /* Utils */
-import is from '../util/is'
-import toControlPoints from '../util/toControlPoints'
-import toReversedControlPoints from '../util/toReversedControlPoints'
-import toToAnimationProgress from '../util/toToAnimationProgress'
-import toInterpolated from '../util/toInterpolated'
+import {
+  toControlPoints,
+  toReversedControlPoints,
+  createToAnimationProgress,
+  toInterpolated,
+  isFunction,
+} from '../util'
 
 function byProgress ({ progress: progressA }, { progress: progressB }) {
   return progressA - progressB
@@ -42,8 +44,8 @@ export default class Animateable {
 
     this._reversedControlPoints = toReversedControlPoints(this._controlPoints)
     
-    this._toAnimationProgress = toToAnimationProgress(this._controlPoints)
-    this._reversedToAnimationProgress = toToAnimationProgress(this._reversedControlPoints)
+    this._toAnimationProgress = createToAnimationProgress(this._controlPoints)
+    this._reversedToAnimationProgress = createToAnimationProgress(this._reversedControlPoints)
 
     this._playCache = {}
     this._reverseCache = {}
@@ -138,7 +140,7 @@ export default class Animateable {
                     hasCustomTiming = !!keyframe?.timing,
                     toAnimationProgress = index === array.length - 1
                       ? timeProgress => 1
-                      : toToAnimationProgress((hasCustomTiming && toControlPoints(keyframe.timing)) || this._controlPoints)
+                      : createToAnimationProgress((hasCustomTiming && toControlPoints(keyframe.timing)) || this._controlPoints)
 
               return [
                 ...propertyEaseables,
@@ -177,7 +179,7 @@ export default class Animateable {
                     hasCustomTiming = !!keyframe?.timing,
                     toAnimationProgress = index === array.length - 1
                       ? timeProgress => 1
-                      : toToAnimationProgress((hasCustomTiming && toReversedControlPoints(toControlPoints(array[index + 1].timing))) || this._reversedControlPoints)
+                      : createToAnimationProgress((hasCustomTiming && toReversedControlPoints(toControlPoints(array[index + 1].timing))) || this._reversedControlPoints)
 
               return [
                 ...propertyEaseables,
@@ -669,7 +671,7 @@ export default class Animateable {
           this._seekCache = { timeProgress }
           this._sought()
 
-          callback = is.function(naiveCallback) ? naiveCallback : this._playCache.callback
+          callback = isFunction(naiveCallback) ? naiveCallback : this._playCache.callback
           this.play(callback, this._playCache.options)
 
           break
@@ -678,7 +680,7 @@ export default class Animateable {
           this._seekCache = { timeProgress }
           this._sought()
 
-          callback = is.function(naiveCallback) ? naiveCallback : this._reverseCache.callback
+          callback = isFunction(naiveCallback) ? naiveCallback : this._reverseCache.callback
           this.reverse(callback, this._reverseCache.options)
 
           break
@@ -699,7 +701,7 @@ export default class Animateable {
           this._seekCache = { timeProgress }
           this._sought()
 
-          callback = is.function(naiveCallback) ? naiveCallback : this._reverseCache.callback
+          callback = isFunction(naiveCallback) ? naiveCallback : this._reverseCache.callback
           this.reverse(callback, this._reverseCache.options)
 
           break
@@ -708,7 +710,7 @@ export default class Animateable {
           this._seekCache = { timeProgress }
           this._sought()
 
-          callback = is.function(naiveCallback) ? naiveCallback : this._playCache.callback
+          callback = isFunction(naiveCallback) ? naiveCallback : this._playCache.callback
           this.play(callback, this._playCache.options)
 
           break
@@ -731,7 +733,7 @@ export default class Animateable {
         this._seekCache = { timeProgress }
         this._sought()
 
-        callback = is.function(naiveCallback) ? naiveCallback : this._playCache.callback
+        callback = isFunction(naiveCallback) ? naiveCallback : this._playCache.callback
         this.play(callback, this._playCache.options)
 
         break
@@ -740,7 +742,7 @@ export default class Animateable {
         this._seekCache = { timeProgress }
         this._sought()
 
-        callback = is.function(naiveCallback) ? naiveCallback : this._reverseCache.callback
+        callback = isFunction(naiveCallback) ? naiveCallback : this._reverseCache.callback
         this.reverse(callback, this._reverseCache.options)
 
         break

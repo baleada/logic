@@ -1,14 +1,17 @@
 import mix from 'mix-css-color'
-import is from './is.js'
+import isUndefined from './isUndefined.js'
+import isNumber from './isNumber.js'
+import isString from './isString.js'
+import isArray from './isArray.js'
 
 export default function toInterpolated ({ previous, next, progress }, options = {}) {
-  if (is.undefined(previous)) {
+  if (isUndefined(previous)) {
     return next
   }
 
-  const type = (is.number(previous) && 'number') ||
-    (is.string(previous) && 'color') ||
-    (is.array(previous) && 'array')
+  const type = (isNumber(previous) && 'number') ||
+    (isString(previous) && 'color') ||
+    (isArray(previous) && 'array')
 
   return (() => {
     switch (type) {

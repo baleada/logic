@@ -1,8 +1,8 @@
-import is from './is'
+import isObject from './isObject.js'
 
 export default function domIsAvailable () {
   try {
-    return is.object(window)
+    return isObject(window)
   } catch (error) {
     return false
   }

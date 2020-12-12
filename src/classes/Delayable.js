@@ -7,7 +7,7 @@
 import Animateable from './Animateable'
 
 // Util
-import guardUntilDelayed from '../util/guardUntilDelayed'
+import { guardUntilDelayed } from '../util'
 
 const defaultOptions = {
   delay: 0,

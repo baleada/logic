@@ -5,8 +5,11 @@
 **/
 
 /* Utils */
-import is from '../util/is'
-import domIsAvailable from '../util/domIsAvailable'
+import {
+  isNull,
+  isString,
+  domIsAvailable,
+} from '../util'
 
 const defaultOptions = {
   type: 'local',
@@ -30,7 +33,7 @@ export default class Storeable {
     this._computedStatus = 'ready'
 
     if (domIsAvailable()) {
-      if (is.null(this.storage.getItem(this._computedStatusKey))) {
+      if (isNull(this.storage.getItem(this._computedStatusKey))) {
         this._storeStatus()
       }
     }
@@ -45,7 +48,7 @@ export default class Storeable {
   get status () {
     if (domIsAvailable()) {
       const storedStatus = this.storage.getItem(this._computedStatusKey)
-      if (this._computedStatus !== storedStatus && is.string(storedStatus)) {
+      if (this._computedStatus !== storedStatus && isString(storedStatus)) {
         this._computedStatus = storedStatus
       }
     }

@@ -6,10 +6,10 @@
 
 import Resolveable from './Resolveable'
 
-import is from '../util/is.js'
+import { isFunction } from '../util'
 
 function ensureOptions (options) {
-  return is.function(options)
+  return isFunction(options)
     ? options({ withJson })
     : options
 }

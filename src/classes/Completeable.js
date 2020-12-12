@@ -5,8 +5,10 @@
  */
 
 /* Util */
-import toLastMatch from '../util/toLastMatch'
-import toNextMatch from '../util/toNextMatch'
+import {
+  toLastMatch,
+  toNextMatch,
+ } from '../util'
 
 const defaultOptions = {
   segment: {
