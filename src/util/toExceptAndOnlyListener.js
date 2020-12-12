@@ -1,5 +1,5 @@
-export function toExceptAndOnlyListener (listener, options) {
-  const { except = [], only = [] } = options,
+export default function toExceptAndOnlyListener (listener, options) {
+  const { except = [], only = [] } = options
   
   return event => {
     const { target } = event,

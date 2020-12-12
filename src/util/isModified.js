@@ -1,4 +1,4 @@
-const fnsByModifier = {
+const guardsByModifier = {
   shift: event => event.shiftKey,
   cmd: event => event.metaKey,
   ctrl: event => event.ctrlKey,
@@ -7,7 +7,7 @@ const fnsByModifier = {
 }
 
 export default function isModified ({ event, alias }) {
-  return fnsByModifier[alias](event)
+  return guardsByModifier[alias]?.(event)
 }
 
 

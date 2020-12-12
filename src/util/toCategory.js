@@ -1,6 +1,6 @@
 import re from './re.js'
 
-assertionsByCategory = new Map([
+const guardsByCategory = new Map([
   [
     'recognizeable',
     type => type === 'recognizeable'
@@ -40,8 +40,6 @@ assertionsByCategory = new Map([
 ])
 
 export default function toCategory (type) {
-  const { 0: category } = assertionsByCategory
-    .entries()
-    .find(({ 1: assertion }) => assertion(type))
-  return category
+  return [...guardsByCategory.keys()]
+    .find(category => guardsByCategory.get(category)(type))
 }

@@ -12,13 +12,14 @@ import {
   re,
   toObserver,
   toCategory,
-  toModifier,
   toKeyType,
   toAddEventListenerParams,
+  eventMatchesKeycombo,
+  eventMatchesClickcombo,
 } from '../util'
 
 /* Factories */
-import uniqueable from '../factories'
+import { uniqueable } from '../factories'
 
 /* Constants */
 const defaultOptions = {
@@ -63,7 +64,7 @@ export default class Listenable {
   setType (type) {
     this.stop()
     this._computedType = type
-    this._computedCategpry = toCategory(type)
+    this._computedCategory = toCategory(type)
     return this
   }
 
@@ -105,19 +106,19 @@ export default class Listenable {
           observerInstance = toObserver({ type: this.type, listener, options: observerOptions })
 
     observerInstance.observe(target, observeOptions)
-    this._computedActiveListeners.push({ target, id: observerInstance, type: 'observation' })
+    this._computedActiveListeners.push({ target, id: observerInstance, category: 'observation' })
   }
   _mediaQueryListen (listener) {
     const target = window.matchMedia(this.type)
 
     target.addEventListener('change', listener)
-    this._computedActiveListeners.push({ target, id: listener, type: 'mediaquery' })
+    this._computedActiveListeners.push({ target, id: listener, category: 'mediaquery' })
   }
   _idleListen (listener, options) {
     const { requestIdleCallback = {} } = options,
           id = window.requestIdleCallback(listener, requestIdleCallback)
 
-    this._computedActiveListeners.push({ id, type: 'idle' })
+    this._computedActiveListeners.push({ id, category: 'idle' })
   }
   _recognizeableListen (listener, options) {
     const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams(listener, options),
@@ -145,10 +146,8 @@ export default class Listenable {
     const keys = uniqueable(this.type.split('+'))
             .unique()
             .map(name => ({ name: name === '' ? '+' : name, type: toKeyType(name) })),
-          listener = event => {
-            const matches = fromKeysToMatches({ event, keys })
-            
-            if (matches) {
+          listener = event => {            
+            if (eventMatchesKeycombo({ event, keys })) {
               naiveListener(event)
             }
           }
@@ -158,9 +157,7 @@ export default class Listenable {
   _clickcomboListen (naiveListener, options) {
     const keys = this.type.split('+'),
           listener = event => {
-            const matches = keys.every(key => re.click.test(key) || (!key.startsWith('!') && modifiersByAssertion[key](event)) || (key.startsWith('!') && !modifiersByAssertion[key](event)))
-
-            if (matches) {
+            if (eventMatchesClickcombo({ event, keys })) {
               naiveListener(event)
             }
           }
@@ -168,21 +165,18 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _eventListen (listener, options) {
-    let type
-    switch (this._computedCategory) {
-    case 'keycombo':
-      type = `key${this._keyDirection}`
-      break
-    case 'leftclickcombo':
-      type = this.type.match(/(\w+)$/)[1]
-      break
-    case 'rightclickcombo':
-      type = 'contextmenu'
-      break
-    default:
-      type = this.type
-      break
-    }
+    const type = (() => {
+      switch (this._computedCategory) {
+        case 'keycombo':
+          return `key${this._keyDirection}`
+        case 'leftclickcombo': // click | mousedown | mouseup
+          return this.type.match(/(\w+)$/)[1]
+        case 'rightclickcombo':
+          return 'contextmenu'
+        default:
+          return this.type
+      }
+    })()
 
     const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams(listener, options),
           eventListeners = [[type, exceptAndOnlyListener, ...listenerOptions]]
@@ -194,7 +188,7 @@ export default class Listenable {
 
     eventListeners.forEach(eventListener => {
       target.addEventListener(...eventListener)
-      this._computedActiveListeners.push({ target, id: eventListener, type: 'event' })
+      this._computedActiveListeners.push({ target, id: eventListener, category: 'event' })
     })
   }
   _listening () {
@@ -203,41 +197,33 @@ export default class Listenable {
 
   stop (target) {
     switch (this.status) {
-    case 'ready':
-    case undefined:
-      // Do nothing. Don't use web APIs during construction or before doing anything else.
-      break
-    default:
-      const stoppable = !!target
-              ? this.activeListeners.filter(({ target: t }) => t === target) // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
-              : this.activeListeners
+      case 'ready':
+      case undefined:
+        // Do nothing. Don't use web APIs during construction or before doing anything else.
+        break
+      default:
+        const stoppable = !!target
+                ? this.activeListeners.filter(({ target: t }) => t === target) // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
+                : this.activeListeners
 
-      stoppable.forEach(({ target: t, id, type }) => {
-        switch (true) {
-        case type === 'observation':
-          id.disconnect()
-          break
-        case type === 'mediaquery':
-          t.removeEventListener(id)
-          break
-        case type === 'idle':
-          window.cancelIdleCallback(id)
-          break
-        case type === 'event':
-          t.removeEventListener(...id)
-          break
+        stoppable.forEach(({ target: t, id, category }) => stopsByCategory[category]({ target: t, id }))
+        
+        if (stoppable.length = this.activeListeners.length) {
+          this._stopped()
         }
-      })
-      
-      if (stoppable.length = this.activeListeners.length) {
-        this._stopped()
+        break
       }
-      break
-    }
 
     return this
   }
   _stopped () {
     this._computedStatus = 'stopped'
   }
+}
+
+const stopsByCategory = {
+  observation: ({ target, id }) => id.disconnect(),
+  mediaquery: ({ target, id }) => target.removeEventListener(id),
+  idle: ({ target, id }) => window.cancelIdleCallback(id),
+  event: ({ target, id }) => target.removeEventListener(...id),
 }

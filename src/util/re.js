@@ -21,4 +21,4 @@ const re = {
     /^(rightclick|click|mousedown|mouseup)$/,
 }
 
-export const re
+export default re

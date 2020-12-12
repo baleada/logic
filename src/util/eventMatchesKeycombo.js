@@ -1,8 +1,8 @@
 import toModifier from './toModifier.js'
 import isModified from './isModified.js'
 
-export default function fromKeysToMatches ({ event, keys }) {
-  keys.every(({ name, type }, index) => {
+export default function eventMatchesKeycombo ({ event, keys }) {
+  return keys.every(({ name, type }, index) => {
     switch (type) {
       case 'singleCharacter':
       case 'enterBackspaceTabSpace':
@@ -10,7 +10,7 @@ export default function fromKeysToMatches ({ event, keys }) {
           ? event.key.toLowerCase() !== name.toLowerCase()
           : event.key.toLowerCase() === name.toLowerCase()
       case 'arrow':
-        return toMatchesByArrow[name]?.({ event, name }) ?? toMatchesByArrow.default({ event, name })
+        return guardsByArrow[name]?.({ event, name }) ?? guardsByArrow.default({ event, name })
       case 'modifier':
         if (index === keys.length - 1) {
           return name.startsWith('!')
@@ -19,13 +19,13 @@ export default function fromKeysToMatches ({ event, keys }) {
         }
 
         return name.startsWith('!')
-          ? !isModified({ alias: name, event })
-          : isModified({ alias: name, event })
+          ? !isModified({ event, alias: name })
+          : isModified({ event, alias: name })
     }
   })
 }
 
-const toMatchesByArrow = {
+const guardsByArrow = {
   'arrow': ({ event }) => ['arrowup', 'arrowright', 'arrowdown', 'arrowleft'].includes(event.key.toLowerCase()),
   '!arrow': ({ event }) => !['arrowup', 'arrowright', 'arrowdown', 'arrowleft'].includes(event.key.toLowerCase()),
   'vertical': ({ event }) => ['arrowup', 'arrowdown'].includes(event.key.toLowerCase()),
