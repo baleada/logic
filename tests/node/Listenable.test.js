@@ -8,131 +8,30 @@ suite.before.each(context => {
   context.setup = (options = {}) => new Listenable('click', options)
 })
 
-suite('stores the eventType', context => {
+suite('stores the type', context => {
   const instance = context.setup()
 
-  assert.is(instance.eventType, 'click')
+  assert.is(instance.type, 'click')
 })
 
-suite('assignment sets the eventType', context => {
+suite('assignment sets the type', context => {
   const instance = context.setup()
-  instance.eventType = 'keydown'
+  instance.type = 'keydown'
 
-  assert.is(instance.eventType, 'keydown')
+  assert.is(instance.type, 'keydown')
 })
 
-suite('setEventType sets the eventType', context => {
+suite('setType sets the type', context => {
   const instance = context.setup()
-  instance.setEventType('keydown')
+  instance.setType('keydown')
 
-  assert.is(instance.eventType, 'keydown')
+  assert.is(instance.type, 'keydown')
 })
 
 suite('activeListeners is empty after construction', context => {
   const instance = context.setup()
 
   assert.equal(instance.activeListeners, [])
-})
-
-/* guess category */
-suite('infers recognizeable category', context => {
-  const instance = new Listenable('recognizeable', { recognizeable: { handlers: {} } })
-
-  assert.is(instance.category, 'recognizeable')
-})
-
-suite('infers observation category', context => {
-  const intersect = new Listenable('intersect'),
-        mutate = new Listenable('mutate'),
-        resize = new Listenable('resize')
-  
-  assert.ok([intersect, mutate, resize].every(instance => instance.category === 'observation'))
-})
-
-suite('infers mediaquery category', context => {
-  const instance = new Listenable('(min-width: 600px)')
-  
-  assert.is(instance.category, 'mediaquery')
-})
-
-suite('infers idle category', context => {
-  const instance = new Listenable('idle')
-  
-  assert.is(instance.category, 'idle')
-})
-
-suite('infers visibilitychange category', context => {
-  const instance = new Listenable('visibilitychange')
-  
-  assert.is(instance.category, 'visibilitychange')
-})
-
-suite('infers keycombo category', context => {
-  const oneModifier = new Listenable('cmd+b'),
-        twoModifier = new Listenable('shift+cmd+b'),
-        threeModifier = new Listenable('shift+alt+cmd+b'),
-        fourModifier = new Listenable('shift+ctrl+alt+cmd+b'),
-        arrow = new Listenable('arrow'),
-        horizontal = new Listenable('horizontal'),
-        vertical = new Listenable('vertical'),
-        up = new Listenable('up'),
-        down = new Listenable('down'),
-        left = new Listenable('left'),
-        right = new Listenable('right'),
-        enter = new Listenable('enter'),
-        backspace = new Listenable('backspace'),
-        tab = new Listenable('tab'),
-        space = new Listenable('space'),
-        number = new Listenable('1'),
-        letter = new Listenable('b'),
-        loneModifier = new Listenable('cmd'),
-        multipleNonModifiers = new Listenable('1+a+enter'),
-        punctuation = new Listenable('/'),
-        plus = new Listenable('+'),
-        negatedLetter = new Listenable('!a'),
-        negatedNumber = new Listenable('!1'),
-        negatedSpecial = new Listenable('!enter'),
-        negatedModifier = new Listenable('!shift'),
-        negatedArrow = new Listenable('!up'),
-        negatedPunctuation = new Listenable('!/'),
-        negatedExclamation = new Listenable('!!')
-
-  const instances = [
-    oneModifier, twoModifier, threeModifier, fourModifier,
-    arrow, horizontal, vertical, up, down, left, right,
-    enter, backspace, tab, space,
-    number, letter,
-    multipleNonModifiers,
-    loneModifier,
-    punctuation, plus,
-    negatedModifier, negatedArrow, negatedSpecial, negatedNumber, negatedLetter, negatedPunctuation, negatedExclamation
-  ]
-  
-  assert.ok(instances.every(instance => instance.category === 'keycombo'))
-})
-
-suite('infers leftclickcombo category', context => {
-  const leftclick = new Listenable('click'),
-        mousedown = new Listenable('mousedown'),
-        mouseup = new Listenable('mouseup'),
-        oneModifier = new Listenable('cmd+click'),
-        twoModifier = new Listenable('shift+cmd+click'),
-        threeModifier = new Listenable('shift+alt+cmd+click'),
-        fourModifier = new Listenable('shift+ctrl+alt+cmd+click'),
-        negatedModifier = new Listenable('!shift+click')
-  
-  assert.ok([leftclick, mousedown, mouseup, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance.category === 'leftclickcombo'))
-})
-
-suite('infers rightclickcombo category', context => {
-  const rightclick = new Listenable('cmd+rightclick'),
-        oneModifier = new Listenable('cmd+rightclick'),
-        twoModifier = new Listenable('shift+cmd+rightclick'),
-        threeModifier = new Listenable('shift+alt+cmd+rightclick'),
-        fourModifier = new Listenable('shift+ctrl+alt+cmd+rightclick'),
-        negatedModifier = new Listenable('!shift+rightclick')
-  
-  assert.ok([rightclick, oneModifier, twoModifier, threeModifier, fourModifier, negatedModifier].every(instance => instance.category === 'rightclickcombo'))
 })
 
 

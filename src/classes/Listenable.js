@@ -24,6 +24,8 @@ import { uniqueable } from '../factories'
 /* Constants */
 const defaultOptions = {
   keyDirection: 'down',
+  // Can support custom delimiter if needed
+  // delimiter: '+'
 }
 
 export default class Listenable {
@@ -143,11 +145,11 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _keycomboListen (naiveListener, options) {
-    const keys = uniqueable(this.type.split('+'))
+    const combo = uniqueable(this.type.split('+'))
             .unique()
             .map(name => ({ name: name === '' ? '+' : name, type: toKeyType(name) })),
           listener = event => {            
-            if (eventMatchesKeycombo({ event, keys })) {
+            if (eventMatchesKeycombo({ event, combo })) {
               naiveListener(event)
             }
           }
@@ -155,9 +157,9 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _clickcomboListen (naiveListener, options) {
-    const keys = this.type.split('+'),
+    const combo = this.type.split('+'),
           listener = event => {
-            if (eventMatchesClickcombo({ event, keys })) {
+            if (eventMatchesClickcombo({ event, combo })) {
               naiveListener(event)
             }
           }

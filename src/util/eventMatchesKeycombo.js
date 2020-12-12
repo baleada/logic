@@ -1,18 +1,22 @@
 import toModifier from './toModifier.js'
 import isModified from './isModified.js'
 
-export default function eventMatchesKeycombo ({ event, keys }) {
-  return keys.every(({ name, type }, index) => {
+export default function eventMatchesKeycombo ({ event, combo }) {
+  return combo.every(({ name, type }, index) => {
     switch (type) {
       case 'singleCharacter':
       case 'enterBackspaceTabSpace':
-        return name.startsWith('!') && name.length === 2
-          ? event.key.toLowerCase() !== name.toLowerCase()
+        if (name === '!') {
+          return event.key === '!'
+        }
+
+        return name.startsWith('!')
+          ? event.key.toLowerCase() !== name.slice(1).toLowerCase()
           : event.key.toLowerCase() === name.toLowerCase()
       case 'arrow':
         return guardsByArrow[name]?.({ event, name }) ?? guardsByArrow.default({ event, name })
       case 'modifier':
-        if (index === keys.length - 1) {
+        if (index === combo.length - 1) {
           return name.startsWith('!')
             ? event.key.toLowerCase() !== toModifier(name).toLowerCase()
             : event.key.toLowerCase() === toModifier(name).toLowerCase()

@@ -1,4 +1,4 @@
-modifiersByAlias = {
+const modifiersByAlias = {
   shift: 'shift',
   cmd: 'meta',
   ctrl: 'control',
@@ -7,5 +7,5 @@ modifiersByAlias = {
 }
 
 export default function toModifier (alias) {
-  return modifiersByAlias[aliasOrEvent]
+  return modifiersByAlias[alias]
 }
