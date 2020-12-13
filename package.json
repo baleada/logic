@@ -17,6 +17,7 @@
   },
   "scripts": {
     "prepare": "rollup --config rollup.config.js",
+    "prepare:test": "rollup --config test.rollup.config.js",
     "test:only": "run() { npx uvu tests/$2 $1.test.js$; }; run",
     "test": "npm run test:only .",
     "dev": "vite"

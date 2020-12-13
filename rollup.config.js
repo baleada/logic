@@ -3,7 +3,6 @@ import toMetadata from './source-transforms/toMetadata'
 
 const shared = configureable('rollup')
         .input('src/index.js')
-        .virtualIndex('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id) })
         .virtualIndex('src/classes')
         .virtualIndex('src/factories')
         .virtualIndex('src/util')
@@ -14,28 +13,36 @@ const shared = configureable('rollup')
           'fast-fuzzy',
           /@babel\/runtime/,
         ]),
+      productionShared = shared
+        .virtualIndex('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id) }),
       metadataShared = configureable('rollup')
         .input('src/metadata.js')
         .virtual({
           test: ({ id }) => id.endsWith('src/metadata.js'),
           transform: toMetadata,
         })
-        .resolve()
+        .resolve(),
+      esm = productionShared
+        .delete({ targets: 'lib/*', verbose: true })
+        .esm({ file: 'lib/index.js', target: 'browser' })
+        .analyze()
+        .configure(),
+      cjs = productionShared
+        .cjs({ file: 'lib/index.cjs' })
+        .configure(),
+      metadataEsm = metadataShared    
+        .delete({ targets: 'metadata/*', verbose: true })
+        .esm({ file: 'metadata/index.js', target: 'node' })
+        .configure(),
+      metadataCjs = metadataShared    
+        .cjs({ file: 'metadata/index.cjs' })
+        .configure()
 
 export default [
-  shared
-    .delete({ targets: 'lib/*', verbose: true })
-    .esm({ file: 'lib/index.js', target: 'browser' })
-    .analyze()
-    .configure(),
-  shared
-    .cjs({ file: 'lib/index.cjs' })
-    .configure(),
-  metadataShared    
-    .delete({ targets: 'metadata/*', verbose: true })
-    .esm({ file: 'metadata/index.js', target: 'node' })
-    .configure(),
-  metadataShared    
-    .cjs({ file: 'metadata/index.cjs' })
-    .configure()
+  esm,
+  cjs,
+  metadataEsm,
+  metadataCjs,
 ]
+
+export { shared }

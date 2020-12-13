@@ -6,12 +6,12 @@ const suite = withPuppeteer(
   createSuite('Fullscreenable')
 )
 
-suite(`element gets the element`, context => {
-  const value = await page.evaluate(async () => {
+// suite(`element gets the element`, context => {
+//   const value = await page.evaluate(async () => {
           
-        })
+//         })
   
-})
+// })
 
 /* INFORMAL */
 
@@ -22,9 +22,9 @@ suite(`element gets the element`, context => {
 // fullscreen
 // exit
 
-suite(``, context => {
+// suite(``, context => {
   
   
-})
+// })
 
 suite.run()

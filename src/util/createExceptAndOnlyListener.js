@@ -1,4 +1,4 @@
-export default function toExceptAndOnlyListener (listener, options) {
+export default function createExceptAndOnlyListener (listener, options) {
   const { except = [], only = [] } = options
   
   return event => {

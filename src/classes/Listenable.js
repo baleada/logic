@@ -9,7 +9,6 @@ import Recognizeable from './Recognizeable'
 
 /* Utils */
 import {
-  re,
   toObserver,
   toCategory,
   toKeyType,

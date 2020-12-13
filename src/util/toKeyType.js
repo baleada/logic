@@ -1,4 +1,7 @@
-import re from './re.js'
+export default function toKeyType (name) {
+  return [...guardsByKeyType.keys()]
+    .find(keyType => guardsByKeyType.get(keyType)(name))
+}
 
 const guardsByKeyType = new Map([
   [
@@ -17,9 +20,14 @@ const guardsByKeyType = new Map([
     'modifier',
     name => re.modifier.test(name)
   ],
-])
-
-export default function toKeyType (name) {
-  return [...guardsByKeyType.keys()]
-    .find(keyType => guardsByKeyType.get(keyType)(name))
+]),
+re = {
+  singleCharacter:
+    /^!?[a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]$/,
+  arrow:
+    /^!?(arrow|vertical|horizontal|up|down|right|left)$/,
+  enterBackspaceTabSpace:
+    /^!?(enter|backspace|tab|space)$/,
+  modifier:
+    /^!?(cmd|shift|ctrl|alt|opt)$/,
 }

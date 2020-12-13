@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import is from '../util'
+import isObject from '../util/isObject.js' // Direct import to prevent circular dependency
 
 export default function reorderable (array) {
   const object = new Array(...array)
