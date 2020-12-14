@@ -5,14 +5,14 @@ export default function eventMatchesKeycombo ({ event, combo }) {
   return combo.every(({ name, type }, index) => {
     switch (type) {
       case 'singleCharacter':
-      case 'enterBackspaceTabSpace':
+    case 'other':
         if (name === '!') {
           return event.key === '!'
         }
 
         return name.startsWith('!')
-          ? event.key.toLowerCase() !== name.slice(1).toLowerCase()
-          : event.key.toLowerCase() === name.toLowerCase()
+          ? event.key.toLowerCase() !== name.replace(/(^|!)space$/, '$1 ').slice(1).toLowerCase()
+          : event.key.toLowerCase() === name.replace(/(^|!)space$/, '$1 ').toLowerCase()
       case 'arrow':
         return guardsByArrow[name]?.({ event, name }) ?? guardsByArrow.default({ event, name })
       case 'modifier':

@@ -11,7 +11,7 @@ import Recognizeable from './Recognizeable'
 import {
   toObserver,
   toCategory,
-  toKeyType,
+  comboItemNameToType,
   toAddEventListenerParams,
   eventMatchesKeycombo,
   eventMatchesClickcombo,
@@ -144,9 +144,9 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _keycomboListen (naiveListener, options) {
-    const combo = uniqueable(this.type.split('+'))
+    const combo = uniqueable(this.type.split('+')) // .unique() omits repeated empty spaces to account for combinations that involve +
             .unique()
-            .map(name => ({ name: name === '' ? '+' : name, type: toKeyType(name) })),
+            .map(name => ({ name: name === '' ? '+' : name, type: comboItemNameToType(name) })),
           listener = event => {            
             if (eventMatchesKeycombo({ event, combo })) {
               naiveListener(event)

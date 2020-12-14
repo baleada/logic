@@ -28,61 +28,61 @@ suite(`predicates single character`, context => {
   }))
 })
 
-suite(`predicates enter, backspace, tab, and space`, context => {
+suite(`predicates other keys`, context => {
   // Enter
   assert.ok(eventMatchesKeycombo({
     event: { key: 'Enter' },
-    combo: [{ name: 'enter', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: 'enter', type: 'other' }],
   }))
   assert.ok(eventMatchesKeycombo({
     event: { key: 'A' },
-    combo: [{ name: '!enter', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: '!enter', type: 'other' }],
   }))
   assert.not.ok(eventMatchesKeycombo({
     event: { key: 'A' },
-    combo: [{ name: 'enter', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: 'enter', type: 'other' }],
   }))
   
   // Backspace
   assert.ok(eventMatchesKeycombo({
     event: { key: 'Backspace' },
-    combo: [{ name: 'backspace', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: 'backspace', type: 'other' }],
   }))
   assert.ok(eventMatchesKeycombo({
     event: { key: 'A' },
-    combo: [{ name: '!backspace', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: '!backspace', type: 'other' }],
   }))
   assert.not.ok(eventMatchesKeycombo({
     event: { key: 'A' },
-    combo: [{ name: 'backspace', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: 'backspace', type: 'other' }],
   }))
   
   // Tab
   assert.ok(eventMatchesKeycombo({
     event: { key: 'Tab' },
-    combo: [{ name: 'tab', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: 'tab', type: 'other' }],
   }))
   assert.ok(eventMatchesKeycombo({
     event: { key: 'A' },
-    combo: [{ name: '!tab', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: '!tab', type: 'other' }],
   }))
   assert.not.ok(eventMatchesKeycombo({
     event: { key: 'A' },
-    combo: [{ name: 'tab', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: 'tab', type: 'other' }],
   }))
   
   // Space
   assert.ok(eventMatchesKeycombo({
-    event: { key: 'Space' },
-    combo: [{ name: 'space', type: 'enterBackspaceTabSpace' }],
+    event: { key: ' ' },
+    combo: [{ name: 'space', type: 'other' }],
   }))
   assert.ok(eventMatchesKeycombo({
     event: { key: 'A' },
-    combo: [{ name: '!space', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: '!space', type: 'other' }],
   }))
   assert.not.ok(eventMatchesKeycombo({
     event: { key: 'A' },
-    combo: [{ name: 'space', type: 'enterBackspaceTabSpace' }],
+    combo: [{ name: 'space', type: 'other' }],
   }))
 })
 
