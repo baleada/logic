@@ -8,22 +8,8 @@ import { toEvent } from '../util'
 
 import { uniqueable } from '../factories'
 
-const defaultOptions = {
-  keyDirection: 'down',
-  // Can support custom delimiter if needed
-  // delimiter: '+'
-}
-
 export default class Dispatchable {
   constructor (type, options = {}) {
-    if (type === 'recognizeable') {
-      
-    }
-
-    // Has no effect if the type is not detected as keycombo
-    this._keyDirection = options.keyDirection ?? defaultOptions.keyDirection
-    this._init = options.init ?? {}
-
     this.setType(type)
     this._ready()
   }
@@ -37,23 +23,28 @@ export default class Dispatchable {
   set type (type) {
     this.setType(type)
   }
+  get cancelled () {
+    return this._computedCancelled
+  }
   get status () {
     return this._computedStatus
-  }
-  get event () {
-    return toEvent({ combo: this._combo, direction: this._keyDirection }, this._init)
   }
 
   setType (type) {
     this._computedType = type
-    this._combo = uniqueable(type.split('+'))
-      .unique()
-      .map(name => (name === '' ? '+' : name))
     return this
   }
 
-  dispatch (target) {
-    (target || window).dispatchEvent(this.event)
+  dispatch (target, options) {
+    const { keyDirection = 'down', init = {} } = options,
+          event = toEvent(
+            {
+              combo: uniqueable(this.type.split('+')).unique().map(name => (name === '' ? '+' : name)),
+              direction: keyDirection
+            },
+            init
+          )
+    this._computedCancelled = !(target || window).dispatchEvent(event)
     this._dispatched()
     return this
   }
