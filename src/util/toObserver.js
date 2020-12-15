@@ -1,5 +1,5 @@
-export default function toObserver ({ eventType, listener, options }) {
-  switch (eventType) {
+export default function toObserver ({ type, listener, options }) {
+  switch (type) {
     case 'intersect':
       return new IntersectionObserver(listener, options)
     case 'mutate':

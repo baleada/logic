@@ -18,22 +18,13 @@ import {
   eventMatchesClickcombo,
 } from '../util'
 
-/* Constants */
-const defaultOptions = {
-  keyDirection: 'down',
-  // Can support custom delimiter if needed
-  // delimiter: '+'
-}
 
 export default class Listenable {
   constructor (type, options = {}) {
     if (type === 'recognizeable') {
       this._computedRecognizeable = new Recognizeable([], options.recognizeable)
       this._computedRecognizeableEvents = Object.keys(options.recognizeable?.handlers || {})
-    }
-
-    // Has no effect if the type is not detected as keycombo
-    this._keyDirection = options?.keyDirection || defaultOptions.keyDirection
+    }    
 
     this._computedActiveListeners = []
 
@@ -111,7 +102,7 @@ export default class Listenable {
     const target = window.matchMedia(this.type)
 
     target.addEventListener('change', listener)
-    this._computedActiveListeners.push({ target, id: listener, category: 'mediaquery' })
+    this._computedActiveListeners.push({ target, id: ['change', listener], category: 'mediaquery' })
   }
   _idleListen (listener, options) {
     const { requestIdleCallback = {} } = options,
@@ -142,8 +133,7 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _keycomboListen (naiveListener, options) {
-    const combo = toCombo(this.type)
-            .map(name => ({ name: name === '' ? '+' : name, type: comboItemNameToType(name) })),
+    const combo = toCombo(this.type).map(name => ({ name, type: comboItemNameToType(name) })),
           listener = event => {            
             if (eventMatchesKeycombo({ event, combo })) {
               naiveListener(event)
@@ -166,7 +156,7 @@ export default class Listenable {
     const type = (() => {
       switch (this._computedCategory) {
         case 'keycombo':
-          return `key${this._keyDirection}`
+          return `key${options.keyDirection || 'down'}`
         case 'leftclickcombo': // click | mousedown | mouseup
           return this.type.match(/(\w+)$/)[1]
         case 'rightclickcombo':
@@ -197,18 +187,22 @@ export default class Listenable {
     switch (this.status) {
       case 'ready':
       case undefined:
-        // Do nothing. Don't use web APIs during construction or before doing anything else.
+        // Do nothing. This call is coming from the initial setType
+        // and shouldn't use web APIs during construction.
         break
       default:
-        const stoppable = !!target
-                ? this.activeListeners.filter(({ target: t }) => t === target) // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
-                : this.activeListeners
+        const stoppable = this.activeListeners
+          .map((listener, index) => ({ index, ...listener }))
+          .filter(({ target: t }) => !target || t === target) // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
 
         stoppable.forEach(({ target: t, id, category }) => stopsByCategory[category]({ target: t, id }))
         
-        if (stoppable.length = this.activeListeners.length) {
+        if (stoppable.length === this.activeListeners.length) {
           this._stopped()
         }
+
+        this._computedActiveListeners = this.activeListeners.filter((listener, index) => !stoppable.some(({ index: i }) => i === index))
+
         break
       }
 
@@ -220,8 +214,8 @@ export default class Listenable {
 }
 
 const stopsByCategory = {
-  observation: ({ target, id }) => id.disconnect(),
-  mediaquery: ({ target, id }) => target.removeEventListener(id),
-  idle: ({ target, id }) => window.cancelIdleCallback(id),
+  observation: ({ id }) => id.disconnect(),
+  mediaquery: ({ target, id }) => target.removeEventListener(...id),
+  idle: ({ id }) => window.cancelIdleCallback(id),
   event: ({ target, id }) => target.removeEventListener(...id),
 }
