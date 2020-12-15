@@ -10,7 +10,6 @@ export default class Copyable {
   constructor (string, options = {}) {
     this.setString(string)
     this._computedCopied = new Resolveable(() => navigator.clipboard.readText())
-    this._computedResponse = {}
     this._ready()
   }
   _ready () {

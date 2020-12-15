@@ -7,7 +7,6 @@
 export default class Grantable {
   constructor (descriptor, options = {}) {
     this.setDescriptor(descriptor)
-    this._computedPermission = {}
     this._ready()
   }
   _ready () {

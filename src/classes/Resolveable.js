@@ -7,7 +7,6 @@
  export default class Resolveable {
   constructor (getPromise, options = {}) {
     this.setGetPromise(getPromise)
-    this._computedResponse = {}
     this._ready()
   }
   _ready () {

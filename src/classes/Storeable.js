@@ -23,7 +23,6 @@ export default class Storeable {
     this._statusKeySuffix = options.statusKeySuffix ?? defaultOptions.statusKeySuffix
 
     this.setKey(key)
-    this._computedError = {}
     this._ready()
   }
   _constructing () {

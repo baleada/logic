@@ -27,7 +27,6 @@ function withJson (data) {
 export default class Fetchable {
   constructor (resource, options = {}) {
     this.setResource(resource)
-    this._computedResponse = {}
 
     this._computedArrayBuffer = new Resolveable(() => this.response.arrayBuffer())
     this._computedBlob = new Resolveable(() => this.response.blob())
