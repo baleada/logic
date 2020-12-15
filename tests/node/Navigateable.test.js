@@ -182,6 +182,22 @@ suite('random() navigates to a random location', context => {
   assert.ok(instance.location >= 0 && instance.location <= instance.array.length)
 })
 
+suite('first() navigates to first item', context => {
+  const instance = context.setup()
+
+  instance.first()
+
+  assert.is(instance.location, 0)
+})
+
+suite('last() navigates to last item', context => {
+  const instance = context.setup()
+
+  instance.last()
+
+  assert.is(instance.location, instance.array.length - 1)
+})
+
 /* status */
 suite('status is "ready" after construction', context => {
   const instance = context.setup()
@@ -201,18 +217,6 @@ suite('status is "navigated" after any navigation function is called at least on
   random.random()
 
   assert.ok([navigate, next, previous, random].every(instance => instance.status === 'navigated'))
-})
-
-/* method chaining */
-suite('can method chain', context => {
-  const instance = context.setup(),
-        chained = instance
-          .setArray(['Baleada'])
-          .navigate(42)
-          .next(42)
-          .previous(42)
-
-  assert.ok(chained instanceof Navigateable)
 })
 
 suite.run()

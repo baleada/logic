@@ -137,4 +137,14 @@ export default class Navigateable {
 
     return this
   }
+
+  first () {
+    this.navigate(0)
+    return this
+  }
+
+  last () {
+    this.navigate(this.array.length - 1)
+    return this
+  }
 }
