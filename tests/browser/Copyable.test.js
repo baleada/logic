@@ -13,6 +13,8 @@ suite.before(context => (context.string = 'Baleada: a toolkit for building web a
 
 suite.before.each(async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000')
+  await page.waitForSelector('body')
+  await page.click('body')
 })
 
 suite(`status is 'copying' immediately after copy(...)`, async ({ puppeteer: { page }, string }) => {
@@ -27,7 +29,6 @@ suite(`status is 'copying' immediately after copy(...)`, async ({ puppeteer: { p
 })
 
 suite(`status is 'copied' after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
-  await page.click('body')
   const value = await page.evaluate(async string => {
           const instance = new window.Logic.Copyable(string)
           await instance.copy()
@@ -39,7 +40,6 @@ suite(`status is 'copied' after successful copy(...)`, async ({ puppeteer: { pag
 })
 
 suite(`copied is string after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
-  await page.click('body')
   const value = await page.evaluate(async string => {
           const instance = new window.Logic.Copyable(string)
           await instance.copy()
