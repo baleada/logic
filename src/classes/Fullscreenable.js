@@ -7,7 +7,6 @@
  export default class Fullscreenable {
   constructor (getElement, options = {}) {
     this.setGetElement(getElement)
-    this._computedError = {}
     this._ready()
   }
   _ready () {
@@ -35,18 +34,18 @@
     return this
   }
 
-  async enter () {
-    await this.fullscreen()
+  async enter (options = {}) {
+    await this.fullscreen(options)
     return this
   }
   
-  async fullscreen () {
+  async fullscreen (options = {}) {
     try {
-      await this.element.requestFullscreen()
+      await this.element.requestFullscreen(options)
       this._fullscreened()
     } catch (error) {
       this._computedError = error
-      this._fullscreenErrored()
+      this._errored()
     }
 
     return this
@@ -54,8 +53,8 @@
   _fullscreened () {
     this._computedStatus = 'fullscreened'
   }
-  _fullscreenErrored () {
-    this._computedStatus = 'fullscreenErrored'
+  _errored () {
+    this._computedStatus = 'errored'
   }
 
   async exit () {
@@ -64,15 +63,12 @@
       this._exited()
     } catch (error) {
       this._computedError = error
-      this._exitErrored()
+      this._errored()
     }
 
     return this
   }
   _exited () {
     this._computedStatus = 'exited'
-  }
-  _exitErrored () {
-    this._computedStatus = 'exitErrored'
   }
 }
