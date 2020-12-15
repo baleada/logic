@@ -44,75 +44,83 @@ suite(`predicates visibilitychange`, context => {
 })
 
 suite(`predicates keycombo`, context => {
-  const values = [
-          toCategory('cmd+b'),
-          toCategory('shift+cmd+b'),
-          toCategory('shift+alt+cmd+b'),
-          toCategory('shift+ctrl+alt+cmd+b'),
-          toCategory('arrow'),
-          toCategory('horizontal'),
-          toCategory('vertical'),
-          toCategory('up'),
-          toCategory('down'),
-          toCategory('left'),
-          toCategory('right'),
-          toCategory('enter'),
-          toCategory('backspace'),
-          toCategory('tab'),
-          toCategory('space'),
-          toCategory('1'),
-          toCategory('b'),
-          toCategory('cmd'),
-          toCategory('1+a+enter'),
-          toCategory('/'),
-          toCategory('+'),
-          toCategory('!a'),
-          toCategory('!1'),
-          toCategory('!enter'),
-          toCategory('!shift'),
-          toCategory('!up'),
-          toCategory('!/'),
-          toCategory('!!')
+  const stubs = [
+          'cmd+b',
+          'shift+cmd+b',
+          'shift+alt+cmd+b',
+          'shift+ctrl+alt+cmd+b',
+          'arrow',
+          'horizontal',
+          'vertical',
+          'up',
+          'down',
+          'left',
+          'right',
+          'enter',
+          'backspace',
+          'space',
+          'tab',
+          'esc',
+          'home',
+          'end',
+          'pagedown',
+          'pageup',
+          'capslock',
+          'f1',
+          'camera',
+          '1',
+          'b',
+          'cmd',
+          '1+a+enter',
+          '/',
+          '+',
+          '!a',
+          '!1',
+          '!enter',
+          '!shift',
+          '!up',
+          '!/',
+          '!!',
         ],
         expected = 'keycombo'
   
-  assert.ok(values.every(value => value === expected))
+  assert.ok(stubs.every(stub => toCategory(stub) === expected))
 })
 
 suite(`predicates leftclickcombo`, context => {
-  const values = [
-          toCategory('click'),
-          toCategory('mousedown'),
-          toCategory('mouseup'),
-          toCategory('cmd+click'),
-          toCategory('shift+cmd+click'),
-          toCategory('shift+alt+cmd+click'),
-          toCategory('shift+ctrl+alt+cmd+click'),
-          toCategory('!shift+click'),
+  const stubs = [
+          'click',
+          'mousedown',
+          'mouseup',
+          'cmd+click',
+          'shift+cmd+click',
+          'shift+alt+cmd+click',
+          'shift+ctrl+alt+cmd+click',
+          '!shift+click',
         ],
         expected = 'leftclickcombo'
   
-  assert.ok(values.every(value => value === expected))
+  assert.ok(stubs.every(stub => toCategory(stub) === expected))
 })
 
 suite(`predicates rightclickcombo`, context => {
-  const values = [
-          toCategory('cmd+rightclick'),
-          toCategory('cmd+rightclick'),
-          toCategory('shift+cmd+rightclick'),
-          toCategory('shift+alt+cmd+rightclick'),
-          toCategory('shift+ctrl+alt+cmd+rightclick'),
-          toCategory('!shift+rightclick'),
+  const stubs = [
+          'cmd+rightclick',
+          'cmd+rightclick',
+          'shift+cmd+rightclick',
+          'shift+alt+cmd+rightclick',
+          'shift+ctrl+alt+cmd+rightclick',
+          '!shift+rightclick',
         ],
         expected = 'rightclickcombo'
   
-  assert.ok(values.every(value => value === expected))
+  assert.ok(stubs.every(stub => toCategory(stub) === expected))
 })
 
 suite(`predicates event`, context => {
-  const values = [
-          toCategory('change'),
-          toCategory('custom event'),
+  const stubs = [
+          'change',
+          'custom event',
 
           // A custom delimiter would allow support for custom events
           // with plus symbols in their name.
@@ -121,7 +129,7 @@ suite(`predicates event`, context => {
         ],
         expected = 'event'
   
-  assert.ok(values.every(value => value === expected))
+  assert.ok(stubs.every(stub => toCategory(stub) === expected))
 })
 
 suite.run()

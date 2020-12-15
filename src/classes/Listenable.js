@@ -133,7 +133,7 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _keycomboListen (naiveListener, options) {
-    const combo = toCombo(this.type).map(name => ({ name, type: comboItemNameToType(name) })),
+    const combo = toCombo(this.type, options.comboDelimiter).map(name => ({ name, type: comboItemNameToType(name) })),
           listener = event => {            
             if (eventMatchesKeycombo({ event, combo })) {
               naiveListener(event)
@@ -143,7 +143,7 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _clickcomboListen (naiveListener, options) {
-    const combo = toCombo(this.type),
+    const combo = toCombo(this.type, options.comboDelimiter),
           listener = event => {
             if (eventMatchesClickcombo({ event, combo })) {
               naiveListener(event)

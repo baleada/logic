@@ -1,11 +1,13 @@
 const modifiersByAlias = {
-  shift: 'shift',
   cmd: 'meta',
+  command: 'meta',
   ctrl: 'control',
-  alt: 'alt',
   opt: 'alt',
 }
 
+// type Alias = 'cmd' | 'command' | 'meta' | 'shift' | 'ctrl' | 'control' | 'alt' | 'opt'
+// type Modifier = 'meta' | 'command' | 'control' | 'alt' | 'shift'
+
 export default function toModifier (alias) {
-  return modifiersByAlias[alias]
+  return modifiersByAlias[alias] || alias
 }

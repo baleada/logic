@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import { isNumber } from '../util'
+import isNumber from '../util/isNumber.js' // Direct import to avoid circular dependency
 
 export default function deleteable (array) {
   const object = new Array(...array)
