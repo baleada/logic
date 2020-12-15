@@ -53,4 +53,13 @@ suite(`predicates click`, context => {
   stubs.forEach(value => assert.is(comboItemNameToType(value), expected))
 })
 
+suite(`predicates custom`, context => {
+  const expected = 'custom',
+        stubs = [
+          'stub',
+        ]
+
+  stubs.forEach(value => assert.is(comboItemNameToType(value), expected))
+})
+
 suite.run()

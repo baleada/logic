@@ -24,7 +24,7 @@ suite(`transforms single character combos`, async ({ puppeteer: { page } }) => {
 
 suite(`transforms other combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const event = window.Logic_util.toEvent({ combo: ['esc'], direction: 'down' },),
+          const event = window.Logic_util.toEvent({ combo: ['esc'], direction: 'down' }),
                 { key, type } = event
           
           return { key, type }
@@ -37,7 +37,7 @@ suite(`transforms other combos`, async({ puppeteer: { page } }) => {
 
 suite(`transforms modifier combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const event = window.Logic_util.toEvent({ combo: ['cmd'], direction: 'up' },),
+          const event = window.Logic_util.toEvent({ combo: ['cmd'], direction: 'up' }),
                 { key, type } = event
           
           return { key, type }
@@ -48,9 +48,35 @@ suite(`transforms modifier combos`, async({ puppeteer: { page } }) => {
 
 })
 
+suite(`transforms click combos`, async({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const event = window.Logic_util.toEvent({ combo: ['click'] }),
+                { clientX, clientY } = event
+          
+          return { clientX, clientY }
+        }),
+        expected = { clientX: 0, clientY: 0 }
+
+  assert.equal(value, expected)
+
+})
+
+suite(`transforms custom combos`, async({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const event = window.Logic_util.toEvent({ combo: ['stub'] }),
+                { type } = event
+          
+          return { type }
+        }),
+        expected = { type: 'stub' }
+
+  assert.equal(value, expected)
+
+})
+
 suite(`transforms modified single character combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const event = window.Logic_util.toEvent({ combo: ['shift', 'a'], direction: 'down' },),
+          const event = window.Logic_util.toEvent({ combo: ['shift', 'a'], direction: 'down' }),
                 { key, type, shiftKey } = event
           
           return { key, type, shiftKey }
@@ -63,7 +89,7 @@ suite(`transforms modified single character combos`, async({ puppeteer: { page }
 
 suite(`transforms modified other combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const event = window.Logic_util.toEvent({ combo: ['shift', 'esc'], direction: 'down' },),
+          const event = window.Logic_util.toEvent({ combo: ['shift', 'esc'], direction: 'down' }),
                 { key, type, shiftKey } = event
           
           return { key, type, shiftKey }
@@ -76,12 +102,24 @@ suite(`transforms modified other combos`, async({ puppeteer: { page } }) => {
 
 suite(`transforms modified modifier combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const event = window.Logic_util.toEvent({ combo: ['shift', 'cmd'], direction: 'up' },),
+          const event = window.Logic_util.toEvent({ combo: ['shift', 'cmd'], direction: 'up' }),
                 { key, type, shiftKey } = event
           
           return { key, type, shiftKey }
         }),
         expected = { key: 'Meta', type: 'keyup', shiftKey: true }
+
+  assert.equal(value, expected)
+})
+
+suite(`transforms modified click combos`, async({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const event = window.Logic_util.toEvent({ combo: ['shift', 'click'] }),
+                { clientX, clientY, shiftKey } = event
+          
+          return { clientX, clientY, shiftKey }
+        }),
+        expected = { clientX: 0, clientY: 0, shiftKey: true }
 
   assert.equal(value, expected)
 })

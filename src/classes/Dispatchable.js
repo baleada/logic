@@ -4,9 +4,7 @@
  * Released under the MIT license
  */
 
-import { toEvent } from '../util'
-
-import { uniqueable } from '../factories'
+import { toEvent, toCombo } from '../util'
 
 export default class Dispatchable {
   constructor (type, options = {}) {
@@ -35,17 +33,13 @@ export default class Dispatchable {
     return this
   }
 
-  dispatch (target, options) {
-    const { keyDirection = 'down', init = {} } = options,
-          event = toEvent(
-            {
-              combo: uniqueable(this.type.split('+')).unique().map(name => (name === '' ? '+' : name)),
-              direction: keyDirection
-            },
-            init
-          )
-    this._computedCancelled = !(target || window).dispatchEvent(event)
+  dispatch (options = {}) {
+    const { target = window, keyDirection = 'down', init = {} } = options,
+          event = toEvent({ combo: toCombo(this.type), direction: keyDirection }, init)
+
+    this._computedCancelled = !target.dispatchEvent(event)
     this._dispatched()
+
     return this
   }
   _dispatched () {

@@ -11,14 +11,12 @@ import Recognizeable from './Recognizeable'
 import {
   toObserver,
   toCategory,
+  toCombo,
   comboItemNameToType,
   toAddEventListenerParams,
   eventMatchesKeycombo,
   eventMatchesClickcombo,
 } from '../util'
-
-/* Factories */
-import { uniqueable } from '../factories'
 
 /* Constants */
 const defaultOptions = {
@@ -144,8 +142,7 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _keycomboListen (naiveListener, options) {
-    const combo = uniqueable(this.type.split('+')) // .unique() omits repeated empty spaces to account for combinations that involve +
-            .unique()
+    const combo = toCombo(this.type)
             .map(name => ({ name: name === '' ? '+' : name, type: comboItemNameToType(name) })),
           listener = event => {            
             if (eventMatchesKeycombo({ event, combo })) {
@@ -156,7 +153,7 @@ export default class Listenable {
     this._eventListen(listener, options)
   }
   _clickcomboListen (naiveListener, options) {
-    const combo = this.type.split('+'),
+    const combo = toCombo(this.type),
           listener = event => {
             if (eventMatchesClickcombo({ event, combo })) {
               naiveListener(event)

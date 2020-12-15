@@ -27,5 +27,10 @@ export default function toEvent ({ combo, direction }, init) {
           ...modifiers.reduce((flags, alias) => ({ ...flags, [toModifierFlag(alias)]: true }), {})
         }
       )
+    case 'custom':
+      return new Event(
+        name,
+        init
+      )
   }
 }

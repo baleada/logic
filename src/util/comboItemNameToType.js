@@ -1,6 +1,5 @@
 export default function comboItemNameToType (name) {
-  return [...guardsByType.keys()]
-    .find(type => guardsByType.get(type)(name))
+  return [...guardsByType.keys()].find(type => guardsByType.get(type)(name)) ?? 'custom'
 }
 
 const guardsByType = new Map([
