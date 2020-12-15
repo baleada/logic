@@ -68,6 +68,7 @@ suite(`predicates keycombo`, context => {
           'capslock',
           'f1',
           'camera',
+          'delete',
           '1',
           'b',
           'cmd',

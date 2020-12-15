@@ -47,4 +47,5 @@ const keysByName = {
   'f19': 'F19',
   'f20': 'F20',
   camera: 'Camera',
+  delete: 'Delete',
 }

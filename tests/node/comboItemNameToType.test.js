@@ -27,8 +27,8 @@ suite(`predicates arrow`, context => {
 suite(`predicates other`, context => {
   const expected = 'other',
         stubs = [
-          'enter', 'backspace', 'tab', 'space', 'esc', 'home', 'end', 'pagedown', 'pageup', 'capslock', 'f1', 'camera',
-          '!enter', '!backspace', '!tab', '!space', '!esc', '!home', '!end', '!pagedown', '!pageup', '!capslock', '!f1', '!camera',
+          'enter', 'backspace', 'tab', 'space', 'esc', 'home', 'end', 'pagedown', 'pageup', 'capslock', 'f1', 'camera', 'delete',
+          '!enter', '!backspace', '!tab', '!space', '!esc', '!home', '!end', '!pagedown', '!pageup', '!capslock', '!f1', '!camera', '!delete',
         ]
   
   stubs.forEach(value => assert.is(comboItemNameToType(value), expected))
