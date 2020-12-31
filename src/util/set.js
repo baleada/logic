@@ -3,6 +3,11 @@ import toKeys from './toKeys.js'
 
 export default function set ({ object, path, value }) {
   toKeys(path).forEach((key, index, array) => {
+    if (array.length === 1) {
+      object[key] = value
+      return
+    }
+
     const p = toPath(array.slice(0, index))
 
     if (!p) {

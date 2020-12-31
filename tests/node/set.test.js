@@ -9,6 +9,15 @@ suite.before.each(context => {
   context.object = { 'a': [{ 'b': { 'c': 3 } }] }
 })
 
+suite(`sets object values`, ({ object }) => {
+  set({ object, path: 'a', value: 4 })
+
+  const value = get({ object, path: 'a' }),
+        expected = 4
+  
+  assert.is(value, expected)
+})
+
 suite(`sets nested object values`, ({ object }) => {
   set({ object, path: 'a.0.b.c', value: 4 })
 
