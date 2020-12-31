@@ -1,4 +1,5 @@
-import get, { toKeys } from './get.js'
+import get from './get.js'
+import toKeys from './toKeys.js'
 
 export default function set ({ object, path, value }) {
   toKeys(path).forEach((key, index, array) => {
