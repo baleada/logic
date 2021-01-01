@@ -35,7 +35,12 @@
   async resolve () {
     this._resolving()
     try {
-      this._computedResponse = await this.getPromise(...arguments)
+      const promises = await this.getPromise(...arguments)
+
+      this._computedResponse = Array.isArray(promises)
+        ? await promises.reduce(async (promises, promise) => [...(await promises), await promise], Promise.resolve([]))
+        : await promises
+
       this._resolved()    
     } catch (error) {
       this._computedResponse = error
