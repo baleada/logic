@@ -4,7 +4,9 @@
  * Released under the MIT license
  */
 
- export default class Resolveable {
+import { toAsyncReduced } from '../util'
+
+export default class Resolveable {
   constructor (getPromise, options = {}) {
     this.setGetPromise(getPromise)
     this._ready()
@@ -38,7 +40,11 @@
       const promises = await this.getPromise(...arguments)
 
       this._computedResponse = Array.isArray(promises)
-        ? await promises.reduce(async (promises, promise) => [...(await promises), await promise], Promise.resolve([]))
+        ? await toAsyncReduced({
+            array: promises,
+            reducer: async (resolvedPromises, promise) => [...resolvedPromises, await promise],
+            initialValue: []
+          })
         : await promises
 
       this._resolved()    
