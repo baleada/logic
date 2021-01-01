@@ -1,8 +1,8 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { toResolvedMap } from '../../lib/index.js'
+import { asyncMapable } from '../../lib/index.js'
 
-const suite = createSuite('toResolvedMap (node)')
+const suite = createSuite('asyncMapable (node)')
 
 const responseStub = 'stub',
       withSuccessStub = () => new Promise(function(resolve, reject) {
@@ -13,7 +13,7 @@ const responseStub = 'stub',
       arrayStub = (new Array(5)).fill()
 
 suite(`resolved async map`, async context => {
-  const value = await toResolvedMap({ array: arrayStub, map: async item => withSuccessStub() }),
+  const value = await asyncMapable(arrayStub).asyncMap(async item => withSuccessStub()),
         expected = [
           'stub',
           'stub',
