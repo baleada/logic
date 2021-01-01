@@ -3,9 +3,10 @@ import toMetadata from './source-transforms/toMetadata'
 
 const shared = configureable('rollup')
         .input('src/index.js')
-        .virtualIndex('src/classes')
-        .virtualIndex('src/factories')
-        .virtualIndex('src/util')
+        .virtual.index('src/classes')
+        .virtual.index('src/factories')
+        .virtual.index('src/util')
+        .virtual.index('src/public-util')
         .resolve()
         .external([
           'bezier-easing',
@@ -14,7 +15,7 @@ const shared = configureable('rollup')
           /@babel\/runtime/,
         ]),
       productionShared = shared
-        .virtualIndex('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id) }),
+        .virtual.index('src/index.js', { test: ({ id }) => /src\/(?:classes|factories|public-util)\/\w+.js$/.test(id) }),
       metadataShared = configureable('rollup')
         .input('src/metadata.js')
         .virtual({
