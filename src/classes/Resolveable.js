@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import { toAsyncReduced } from '../util'
+import { asyncMapable } from '../factories'
 
 export default class Resolveable {
   constructor (getPromise, options = {}) {
@@ -40,11 +40,7 @@ export default class Resolveable {
       const promises = await this.getPromise(...arguments)
 
       this._computedResponse = Array.isArray(promises)
-        ? await toAsyncReduced({
-            array: promises,
-            reducer: async (resolvedPromises, promise) => [...resolvedPromises, await promise],
-            initialValue: []
-          })
+        ? await asyncMapable(promises).asyncMap(async promise => await promise)
         : await promises
 
       this._resolved()    

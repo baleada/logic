@@ -10,8 +10,8 @@ export default function asyncFilterable (array) {
   const object = new Array(...array)
 
   object.asyncFilter = async filter => {
-    const filterResults = await asyncMapable(array).asyncMap(filter)
-    return asyncFilterable(array.filter((_, index) => filterResults[index]))
+    const asyncMapped = await asyncMapable(array).asyncMap(filter)
+    return asyncFilterable(array.filter((_, index) => asyncMapped[index]))
   }
 
   return object
