@@ -13,7 +13,6 @@ import {
   insert,
   isArray,
   isNumber,
-  isFunction,
 } from '../util'
 
 const defaultOptions = {
@@ -110,22 +109,22 @@ export default class Recognizeable {
             : 0,
           newSequence = [ ...this.sequence.slice(excess), event ]
 
-    if (isFunction(this._handlers[type])) {
-      this._handlers[type]({ event,
-        ...this._handlerApi,
-        getSequence: () => newSequence,
-      })
-    }
+    this._handlers[type]?.({
+      event,
+      ...this._handlerApi,
+      getSequence: () => newSequence,
+    })
+      
 
     switch (this.status) {
-    case 'denied':
-      this._resetComputedMetadata()
-      this.setSequence([])
-      break
-    case 'recognizing':
-    case 'recognized':
-      this.setSequence(newSequence)
-      break
+      case 'denied':
+        this._resetComputedMetadata()
+        this.setSequence([])
+        break
+      case 'recognizing':
+      case 'recognized':
+        this.setSequence(newSequence)
+        break
     }
 
     return this
