@@ -124,6 +124,24 @@ suite('handler API getMetadata() gets metadata', context => {
   assert.equal(value, instance.metadata)
 })
 
+suite('handler API getMetadata(param) gets metadata', context => {
+  let value
+
+  const instance = context.setup({
+    handlers: {
+      [eventTypeStub]: ({ getMetadata }) => (value = getMetadata({ path: 'example.last' }))
+    }
+  })
+  
+  // Metadata setting should only happen via setMetadata exposed to a handler,
+  // but that's tested later.
+  instance._computedMetadata = { example: [0, 1, 2] }
+
+  instance.recognize(eventStub)
+
+  assert.equal(value, 2)
+})
+
 suite('handler API setMetadata() sets metadata', context => {
   const instance = context.setup({
     handlers: {

@@ -33,7 +33,7 @@ export default class Recognizeable {
     this._handlerApi = {
       toPolarCoordinates,
       getStatus: () => this.status,
-      getMetadata: () => this.metadata,
+      getMetadata: (param) => param ? get({ object: this.metadata, ...param }) : this.metadata,
       setMetadata: (...args) => this._setMetadata(...args),
       pushMetadata: (...args) => this._pushMetadata(...args),
       insertMetadata: (...args) => this._insertMetadata(...args),
@@ -59,20 +59,20 @@ export default class Recognizeable {
   }
 
   _setMetadata ({ path, value }) {
-    set({ object: this._computedMetadata, path, value })
+    set({ object: this.metadata, path, value })
   }
   _pushMetadata ({ path, value }) {
     this._ensureArray({ path })
-    push({ object: this._computedMetadata, path, value })
+    push({ object: this.metadata, path, value })
   }
   _insertMetadata ({ path, value, index }) {
     this._ensureArray({ path })
-    insert({ object: this._computedMetadata, path, value, index })
+    insert({ object: this.metadata, path, value, index })
   }
   _ensureArray ({ path }) {
     const currentValue = (() => {
       try {
-        return get({ object: this._computedMetadata, path })
+        return get({ object: this.metadata, path })
       } catch (error) {
         return undefined
       }
