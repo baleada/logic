@@ -107,7 +107,7 @@ export default class Recognizeable {
     return this
   }
   setListener (listener) {
-    this._computedListener = Array.from(listener)
+    this._computedListener = listener
     return this
   }
 
