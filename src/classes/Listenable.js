@@ -114,13 +114,15 @@ export default class Listenable {
     const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams(listener, options),
           eventListeners = this._computedRecognizeableEvents.map(name => {
             return [name, event => {
-              this._computedRecognizeable.recognize(event)
+              this.recognizeable.recognize(event)
 
-              if (this._computedRecognizeable.status === 'recognized') {
+              if (this.recognizeable.status === 'recognized') {
                 exceptAndOnlyListener(event)
               }
             }, ...listenerOptions]
           })
+
+    this.recognizeable.setListener(exceptAndOnlyListener)
 
     this._addEventListeners(eventListeners, options)
   }

@@ -38,6 +38,7 @@ export default class Recognizeable {
       insertMetadata: (...args) => this._insertMetadata(...args),
       recognized: () => this._recognized(),
       denied: () => this._denied(),
+      listener: event => this.listener?.(event),
     }
 
     this._ready()
@@ -88,6 +89,12 @@ export default class Recognizeable {
   set sequence (sequence) {
     this.setSequence(sequence)
   }
+  get listener () {
+    return this._computedListener
+  }
+  set listener (listener) {
+    this.setListener(listener)
+  }
   get status () {
     return this._computedStatus
   }
@@ -97,6 +104,10 @@ export default class Recognizeable {
 
   setSequence (sequence) {
     this._computedSequence = Array.from(sequence)
+    return this
+  }
+  setListener (listener) {
+    this._computedListener = Array.from(listener)
     return this
   }
 
@@ -115,7 +126,6 @@ export default class Recognizeable {
       getSequence: () => newSequence,
     })
       
-
     switch (this.status) {
       case 'denied':
         this._resetComputedMetadata()
