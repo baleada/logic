@@ -11,6 +11,7 @@ const shared = configureable('rollup')
           'bezier-easing',
           'mix-css-color',
           'fast-fuzzy',
+          '@sindresorhus/slugify',
           /@babel\/runtime/,
         ]),
       productionShared = shared
