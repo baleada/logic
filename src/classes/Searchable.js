@@ -40,12 +40,9 @@ export default class Searchable {
   /* Public methods */
   setCandidates (candidates) {
     this._computedCandidates = Array.from(candidates)
-    this._searcher = this._getSearcher(this.candidates)
+    this._searcher = new Searcher(candidates, this._searcherOptions)
 
     return this
-  }
-  _getSearcher (candidates) {
-    return new Searcher(candidates, this._searcherOptions)
   }
 
   _setResults (results) {

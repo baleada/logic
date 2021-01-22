@@ -18,7 +18,7 @@ export default function toInterpolated ({ previous, next, progress }, options = 
       case 'number':
         return (next - previous) * progress + previous
       case 'color':
-        return mix(previous, next, progress * 100).hexa
+        return mix(previous, next, (1 - progress) * 100).hexa // No clue why this progress needs to be inverted, but it works
       case 'array':
         const sliceToExact = (next.length - previous.length) * progress + previous.length,
               nextIsLonger = next.length > previous.length,

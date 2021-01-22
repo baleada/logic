@@ -245,46 +245,46 @@ export default class Animateable {
     }
 
     switch (this.status) {
-    case 'ready':
-    case 'stopped':
-    case 'played':
-    case 'reversed':
-    case 'sought':
-      this._animate(callback, options, 'play')
-      break
-    case 'paused':
-      if (this._alternates) {
-        switch (this._alternateCache.status) {
-        case 'playing':
-          switch (this._pauseCache.status) {
-          case 'playing':
-            this._animate(callback, options, 'play')
-            break
-          case 'reversing':
-            this._animate(callback, options, 'reverse')
-            break
-          }
-          break
-        case 'reversing':
-          this._alternateCache.status = 'playing'
-          switch (this._pauseCache.status) {
-          case 'playing':
-            this._animate(callback, options, 'play')
-            break
-          case 'reversing':
-            this._animate(callback, options, 'play')
-            break
-          }
-          break
-        }
-      } else {
+      case 'ready':
+      case 'stopped':
+      case 'played':
+      case 'reversed':
+      case 'sought':
         this._animate(callback, options, 'play')
-      }
-      break
-    case 'reversing':
-      this.pause()
-      this._animate(callback, options, 'play')
-      break
+        break
+      case 'paused':
+        if (this._alternates) {
+          switch (this._alternateCache.status) {
+          case 'playing':
+            switch (this._pauseCache.status) {
+            case 'playing':
+              this._animate(callback, options, 'play')
+              break
+            case 'reversing':
+              this._animate(callback, options, 'reverse')
+              break
+            }
+            break
+          case 'reversing':
+            this._alternateCache.status = 'playing'
+            switch (this._pauseCache.status) {
+            case 'playing':
+              this._animate(callback, options, 'play')
+              break
+            case 'reversing':
+              this._animate(callback, options, 'play')
+              break
+            }
+            break
+          }
+        } else {
+          this._animate(callback, options, 'play')
+        }
+        break
+      case 'reversing':
+        this.pause()
+        this._animate(callback, options, 'play')
+        break
     }
     
     return this
