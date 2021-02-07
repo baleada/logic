@@ -12,7 +12,7 @@ const conditionStub = item => new Promise(function(resolve, reject) {
       arrayStub = (new Array(5)).fill().map((_, index) => index)
 
 suite(`resolved async map`, async context => {
-  const value = await asyncFilterable(arrayStub).asyncFilter(conditionStub),
+  const value = (await asyncFilterable(arrayStub).asyncFilter(conditionStub)).value,
         expected = [0, 2, 4]
   
   assert.equal(value, expected)

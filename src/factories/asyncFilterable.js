@@ -7,12 +7,10 @@
 import asyncMapable from './asyncMapable.js'
 
 export default function asyncFilterable (array) {
-  const object = new Array(...array)
-
-  object.asyncFilter = async filter => {
-    const asyncMapped = await asyncMapable(array).asyncMap(filter)
+  const asyncFilter = async filter => {
+    const asyncMapped = (await asyncMapable(array).asyncMap(filter)).value
     return asyncFilterable(array.filter((_, index) => asyncMapped[index]))
   }
 
-  return object
+  return { asyncFilter, value: array }
 }

@@ -10,16 +10,9 @@ suite.before.each(context => {
 
 suite('unique() removes duplicates', context => {
   const instance = context.setup(),
-        result = instance.unique()
+        result = instance.unique().value
 
-  assert.equal([...result], ['baleada', 'toolkit'])
-})
-
-suite('unique(...) returns uniqueable', context => {
-  const instance = context.setup(),
-        result = instance.unique()
-
-  assert.ok(typeof result.unique === 'function')
+  assert.equal(result, ['baleada', 'toolkit'])
 })
 
 suite.run()

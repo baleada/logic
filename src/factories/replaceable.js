@@ -5,18 +5,16 @@
  */
 
 export default function replaceable (array) {
-  const object = new Array(...array)
-
-  object.replace = ({ index, item }) => {
+  const replace = ({ index, item }) => {
     const replaced = [
-            ...object.slice(0, index),
+            ...array.slice(0, index),
             item,
-            ...object.slice(index + 1),
+            ...array.slice(index + 1),
           ]
 
     return replaceable(replaced)
   }
  
-  return object
+  return { replace, value: array }
 }
  

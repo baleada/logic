@@ -4,28 +4,23 @@
  * Released under the MIT license
  */
 
-import isObject from '../util/isObject.js' // Direct import to prevent circular dependency
-
 export default function reorderable (array) {
-  const object = new Array(...array)
-
-  // Adapted from Adam Wathan's Advanced Vue Component Design course
-  object.reorder = ({ from, to }) => {
+  const reorder = ({ from, to }) => {
     const { itemsToMoveStartIndex, itemsToMoveCount } = getItemsToMoveStartIndexAndCount(from),
           insertIndex = to
           
     // Guard against item ranges that overlap the insert index. Not possible to reorder in that way.
     if (insertIndex > itemsToMoveStartIndex && insertIndex < itemsToMoveStartIndex + itemsToMoveCount) {
-      return object
+      return array
     }
           
-    const itemsToMove = object.slice(itemsToMoveStartIndex, itemsToMoveStartIndex + itemsToMoveCount)
+    const itemsToMove = array.slice(itemsToMoveStartIndex, itemsToMoveStartIndex + itemsToMoveCount)
 
     let reordered
     if (itemsToMoveStartIndex < insertIndex) {
-      const beforeItemsToMove = itemsToMoveStartIndex === 0 ? [] : object.slice(0, itemsToMoveStartIndex),
-            betweenItemsToMoveAndInsertIndex = object.slice(itemsToMoveStartIndex + itemsToMoveCount, insertIndex + 1),
-            afterInsertIndex = object.slice(insertIndex + 1)
+      const beforeItemsToMove = itemsToMoveStartIndex === 0 ? [] : array.slice(0, itemsToMoveStartIndex),
+            betweenItemsToMoveAndInsertIndex = array.slice(itemsToMoveStartIndex + itemsToMoveCount, insertIndex + 1),
+            afterInsertIndex = array.slice(insertIndex + 1)
 
       reordered = [
         ...beforeItemsToMove,
@@ -34,9 +29,9 @@ export default function reorderable (array) {
         ...afterInsertIndex,
       ]
     } else if (itemsToMoveStartIndex > insertIndex) {
-      const beforeInsertion = insertIndex === 0 ? [] : object.slice(0, insertIndex),
-            betweenInsertionAndItemsToMove = object.slice(insertIndex, itemsToMoveStartIndex),
-            afterItemsToMove = object.slice(itemsToMoveStartIndex + itemsToMoveCount)
+      const beforeInsertion = insertIndex === 0 ? [] : array.slice(0, insertIndex),
+            betweenInsertionAndItemsToMove = array.slice(insertIndex, itemsToMoveStartIndex),
+            afterItemsToMove = array.slice(itemsToMoveStartIndex + itemsToMoveCount)
 
       reordered = [
         ...beforeInsertion,
@@ -50,15 +45,11 @@ export default function reorderable (array) {
   }
 
   function getItemsToMoveStartIndexAndCount (from) {
-    const itemsToMoveStartIndex = isObject(from) // from can be an object or a number
-            ? from.start
-            : from,
-          itemsToMoveCount = isObject(from)
-            ? from.itemCount
-            : 1
+    const itemsToMoveStartIndex = from.start ?? from,
+          itemsToMoveCount = from.itemCount ?? 1
 
     return { itemsToMoveStartIndex, itemsToMoveCount }
   }
 
-  return object
+  return { reorder, value: array }
 }

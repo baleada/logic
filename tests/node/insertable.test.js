@@ -10,23 +10,16 @@ suite.before.each(context => {
 
 suite('insert({ item, index }) inserts the item at index', context => {
   const instance = context.setup(),
-        result = instance.insert({ item: 'baleada', index: 2 })
+        result = instance.insert({ item: 'baleada', index: 2 }).value
 
-  assert.equal([...result], ['tortilla', 'frijoles', 'baleada', 'mantequilla', 'aguacate', 'huevito'])
+  assert.equal(result, ['tortilla', 'frijoles', 'baleada', 'mantequilla', 'aguacate', 'huevito'])
 })
 
 suite('insert({ items, index }) inserts the items at index', context => {
   const instance = context.setup(),
-        result = instance.insert({ items: ['baleada', 'toolkit'], index: 2 })
+        result = instance.insert({ items: ['baleada', 'toolkit'], index: 2 }).value
 
-  assert.equal([...result], ['tortilla', 'frijoles', 'baleada', 'toolkit', 'mantequilla', 'aguacate', 'huevito'])
-})
-
-suite('insert(...) returns insertable', context => {
-  const instance = context.setup(),
-        result = instance.insert({ item: 'baleada', index: 2 })
-
-  assert.ok(typeof result.insert === 'function')
+  assert.equal(result, ['tortilla', 'frijoles', 'baleada', 'toolkit', 'mantequilla', 'aguacate', 'huevito'])
 })
 
 suite.run()

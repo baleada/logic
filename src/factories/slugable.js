@@ -7,12 +7,10 @@
 import slugify from '@sindresorhus/slugify'
 
 export default function slugable (string) {
-  const object = new String(string)
-
-  object.slug = function (...args) {
-    return slugable(slugify(`${object}`, ...args))
+  const slug = (...args) => {
+    return slugable(slugify(string, ...args))
   }
 
-  return object
+  return { slug, value: string }
 }
 

@@ -4,12 +4,10 @@
  * Released under the MIT license
  */
 
-import { toAsyncReduced } from '../util'
+import toAsyncReduced from '../util/toAsyncReduced.js'
 
 export default function asyncMapable (array) {
-  const object = new Array(...array)
-
-  object.asyncMap = async map => {
+  const asyncMap = async map => {
     const asyncReduced = await toAsyncReduced({
       array,
       reducer: async (resolvedMaps, ...rest) => [...resolvedMaps, await map(...rest)],
@@ -18,5 +16,5 @@ export default function asyncMapable (array) {
     return asyncMapable(asyncReduced)
   }
 
-  return object
+  return { asyncMap, value: array }
 }

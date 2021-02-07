@@ -4,20 +4,18 @@
  * Released under the MIT license
  */
 
-import replaceable from './replaceable'
+import replaceable from './replaceable.js'
 
 export default function renameable (map) {
-  const object = new Map(map)
-
-  object.rename = ({ from, to }) => {
-    const keys = Array.from(object.keys()),
+  const rename = ({ from, to }) => {
+    const keys = [...map.keys()],
           keyToRenameIndex = keys.findIndex(k => k === from),
-          newKeys = replaceable(keys).replace({ index: keyToRenameIndex, item: to }),
-          values = Array.from(object.values()),
+          newKeys = replaceable(keys).replace({ index: keyToRenameIndex, item: to }).value,
+          values = [...map.values()],
           renamed = newKeys.reduce((renamed, key, index) => renamed.set(key, values[index]), new Map())
 
     return renameable(renamed)
   }
 
-  return object
+  return { rename, value: map }
 }

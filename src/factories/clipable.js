@@ -5,13 +5,11 @@
  */
  
 export default function clipable (string) {
-  const object = new String(string)
-
-  object.clip = function (clipTextOrClipRE) {
-    const clipped = object.replace(clipTextOrClipRE, '')
+  const clip = clipTextOrClipRE => {
+    const clipped = string.replace(clipTextOrClipRE, '')
     return clipable(clipped)
   }
 
-  return object
+  return { clip, value: string }
 }
 

@@ -5,21 +5,14 @@ import { renameable } from '../../lib/index.js'
 const suite = createSuite('renameable (node)')
 
 suite.before.each(context => {
-  context.setup = () => renameable([['one', 'value'], ['two', 'value']])
+  context.setup = () => renameable(new Map([['one', 'value'], ['two', 'value']]))
 })
 
 suite('rename({ from, to }) renames "from" name to "to" name', context => {
   const instance = context.setup(),
-        result = instance.rename({ from: 'one', to: 'uno' })
+        result = instance.rename({ from: 'one', to: 'uno' }).value
 
-  assert.equal(new Map(result), new Map([['uno', 'value'], ['two', 'value']]))
-})
-
-suite('rename(...) returns renameable', context => {
-  const instance = context.setup(),
-        result = instance.rename({ from: 'one', to: 'uno' })
-
-  assert.ok(typeof result.rename === 'function')
+  assert.equal(result, new Map([['uno', 'value'], ['two', 'value']]))
 })
 
 suite.run()

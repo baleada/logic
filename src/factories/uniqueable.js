@@ -5,11 +5,9 @@
  */
 
 export default function uniqueable (array) {
-  const object = new Array(...array)
-
-  object.unique = () => {
-    return uniqueable(Array.from(new Set(object)))
+  const unique = () => {
+    return uniqueable(Array.from(new Set(array)))
   }
 
-  return object
+  return { unique, value: array }
 }

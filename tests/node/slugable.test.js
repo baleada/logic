@@ -5,10 +5,10 @@ import slugable from '../../src/factories/slugable.js'
 const suite = createSuite('slugable (node)')
 
 suite(`slugs strings`, context => {
-  assert.is(`${slugable('I ♥ Dogs').slug()}`, 'i-love-dogs')
-  assert.is(`${slugable('  Déjà Vu!  ').slug()}`, 'deja-vu')
-  assert.is(`${slugable('fooBar 123 $#%').slug()}`, 'foo-bar-123')
-  assert.is(`${slugable('я люблю единорогов').slug()}`, 'ya-lyublyu-edinorogov')
+  assert.is(slugable('I ♥ Dogs').slug().value, 'i-love-dogs')
+  assert.is(slugable('  Déjà Vu!  ').slug().value, 'deja-vu')
+  assert.is(slugable('fooBar 123 $#%').slug().value, 'foo-bar-123')
+  assert.is(slugable('я люблю единорогов').slug().value, 'ya-lyublyu-edinorogov')
 })
 
 suite(`respects options`, context => {
@@ -16,9 +16,9 @@ suite(`respects options`, context => {
     customReplacements: [
       ['@', 'at']
     ]
-  })
+  }).value
   
-  assert.is(`${value}`, 'fooatunicorn')
+  assert.is(value, 'fooatunicorn')
 })
 
 suite.run()

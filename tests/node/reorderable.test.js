@@ -10,16 +10,16 @@ suite.before.each(context => {
 
 suite('reorder({ from: index, to: index }) moves `from` index forward to `to` index', context => {
   const instance = context.setup(),
-        result = instance.reorder({ from: 1, to: 3 })
+        result = instance.reorder({ from: 1, to: 3 }).value
 
-  assert.equal([...result], ['tortilla', 'mantequilla', 'aguacate', 'frijoles', 'huevito'])
+  assert.equal(result, ['tortilla', 'mantequilla', 'aguacate', 'frijoles', 'huevito'])
 })
 
 suite('reorder({ from: index, to: index }) moves `from` index backward to `to` index', context => {
   const instance = context.setup(),
-        result = instance.reorder({ from: 3, to: 1 })
+        result = instance.reorder({ from: 3, to: 1 }).value
 
-  assert.equal([...result], ['tortilla', 'aguacate', 'frijoles', 'mantequilla', 'huevito'])
+  assert.equal(result, ['tortilla', 'aguacate', 'frijoles', 'mantequilla', 'huevito'])
 })
 
 suite('reorder({ from: { start, itemCount = 1 }, to: index }) moves item from `start` forward to `to` index', context => {
@@ -27,9 +27,9 @@ suite('reorder({ from: { start, itemCount = 1 }, to: index }) moves item from `s
         result = instance.reorder({
           from: { start: 0, itemCount: 1 },
           to: 1
-        })
+        }).value
 
-  assert.equal([...result], ['frijoles', 'tortilla', 'mantequilla', 'aguacate', 'huevito'])
+  assert.equal(result, ['frijoles', 'tortilla', 'mantequilla', 'aguacate', 'huevito'])
 })
 
 suite('reorder({ from: { start, itemCount != 0 }, to: index }) moves `itemCount` items from `start` to `to` index', context => {
@@ -37,16 +37,9 @@ suite('reorder({ from: { start, itemCount != 0 }, to: index }) moves `itemCount`
         result = instance.reorder({
           from: { start: 0, itemCount: 2 },
           to: 2
-        })
+        }).value
 
-  assert.equal([...result], ['mantequilla', 'tortilla', 'frijoles', 'aguacate', 'huevito'])
-})
-
-suite('reorder(...) returns reorderable', context => {
-  const instance = context.setup(),
-        result = instance.reorder({ from: 0, to: 1 })
-
-  assert.ok(typeof result.reorder === 'function')
+  assert.equal(result, ['mantequilla', 'tortilla', 'frijoles', 'aguacate', 'huevito'])
 })
 
 suite.run()

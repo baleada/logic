@@ -40,7 +40,7 @@ export default class Resolveable {
       const promises = await this.getPromise(...arguments)
 
       this._computedResponse = Array.isArray(promises)
-        ? await asyncMapable(promises).asyncMap(async promise => await promise)
+        ? (await asyncMapable(promises).asyncMap(async promise => await promise)).value
         : await promises
 
       this._resolved()    

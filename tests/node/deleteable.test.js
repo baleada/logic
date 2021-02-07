@@ -10,30 +10,23 @@ suite.before.each(context => {
 
 suite('delete({ index }) removes the item at index from the array', context => {
   const instance = context.setup(),
-        result = instance.delete({ index: 2 })
+        result = instance.delete({ index: 2 }).value
 
-  assert.equal([...result], ['tortilla', 'frijoles', 'aguacate', 'huevito'])
+  assert.equal(result, ['tortilla', 'frijoles', 'aguacate', 'huevito'])
 })
 
 suite('delete({ item }) removes item from the array', context => {
   const instance = context.setup(),
-        result = instance.delete({ item: 'mantequilla' })
+        result = instance.delete({ item: 'mantequilla' }).value
 
-  assert.equal([...result], ['tortilla', 'frijoles', 'aguacate', 'huevito'])
+  assert.equal(result, ['tortilla', 'frijoles', 'aguacate', 'huevito'])
 })
 
 suite('delete({ index, item }) ignores item and removes the item at index from the array', context => {
   const instance = context.setup(),
-        result = instance.delete({ index: 0, item: 'mantequilla' })
+        result = instance.delete({ index: 0, item: 'mantequilla' }).value
 
-  assert.equal([...result], ['frijoles', 'mantequilla', 'aguacate', 'huevito'])
-})
-
-suite('delete(...) returns deleteable', context => {
-  const instance = context.setup(),
-        result = instance.delete({ index: 2 })
-
-  assert.ok(typeof result.delete === 'function')
+  assert.equal(result, ['frijoles', 'mantequilla', 'aguacate', 'huevito'])
 })
 
 suite.run()

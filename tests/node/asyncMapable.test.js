@@ -13,7 +13,7 @@ const responseStub = 'stub',
       arrayStub = (new Array(5)).fill()
 
 suite(`resolved async map`, async context => {
-  const value = await asyncMapable(arrayStub).asyncMap(async item => withSuccessStub()),
+  const value = (await asyncMapable(arrayStub).asyncMap(async item => withSuccessStub())).value,
         expected = [
           'stub',
           'stub',

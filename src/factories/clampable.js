@@ -5,15 +5,13 @@
  */
  
  export default function clampable (number) {
-  const object = new Number(number)
-
-  object.clamp = function ({ min, max }) {
-    const maxed = Math.max(0 + object, min),
+  const clamp = ({ min, max }) => {
+    const maxed = Math.max(0 + number, min),
           clamped = Math.min(maxed, max)
           
     return clampable(clamped)
   }
 
-  return object
+  return { clamp, value: number }
 }
 

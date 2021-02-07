@@ -7,17 +7,15 @@
 import isNumber from '../util/isNumber.js' // Direct import to avoid circular dependency
 
 export default function deleteable (array) {
-  const object = new Array(...array)
-
-  object.delete = ({ index, item }) => {
-    const deleteIndex = isNumber(index) ? index : object.findIndex(element => element === item),
+  const del = ({ index, item }) => {
+    const deleteIndex = isNumber(index) ? index : array.findIndex(element => element === item),
           deleted = [
-            ...object.slice(0, deleteIndex),
-            ...object.slice(deleteIndex + 1),
+            ...array.slice(0, deleteIndex),
+            ...array.slice(deleteIndex + 1),
           ]
 
     return deleteable(deleted)
   }
 
-  return object
+  return { delete: del, value: array }
 }

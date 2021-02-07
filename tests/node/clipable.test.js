@@ -10,25 +10,18 @@ suite.before.each(context => {
 
 suite('clip(text) clips text from a string', context => {
   const instance = context.setup(),
-        result = instance.clip('Baleada: '),
+        result = instance.clip('Baleada: ').value,
         expected = 'a toolkit for building web apps'
 
-  assert.is(`${result}`, expected)
+  assert.is(result, expected)
 })
 
 suite('clip(regularExpression) clips regularExpression from a string', context => {
   const instance = context.setup(),
-        result = instance.clip(/^Baleada: /),
+        result = instance.clip(/^Baleada: /).value,
         expected = 'a toolkit for building web apps'
 
-  assert.is(`${result}`, expected)
-})
-
-suite('clip(...) returns clipable', context => {
-  const instance = context.setup(),
-        result = instance.clip('Baleada: ')
-
-  assert.ok(typeof result.clip === 'function')
+  assert.is(result, expected)
 })
 
 suite.run()

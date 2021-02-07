@@ -10,16 +10,9 @@ suite.before.each(context => {
 
 suite('replace({ item, index }) replaces the item at index with a new item', context => {
   const instance = context.setup(),
-        result = instance.replace({ item: 'baleada' ,index: 2 })
+        result = instance.replace({ item: 'baleada' ,index: 2 }).value
 
-  assert.equal([...result], ['tortilla', 'frijoles', 'baleada', 'aguacate', 'huevito'])
-})
-
-suite('replace(...) returns replaceable', context => {
-  const instance = context.setup(),
-        result = instance.replace({ item: 'baleada', index: 2 })
-
-  assert.ok(typeof result.replace === 'function')
+  assert.equal(result, ['tortilla', 'frijoles', 'baleada', 'aguacate', 'huevito'])
 })
 
 suite.run()

@@ -6,6 +6,7 @@ export default function toCombo (type, delimiter = '+') {
   // Uniqueable ensures those two are combined into one.
   return uniqueable(type.split(delimiter))
     .unique()
+    .value
     .map(name => (name === '' ? delimiter : name))
 }
 
