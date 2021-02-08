@@ -16,5 +16,5 @@ export default function asyncMapable (array) {
     return asyncMapable(asyncReduced)
   }
 
-  return { asyncMap, value: array }
+  return { asyncMap, array }
 }
