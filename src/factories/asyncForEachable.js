@@ -15,6 +15,6 @@
      return asyncForEachable(array)
    }
  
-   return { asyncForEach, array }
+   return { asyncForEach, value: array }
  }
  

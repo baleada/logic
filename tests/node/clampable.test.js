@@ -11,21 +11,21 @@ suite.before.each(context => {
 
 suite('clampable({ min, max }) handles number between min and max', context => {
   const instance = context.setup(),
-        result = instance.clamp({ min: 0, max: 100 }).number
+        result = instance.clamp({ min: 0, max: 100 }).value
 
   assert.is(result, 42)
 })
 
 suite('clampable({ min, max }) handles number below min', context => {
   const instance = context.setup(),
-        result = instance.clamp({ min: 50, max: 100 }).number
+        result = instance.clamp({ min: 50, max: 100 }).value
 
   assert.is(result, 50)
 })
 
 suite('clampable({ min, max }) handles number above max', context => {
   const instance = context.setup(),
-        result = instance.clamp({ min: 0, max: 36 }).number
+        result = instance.clamp({ min: 0, max: 36 }).value
 
   assert.is(result, 36)
 })
