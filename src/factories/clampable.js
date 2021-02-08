@@ -12,6 +12,5 @@
     return clampable(clamped)
   }
 
-  return { clamp, value: number }
+  return { clamp, number }
 }
-
