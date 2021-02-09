@@ -1,9 +1,10 @@
-import insertableFactory from '../factories/insertable.js'
+import array from '../factories/array.js'
 import get from './get.js'
 import set from './set.js'
 
 export default function insert ({ object, path, value, index }) {
-  const insertable = insertableFactory(get({ object, path })),
-        inserted = insertable.insert({ item: value, index }).value
+  const inserted = array(get({ object, path }))
+          .insert({ item: value, index })
+          .normalize()
   set({ object, path, value: inserted })
 }

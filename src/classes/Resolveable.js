@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import { asyncMapable } from '../factories'
+import { array } from '../factories'
 
 export default class Resolveable {
   constructor (getPromise, options = {}) {
@@ -40,7 +40,7 @@ export default class Resolveable {
       const promises = await this.getPromise(...arguments)
 
       this._computedResponse = Array.isArray(promises)
-        ? (await asyncMapable(promises).asyncMap(async promise => await promise)).value
+        ? (await array(promises).asyncMap(async promise => await promise)).normalize()
         : await promises
 
       this._resolved()    
