@@ -1,5 +1,6 @@
 import toModifier from './toModifier.js'
 import isModified from './isModified.js'
+import toKey from './toKey.js'
 
 export default function eventMatchesKeycombo ({ event, combo }) {
   return combo.every(({ name, type }, index) => {
@@ -11,8 +12,8 @@ export default function eventMatchesKeycombo ({ event, combo }) {
         }
 
         return name.startsWith('!')
-          ? event.key.toLowerCase() !== name.replace(/(^|!)space$/, '$1 ').slice(1).toLowerCase()
-          : event.key.toLowerCase() === name.replace(/(^|!)space$/, '$1 ').toLowerCase()
+          ? event.key.toLowerCase() !== toKey(name).slice(1).toLowerCase()
+          : event.key.toLowerCase() === toKey(name).toLowerCase()
       case 'arrow':
         return guardsByArrow[name]?.({ event, name }) ?? guardsByArrow.default({ event, name })
       case 'modifier':

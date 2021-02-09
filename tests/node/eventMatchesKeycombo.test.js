@@ -84,6 +84,20 @@ suite(`predicates other keys`, context => {
     event: { key: 'A' },
     combo: [{ name: 'space', type: 'other' }],
   }))
+  
+  // Escape
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'Escape' },
+    combo: [{ name: 'esc', type: 'other' }],
+  }))
+  assert.ok(eventMatchesKeycombo({
+    event: { key: 'A' },
+    combo: [{ name: '!esc', type: 'other' }],
+  }))
+  assert.not.ok(eventMatchesKeycombo({
+    event: { key: 'A' },
+    combo: [{ name: 'esc', type: 'other' }],
+  }))
 })
 
 suite(`predicates arrows`, context => {
