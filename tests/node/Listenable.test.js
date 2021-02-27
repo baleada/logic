@@ -28,10 +28,10 @@ suite('setType sets the type', context => {
   assert.is(instance.type, 'keydown')
 })
 
-suite('activeListeners is empty after construction', context => {
+suite('active is empty after construction', context => {
   const instance = context.setup()
 
-  assert.equal(instance.activeListeners, [])
+  assert.equal(instance.active, new Set())
 })
 
 

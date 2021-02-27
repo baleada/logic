@@ -26,7 +26,7 @@ export default class Listenable {
       this._computedRecognizeableEvents = Object.keys(options.recognizeable?.handlers || {})
     }    
 
-    this._computedActiveListeners = []
+    this._computedActive = new Set()
 
     this.setType(type)
     this._ready()
@@ -44,8 +44,8 @@ export default class Listenable {
   get status () {
     return this._computedStatus
   }
-  get activeListeners () {
-    return this._computedActiveListeners
+  get active () {
+    return this._computedActive
   }
   get recognizeable () {
     return this._computedRecognizeable
@@ -96,19 +96,19 @@ export default class Listenable {
           observerInstance = toObserver({ type: this.type, listener, options: observerOptions })
 
     observerInstance.observe(target, observeOptions)
-    this._computedActiveListeners.push({ target, id: observerInstance, category: 'observation' })
+    this.active.add({ target, id: observerInstance, category: 'observation' })
   }
   _mediaQueryListen (listener) {
     const target = window.matchMedia(this.type)
 
     target.addEventListener('change', listener)
-    this._computedActiveListeners.push({ target, id: ['change', listener], category: 'mediaquery' })
+    this.active.add({ target, id: ['change', listener], category: 'mediaquery' })
   }
   _idleListen (listener, options) {
     const { requestIdleCallback = {} } = options,
           id = window.requestIdleCallback(listener, requestIdleCallback)
 
-    this._computedActiveListeners.push({ id, category: 'idle' })
+    this.active.add({ id, category: 'idle' })
   }
   _recognizeableListen (listener, options) {
     const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams(listener, options),
@@ -178,7 +178,7 @@ export default class Listenable {
 
     eventListeners.forEach(eventListener => {
       target.addEventListener(...eventListener)
-      this._computedActiveListeners.push({ target, id: eventListener, category: 'event' })
+      this.active.add({ target, id: eventListener, category: 'event' })
     })
   }
   _listening () {
@@ -193,17 +193,18 @@ export default class Listenable {
         // and shouldn't use web APIs during construction.
         break
       default:
-        const stoppable = this.activeListeners
-          .map((listener, index) => ({ index, ...listener }))
-          .filter(({ target: t }) => !target || t === target) // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
+        const stoppable = [...this.active].filter(({ target: t }) => !target || t === target), // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
+              shouldUpdateStatus = stoppable.length === this.active.size
 
-        stoppable.forEach(({ target: t, id, category }) => stopsByCategory[category]({ target: t, id }))
+        stoppable.forEach(stoppable => {
+          const { target: t, id, category } = stoppable
+          stopsByCategory[category]({ target: t, id })
+          this.active.delete(stoppable)
+        })
         
-        if (stoppable.length === this.activeListeners.length) {
+        if (shouldUpdateStatus) {
           this._stopped()
         }
-
-        this._computedActiveListeners = this.activeListeners.filter((listener, index) => !stoppable.some(({ index: i }) => i === index))
 
         break
       }
