@@ -369,7 +369,7 @@ export default class Animateable {
   }
 
   _listenForVisibilitychange () {
-    if (this._visibilitychange.activeListeners.length === 0) {
+    if (this._visibilitychange.active.size === 0) {
       this._totalTimeInvisible = 0
 
       this._visibilitychange.listen(({ timeStamp: timestamp }) => {
