@@ -29,7 +29,7 @@ export default class Completeable {
     this._computedDividerIndices = { before: 0, after: 0 }
 
     this.setString(string)
-    this.setSelection(options?.initialSelection || { start: string.length, end: string.length })
+    this.setSelection(options?.initialSelection || { start: string.length, end: string.length, direction: 'none' })
     this._ready()
   }
   _constructing () {
@@ -56,14 +56,14 @@ export default class Completeable {
   }
   get segment () {
     return this.string.slice(
-      this._computeSegmentStartIndex(),
-      this._computeSegmentEndIndex()
+      this._getSegmentStartIndex(),
+      this._getSegmentEndIndex()
     )
   }
   get dividerIndices () {
     return this._computedDividerIndices
   }
-  _computeSegmentStartIndex () {
+  _getSegmentStartIndex () {
     switch (this._segmentFrom) {
       case 'start':
         return 0
@@ -75,7 +75,7 @@ export default class Completeable {
     
     return index
   }
-  _computeSegmentEndIndex () {
+  _getSegmentEndIndex () {
     switch (this._segmentTo) {
       case 'end':
         return this.string.length
@@ -104,8 +104,6 @@ export default class Completeable {
   }
 
   setSelection (selection) {
-    // VALIDATE: selection can only have start, end, and direction properties
-
     this._computedSelection = selection
     this._setDividerIndices()
 
@@ -128,31 +126,33 @@ export default class Completeable {
     this._completing()
 
     options = {
-      newSelection: 'completionEnd', // completion|completionEnd
+      select: 'completionEnd', // completion|completionEnd
       ...options
     }
 
-    const { newSelection: newSelectionOption } = options,
+    const { select } = options,
           textBefore = this._getTextBefore(),
           textAfter = this._getTextAfter(),
           completedString = textBefore + completion + textAfter,
-          newSelection = (() => {
-            switch (newSelectionOption) {
+          completedSelection = (() => {
+            switch (select) {
               case 'completion':
                 return {
                   start: textBefore.length,
-                  end: `${textBefore}${completion}`.length
+                  end: `${textBefore}${completion}`.length,
+                  direction: this.selection.direction,
                 }
               case 'completionEnd':
                 return {
                   start: `${textBefore}${completion}`.length,
                   end: `${textBefore}${completion}`.length,
+                  direction: this.selection.direction,
                 }
             }
           })()
 
     this.setString(completedString)
-    this.setSelection(newSelection)
+    this.setSelection(completedSelection)
 
     this._completed()
 

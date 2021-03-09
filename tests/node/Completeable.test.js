@@ -34,31 +34,31 @@ suite('setString sets the string', context => {
 suite('initial selection is at the end of the string by default', context => {
   const instance = context.setup()
 
-  assert.equal(instance.selection, { start: instance.string.length, end: instance.string.length })
+  assert.equal(instance.selection, { start: instance.string.length, end: instance.string.length, direction: 'none' })
 })
 
 suite('initial selection can be customized via options', context => {
   const instance = context.setup({
-    initialSelection: { start: 0, end: 0 },
+    initialSelection: { start: 0, end: 0, direction: 'forward' },
   })
 
-  assert.equal(instance.selection, { start: 0, end: 0 })
+  assert.equal(instance.selection, { start: 0, end: 0, direction: 'forward' })
 })
 
 suite('assignment sets the selection', context => {
   const instance = context.setup()
 
-  instance.selection = { start: 0, end: 0 }
+  instance.selection = { start: 0, end: 0, direction: 'forward' }
 
-  assert.equal(instance.selection, { start: 0, end: 0 })
+  assert.equal(instance.selection, { start: 0, end: 0, direction: 'forward' })
 })
 
 suite('setSelection sets the selection', context => {
   const instance = context.setup()
 
-  instance.setSelection({ start: 0, end: 0 })
+  instance.setSelection({ start: 0, end: 0, direction: 'forward' })
 
-  assert.equal(instance.selection, { start: 0, end: 0 })
+  assert.equal(instance.selection, { start: 0, end: 0, direction: 'forward' })
 })
 
 /* segment */
@@ -172,32 +172,32 @@ suite('complete(completion) correctly inserts completion when options.segment.to
   assert.is(instance.string, 'toolkit for building web apps')
 })
 
-suite('complete(completion, options) correctly computes new selection when options.newSelection is the default "completionEnd"', context => {
+suite('complete(completion, options) correctly computes new selection when options.select is the default "completionEnd"', context => {
   const instance = context.setup()
 
   instance.complete('Baleada')
 
-  assert.equal(instance.selection, { start: 'Baleada'.length, end: 'Baleada'.length })
+  assert.equal(instance.selection, { start: 'Baleada'.length, end: 'Baleada'.length, direction: 'none' })
 })
 
-suite('complete(completion, options) correctly computes new selection when options.newSelection is "completion"', context => {
+suite('complete(completion, options) correctly computes new selection when options.select is "completion"', context => {
   const instance = context.setup()
 
-  instance.complete('Baleada', { newSelection: 'completion' })
+  instance.complete('Baleada', { select: 'completion' })
 
-  assert.equal(instance.selection, { start: 0, end: 'Baleada'.length })
+  assert.equal(instance.selection, { start: 0, end: 'Baleada'.length, direction: 'none' })
 })
 
-suite('complete(completion, options) correctly computes new selection when options.newSelection is "completion" and segment is not start to end', context => {
+suite('complete(completion, options) correctly computes new selection when options.select is "completion" and segment is not start to end', context => {
   const instance = context.setup({ segment: { from: 'divider', to: 'divider' } })
 
   // instance.segment is 'toolkit for' after this
-  instance.setSelection({ start: 'Baleada: a tool'.length, end: 'Baleada: a toolkit f'.length }) // start is ignored when options.segment.from is default
+  instance.setSelection({ start: 'Baleada: a tool'.length, end: 'Baleada: a toolkit f'.length, direction: 'none' }) // start is ignored when options.segment.from is default
 
   // instance.string is 'Baleada: a t00lk1t 4 building web apps' after this
-  instance.complete('t00lk1t 4', { newSelection: 'completion' })
+  instance.complete('t00lk1t 4', { select: 'completion' })
 
-  assert.equal(instance.selection, { start: 'Baleada: a '.length, end: 'Baleada: a t00lk1t 4'.length })
+  assert.equal(instance.selection, { start: 'Baleada: a '.length, end: 'Baleada: a t00lk1t 4'.length, direction: 'none' })
 })
 
 
