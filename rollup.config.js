@@ -4,7 +4,6 @@ import toMetadata from './source-transforms/toMetadata'
 const shared = configureable('rollup')
         .input('src/index.js')
         .virtual.index('src/classes')
-        .virtual.index('src/factories')
         .virtual.index('src/util')
         .resolve()
         .external([
@@ -12,10 +11,11 @@ const shared = configureable('rollup')
           'mix-css-color',
           'fast-fuzzy',
           '@sindresorhus/slugify',
+          'dompurify',
           /@babel\/runtime/,
         ]),
       productionShared = shared
-        .virtual.index('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id) }),
+        .virtual.index('src/index.js', { test: ({ id }) => /src\/(?:classes)\/\w+.js$/.test(id) }),
       metadataShared = configureable('rollup')
         .input('src/metadata.js')
         .virtual({

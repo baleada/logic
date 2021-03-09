@@ -8,6 +8,8 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from './pages/routes.js'
 
+import DOMPurify from 'dompurify'
+
 window.Logic = Logic
 window.Logic_classes = classes
 window.Logic_factories = factories
@@ -25,3 +27,7 @@ app.use(router)
 app.mount('#app')
 
 window.nextTick = nextTick
+
+
+console.log((new DOMPurify()).sanitize(`<script>alert('hello');</script><div>hello</div>`))
+

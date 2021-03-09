@@ -59,6 +59,7 @@
     "@babel/runtime": "^7.12.1",
     "@sindresorhus/slugify": "^1.1.0",
     "bezier-easing": "^2.1.0",
+    "dompurify": "^2.2.6",
     "fast-fuzzy": "^1.10.8",
     "mix-css-color": "^0.1.1"
   },

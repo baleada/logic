@@ -4,7 +4,7 @@
  * Released under the MIT license
  */
 
-import { array } from '../factories'
+import { createAsyncMap } from '../pipes/index.js'
 
 export default class Resolveable {
   constructor (getPromise, options = {}) {
@@ -40,7 +40,7 @@ export default class Resolveable {
       const promises = await this.getPromise(...arguments)
 
       this._computedResponse = Array.isArray(promises)
-        ? (await array(promises).asyncMap(async promise => await promise)).normalize()
+        ? (await createAsyncMap(async promise => await promise))(promises)
         : await promises
 
       this._resolved()    

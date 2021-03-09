@@ -1,3 +1,3 @@
-import { readdirSync, readFileSync, writeFileSync } from 'fs'
+import DOMPurify from 'dompurify'
 
-console.log(readdirSync('src/util'))
+console.log((new DOMPurify()))
