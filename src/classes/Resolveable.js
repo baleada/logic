@@ -1,4 +1,4 @@
-import { createAsyncMap } from '../pipes.js'
+import { createMapAsync } from '../pipes.js'
 
 export default class Resolveable {
   constructor (getPromise, options = {}) {
@@ -34,7 +34,7 @@ export default class Resolveable {
       const promises = await this.getPromise(...arguments)
 
       this._computedResponse = Array.isArray(promises)
-        ? (await createAsyncMap(async promise => await promise))(promises)
+        ? await createMapAsync(async promise => await promise)(promises)
         : await promises
 
       this._resolved()    

@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import toCategory from '../../src/util/toCategory.js'
+import { toCategory } from '../../src/util.js'
 
 const suite = createSuite('toCategory (node)')
 

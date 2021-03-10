@@ -46,7 +46,7 @@
   "homepage": "https://baleada.netlify.com",
   "devDependencies": {
     "@baleada/animateable-utils": "^0.0.2",
-    "@baleada/prepare": "^0.4.41",
+    "@baleada/prepare": "^0.4.43",
     "@vue/compiler-sfc": "^3.0.5",
     "rollup": "^2.33.3",
     "tailwindcss": "^2.0.1-compat",

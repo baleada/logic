@@ -170,7 +170,7 @@ export function isArray (value) {
 }
 
 export function isUndefined (value) {
-  return typeof value !== 'undefined'
+  return value === undefined
 }
 
 export function isFunction (value) {
@@ -195,10 +195,6 @@ export function isObject (value) {
 
 export function isString (value) {
   return typeof value === 'string'
-}
-
-export function isUndefined (value) {
-  return typeof value === 'undefined'
 }
 
 

@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Dispatchable } from '../../lib/index.js'
+import { Dispatchable } from '../../src/classes.js'
 
 const suite = createSuite('Dispatchable (node)')
 

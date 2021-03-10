@@ -1,6 +1,4 @@
-import Recognizeable from './Recognizeable'
-
-/* Utils */
+import Recognizeable from './Recognizeable.js'
 import {
   toObserver,
   toCategory,
@@ -10,7 +8,6 @@ import {
   eventMatchesKeycombo,
   eventMatchesClickcombo,
 } from '../util.js'
-
 
 export default class Listenable {
   constructor (type, options = {}) {

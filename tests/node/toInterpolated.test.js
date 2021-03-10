@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import toInterpolated from '../../src/util/toInterpolated.js'
+import { toInterpolated } from '../../src/util.js'
 
 const suite = createSuite('toInterpolated (node)')
 

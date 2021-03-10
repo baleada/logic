@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Fullscreenable } from '../../lib/index.js'
+import { Fullscreenable } from '../../src/classes.js'
 
 const suite = createSuite('Fullscreenable (node)')
 

@@ -1,7 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import set from '../../src/util/set.js'
-import get from '../../src/util/get.js'
+import { set } from '../../src/util.js'
+import { get } from '../../src/util.js'
 
 const suite = createSuite('set')
 

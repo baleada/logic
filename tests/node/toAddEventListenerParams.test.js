@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import toAddEventListenerParams from '../../src/util/toAddEventListenerParams.js'
+import { toAddEventListenerParams } from '../../src/util.js'
 
 const suite = createSuite('toAddEventListenerParams (node)')
 

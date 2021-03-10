@@ -20,12 +20,12 @@ const shared = configureable('rollup')
           transform: toMetadata,
         })
         .resolve(),
-      esm = productionShared
+      esm = shared
         .delete({ targets: 'lib/*', verbose: true })
         .esm({ file: 'lib/index.js', target: 'browser' })
         .analyze()
         .configure(),
-      cjs = productionShared
+      cjs = shared
         .cjs({ file: 'lib/index.cjs' })
         .configure(),
       metadataEsm = metadataShared    

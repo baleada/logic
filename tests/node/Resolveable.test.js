@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Resolveable } from '../../lib/index.js'
+import { Resolveable } from '../../src/classes.js'
 
 const suite = createSuite('Resolveable (node)')
 
@@ -9,12 +9,12 @@ const responseStub = 'stub',
       withSuccessStub = () => new Promise(function(resolve, reject) {
         setTimeout(function() {
           resolve(responseStub)
-        }, 100)
+        }, 10)
       }),
       withErrorStub = () => new Promise(function(resolve, reject) {
         setTimeout(function() {
           reject(new Error(errorMessageStub))
-        }, 100)
+        }, 10)
       })
 
 suite.before.each(context => {

@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import toNextMatch from '../../src/util/toNextMatch.js'
+import { toNextMatch } from '../../src/util.js'
 
 const suite = createSuite('toNextMatch (node)')
 

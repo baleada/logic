@@ -1,4 +1,4 @@
-import isNumber from './util.js'
+import { isNumber } from './util.js'
 import slugify from '@sindresorhus/slugify'
 
 // ARRAY

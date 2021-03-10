@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import eventMatchesClickcombo from '../../src/util/eventMatchesClickcombo.js'
+import { eventMatchesClickcombo } from '../../src/util.js'
 
 const suite = createSuite('eventMatchesClickcombo (node)')
 

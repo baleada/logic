@@ -1,10 +1,9 @@
 import { readFileSync } from 'fs'
-import { parse } from 'path'
 import { Pipeable, createUnique } from '../src/pipes.js'
 
 export default function toMetadata () {
-  const classes = readFileSync('./src/classes.js'),
-        pipes = readFileSync('./src/pipes.js'),
+  const classes = readFileSync('./src/classes.js', 'utf8'),
+        pipes = readFileSync('./src/pipes.js', 'utf8'),
         classMetadata = toClassMetadata(classes),
         subclassMetadata = toPipesMetadata(pipes),
         metadata = {
@@ -28,18 +27,13 @@ function toClassMetadata (classes) {
 }
 
 function toPipesMetadata (pipes) {
-  return new Pipeable(pipes.match(/create\w+/))
+  return new Pipeable(pipes.match(/create\w+/g))
     .pipe(createUnique())
-    .concat(['Pipeable'])
-}
-
-function toName (file) {
-  return parse(file).name
 }
 
 const needsCleanupRE = /\n\s+stop ?\(.*?\) {/ // If the class has a `stop` method, it needs cleanup
 function toNeedsCleanup (file) {
-  const contents = readFileSync(`./src/classes/${file}`, 'utf8')
+  const contents = readFileSync(file, 'utf8')
 
   return needsCleanupRE.test(contents)
 }

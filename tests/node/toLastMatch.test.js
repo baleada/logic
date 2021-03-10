@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import toLastMatch from '../../src/util/toLastMatch.js'
+import { toLastMatch } from '../../src/util.js'
 
 const suite = createSuite('toLastMatch (node)')
 

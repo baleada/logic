@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import createExceptAndOnlyListener from '../../src/util/createExceptAndOnlyListener.js'
+import { createExceptAndOnlyListener } from '../../src/util.js'
 
 const suite = createSuite('createExceptAndOnlyListener (node)')
 
