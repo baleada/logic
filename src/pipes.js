@@ -1,33 +1,36 @@
-import toAsyncReduced from '../util/toAsyncReduced.js'
-import isNumber from '../util/isNumber.js'
+import isNumber from './util.js'
 import slugify from '@sindresorhus/slugify'
 
 // ARRAY
-export function createAsyncFilter (filter) {
+export function createReduceAsync ({ reduce, initialValue }) {
   return async array => {
-    const asyncMapped = await createAsyncMap(filter)(array)
-    return array.filter((_, index) => asyncMapped[index])
+    return await array.reduce(async (...args) => {
+      const reduced = await args[0]
+      return reduce(reduced, ...args.slice(1))
+    }, Promise.resolve(initialValue))
   }
 }
 
-export function createAsyncForEach (forEach) {
+export function createFilterAsync (filter) {
   return async array => {
-    await toAsyncReduced({
-      array,
-      reducer: async (_, ...rest) => await forEach(...rest),
-    })
-    
+    const mappedAsync = await createMapAsync(filter)(array)
+    return array.filter((_, index) => mappedAsync[index])
+  }
+}
+
+export function createForEachAsync (forEach) {
+  return async array => {
+    await createReduceAsync({ reduce: async (_, ...rest) => await forEach(...rest) })(array)
     return array
   }
 }
 
-export function createAsyncMap (map) {
+export function createMapAsync (map) {
   return async array => {
-    return await toAsyncReduced({
-      array: array,
-      reducer: async (resolvedMaps, ...rest) => [...resolvedMaps, await map(...rest)],
+    return await createReduceAsync({
+      reduce: async (resolvedMaps, ...rest) => [...resolvedMaps, await map(...rest)],
       initialValue: []
-    })
+    })(array)
   }
 }
 
@@ -156,24 +159,19 @@ export function createRename ({ from, to }) {
 
 
 // PIPEABLE
-export function pipeable (state) {
-  return new Pipeable(state)
-}
-
-class Pipeable {
+export class Pipeable {
   constructor (state) {
-    this.state = state
+    this._state = state
   }
 
   pipe (...fns) {
-    return fns.reduce((piped, fn, ...rest) => fn(piped, ...rest), this.state)
+    return fns.reduce((piped, fn, ...rest) => fn(piped, ...rest), this._state)
   }
 
-  async asyncPipe (...fns) {
-    return await toAsyncReduced({
-      array: fns,
-      reducer: async (piped, fn, ...rest) => await fn(piped, ...rest),
-      initialValue: this.state
-    })
+  async pipeAsync (...fns) {
+    return await createReduceAsync({
+      reduce: async (piped, fn, ...rest) => await fn(piped, ...rest),
+      initialValue: this._state
+    })(fns)
   }
 }

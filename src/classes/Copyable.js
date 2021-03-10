@@ -1,9 +1,3 @@
-/*
-* Copyable.js
-* (c) 2019-present Alex Vipond
-* Released under the MIT license
-*/
-
 import Resolveable from './Resolveable.js'
 
 export default class Copyable {

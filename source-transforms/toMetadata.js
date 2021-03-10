@@ -1,47 +1,40 @@
-import { readdirSync, readFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import { parse } from 'path'
+import { Pipeable, createUnique } from '../src/pipes.js'
 
 export default function toMetadata () {
-  const classes = readdirSync('./src/classes').filter(file => !/index\.js$/.test(file)),
-        factories = readdirSync('./src/factories').filter(file => !/index\.js$/.test(file)),
+  const classes = readFileSync('./src/classes.js'),
+        pipes = readFileSync('./src/pipes.js'),
         classMetadata = toClassMetadata(classes),
-        subclassMetadata = toFactoriesMetadata(factories),
+        subclassMetadata = toPipesMetadata(pipes),
         metadata = {
           classes: classMetadata,
-          factories: subclassMetadata,
+          pipes: subclassMetadata,
         },
         code = `export default ${JSON.stringify(metadata, null, 2)}`
 
-  console.log(`toMetadata: Scraped metadata for ${metadata.classes.length} classes and ${metadata.factories.length} factories`)
+  console.log(`toMetadata: Scraped metadata for ${metadata.classes.length} classes and ${metadata.pipes.length} pipes`)
 
   return code
 }
 
 function toClassMetadata (classes) {
-  return classes.map(file => ({
-    name: toName(file),
-    usesDOM: toUsesDOM(file),
-    needsCleanup: toNeedsCleanup(file),
-  }))
+  return new Pipeable(classes.match(/[A-Z]\w+/g))
+    .pipe(createUnique())
+    .map(name => ({
+      name,
+      needsCleanup: toNeedsCleanup(`src/classes/${name}.js`),
+    }))
 }
 
-function toFactoriesMetadata (factories) {
-  return factories.map(file => ({
-    name: toName(file),
-  }))
+function toPipesMetadata (pipes) {
+  return new Pipeable(pipes.match(/create\w+/))
+    .pipe(createUnique())
+    .concat(['Pipeable'])
 }
 
 function toName (file) {
   return parse(file).name
-}
-
-const constructorRE = /constructor ?\(.*?\) ?\{((.|\r?\n)*?)\n\s\s\}/,
-      usesDomRE = /\/\/ METADATA: uses DOM/ // If the class constructor contains a 'METADATA: uses DOM' comment in its constructor, it uses the DOM
-function toUsesDOM (file) {
-  const contents = readFileSync(`./src/classes/${file}`, 'utf8'),
-        { 1: constructor = '' } = contents.match(constructorRE) || []
-
-  return usesDomRE.test(constructor)
 }
 
 const needsCleanupRE = /\n\s+stop ?\(.*?\) {/ // If the class has a `stop` method, it needs cleanup

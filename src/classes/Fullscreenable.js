@@ -1,10 +1,4 @@
-/*
- * Fullscreenable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
- export default class Fullscreenable {
+export default class Fullscreenable {
   constructor (getElement, options = {}) {
     this.setGetElement(getElement)
     this._ready()

@@ -1,12 +1,5 @@
-/**
-* Fetchable.js
-* (c) 2019-present Alex Vipond
-* Released under the MIT license
-**/
-
-import Resolveable from './Resolveable'
-
-import { isFunction } from '../util'
+import Resolveable from './Resolveable.js'
+import { isFunction } from '../util.js'
 
 function ensureOptions (options) {
   return isFunction(options)

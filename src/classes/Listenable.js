@@ -1,10 +1,3 @@
-/*
- * Listenable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
-/* Dependencies */
 import Recognizeable from './Recognizeable'
 
 /* Utils */
@@ -16,7 +9,7 @@ import {
   toAddEventListenerParams,
   eventMatchesKeycombo,
   eventMatchesClickcombo,
-} from '../util'
+} from '../util.js'
 
 
 export default class Listenable {

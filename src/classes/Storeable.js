@@ -1,15 +1,8 @@
-/**
-* Storeable.js
-* (c) 2019-present Alex Vipond
-* Released under the MIT license
-**/
-
-/* Utils */
 import {
   isNull,
   isString,
   domIsAvailable,
-} from '../util'
+} from '../util.js'
 
 const defaultOptions = {
   type: 'local',

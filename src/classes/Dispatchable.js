@@ -1,10 +1,4 @@
-/*
- * Dispatchable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
-import { toEvent, toCombo } from '../util'
+import { toEvent, toCombo } from '../util.js'
 
 export default class Dispatchable {
   constructor (type, options = {}) {

@@ -1,13 +1,5 @@
-/*
- * Delayable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
-import Animateable from './Animateable'
-
-// Util
-import { guardUntilDelayed } from '../util'
+import Animateable from './Animateable.js'
+import { guardUntilDelayed } from '../util.js'
 
 const defaultOptions = {
   delay: 0,

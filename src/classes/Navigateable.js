@@ -1,9 +1,3 @@
-/*
- * Navigateable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
 const defaultOptions = {
   initialLocation: 0,
 }

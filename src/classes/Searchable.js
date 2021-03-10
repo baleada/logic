@@ -1,10 +1,3 @@
-/*
- * Searchable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
-/* Dependencies */
 import { Searcher } from 'fast-fuzzy'
 
 export default class Searchable {

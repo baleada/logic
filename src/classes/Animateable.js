@@ -1,30 +1,17 @@
-/*
- * Animateable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
-/* Dependencies */
-import Listenable from './Listenable'
-
-/* Utils */
+import Listenable from './Listenable.js'
 import {
   toControlPoints,
   toReversedControlPoints,
   createToAnimationProgress,
   toInterpolated,
   isFunction,
-} from '../util'
+} from '../util.js'
 
 function byProgress ({ progress: progressA }, { progress: progressB }) {
   return progressA - progressB
 }
 
-const linearTiming = [
-        { x: 0, y: 0 },
-        { x: 1, y: 1 },
-      ],
-      defaultOptions = {
+const defaultOptions = {
         duration: 0,
         // delay can be handled by delayable
         timing: [

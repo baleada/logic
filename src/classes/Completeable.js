@@ -1,14 +1,7 @@
-/*
- * Completeable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
-/* Util */
 import {
   toLastMatch,
   toNextMatch,
- } from '../util'
+ } from '../util.js'
 
 const defaultOptions = {
   segment: {

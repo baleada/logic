@@ -1,10 +1,3 @@
-/*
- * Recognizeable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
-/* Utils */
 import {
   toPolarCoordinates,
   get,
@@ -13,7 +6,7 @@ import {
   insert,
   isArray,
   isNumber,
-} from '../util'
+} from '../util.js'
 
 const defaultOptions = {
   maxSequenceLength: true,

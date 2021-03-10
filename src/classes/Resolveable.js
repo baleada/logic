@@ -1,10 +1,4 @@
-/*
- * Resolveable.js
- * (c) 2019-present Alex Vipond
- * Released under the MIT license
- */
-
-import { createAsyncMap } from '../pipes/index.js'
+import { createAsyncMap } from '../pipes.js'
 
 export default class Resolveable {
   constructor (getPromise, options = {}) {

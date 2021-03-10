@@ -2,9 +2,8 @@ import { configureable } from '@baleada/prepare'
 import toMetadata from './source-transforms/toMetadata'
 
 const shared = configureable('rollup')
-        .input('src/index.js')
-        .virtual.index('src/classes')
-        .virtual.index('src/util')
+        .input(['src/classes.js', 'src/pipes.js'])
+        .multi()
         .resolve()
         .external([
           'bezier-easing',
@@ -14,8 +13,6 @@ const shared = configureable('rollup')
           'dompurify',
           /@babel\/runtime/,
         ]),
-      productionShared = shared
-        .virtual.index('src/index.js', { test: ({ id }) => /src\/(?:classes)\/\w+.js$/.test(id) }),
       metadataShared = configureable('rollup')
         .input('src/metadata.js')
         .virtual({

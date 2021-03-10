@@ -1,9 +1,10 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import {
-  createAsyncFilter,
-  createAsyncForEach,
-  createAsyncMap,
+  createReduceAsync,
+  createFilterAsync,
+  createForEachAsync,
+  createMapAsync,
   createDelete,
   createInsert,
   createReorder,
@@ -26,6 +27,22 @@ suite.before.each(context => {
 
 
 // ARRAY
+const reduceStub = number => new Promise(function(resolve, reject) {
+  setTimeout(function() {
+    resolve(number)
+  }, 10)
+})
+
+suite(`async reduces`, async context => {
+  const value = await createReduceAsync({
+          reduce: async value => value + (await reduceStub(1)),
+          initialValue: 0,
+        })(context.array),
+        expected = context.array.length
+
+  assert.is(value, expected)
+})
+
 const conditionStub = item => new Promise(function(resolve, reject) {
         setTimeout(item => {
           resolve(item % 2 === 0)
@@ -34,7 +51,7 @@ const conditionStub = item => new Promise(function(resolve, reject) {
       filterArrayStub = (new Array(5)).fill().map((_, index) => index)
 
 suite(`async filters`, async context => {
-  const value = await createAsyncFilter(conditionStub)(filterArrayStub),
+  const value = await createFilterAsync(conditionStub)(filterArrayStub),
         expected = [0, 2, 4]
 
   assert.equal(value, expected)
@@ -51,7 +68,7 @@ const forEachResponseStub = 'stub',
 suite(`async forEaches`, async context => {
   let value = []
 
-  await createAsyncForEach(async () => value.push(await withForEachSuccessStub()))(forEachArrayStub)
+  await createForEachAsync(async () => value.push(await withForEachSuccessStub()))(forEachArrayStub)
   const expected = [
       'stub',
       'stub',
@@ -72,7 +89,7 @@ const mapResponseStub = 'stub',
       mapStub = (new Array(5)).fill()
 
 suite(`async maps`, async context => {
-  const value = await createAsyncMap(async item => await withMapSuccessStub())(mapStub),
+  const value = await createMapAsync(async item => await withMapSuccessStub())(mapStub),
         expected = [
           'stub',
           'stub',

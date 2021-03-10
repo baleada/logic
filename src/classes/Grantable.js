@@ -1,9 +1,3 @@
-/*
-* Grantable.js
-* (c) 2019-present Alex Vipond
-* Released under the MIT license
-*/
-
 export default class Grantable {
   constructor (descriptor, options = {}) {
     this.setDescriptor(descriptor)
