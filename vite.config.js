@@ -7,10 +7,6 @@ export default configureable('vite')
   .includeDeps([
     '@baleada/animateable-utils'
   ])
-  .virtual.index('src/index.js', { test: ({ id }) => /src\/(?:classes|factories)\/\w+.js$/.test(id), importType: 'relativeFromRoot' })
-  .virtual.index('src/classes')
-  .virtual.index('src/factories')
-  .virtual.index('src/util')
   .virtual.routes(
     { path: 'tests/stubs/app/src/pages/routes.js', router: 'vue' },
     {
