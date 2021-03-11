@@ -18,7 +18,7 @@
   "scripts": {
     "prepare": "rollup --config rollup.config.js",
     "prepare:test": "rollup --config test.rollup.config.js",
-    "test:only": "run() { npx uvu tests/$2 $1.test.js$; }; run",
+    "test:only": "run() { npx uvu -r ts-node/register tests/$2 $1.test.js$; }; run",
     "test": "npm run test:only .",
     "dev": "vite"
   },
@@ -50,6 +50,8 @@
     "@vue/compiler-sfc": "^3.0.5",
     "rollup": "^2.33.3",
     "tailwindcss": "^2.0.1-compat",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3",
     "uvu": "^0.5.0",
     "vite": "^2.0.0-beta.36",
     "vue": "^3.0.5",

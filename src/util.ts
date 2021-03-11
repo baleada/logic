@@ -1,6 +1,5 @@
 import BezierEasing from 'bezier-easing'
-import { createInsert } from './pipes.js'
-import { createUnique } from './pipes.js'
+import { createInsert, createUnique } from './pipes'
 import mix from 'mix-css-color'
 
 export function comboItemNameToType (name) {
@@ -165,35 +164,31 @@ export function insert ({ object, path, value, index }) {
 }
 
 
-export function isArray (value) {
+export function isArray (value: unknown): value is any[] {
   return Array.isArray(value)
 }
 
-export function isUndefined (value) {
+export function isUndefined (value: unknown): value is undefined {
   return value === undefined
 }
 
-export function isFunction (value) {
+export function isFunction (value: unknown): value is (...args: any[]) => any {
   return typeof value === 'function'
 }
 
-export function isMap (value) {
-  return value instanceof Map
-}
-
-export function isNull (value) {
+export function isNull (value: unknown): value is null {
   return value === null
 }
 
-export function isNumber (value) {
+export function isNumber (value: unknown): value is number {
   return typeof value === 'number'
 }
 
-export function isObject (value) {
+export function isObject (value: unknown): value is object {
   return typeof value === 'object'
 }
 
-export function isString (value) {
+export function isString (value: unknown): value is string {
   return typeof value === 'string'
 }
 
