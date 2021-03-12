@@ -1,3 +1,6 @@
 {
-  "module": "ESNext"
+  "module": "ESNext",
+  "compilerOptions": {
+    "types": ["resize-observer-browser"],
+  }
 }

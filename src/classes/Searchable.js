@@ -2,10 +2,8 @@ import { Searcher } from 'fast-fuzzy'
 
 export default class Searchable {
   constructor (candidates, options = {}) {
-    /* Options */
     this._searcherOptions = options
 
-    /* Public properties */
     this.setCandidates(candidates)
     this._setResults([])
     this._ready()

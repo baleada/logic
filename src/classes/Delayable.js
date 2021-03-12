@@ -1,5 +1,4 @@
 import Animateable from './Animateable.js'
-import { guardUntilDelayed } from '../util.js'
 
 const defaultOptions = {
   delay: 0,
@@ -141,4 +140,27 @@ export default class Delayable {
   _stopped () {
     this._computedStatus = 'stopped'
   }
+}
+
+function guardUntilDelayed (naiveCallback) {
+  function callback (frame) {
+    const { data: { progress }, timestamp } = frame
+
+    if (progress === 1) {
+      naiveCallback(timestamp)
+      this._delayed()
+    } else {
+      switch (this.status) {
+      case 'ready':
+      case 'paused':
+      case 'sought':
+      case 'delayed':
+      case 'stopped':
+        this._delaying()
+        break
+      }
+    }
+  }
+
+  return callback
 }

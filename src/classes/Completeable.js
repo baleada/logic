@@ -103,16 +103,16 @@ export default class Completeable {
     return this
   }
   _setDividerIndices () {
-    this._computedDividerIndices.before = this._toLastMatch({ expression: this._divider, from: this.selection.start })
+    this._computedDividerIndices.before = this._toLastMatch({ re: this._divider, from: this.selection.start })
 
-    const after = this._toNextMatch({ expression: this._divider, from: this.selection.end })
+    const after = this._toNextMatch({ re: this._divider, from: this.selection.end })
     this._computedDividerIndices.after = after === -1 ? this.string.length + 1 : after
   }
-  _toLastMatch ({ expression, from }) {
-    return toLastMatch({ string: this.string, expression, from })
+  _toLastMatch ({ re, from }) {
+    return toLastMatch({ string: this.string, re, from })
   }
-  _toNextMatch ({ expression, from }) {
-    return toNextMatch({ string: this.string, expression, from })
+  _toNextMatch ({ re, from }) {
+    return toNextMatch({ string: this.string, re, from })
   }
 
   complete (completion, options = {}) {

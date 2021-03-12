@@ -17,7 +17,7 @@ const defaultOptions = {
         timing: [
           0, 0,
           1, 1,
-        ], // linear by default. Instinct was to do this as an array of two objects with x and y properties, but instead I'm matching CSS's and the internet's chosen format to make copy/pasting control points easier
+        ], // linear by default
         iterations: 1,
         alternates: false,
       }
