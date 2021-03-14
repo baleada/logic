@@ -11,6 +11,9 @@ function byProgress ({ progress: progressA }, { progress: progressB }) {
   return progressA - progressB
 }
 
+/**
+ * @type {AnimateableOptions}
+ */
 const defaultOptions = {
         duration: 0,
         // delay can be handled by delayable
@@ -23,6 +26,12 @@ const defaultOptions = {
       }
 
 export default class Animateable {
+  /**
+   * @typedef {{ progress: number, data: { [key: string]: (number | string | any[]) } }} AnimateableKeyframe
+   * @typedef {{ duration?: number, timing?: [number, number, number, number], iterations?: number, alternates?: boolean }} AnimateableOptions
+   * @param {AnimateableKeyframe[]} keyframes
+   * @param {AnimateableOptions} [options]
+   */
   constructor (keyframes, options = {}) {
     this._initialDuration = options?.duration || defaultOptions.duration
     this._controlPoints = toControlPoints(options?.timing || defaultOptions.timing)
@@ -95,6 +104,9 @@ export default class Animateable {
     return this._computedProgress
   }
 
+  /**
+   * @param {AnimateableKeyframe[]} keyframes 
+   */
   setKeyframes (keyframes) {
     this.stop()
 
@@ -194,15 +206,18 @@ export default class Animateable {
     }, [])
   }
 
-  setPlaybackRate (naivePlaybackRate) {
-    const playbackRate = Math.max(0, naivePlaybackRate) // negative playback rate is not possible
-    this._computedPlaybackRate = playbackRate
-    this._duration = (1 / playbackRate) * this._initialDuration
+  /**
+   * @param {number} playbackRate 
+   */
+  setPlaybackRate (playbackRate) {
+    const ensuredPlaybackRate = Math.max(0, playbackRate) // negative playback rate is not supported
+    this._computedPlaybackRate = ensuredPlaybackRate
+    this._duration = (1 / ensuredPlaybackRate) * this._initialDuration
 
     switch (this.status) {
     case 'playing':
     case 'reversing': 
-      this._totalTimeInvisible = (1 / playbackRate) * this._totalTimeInvisible
+      this._totalTimeInvisible = (1 / ensuredPlaybackRate) * this._totalTimeInvisible
       this.seek(this.progress.time)
       
       break
@@ -357,6 +372,9 @@ export default class Animateable {
 
   _listenForVisibilitychange () {
     if (this._visibilitychange.active.size === 0) {
+      /**
+       * @type {number}
+       */
       this._totalTimeInvisible = 0
 
       this._visibilitychange.listen(({ timeStamp: timestamp }) => {

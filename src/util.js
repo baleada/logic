@@ -49,21 +49,22 @@ export function toInterpolated ({ previous, next, progress }, options = {}) {
     return next
   }
 
-  if (isNumber(previous)) {
+  if (isNumber(previous) && isNumber(next)) {
     return (next  - previous) * progress + previous
   }
 
-  if (isString(previous)) {
+  if (isString(previous) && isString(next)) {
     return mix(previous, next, (1 - progress) * 100).hexa // No clue why this progress needs to be inverted, but it works
   }
 
-  // is array
-  const sliceToExact = (next.length - previous.length) * progress + previous.length,
-            nextIsLonger = next.length > previous.length,
-            sliceTo = nextIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
-            shouldBeSliced = nextIsLonger ? next : previous
-  
-  return shouldBeSliced.slice(0, sliceTo)
+  if (isArray(previous) && isArray(next)) {
+    const sliceToExact = (next.length - previous.length) * progress + previous.length,
+    nextIsLonger = next.length > previous.length,
+    sliceTo = nextIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
+    shouldBeSliced = nextIsLonger ? next : previous
+
+    return shouldBeSliced.slice(0, sliceTo)
+  }
 }
 
 
@@ -154,6 +155,8 @@ export function toEvent (combo, options = {}) {
  * @typedef {'intersect' | 'mutate' | 'resize'} ObserverType
  * @param {{ type: ObserverType, listener: (entries: any[]) => any }} required
  * @param {IntersectionObserverInit} [options]
+ * @typedef {any} ResizeObserver
+ * TODO: narrow when resize observer gets TS support
  * @return {IntersectionObserver | MutationObserver | ResizeObserver}
  */
 export function toObserver ({ type, listener }, options) {
@@ -163,6 +166,7 @@ export function toObserver ({ type, listener }, options) {
     case 'mutate':
       return new MutationObserver(listener)
     case 'resize':
+      // @ts-ignore
       return new ResizeObserver(listener)
   }
 }

@@ -1,15 +1,26 @@
 import Resolveable from './Resolveable.js'
 import { isFunction } from '../util.js'
 
+/**
+ * 
+ * @param {RequestInit | ((FetchOptionsApi) => RequestInit)} options 
+ */
 function ensureOptions (options) {
   return isFunction(options)
     ? options({ withJson })
     : options
 }
 
-function withJson (data) {
+/**
+ * @typedef {{ withJson: (data: Record<any, any>) => { body: string, headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } } }} FetchOptionsApi
+ */
+
+/**
+ * @type {(data: Record<any, any>) => { body: string, headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } }}
+ */
+function withJson (json) {
   return {
-    body: JSON.stringify(data),
+    body: JSON.stringify(json),
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -18,6 +29,10 @@ function withJson (data) {
 }
 
 export default class Fetchable {
+  /**
+   * @param {string} resource
+   * @param {{}} [options]
+   */
   constructor (resource, options = {}) {
     this.setResource(resource)
 
@@ -30,6 +45,9 @@ export default class Fetchable {
     this._ready()
   }
   _ready () {
+    /**
+     * @type {'ready' | 'fetching' | 'fetched' | 'aborted' | 'errored'}
+     */
     this._computedStatus = 'ready'
   }
 
@@ -86,6 +104,9 @@ export default class Fetchable {
     }
   }
 
+  /**
+   * @param {string} resource
+   */
   setResource (resource) {
     this._computedResource = resource
     return this
@@ -95,6 +116,10 @@ export default class Fetchable {
     return this
   }
   
+  /**
+   * 
+   * @param {RequestInit} [options]
+   */
   async fetch (options) {
     options = {
       signal: this.abortController.signal,
@@ -121,7 +146,7 @@ export default class Fetchable {
       signal: this.abortController.signal,
       ...ensureOptions(options),
     }
-    await this.fetch({ ...options, method: 'get' })
+    await this.fetch({ ...ensureOptions(options), method: 'get' })
     return this
   }
   async patch (options = {}) {
@@ -129,7 +154,7 @@ export default class Fetchable {
       signal: this.abortController.signal,
       ...ensureOptions(options),
     }
-    await this.fetch({ ...options, method: 'patch' })
+    await this.fetch({ ...ensureOptions(options), method: 'patch' })
     return this
   }
   async post (options = {}) {
@@ -137,7 +162,7 @@ export default class Fetchable {
       signal: this.abortController.signal,
       ...ensureOptions(options),
     }
-    await this.fetch({ ...options, method: 'post' })
+    await this.fetch({ ...ensureOptions(options), method: 'post' })
     return this
   }
   async put (options = {}) {
@@ -145,7 +170,7 @@ export default class Fetchable {
       signal: this.abortController.signal,
       ...ensureOptions(options),
     }
-    await this.fetch({ ...options, method: 'put' })
+    await this.fetch({ ...ensureOptions(options), method: 'put' })
     return this
   }
   async delete (options = {}) {
@@ -153,7 +178,7 @@ export default class Fetchable {
       signal: this.abortController.signal,
       ...ensureOptions(options),
     }
-    await this.fetch({ ...options, method: 'delete' })
+    await this.fetch({ ...ensureOptions(options), method: 'delete' })
     return this
   }
   abort () {

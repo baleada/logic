@@ -3,16 +3,23 @@ import {
   toNextMatch,
  } from '../util.js'
 
+/**
+ * @type {CompleteableOptions}
+ */
 const defaultOptions = {
   segment: {
     from: 'start', // start|selection|divider
     to: 'end', // end|selection|divider
   },
   divider: /\s/, // Keep an eye out for use cases where a { before, after } object would be needed, or where multi-character dividers need to be used
-  // initialSelection
 }
 
 export default class Completeable {
+  /**
+   * @typedef {{ segment?: { from?: 'start' | 'selection' | 'divider', to?: 'end' |'selection' |'divider' }, divider?: RegExp, initialSelection?: CompleteableSelection }} CompleteableOptions
+   * @param {string} string
+   * @param {CompleteableOptions} [options]
+   */
   constructor (string, options = {}) {
     this._constructing()
     this._segmentFrom = options?.segment?.from || defaultOptions.segment.from
@@ -29,6 +36,9 @@ export default class Completeable {
     this._computedStatus = 'constructing'
   }
   _ready () {
+    /**
+     * @type {'constructing' | 'ready' | 'completing' | 'completed'}
+     */
     this._computedStatus = 'ready'
   }
 
@@ -56,6 +66,10 @@ export default class Completeable {
   get dividerIndices () {
     return this._computedDividerIndices
   }
+  
+  /**
+   * @return {number}
+   */
   _getSegmentStartIndex () {
     switch (this._segmentFrom) {
       case 'start':
@@ -65,9 +79,10 @@ export default class Completeable {
       case 'divider':
         return this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, toLastMatch returns -1, and this becomes 0
     }
-    
-    return index
   }
+  /**
+   * @return {number}
+   */
   _getSegmentEndIndex () {
     switch (this._segmentTo) {
       case 'end':
@@ -77,10 +92,11 @@ export default class Completeable {
       case 'divider':
         return this.dividerIndices.after // No arithmetic needed, because segment ends before the divider index, so the divider index should be the second arg for slice. -1 edge case is handled by setDividerIndices
     }
-    
-    return index
   }
 
+  /**
+   * @param {string} string 
+   */
   setString (string) {
     this._computedString = string
 
@@ -96,6 +112,10 @@ export default class Completeable {
     return this
   }
 
+  /**
+   * @typedef {{ start: number, end: number, direction: 'forward' | 'backward' | 'none' }} CompleteableSelection
+   * @param {CompleteableSelection} selection 
+   */
   setSelection (selection) {
     this._computedSelection = selection
     this._setDividerIndices()
@@ -108,13 +128,25 @@ export default class Completeable {
     const after = this._toNextMatch({ re: this._divider, from: this.selection.end })
     this._computedDividerIndices.after = after === -1 ? this.string.length + 1 : after
   }
+  /**
+   * @param {{ re: RegExp, from: number }} required
+   * @return number
+   */
   _toLastMatch ({ re, from }) {
     return toLastMatch({ string: this.string, re, from })
   }
+  /**
+   * @param {{ re: RegExp, from: number }} required
+   * @return number
+   */
   _toNextMatch ({ re, from }) {
     return toNextMatch({ string: this.string, re, from })
   }
 
+  /**
+   * @param {string} completion 
+   * @param {{ select?: 'completion' | 'completionEnd' }} [options] 
+   */
   complete (completion, options = {}) {
     this._completing()
 
@@ -169,9 +201,7 @@ export default class Completeable {
         return this.string.slice(this.selection.end)
       case 'divider':
         return this.string.slice(this.dividerIndices.after)
-      }
-
-    return text
+    }
   }
   _completing () {
     this._computedStatus = 'completing'

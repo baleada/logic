@@ -1,11 +1,20 @@
 import { createMapAsync } from '../pipes.js'
+import { isArray } from '../util.js'
 
 export default class Resolveable {
+  /**
+   * 
+   * @param {(...args: any[]) => (Promise<any> | Promise<any>[])} getPromise 
+   * @param {{}} [options] 
+   */
   constructor (getPromise, options = {}) {
     this.setGetPromise(getPromise)
     this._ready()
   }
   _ready () {
+    /**
+     * @type {'ready' | 'resolving' | 'resolved' | 'errored'}
+     */
     this._computedStatus = 'ready'
   }
 
@@ -22,18 +31,24 @@ export default class Resolveable {
     return this._computedResponse
   }
 
+  /**
+   * @param {(...args: any[]) => (Promise<any> | Promise<any>[])} getPromise 
+   */
   setGetPromise (getPromise) {
     this._computedGetPromise = getPromise
 
     return this
   }
   
+  /**
+   * @type {(...args: any[]) => Promise<this>}
+   */
   async resolve () {
     this._resolving()
     try {
-      const promises = await this.getPromise(...arguments)
+      const promises = this.getPromise(...arguments)
 
-      this._computedResponse = Array.isArray(promises)
+      this._computedResponse = isArray(promises)
         ? await createMapAsync(async promise => await promise)(promises)
         : await promises
 

@@ -1,14 +1,22 @@
-import { Searcher } from 'fast-fuzzy'
+import { Searcher, FullOptions as SearcherOptions, MatchData as SearcherMatchData } from 'fast-fuzzy'
 
 export default class Searchable {
+  /**
+   * 
+   * @param {(string | Record<any, any>)[]} candidates 
+   * @param {SearcherOptions<(string | Record<any, any>)>} [options] 
+   */
   constructor (candidates, options = {}) {
     this._searcherOptions = options
 
     this.setCandidates(candidates)
-    this._setResults([])
+    this._computedResults = []
     this._ready()
   }
   _ready () {
+    /**
+     * @type {('ready' | 'searched')}
+     */
     this._computedStatus = 'ready'
   }
 
@@ -18,17 +26,16 @@ export default class Searchable {
   set candidates (candidates) {
     this.setCandidates(candidates)
   }
-  get status () {
-    return this._computedStatus
-  }
   get results () {
     return this._computedResults
   }
-  get trie () {
-    return this._searcher.trie
+  get status () {
+    return this._computedStatus
   }
 
-  /* Public methods */
+  /**
+   * @param {(string | Record<any, any>)[]} candidates 
+   */
   setCandidates (candidates) {
     this._computedCandidates = Array.from(candidates)
     this._searcher = new Searcher(candidates, this._searcherOptions)
@@ -36,13 +43,18 @@ export default class Searchable {
     return this
   }
 
-  _setResults (results) {
-    this._computedResults = results
-  }
-
+  /**
+   * 
+   * @param {string} query 
+   * @param {SearcherOptions<(string | Record<any, any>)>} [options] 
+   */
   search (query, options) {
     const results = this._searcher.search(query, options)
-    this._setResults(results)
+
+    /**
+     * @type {any[] | SearcherMatchData<(string | Record<any, any>)>[]} results 
+     */
+    this._computedResults = results
 
     switch (this.status) {
     case 'ready':

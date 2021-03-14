@@ -1,14 +1,25 @@
+/**
+ * @type {NavigateableOptions}
+ */
 const defaultOptions = {
   initialLocation: 0,
 }
 
 export default class Navigateable {
+  /**
+   * @typedef {{ initialLocation?: number }} NavigateableOptions
+   * @param {any[]} array 
+   * @param {NavigateableOptions} [options]
+   */
   constructor (array, options = {}) {
     this.setArray(array)
     this.navigate(options?.initialLocation || defaultOptions.initialLocation)
     this._ready()
   }
   _ready () {
+    /**
+     * @type {('ready' | 'navigated')}
+     */
     this._computedStatus = 'ready'
   }
 
@@ -32,24 +43,34 @@ export default class Navigateable {
     return this.array[this.location]
   }
 
+  /**
+   * @param {any[]} array 
+   */
   setArray (array) {
     this._computedArray = array
     return this
   }
+
+  /**
+   * @param {number} newLocation
+   */
   setLocation (newLocation) {
     this.navigate(newLocation)
 
     return this
   }
 
-  navigate (rawNewLocation) {
-    const newLocation = rawNewLocation < 0
+  /**
+   * @param {number} newLocation
+   */
+  navigate (newLocation) {
+    const ensuredNewLocation = newLocation < 0
       ? 0 // WARNING: console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
-      : rawNewLocation > this.array.length - 1
+      : newLocation > this.array.length - 1
         ? this.array.length - 1 // WARNING: console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
-        : rawNewLocation
+        : newLocation
       
-    this._computedLocation = newLocation
+    this._computedLocation = ensuredNewLocation
 
     this._navigated()
 
@@ -59,6 +80,9 @@ export default class Navigateable {
     this._computedStatus = 'navigated'
   }
 
+  /**
+   * @param {{ distance?: number, loops?: boolean }} [options]
+   */
   next (options = {}) {
     options = {
       distance: 1,
@@ -93,6 +117,9 @@ export default class Navigateable {
     return this
   }
 
+  /**
+   * @param {{ distance?: number, loops?: boolean }} [options]
+   */
   previous (options = {}) {
     options = {
       distance: 1,
@@ -124,7 +151,7 @@ export default class Navigateable {
 
     return this
   }
-
+  
   random () {
     const newLocation = Math.floor(Math.random() * (this.array.length))
     this.navigate(newLocation)
