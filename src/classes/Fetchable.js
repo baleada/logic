@@ -86,6 +86,10 @@ export default class Fetchable {
     return this._getUsedBody(this._computedText)
   }
 
+  /**
+   * @template T
+   * @param {Resolveable<T>} resolveable 
+   */
   _getUsedBody (resolveable) {
     if (!this.response.bodyUsed) {
       return resolveable.resolve()
@@ -111,13 +115,18 @@ export default class Fetchable {
     this._computedResource = resource
     return this
   }
+  /**
+   * @param {Response} response 
+   */
   _setResponse (response) {
+    /**
+     * @type {Response}
+     */
     this._computedResponse = response
     return this
   }
   
   /**
-   * 
    * @param {RequestInit} [options]
    */
   async fetch (options) {
@@ -141,6 +150,9 @@ export default class Fetchable {
 
     return this
   }
+  /**
+   * @param {RequestInit} [options]
+   */
   async get (options = {}) {
     options = {
       signal: this.abortController.signal,
@@ -149,6 +161,9 @@ export default class Fetchable {
     await this.fetch({ ...ensureOptions(options), method: 'get' })
     return this
   }
+  /**
+   * @param {RequestInit} [options]
+   */
   async patch (options = {}) {
     options = {
       signal: this.abortController.signal,
@@ -157,6 +172,9 @@ export default class Fetchable {
     await this.fetch({ ...ensureOptions(options), method: 'patch' })
     return this
   }
+  /**
+   * @param {RequestInit} [options]
+   */
   async post (options = {}) {
     options = {
       signal: this.abortController.signal,
@@ -165,6 +183,9 @@ export default class Fetchable {
     await this.fetch({ ...ensureOptions(options), method: 'post' })
     return this
   }
+  /**
+   * @param {RequestInit} [options]
+   */
   async put (options = {}) {
     options = {
       signal: this.abortController.signal,
@@ -173,6 +194,9 @@ export default class Fetchable {
     await this.fetch({ ...ensureOptions(options), method: 'put' })
     return this
   }
+  /**
+   * @param {RequestInit} [options]
+   */
   async delete (options = {}) {
     options = {
       signal: this.abortController.signal,

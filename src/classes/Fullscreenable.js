@@ -1,9 +1,17 @@
 export default class Fullscreenable {
+  /**
+   * 
+   * @param {(...args: any[]) => Element} getElement
+   * @param {{}} [options]
+   */
   constructor (getElement, options = {}) {
     this.setGetElement(getElement)
     this._ready()
   }
   _ready () {
+    /**
+     * @type {'ready' | 'fullscreened' | 'errored' | 'exited'}
+     */
     this._computedStatus = 'ready'
   }
 
@@ -23,16 +31,25 @@ export default class Fullscreenable {
     return this._computedError
   }
 
+  /**
+   * @param {(...args: any[]) => Element} getElement 
+   */
   setGetElement (getElement) {
     this._computedGetElement = () => getElement()
     return this
   }
 
+  /**
+   * @param {FullscreenOptions} [options]
+   */
   async enter (options = {}) {
     await this.fullscreen(options)
     return this
   }
   
+  /**
+   * @param {FullscreenOptions} [options]
+   */
   async fullscreen (options = {}) {
     try {
       await this.element.requestFullscreen(options)

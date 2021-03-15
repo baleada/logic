@@ -1,10 +1,13 @@
 import { createMapAsync } from '../pipes.js'
 import { isArray } from '../util.js'
 
+/**
+ * @template T
+ */
 export default class Resolveable {
   /**
    * 
-   * @param {(...args: any[]) => (Promise<any> | Promise<any>[])} getPromise 
+   * @param {(...args: any[]) => (Promise<T> | Promise<T>[])} getPromise 
    * @param {{}} [options] 
    */
   constructor (getPromise, options = {}) {
@@ -32,7 +35,7 @@ export default class Resolveable {
   }
 
   /**
-   * @param {(...args: any[]) => (Promise<any> | Promise<any>[])} getPromise 
+   * @param {(...args: any[]) => (Promise<T> | Promise<T>[])} getPromise 
    */
   setGetPromise (getPromise) {
     this._computedGetPromise = getPromise

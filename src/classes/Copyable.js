@@ -1,12 +1,19 @@
 import Resolveable from './Resolveable.js'
 
 export default class Copyable {
+  /**
+   * @param {string} string
+   * @param {{}} [options]
+   */
   constructor (string, options = {}) {
     this.setString(string)
-    this._computedCopied = new Resolveable(() => navigator.clipboard.readText())
+    this._computedCopied = new Resolveable(async () => await navigator.clipboard.readText() === this.string)
     this._ready()
   }
   _ready () {
+    /**
+     * @type {'ready' | 'copying' | 'copied' | 'errored'}
+     */
     this._computedStatus = 'ready'
   }
   
@@ -27,11 +34,17 @@ export default class Copyable {
     return this._computedResponse
   }
   
+  /**
+   * @param {string} string 
+   */
   setString (string) {
     this._computedString = string
     return this
   }
   
+  /**
+   * @param {{ type?: 'clipboard' | 'element' }} [options]
+   */
   async copy (options = {}) {    
     this._copying()
     
