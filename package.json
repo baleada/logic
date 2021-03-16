@@ -47,8 +47,11 @@
   "devDependencies": {
     "@baleada/animateable-utils": "^0.0.2",
     "@baleada/prepare": "^0.4.43",
+    "@types/dompurify": "^2.2.1",
     "@types/resize-observer-browser": "^0.1.5",
     "@vue/compiler-sfc": "^3.0.5",
+    "i": "^0.3.6",
+    "npm": "^7.6.3",
     "rollup": "^2.33.3",
     "tailwindcss": "^2.0.1-compat",
     "typescript": "^4.2.3",

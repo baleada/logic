@@ -1,6 +1,9 @@
 {
   "module": "ESNext",
   "compilerOptions": {
-    "types": ["resize-observer-browser"],
+    "types": [
+      "resize-observer-browser",
+      "dompurify"
+    ],
   }
 }
