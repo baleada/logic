@@ -1,9 +1,17 @@
 export default class Grantable {
+  /**
+   * 
+   * @param {PermissionDescriptor | DevicePermissionDescriptor | MidiPermissionDescriptor | PushPermissionDescriptor} descriptor
+   * @param {{}} [options]
+   */
   constructor (descriptor, options = {}) {
     this.setDescriptor(descriptor)
     this._ready()
   }
   _ready () {
+    /**
+     * @type {'ready' | 'querying' | 'queried' | 'errored'}
+     */
     this._computedStatus = 'ready'
   }
   
@@ -20,6 +28,9 @@ export default class Grantable {
     return this._computedStatus
   }
   
+  /**
+   * @param {PermissionDescriptor | DevicePermissionDescriptor | MidiPermissionDescriptor | PushPermissionDescriptor} descriptor
+   */
   setDescriptor (descriptor) {
     this._computedDescriptor = descriptor
     return this
@@ -29,6 +40,9 @@ export default class Grantable {
     this._querying()
 
     try {
+      /**
+       * @type {PermissionStatus | Error}
+       */
       this._computedPermission = await navigator.permissions.query(this.descriptor)
       this._queried()
     } catch (error) {

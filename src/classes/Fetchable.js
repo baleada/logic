@@ -115,16 +115,6 @@ export default class Fetchable {
     this._computedResource = resource
     return this
   }
-  /**
-   * @param {Response} response 
-   */
-  _setResponse (response) {
-    /**
-     * @type {Response}
-     */
-    this._computedResponse = response
-    return this
-  }
   
   /**
    * @param {RequestInit} [options]
@@ -138,6 +128,9 @@ export default class Fetchable {
     this._computedStatus = 'fetching'
 
     try {
+      /**
+       * @type {Response | Error}
+       */
       this._computedResponse = await fetch(this.resource, options)
       this._computedStatus = 'fetched'
     } catch (error) {

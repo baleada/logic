@@ -51,6 +51,9 @@ export default class Resolveable {
     try {
       const promises = this.getPromise(...arguments)
 
+      /**
+       * @type {T | T[] | Error}
+       */
       this._computedResponse = isArray(promises)
         ? await createMapAsync(async promise => await promise)(promises)
         : await promises

@@ -8,12 +8,46 @@ import {
   isNumber,
 } from '../util.js'
 
+/**
+ * @type {RecognizeableOptions}
+ */
 const defaultOptions = {
   maxSequenceLength: true,
   handlers: {},
 }
 
+/**
+ * @template {Event} T
+ */
 export default class Recognizeable {
+  /**
+   * @typedef {object} RecognizeableHandlerApiConstructed
+   * @property {toPolarCoordinates} toPolarCoordinates
+   * @property {() => 'recognized' | 'recognizing' | 'denied' | 'ready'} getStatus
+   * @property {(param?: { path: string }) => any} getMetadata
+   * @property {(required: { path: string, value: any }) => void} setMetadata
+   * @property {(required: { path: string, value: any }) => void} pushMetadata
+   * @property {(required: { path: string, value: any, index: number }) => void} insertMetadata
+   * @property {() => void} recognized
+   * @property {() => void} denied
+   * @property {(event: T) => any} listener
+   */
+
+  /**
+   * @typedef {object} RecognizeableHandlerApiRuntime
+   * @property {T} event
+   * @property {() => T[]} getSequence
+   */
+
+  /**
+   * @typedef {RecognizeableHandlerApiConstructed & RecognizeableHandlerApiRuntime} RecognizeableHandlerApi
+   */
+
+  /**
+   * @param {T[]} sequence
+   * @typedef {{ maxSequenceLength?: true | number, handlers?: Record<any, (handlerApi: RecognizeableHandlerApi) => any> }} RecognizeableOptions
+   * @param {RecognizeableOptions} [options]
+   */
   constructor (sequence, options = {}) {
     this._maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength
     this._handlers = options?.handlers || defaultOptions.handlers
@@ -22,13 +56,16 @@ export default class Recognizeable {
 
     this.setSequence(sequence)
 
+    /**
+     * @type {RecognizeableHandlerApiConstructed}
+     */
     this._handlerApi = {
       toPolarCoordinates,
       getStatus: () => this.status,
-      getMetadata: (param) => param ? get({ object: this.metadata, ...param }) : this.metadata,
-      setMetadata: (...args) => this._setMetadata(...args),
-      pushMetadata: (...args) => this._pushMetadata(...args),
-      insertMetadata: (...args) => this._insertMetadata(...args),
+      getMetadata: param => param ? get({ object: this.metadata, ...param }) : this.metadata,
+      setMetadata: required => this._setMetadata(required),
+      pushMetadata: required => this._pushMetadata(required),
+      insertMetadata: required => this._insertMetadata(required),
       recognized: () => this._recognized(),
       denied: () => this._denied(),
       listener: event => this.listener?.(event),
@@ -38,6 +75,9 @@ export default class Recognizeable {
   }
 
   _resetComputedMetadata () {
+    /**
+     * @type {Record<any, any>}
+     */
     this._computedMetadata = {}
   }
   
@@ -48,16 +88,28 @@ export default class Recognizeable {
     this._computedStatus = 'denied'
   }
   _ready () {
+    /**
+     * @type {'recognized' | 'recognizing' | 'denied' | 'ready'}
+     */
     this._computedStatus = 'ready'
   }
 
+  /**
+   * @param {{ path: string, value: any }} required
+   */
   _setMetadata ({ path, value }) {
     set({ object: this.metadata, path, value })
   }
+  /**
+   * @param {{ path: string, value: any }} required
+   */
   _pushMetadata ({ path, value }) {
     this._ensureArray({ path })
     push({ object: this.metadata, path, value })
   }
+  /**
+   * @param {{ path: string, value: any, index: number }} required
+   */
   _insertMetadata ({ path, value, index }) {
     this._ensureArray({ path })
     insert({ object: this.metadata, path, value, index })
@@ -95,15 +147,24 @@ export default class Recognizeable {
     return this._computedMetadata
   }
 
+  /**
+   * @param {T[]} sequence 
+   */
   setSequence (sequence) {
     this._computedSequence = Array.from(sequence)
     return this
   }
+  /**
+   * @param {(event: T) => any} listener 
+   */
   setListener (listener) {
     this._computedListener = listener
     return this
   }
 
+  /**
+   * @param {T} event 
+   */
   recognize (event) {
     this._recognizing()
 
