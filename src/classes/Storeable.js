@@ -4,12 +4,21 @@ import {
   domIsAvailable,
 } from '../util.js'
 
+/**
+ * @type {StoreableOptions}
+ */
 const defaultOptions = {
   type: 'local',
   statusKeySuffix: '_status',
 }
 
 export default class Storeable {
+  /**
+   * 
+   * @param {string} key
+   * @typedef {{ type?: 'local' | 'session', statusKeySuffix?: string }} StoreableOptions
+   * @param {StoreableOptions} [options]
+   */
   constructor (key, options = {}) {
     this._constructing()
     this._type = options.type ?? defaultOptions.type
@@ -22,6 +31,9 @@ export default class Storeable {
     this._computedStatus = 'constructing'
   }
   _ready () {
+    /**
+     * @type {'ready' | 'constructing' | 'stored' | 'errored' | 'removed'}
+     */
     this._computedStatus = 'ready'
 
     if (domIsAvailable()) {
@@ -41,7 +53,7 @@ export default class Storeable {
     if (domIsAvailable()) {
       const storedStatus = this.storage.getItem(this._computedStatusKey)
       if (this._computedStatus !== storedStatus && isString(storedStatus)) {
-        this._computedStatus = storedStatus
+        this._computedStatus = /** @type {'ready' | 'constructing' | 'stored' | 'errored' | 'removed'} */ (storedStatus)
       }
     }
 
@@ -62,6 +74,9 @@ export default class Storeable {
     return this._computedError
   }
 
+  /**
+   * @param {string} key 
+   */
   setKey (key) {
     let string
     switch (this.status) {
@@ -89,12 +104,18 @@ export default class Storeable {
     return this
   }
 
+  /**
+   * @param {string} string 
+   */
   store (string) {
     try {
       this.storage.setItem(this.key, string)
       this._computedString = string // This assignment allows reactivity tools to detect data change
       this._stored()
     } catch (error) {
+      /**
+       * @type {Error}
+       */
       this._computedError = error
       this._errored()
     }

@@ -1,9 +1,12 @@
 {
-  "module": "ESNext",
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
     "types": [
       "resize-observer-browser",
       "dompurify"
     ],
+    "checkJs": true,
+    "outDir": "lib"
   }
 }
