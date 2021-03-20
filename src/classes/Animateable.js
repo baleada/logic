@@ -1,15 +1,8 @@
+import BezierEasing from 'bezier-easing'
+import mix from 'mix-css-color'
 import { Listenable } from './Listenable.js'
-import {
-  toControlPoints,
-  toReversedControlPoints,
-  createToAnimationProgress,
-  toInterpolated,
-  isFunction,
-} from '../util.js'
-
-function byProgress ({ progress: progressA }, { progress: progressB }) {
-  return progressA - progressB
-}
+import { isFunction, isUndefined, isNumber, isString, isArray } from '../util.js'
+import { createUnique } from '../pipes.js'
 
 /**
  * @type {AnimateableOptions}
@@ -27,18 +20,19 @@ const defaultOptions = {
 
 export class Animateable {
   /**
-   * @typedef {{ progress: number, data: { [key: string]: (number | string | any[]) } }} AnimateableKeyframe
-   * @typedef {{ duration?: number, timing?: [number, number, number, number], iterations?: number, alternates?: boolean }} AnimateableOptions
+   * @typedef {[number, number, number, number]} AnimateableTiming
+   * @typedef {{ progress: number, data: { [key: string]: (number | string | any[]) }, timing?: AnimateableTiming }} AnimateableKeyframe
+   * @typedef {{ duration?: number, timing?: AnimateableTiming, iterations?: number | true, alternates?: boolean }} AnimateableOptions
    * @param {AnimateableKeyframe[]} keyframes
    * @param {AnimateableOptions} [options]
    */
   constructor (keyframes, options = {}) {
     this._initialDuration = options?.duration || defaultOptions.duration
-    this._controlPoints = toControlPoints(options?.timing || defaultOptions.timing)
+    this._controlPoints = fromTimingToControlPoints(options?.timing || defaultOptions.timing)
     this._iterationLimit = options?.iterations || defaultOptions.iterations
     this._alternates = options?.alternates || defaultOptions.alternates
 
-    this._reversedControlPoints = toReversedControlPoints(this._controlPoints)
+    this._reversedControlPoints = fromTimingToReversedControlPoints(this._controlPoints)
     
     this._toAnimationProgress = createToAnimationProgress(this._controlPoints)
     this._reversedToAnimationProgress = createToAnimationProgress(this._reversedControlPoints)
@@ -49,6 +43,9 @@ export class Animateable {
     this._seekCache = {}
     this._alternateCache = { status: 'ready' }
     this._visibilitychange = new Listenable('visibilitychange')
+
+    this._getEaseables = createGetEaseables(({ keyframe }) => keyframe.timing ? fromTimingToControlPoints(keyframe.timing) : this._controlPoints)
+    this._getReversedEaseables = createGetEaseables(({ keyframe, index, array }) => keyframe.timing ? fromTimingToReversedControlPoints(fromTimingToControlPoints(array[index + 1].timing)) : this._reversedControlPoints)
     
     this.setKeyframes(keyframes)
     this.setPlaybackRate(1)
@@ -58,6 +55,9 @@ export class Animateable {
     this._resetIterations()
   }
   _ready () {
+    /**
+     * @type {'ready' | 'playing' | 'played' | 'reversing' | 'reversed' | 'paused' | 'sought' | 'stopped'}
+     */
     this._computedStatus = 'ready'
   }
   _resetTime () {
@@ -110,100 +110,17 @@ export class Animateable {
   setKeyframes (keyframes) {
     this.stop()
 
-    this._computedKeyframes = Array.from(keyframes).sort(byProgress) // Sort without mutating original
+    // Sort by progress without mutating original
+    this._computedKeyframes = Array.from(keyframes).sort(({ progress: progressA }, { progress: progressB }) => progressA - progressB)
 
     this._reversedKeyframes = Array.from(this.keyframes).reverse() // Reverse without mutating
       .map(({ progress, data }) => ({ progress: 1 - progress, data }))
 
-    this._properties = this._getProperties()
-    this._easeables = this._getEaseables()
-    this._reversedEaseables = this._getReversedEaseables()
+    this._properties = toProperties(this.keyframes)
+    this._easeables = this._getEaseables({ keyframes: this.keyframes, properties: this._properties })
+    this._reversedEaseables = this._getReversedEaseables({ keyframes: this._reversedKeyframes, properties: this._properties })
 
     return this
-  }
-  _getProperties () {
-    return Array.from(
-      new Set(
-        this.keyframes.map(({ data }) => Object.keys(data)).flat()
-      )
-    )
-  }
-  _getEaseables () {
-    return this._properties.reduce((easeables, property) => {
-      const propertyKeyframes = this.keyframes.filter(({ data }) => data.hasOwnProperty(property)),
-            propertyEaseables = propertyKeyframes.reduce((propertyEaseables, keyframe, index, array) => {
-              const previous = keyframe.data[property],
-                    next = index === array.length - 1 ? previous : array[index + 1].data[property],
-                    start = keyframe.progress,
-                    end = index === array.length - 1 ? 2 : array[index + 1].progress,
-                    hasCustomTiming = !!keyframe?.timing,
-                    toAnimationProgress = index === array.length - 1
-                      ? timeProgress => 1
-                      : createToAnimationProgress((hasCustomTiming && toControlPoints(keyframe.timing)) || this._controlPoints)
-
-              return [
-                ...propertyEaseables,
-                {
-                  property,
-                  value: { previous, next },
-                  progress: { start, end },
-                  hasCustomTiming,
-                  toAnimationProgress
-                }
-              ]
-            }, []),
-            firstEaseable = {
-              property,
-              value: { previous: propertyEaseables[0].value.previous, next: propertyEaseables[0].value.previous },
-              progress: { start: -1, end: propertyEaseables[0].progress.start },
-              toAnimationProgress: timeProgress => 1,
-            }
-      
-      return [
-        ...easeables,
-        firstEaseable,
-        ...propertyEaseables,
-      ]
-    }, [])
-  }
-  _getReversedEaseables () {
-    // TODO: abstract and make DRYer
-    return this._properties.reduce((easeables, property) => {
-      const propertyKeyframes = this._reversedKeyframes.filter(({ data }) => data.hasOwnProperty(property)),
-            propertyEaseables = propertyKeyframes.reduce((propertyEaseables, keyframe, index, array) => {
-              const previous = keyframe.data[property],
-                    next = index === array.length - 1 ? previous : array[index + 1].data[property],
-                    start = keyframe.progress,
-                    end = index === array.length - 1 ? 2 : array[index + 1].progress,
-                    hasCustomTiming = !!keyframe?.timing,
-                    toAnimationProgress = index === array.length - 1
-                      ? timeProgress => 1
-                      : createToAnimationProgress((hasCustomTiming && toReversedControlPoints(toControlPoints(array[index + 1].timing))) || this._reversedControlPoints)
-
-              return [
-                ...propertyEaseables,
-                {
-                  property,
-                  value: { previous, next },
-                  progress: { start, end },
-                  hasCustomTiming,
-                  toAnimationProgress
-                }
-              ]
-            }, []),
-            firstEaseable = {
-              property,
-              value: { previous: propertyEaseables[0].value.previous, next: propertyEaseables[0].value.previous },
-              progress: { start: -1, end: propertyEaseables[0].progress.start },
-              toAnimationProgress: timeProgress => 1,
-            }
-      
-      return [
-        ...easeables,
-        firstEaseable,
-        ...propertyEaseables,
-      ]
-    }, [])
   }
 
   /**
@@ -226,9 +143,13 @@ export class Animateable {
     return this
   }
 
-  play (callback, options) { // Play from current time progress
+  /**
+   * @param {AnimateableFrameHandler} handle 
+   * @param {AnimateOptions} [options]
+   */
+  play (handle, options) { // Play from current time progress
     this._playCache = {
-      callback,
+      handle,
       options,
     }
 
@@ -252,7 +173,7 @@ export class Animateable {
       case 'played':
       case 'reversed':
       case 'sought':
-        this._animate(callback, options, 'play')
+        this._createAnimate('play')(handle, options)
         break
       case 'paused':
         if (this._alternates) {
@@ -260,10 +181,10 @@ export class Animateable {
           case 'playing':
             switch (this._pauseCache.status) {
             case 'playing':
-              this._animate(callback, options, 'play')
+              this._createAnimate('play')(handle, options)
               break
             case 'reversing':
-              this._animate(callback, options, 'reverse')
+              this._createAnimate('reverse')(handle, options)
               break
             }
             break
@@ -271,21 +192,21 @@ export class Animateable {
             this._alternateCache.status = 'playing'
             switch (this._pauseCache.status) {
             case 'playing':
-              this._animate(callback, options, 'play')
+              this._createAnimate('play')(handle, options)
               break
             case 'reversing':
-              this._animate(callback, options, 'play')
+              this._createAnimate('play')(handle, options)
               break
             }
             break
           }
         } else {
-          this._animate(callback, options, 'play')
+          this._createAnimate('play')(handle, options)
         }
         break
       case 'reversing':
         this.pause()
-        this._animate(callback, options, 'play')
+        this._createAnimate('play')(handle, options)
         break
     }
     
@@ -298,9 +219,13 @@ export class Animateable {
     this._computedStatus = 'played'
   }
 
-  reverse (callback, options) { // Reverse from current time progress
+  /**
+   * @param {AnimateableFrameHandler} handle 
+   * @param {AnimateOptions} [options]
+   */
+  reverse (handle, options) { // Reverse from current time progress
     this._reverseCache = {
-      callback,
+      handle,
       options,
     }
 
@@ -324,7 +249,7 @@ export class Animateable {
       case 'played':
       case 'reversed':
       case 'sought':
-        this._animate(callback, options, 'reverse')
+        this._createAnimate('reverse')(handle, options)
         break
       case 'paused':
         if (this._alternates) {
@@ -333,31 +258,31 @@ export class Animateable {
             this._alternateCache.status = 'reversing'
             switch (this._pauseCache.status) {
             case 'playing':
-              this._animate(callback, options, 'reverse')
+              this._createAnimate('reverse')(handle, options)
               break
             case 'reversing':
-              this._animate(callback, options, 'reverse')
+              this._createAnimate('reverse')(handle, options)
               break
             }
             break
           case 'reversing':
             switch (this._pauseCache.status) {
             case 'playing':
-              this._animate(callback, options, 'play')
+              this._createAnimate('play')(handle, options)
               break
             case 'reversing':
-              this._animate(callback, options, 'reverse')
+              this._createAnimate('reverse')(handle, options)
               break
             }
             break
           }
         } else {
-          this._animate(callback, options, 'play')
+          this._createAnimate('play')(handle, options)
         }
         break
       case 'playing':
         this.pause()
-        this._animate(callback, options, 'reverse')
+        this._createAnimate('reverse')(handle, options)
         break
       }
     
@@ -390,97 +315,106 @@ export class Animateable {
     }
   }
 
-  _animate (callback, options = {}, type) {
-    const { interpolate: interpolateOptions } = options
+  /**
+   * @typedef {(frame?: AnimateableFrame) => any} AnimateableFrameHandler
+   * @typedef {{ progress: { [key: string]: { time: number, animation: number } }, data: { [key: string]: number | string | any[] }, timestamp: number }} AnimateableFrame
+   * @typedef {{ interpolate?: any }} AnimateOptions
+   * @param {'play' | 'reverse' | 'seek'} type
+   * @return {(handle: (frame?: AnimateableFrame) => any, options?: AnimateOptions) => this}
+   */
+  _createAnimate (type) {
+    return (handle, options = {}) => {
+      const { interpolate: interpolateOptions } = options
 
-    this._computedRequest = window.requestAnimationFrame(timestamp => {
-      this._setStartTimeAndStatus(type, timestamp)
+      this._computedRequest = window.requestAnimationFrame(timestamp => {
+        this._setStartTimeAndStatus(type, timestamp)
 
-      const timeElapsed = Math.min((timestamp - this._startTime) - this._totalTimeInvisible, this._duration), // Might need to multiply visibility offset by something to get correct playback rate
-            timeRemaining = this._duration - timeElapsed,
-            timeProgress = timeElapsed / this._duration,
-            toAnimationProgress = this._getToAnimationProgress(type),
-            animationProgress = toAnimationProgress(timeProgress)
+        const timeElapsed = Math.min((timestamp - this._startTime) - this._totalTimeInvisible, this._duration), // Might need to multiply visibility offset by something to get correct playback rate
+              timeRemaining = this._duration - timeElapsed,
+              timeProgress = timeElapsed / this._duration,
+              toAnimationProgress = this._getToAnimationProgress(type),
+              animationProgress = toAnimationProgress(timeProgress)
 
-      this._computedTime = {
-        elapsed: timeElapsed,
-        remaining: timeRemaining,
-      }
+        this._computedTime = {
+          elapsed: timeElapsed,
+          remaining: timeRemaining,
+        }
 
-      this._computedProgress = {
-        time: timeProgress,
-        animation: animationProgress,
-      }
+        this._computedProgress = {
+          time: timeProgress,
+          animation: animationProgress,
+        }
 
-      const frame = {
-        ...this._getFrame(type, timeProgress, interpolateOptions),
-        timestamp,
-      }
+        const frame = {
+          ...this._getFrame(type, timeProgress, interpolateOptions),
+          timestamp,
+        }
 
-      callback(frame) // TODO: error message
+        handle(frame) // TODO: error message
 
-      this._recurse(type, timeRemaining, callback, options)
-    })
+        this._recurse(type, timeRemaining, handle, options)
+      })
 
-    return this
+      return this
+    }
   }
   _setStartTimeAndStatus (type, timestamp) {
     switch (type) {
-    case 'play':
-      switch (this.status) {
-      case 'ready':
-      case 'played':
-      case 'reversed':
-      case 'stopped':
-        this._startTime = timestamp
-        this._playing()
-        break
-      case 'paused':
-        switch (this._pauseCache.status) {
-        case 'playing':
-          this._startTime = timestamp - this._duration * this._pauseCache.timeProgress
+      case 'play':
+        switch (this.status) {
+        case 'ready':
+        case 'played':
+        case 'reversed':
+        case 'stopped':
+          this._startTime = timestamp
+          this._playing()
           break
-        case 'reversing':
-          this._startTime = timestamp - (this._duration * (1 - this._pauseCache.timeProgress))
+        case 'paused':
+          switch (this._pauseCache.status) {
+          case 'playing':
+            this._startTime = timestamp - this._duration * this._pauseCache.timeProgress
+            break
+          case 'reversing':
+            this._startTime = timestamp - (this._duration * (1 - this._pauseCache.timeProgress))
+            break
+          }
+          this._playing()
           break
-        }
-        this._playing()
-        break
-      case 'sought':
-        this._startTime = timestamp - this._duration * this._seekCache.timeProgress
-        this._playing()
-        break
-      }
-      break
-    case 'reverse':
-      switch (this.status) {
-      case 'ready':
-      case 'played':
-      case 'reversed':
-      case 'stopped':
-        this._startTime = timestamp
-        this._reversing()
-        break
-      case 'paused':
-        switch (this._pauseCache.status) {
-        case 'playing':
-          this._startTime = timestamp - (this._duration * (1 - this._pauseCache.timeProgress))
-          break
-        case 'reversing':
-          this._startTime = timestamp - this._duration * this._pauseCache.timeProgress
+        case 'sought':
+          this._startTime = timestamp - this._duration * this._seekCache.timeProgress
+          this._playing()
           break
         }
-        this._reversing()
         break
-      case 'sought':
+      case 'reverse':
+        switch (this.status) {
+        case 'ready':
+        case 'played':
+        case 'reversed':
+        case 'stopped':
+          this._startTime = timestamp
+          this._reversing()
+          break
+        case 'paused':
+          switch (this._pauseCache.status) {
+          case 'playing':
+            this._startTime = timestamp - (this._duration * (1 - this._pauseCache.timeProgress))
+            break
+          case 'reversing':
+            this._startTime = timestamp - this._duration * this._pauseCache.timeProgress
+            break
+          }
+          this._reversing()
+          break
+        case 'sought':
+          this._startTime = timestamp - this._duration * this._seekCache.timeProgress
+          this._reversing()
+          break
+        }
+        break
+      case 'seek':
         this._startTime = timestamp - this._duration * this._seekCache.timeProgress
-        this._reversing()
         break
-      }
-      break
-    case 'seek':
-      this._startTime = timestamp - this._duration * this._seekCache.timeProgress
-      break
     }
   }
   _getToAnimationProgress (type) {
@@ -492,6 +426,12 @@ export class Animateable {
       return this._reversedToAnimationProgress.bind(this)
     }
   }
+  /**
+   * @param {'play' | 'reverse' | 'seek'} type 
+   * @param {number} naiveTimeProgress 
+   * @param {number} interpolateOptions 
+   * @return {{ progress: { [key: string]: { time: number, animation: number } }, data: { [key: string]: number | string | any[] }}}
+   */
   _getFrame (type, naiveTimeProgress, interpolateOptions) {
     const easeables = (() => {
       switch (type) {
@@ -521,76 +461,76 @@ export class Animateable {
         }
       }, { data: {}, progress: {} })
   }
-  _recurse (type, timeRemaining, callback, options) {
+  _recurse (type, timeRemaining, handle, options) {
     switch (type) {
-    case 'play':
-      if (timeRemaining <= 0) {
-        this._played()
-        this._totalTimeInvisible = 0
+      case 'play':
+        if (timeRemaining <= 0) {
+          this._played()
+          this._totalTimeInvisible = 0
 
-        if (this._alternates) {
-          switch (this._alternateCache.status) {
-          case 'playing':
-            this._animate(callback, options, 'reverse')
-            break
-          case 'reversing':
+          if (this._alternates) {
+            switch (this._alternateCache.status) {
+            case 'playing':
+              this._createAnimate('reverse')(handle, options)
+              break
+            case 'reversing':
+              this._computedIterations += 1
+
+              if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
+                this._createAnimate('reverse')(handle, options)
+              } else {
+                this._alternateCache.status = 'ready'
+              }
+
+              break
+            }
+          } else {
             this._computedIterations += 1
 
             if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
-              this._animate(callback, options, 'reverse')
-            } else {
-              this._alternateCache.status = 'ready'
+              this._createAnimate('play')(handle, options)
             }
-
-            break
           }
         } else {
-          this._computedIterations += 1
-
-          if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
-            this._animate(callback, options, 'play')
-          }
+          this._createAnimate('play')(handle, options)
         }
-      } else {
-        this._animate(callback, options, 'play')
-      }
-      break
-    case 'reverse':
-      if (timeRemaining <= 0) {
-        this._reversed()
-        this._totalTimeInvisible = 0
+        break
+      case 'reverse':
+        if (timeRemaining <= 0) {
+          this._reversed()
+          this._totalTimeInvisible = 0
 
-        if (this._alternates) {
-          switch (this._alternateCache.status) {
-          case 'playing':
+          if (this._alternates) {
+            switch (this._alternateCache.status) {
+            case 'playing':
+              this._computedIterations += 1
+
+              if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
+                this._createAnimate('play')(handle, options)
+              } else {
+                this._alternateCache.status = 'ready'
+              }
+
+              break
+            case 'reversing':
+              this._createAnimate('play')(handle, options)
+              break
+            }
+          } else {
             this._computedIterations += 1
 
-            if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
-              this._animate(callback, options, 'play')
-            } else {
-              this._alternateCache.status = 'ready'
+            if (this.iterations < this._iterationLimit) {
+              this._createAnimate('reverse')(handle, options)
             }
-
-            break
-          case 'reversing':
-            this._animate(callback, options, 'play')
-            break
           }
         } else {
-          this._computedIterations += 1
-
-          if (this.iterations < this._iterationLimit) {
-            this._animate(callback, options, 'reverse')
-          }
+          this._createAnimate('reverse')(handle, options)
         }
-      } else {
-        this._animate(callback, options, 'reverse')
-      }
-      break
-    case 'seek':
-      this._totalTimeInvisible = 0
-      // Do nothing
-      break
+        break
+      case 'seek':
+        this._totalTimeInvisible = 0
+        // Do nothing
+        break
     }
   }
 
@@ -658,105 +598,110 @@ export class Animateable {
     window.cancelAnimationFrame(this.request)
   }
 
-  seek (naiveTimeProgress, naiveCallback, options) { // Store time progress. Continue playing or reversing if applicable.
-    const iterations = Math.floor(naiveTimeProgress),
-          naiveIterationProgress = naiveTimeProgress - iterations
+  /**
+   * @param {number} timeProgress 
+   * @param {{ handle?: AnimateableFrameHandler } & AnimateOptions} [options]
+   */
+  seek (timeProgress, options) { // Store time progress. Continue playing or reversing if applicable.
+    const iterations = Math.floor(timeProgress),
+          naiveIterationProgress = timeProgress - iterations,
+          { handle: naiveHandle } = options
 
     this._computedIterations = iterations
 
-    let timeProgress, callback
+    let ensuredTimeProgress, handle
 
     if (this._alternates) {
       if (naiveIterationProgress <= .5) {
-        timeProgress = naiveIterationProgress * 2
+        ensuredTimeProgress = naiveIterationProgress * 2
 
         switch (this._alternateCache.status) {
         case 'playing':
           this._cancelAnimate()
-          this._seekCache = { timeProgress }
+          this._seekCache = { timeProgress: ensuredTimeProgress }
           this._sought()
 
-          callback = isFunction(naiveCallback) ? naiveCallback : this._playCache.callback
-          this.play(callback, this._playCache.options)
+          handle = isFunction(naiveHandle) ? naiveHandle : this._playCache.handle
+          this.play(handle, this._playCache.options)
 
           break
         case 'reversing':
           this._cancelAnimate()
-          this._seekCache = { timeProgress }
+          this._seekCache = { timeProgress: ensuredTimeProgress }
           this._sought()
 
-          callback = isFunction(naiveCallback) ? naiveCallback : this._reverseCache.callback
-          this.reverse(callback, this._reverseCache.options)
+          handle = isFunction(naiveHandle) ? naiveHandle : this._reverseCache.handle
+          this.reverse(handle, this._reverseCache.options)
 
           break
         default:
-          this._seekCache = { timeProgress }
+          this._seekCache = { timeProgress: ensuredTimeProgress }
           this._sought()
 
-          callback = naiveCallback
-          this._animate(callback, options, 'seek')
+          handle = naiveHandle
+          this._createAnimate('seek')(handle, options)
 
           break
         }
       } else {
-        timeProgress = (naiveIterationProgress - .5) * 2
+        ensuredTimeProgress = (naiveIterationProgress - .5) * 2
         switch (this._alternateCache.status) {
         case 'playing':
           this._cancelAnimate()
-          this._seekCache = { timeProgress }
+          this._seekCache = { timeProgress: ensuredTimeProgress }
           this._sought()
 
-          callback = isFunction(naiveCallback) ? naiveCallback : this._reverseCache.callback
-          this.reverse(callback, this._reverseCache.options)
+          handle = isFunction(naiveHandle) ? naiveHandle : this._reverseCache.handle
+          this.reverse(handle, this._reverseCache.options)
 
           break
         case 'reversing':
           this._cancelAnimate()
-          this._seekCache = { timeProgress }
+          this._seekCache = { timeProgress: ensuredTimeProgress }
           this._sought()
 
-          callback = isFunction(naiveCallback) ? naiveCallback : this._playCache.callback
-          this.play(callback, this._playCache.options)
+          handle = isFunction(naiveHandle) ? naiveHandle : this._playCache.handle
+          this.play(handle, this._playCache.options)
 
           break
         default:
-          this._seekCache = { timeProgress }
+          this._seekCache = { timeProgress: ensuredTimeProgress }
           this._sought()
 
-          callback = naiveCallback
-          this._animate(callback, options, 'seek')
+          handle = naiveHandle
+          this._createAnimate('seek')(handle, options)
 
           break
         }
       }
     } else {
-      timeProgress = naiveIterationProgress
+      ensuredTimeProgress = naiveIterationProgress
 
       switch (this.status) {
       case 'playing':
         this._cancelAnimate()
-        this._seekCache = { timeProgress }
+        this._seekCache = { timeProgress: ensuredTimeProgress }
         this._sought()
 
-        callback = isFunction(naiveCallback) ? naiveCallback : this._playCache.callback
-        this.play(callback, this._playCache.options)
+        handle = isFunction(naiveHandle) ? naiveHandle : this._playCache.handle
+        this.play(handle, this._playCache.options)
 
         break
       case 'reversing':
         this._cancelAnimate()
-        this._seekCache = { timeProgress }
+        this._seekCache = { timeProgress: ensuredTimeProgress }
         this._sought()
 
-        callback = isFunction(naiveCallback) ? naiveCallback : this._reverseCache.callback
-        this.reverse(callback, this._reverseCache.options)
+        handle = isFunction(naiveHandle) ? naiveHandle : this._reverseCache.handle
+        this.reverse(handle, this._reverseCache.options)
 
         break
       default:
-        this._seekCache = { timeProgress }
+        this._seekCache = { timeProgress: ensuredTimeProgress }
         this._sought()
 
-        callback = naiveCallback
-        this._animate(callback, options, 'seek')
+        handle = naiveHandle
+        this._createAnimate('seek')(handle, options)
 
         break
       }    
@@ -772,14 +717,14 @@ export class Animateable {
     switch (this.status) {
     case 'played': // TODO: Pretty sure this could cause problems for alternating animations
       this.seek(0)
-      this.play(this._playCache.callback, this._playCache.options)
+      this.play(this._playCache.handle, this._playCache.options)
       break
     case 'playing':
       this.seek(0)
       break
     case 'reversed': // TODO: Pretty sure this could cause problems for alternating animations
       this.seek(0)
-      this.reverse(this._reverseCache.callback, this._reverseCache.options)
+      this.reverse(this._reverseCache.handle, this._reverseCache.options)
       break
     case 'reversing':
       this.seek(0)
@@ -788,11 +733,11 @@ export class Animateable {
       switch (this._pauseCache.status) {
       case 'playing':
         this.seek(0)
-        this.play(this._playCache.callback, this._playCache.options)
+        this.play(this._playCache.handle, this._playCache.options)
         break
       case 'reversing':
         this.seek(0)
-        this.reverse(this._reverseCache.callback, this._reverseCache.options)
+        this.reverse(this._reverseCache.handle, this._reverseCache.options)
         break
       }
     }
@@ -818,5 +763,141 @@ export class Animateable {
   }
   _stopped () {
     this._computedStatus = 'stopped'
+  }
+}
+
+/**
+ * @typedef {{ property: string, value: { previous: string | number | any[], next: string | number | any[] }, progress: { start: number, end: number }, hasCustomTiming: boolean, toAnimationProgress: BezierEasing.EasingFunction }} Easeable
+ * @param {(required: { keyframe: AnimateableKeyframe, index: number, array: AnimateableKeyframe[] }) => [{ x: number, y: number }, { x: number, y: number }]} fromKeyframeToControlPoints
+ * @return {(required: { properties: string[], keyframes: AnimateableKeyframe[] }) => Easeable[]}
+ */
+export function createGetEaseables (fromKeyframeToControlPoints) {
+  return ({ properties, keyframes }) => {
+    return properties.reduce(
+      /**
+        * @param {Easeable[]} easeables 
+        * @param {string} property 
+        */
+      (easeables, property) => {
+        const propertyKeyframes = keyframes.filter(({ data }) => data.hasOwnProperty(property)),
+              propertyEaseables = propertyKeyframes.reduce(
+                /**
+                  * @param {Easeable[]} propertyEaseables
+                  * @param {AnimateableKeyframe} keyframe
+                  * @param {number} index
+                  * @param {AnimateableKeyframe[]} array
+                  * @return {Easeable[]}
+                  */
+                (propertyEaseables, keyframe, index, array) => {
+                  const previous = keyframe.data[property],
+                        next = index === array.length - 1 ? previous : array[index + 1].data[property],
+                        start = keyframe.progress,
+                        end = index === array.length - 1 ? 2 : array[index + 1].progress,
+                        hasCustomTiming = !!keyframe.timing,
+                        toAnimationProgress = index === array.length - 1
+                          ? timeProgress => 1
+                          : createToAnimationProgress(fromKeyframeToControlPoints({ keyframe, index, array }))
+
+                  return [
+                    ...propertyEaseables,
+                    {
+                      property,
+                      value: { previous, next },
+                      progress: { start, end },
+                      hasCustomTiming,
+                      toAnimationProgress
+                    }
+                  ]
+                },
+                []
+              ),
+              firstEaseable = /** @type {Easeable} */ ({
+                property,
+                value: { previous: propertyEaseables[0].value.previous, next: propertyEaseables[0].value.previous },
+                progress: { start: -1, end: propertyEaseables[0].progress.start },
+                toAnimationProgress: timeProgress => 1,
+              })
+        
+        return [
+          ...easeables,
+          firstEaseable,
+          ...propertyEaseables,
+        ]
+      },
+      []
+    )
+  }
+
+}
+
+/**
+ * 
+ * @param {AnimateableKeyframe[]} keyframes
+ */
+ export function toProperties (keyframes) {
+  return createUnique()(keyframes.map(({ data }) => Object.keys(data)).flat())
+}
+
+/**
+ * 
+ * @param {[number, number, number, number]} timing
+ * @return {[{ x: number, y: number }, { x: number, y: number }]}
+ */
+ export function fromTimingToControlPoints(timing) {
+  const { 0: point1x, 1: point1y, 2: point2x, 3: point2y } = timing
+  
+  return [
+    { x: point1x, y: point1y },
+    { x: point2x, y: point2y },
+  ]
+}
+
+/**
+ * @param {[{ x: number, y: number }, { x: number, y: number }]} points
+ * @return {[{ x: number, y: number }, { x: number, y: number }]}
+ */
+export function fromTimingToReversedControlPoints (points) {
+  // This easy reversal is why the control point objects are preferable
+  return [
+    { x: 1 - points[1].x, y: 1 - points[1].y },
+    { x: 1 - points[0].x, y: 1 - points[0].y },
+  ]
+}
+
+/**
+ * @param {[{ x: number, y: number }, { x: number, y: number }]} points
+ * @return {BezierEasing.EasingFunction}
+ */
+ export function createToAnimationProgress (points) {
+  const { 0: { x: point1x, y: point1y }, 1: { x: point2x, y: point2y } } = points
+  return BezierEasing(point1x, point1y, point2x, point2y)
+}
+
+/**
+ * @template {string | number | any[]} T
+ * @param {{ previous?: T, next: T, progress: number }} required
+ * @param {object} [options]
+ * @return T
+ */
+export function toInterpolated ({ previous, next, progress }, options = {}) {
+  if (isUndefined(previous)) {
+    return next
+  }
+
+  if (isNumber(previous) && isNumber(next)) {
+    return (next  - previous) * progress + previous
+  }
+
+  if (isString(previous) && isString(next)) {
+    return mix(previous, next, (1 - progress) * 100).hexa // No clue why this progress needs to be inverted, but it works
+  }
+
+  if (isArray(previous) && isArray(next)) {
+    const sliceToExact = (next.length - previous.length) * progress + previous.length,
+    nextIsLonger = next.length > previous.length,
+    sliceTo = nextIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
+    shouldBeSliced = nextIsLonger ? next : previous
+
+    return shouldBeSliced.slice(0, sliceTo)
   }
 }

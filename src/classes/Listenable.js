@@ -10,6 +10,11 @@ import {
 } from '../util.js'
 
 export class Listenable {
+  // TODO: import recognizeable types
+  /**
+   * @param {string} type
+   * @param {{ recognizeable?: any }} [options]
+   */
   constructor (type, options = {}) {
     if (type === 'recognizeable') {
       this._computedRecognizeable = new Recognizeable([], options.recognizeable)

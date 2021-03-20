@@ -1,71 +1,4 @@
-import BezierEasing from 'bezier-easing'
 import { createInsert, createUnique } from './pipes.js'
-import mix from 'mix-css-color'
-
-// ANIMATEABLE
-/**
- * 
- * @param {[number, number, number, number]} timing
- * @return {[{ x: number, y: number }, { x: number, y: number }]}
- */
- export function toControlPoints(timing) {
-  const { 0: point1x, 1: point1y, 2: point2x, 3: point2y } = timing
-  
-  return [
-    { x: point1x, y: point1y },
-    { x: point2x, y: point2y },
-  ]
-}
-
-/**
- * @param {[{ x: number, y: number }, { x: number, y: number }]} points
- * @return {[{ x: number, y: number }, { x: number, y: number }]}
- */
-export function toReversedControlPoints (points) {
-  // This easy reversal is why the control point objects are preferable
-  return [
-    { x: 1 - points[1].x, y: 1 - points[1].y },
-    { x: 1 - points[0].x, y: 1 - points[0].y },
-  ]
-}
-
-/**
- * @param {[{ x: number, y: number }, { x: number, y: number }]} points
- * @return {BezierEasing.EasingFunction}
- */
- export function createToAnimationProgress (points) {
-  const { 0: { x: point1x, y: point1y }, 1: { x: point2x, y: point2y } } = points
-  return BezierEasing(point1x, point1y, point2x, point2y)
-}
-
-/**
- * @template {string | number | any[]} T
- * @param {{ previous?: T, next: T, progress: number }} required
- * @param {object} [options]
- * @return T
- */
-export function toInterpolated ({ previous, next, progress }, options = {}) {
-  if (isUndefined(previous)) {
-    return next
-  }
-
-  if (isNumber(previous) && isNumber(next)) {
-    return (next  - previous) * progress + previous
-  }
-
-  if (isString(previous) && isString(next)) {
-    return mix(previous, next, (1 - progress) * 100).hexa // No clue why this progress needs to be inverted, but it works
-  }
-
-  if (isArray(previous) && isArray(next)) {
-    const sliceToExact = (next.length - previous.length) * progress + previous.length,
-    nextIsLonger = next.length > previous.length,
-    sliceTo = nextIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
-    shouldBeSliced = nextIsLonger ? next : previous
-
-    return shouldBeSliced.slice(0, sliceTo)
-  }
-}
 
 
 // COMPLETEABLE
@@ -113,7 +46,7 @@ export function toNextMatch ({ string, re, from }) {
 /**
  * 
  * @param {(ListenableKeyComboItemName | ListenableClickComboItemName)[]} combo 
- * @param {{ init?: object, keyDirection?: 'up' | 'down' }} [options]
+ * @param {{ init?: EventInit, keyDirection?: 'up' | 'down' }} [options]
  */
 export function toEvent (combo, options = {}) {
   const modifiers = combo.slice(0, combo.length - 1),
