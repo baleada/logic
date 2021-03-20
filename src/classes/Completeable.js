@@ -14,7 +14,7 @@ const defaultOptions = {
   divider: /\s/, // Keep an eye out for use cases where a { before, after } object would be needed, or where multi-character dividers need to be used
 }
 
-export default class Completeable {
+export class Completeable {
   /**
    * @typedef {{ segment?: { from?: 'start' | 'selection' | 'divider', to?: 'end' |'selection' |'divider' }, divider?: RegExp, initialSelection?: CompleteableSelection }} CompleteableOptions
    * @param {string} string

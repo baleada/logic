@@ -1,7 +1,7 @@
 import createDOMPurify from 'dompurify'
 import { domIsAvailable } from '../util.js'
 
-export default class Sanitizeable {
+export class Sanitizeable {
   /**
    * 
    * @param {string} html

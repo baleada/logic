@@ -1,11 +1,11 @@
-import Animateable from './Animateable.js'
+import { Animateable } from './Animateable.js'
 
 const defaultOptions = {
   delay: 0,
   executions: 1,
 }
 
-export default class Delayable {
+export class Delayable {
   constructor (callback, options) {
     this._animateable = new Animateable(
       [

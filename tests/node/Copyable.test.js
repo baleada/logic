@@ -39,13 +39,4 @@ suite('status is "ready" after construction', context => {
   assert.is(instance.status, 'ready')
 })
 
-
-/* INFORMAL */
-
-// copy
-// copy({ usesFallback: true })
-
-// status is "copying" after copy(...) is called and before the promise resolves
-// status is "copied" after copy(...) is called after the promise resolves
-
 suite.run()

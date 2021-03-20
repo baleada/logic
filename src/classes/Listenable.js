@@ -1,4 +1,4 @@
-import Recognizeable from './Recognizeable.js'
+import { Recognizeable } from './Recognizeable.js'
 import {
   toObserver,
   toCategory,
@@ -9,7 +9,7 @@ import {
   eventMatchesClickcombo,
 } from '../util.js'
 
-export default class Listenable {
+export class Listenable {
   constructor (type, options = {}) {
     if (type === 'recognizeable') {
       this._computedRecognizeable = new Recognizeable([], options.recognizeable)

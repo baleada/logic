@@ -39,13 +39,37 @@ suite(`status is 'copied' after successful copy(...)`, async ({ puppeteer: { pag
   assert.is(value, expected)
 })
 
-suite(`copied is string after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
+suite(`isClipboardText is true after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
   const value = await page.evaluate(async string => {
           const instance = new window.Logic.Copyable(string)
           await instance.copy()
-          return (await instance.copied).response
+          return await instance.isClipboardText
         }, string),
-        expected = string
+        expected = true
+  
+  assert.is(value, expected)
+})
+
+suite(`copy() updates optional clipboard.text after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
+  const value = await page.evaluate(async string => {
+          const clipboard = { text: '' },
+                instance = new window.Logic.Copyable(string, { clipboard })
+          await instance.copy()
+          return instance.isClipboardText
+        }, string),
+        expected = true
+  
+  assert.is(value, expected)
+})
+
+suite(`copy({ type: 'element' }) updates optional clipboard.text after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
+  const value = await page.evaluate(async string => {
+          const clipboard = { text: '' },
+                instance = new window.Logic.Copyable(string, { clipboard })
+          await instance.copy({ type: 'element' })
+          return instance.isClipboardText
+        }, string),
+        expected = true
   
   assert.is(value, expected)
 })

@@ -1,13 +1,11 @@
-import Resolveable from './Resolveable.js'
-
-export default class Copyable {
+export class Copyable {
   /**
    * @param {string} string
-   * @param {{}} [options]
+   * @param {{ clipboard?: { text: string } }} [options]
    */
   constructor (string, options = {}) {
+    this._clipboard = options.clipboard
     this.setString(string)
-    this._computedCopied = new Resolveable(async () => await navigator.clipboard.readText() === this.string)
     this._ready()
   }
   _ready () {
@@ -27,8 +25,10 @@ export default class Copyable {
     return this._computedStatus
   }
   // TODO: Test this, including in firefox
-  get copied () {
-    return this._computedCopied.resolve()
+  get isClipboardText () {
+    return this._clipboard
+      ? this._clipboard.text === this.string
+      : (async () => await navigator.clipboard.readText() === this.string)()
   }
   get response () {
     return this._computedResponse
@@ -54,6 +54,11 @@ export default class Copyable {
       case 'clipboard':
         try {
           this._computedResponse = await navigator.clipboard.writeText(this.string)
+          
+          if (this._clipboard) {
+            this._clipboard.text = this.string
+          }
+          
           this._copied()
         } catch (error) {
           this._computedResponse = error
@@ -71,6 +76,10 @@ export default class Copyable {
         document.execCommand('copy')
         
         document.body.removeChild(input)
+
+        if (this._clipboard) {
+          this._clipboard.text = this.string
+        }
 
         this._copied()
         break

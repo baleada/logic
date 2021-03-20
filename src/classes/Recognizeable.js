@@ -19,7 +19,7 @@ const defaultOptions = {
 /**
  * @template {Event} T
  */
-export default class Recognizeable {
+export class Recognizeable {
   /**
    * @typedef {object} RecognizeableHandlerApiConstructed
    * @property {toPolarCoordinates} toPolarCoordinates

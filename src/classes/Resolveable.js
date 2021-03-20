@@ -4,7 +4,7 @@ import { isArray } from '../util.js'
 /**
  * @template T
  */
-export default class Resolveable {
+export class Resolveable {
   /**
    * 
    * @param {(...args: any[]) => (Promise<T> | Promise<T>[])} getPromise 

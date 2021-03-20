@@ -1,4 +1,4 @@
-export default class Grantable {
+export class Grantable {
   /**
    * 
    * @param {PermissionDescriptor | DevicePermissionDescriptor | MidiPermissionDescriptor | PushPermissionDescriptor} descriptor

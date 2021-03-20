@@ -7,6 +7,8 @@
       "dompurify"
     ],
     "checkJs": true,
-    "outDir": "lib"
+    "outDir": "lib",
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node"
   }
 }

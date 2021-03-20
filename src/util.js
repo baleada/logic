@@ -1,5 +1,5 @@
 import BezierEasing from 'bezier-easing'
-import { createInsert, createUnique } from './pipes'
+import { createInsert, createUnique } from './pipes.js'
 import mix from 'mix-css-color'
 
 // ANIMATEABLE

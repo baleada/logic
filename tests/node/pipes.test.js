@@ -34,10 +34,10 @@ const reduceStub = number => new Promise(function(resolve, reject) {
 })
 
 suite(`async reduces`, async context => {
-  const value = await createReduceAsync({
-          reduce: async value => value + (await reduceStub(1)),
-          initialValue: 0,
-        })(context.array),
+  const value = await createReduceAsync(
+          async value => value + (await reduceStub(1)),
+          0,
+        )(context.array),
         expected = context.array.length
 
   assert.is(value, expected)

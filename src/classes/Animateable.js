@@ -1,4 +1,4 @@
-import Listenable from './Listenable.js'
+import { Listenable } from './Listenable.js'
 import {
   toControlPoints,
   toReversedControlPoints,
@@ -25,7 +25,7 @@ const defaultOptions = {
         alternates: false,
       }
 
-export default class Animateable {
+export class Animateable {
   /**
    * @typedef {{ progress: number, data: { [key: string]: (number | string | any[]) } }} AnimateableKeyframe
    * @typedef {{ duration?: number, timing?: [number, number, number, number], iterations?: number, alternates?: boolean }} AnimateableOptions

@@ -12,7 +12,7 @@ const defaultOptions = {
   statusKeySuffix: '_status',
 }
 
-export default class Storeable {
+export class Storeable {
   /**
    * 
    * @param {string} key

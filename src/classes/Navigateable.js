@@ -5,7 +5,7 @@ const defaultOptions = {
   initialLocation: 0,
 }
 
-export default class Navigateable {
+export class Navigateable {
   /**
    * @typedef {{ initialLocation?: number }} NavigateableOptions
    * @param {any[]} array 

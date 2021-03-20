@@ -1,6 +1,6 @@
 import { toEvent, toCombo } from '../util.js'
 
-export default class Dispatchable {
+export class Dispatchable {
   constructor (type, options = {}) {
     this.setType(type)
     this._ready()

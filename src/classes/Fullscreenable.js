@@ -1,4 +1,4 @@
-export default class Fullscreenable {
+export class Fullscreenable {
   /**
    * 
    * @param {(...args: any[]) => Element} getElement

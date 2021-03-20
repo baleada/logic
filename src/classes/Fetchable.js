@@ -1,4 +1,4 @@
-import Resolveable from './Resolveable.js'
+import { Resolveable } from './Resolveable.js'
 import { isFunction } from '../util.js'
 
 /**
@@ -28,7 +28,7 @@ function withJson (json) {
   }
 }
 
-export default class Fetchable {
+export class Fetchable {
   /**
    * @param {string} resource
    * @param {{}} [options]
