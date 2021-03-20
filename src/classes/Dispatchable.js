@@ -29,7 +29,7 @@ export class Dispatchable {
 
   dispatch (options = {}) {
     const { target = window, keyDirection = 'down', init = {} } = options,
-          event = toEvent({ combo: toCombo(this.type), direction: keyDirection }, init)
+          event = toEvent(toCombo(this.type), { keyDirection: keyDirection, init })
 
     this._computedCancelled = !target.dispatchEvent(event)
     this._dispatched()

@@ -66,7 +66,7 @@ suite(`copy({ type: 'element' }) updates optional clipboard.text after successfu
   const value = await page.evaluate(async string => {
           const clipboard = { text: '' },
                 instance = new window.Logic.Copyable(string, { clipboard })
-          await instance.copy({ type: 'element' })
+          await instance.copy({ type: 'deprecated' })
           return instance.isClipboardText
         }, string),
         expected = true

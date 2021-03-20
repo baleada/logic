@@ -43,7 +43,7 @@ export class Copyable {
   }
   
   /**
-   * @param {{ type?: 'clipboard' | 'element' }} [options]
+   * @param {{ type?: 'clipboard' | 'deprecated' }} [options]
    */
   async copy (options = {}) {    
     this._copying()
@@ -66,7 +66,7 @@ export class Copyable {
         }
         
         break
-      case 'element':
+      case 'deprecated':
         const input = document.createElement('input')
         input.type = 'text'
         input.value = this.string
