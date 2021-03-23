@@ -1,8 +1,3 @@
-import {
-  toLastMatch,
-  toNextMatch,
- } from '../util.js'
-
 /**
  * @type {CompleteableOptions}
  */
@@ -209,4 +204,43 @@ export class Completeable {
   _completed () {
     this._computedStatus = 'completed'
   }
+}
+
+/**
+ * 
+ * @param {{ string: string, re: RegExp, from: number }} required
+ & @return {number}
+ */
+ export function toLastMatch ({ string, re, from }) {
+  let indexOf
+  if (!re.test(string.slice(0, from)) || from === 0) {
+    indexOf = -1
+  } else {
+    const reversedStringBeforeFrom = string
+            .slice(0, from)
+            .split('')
+            .reverse()
+            .join(''),
+          toNextMatchIndex = toNextMatch({ string: reversedStringBeforeFrom, re, from: 0 })
+    
+    indexOf = toNextMatchIndex === -1
+      ? -1
+      : (reversedStringBeforeFrom.length - 1) - toNextMatchIndex
+  }
+
+  return indexOf
+}
+
+/**
+ * 
+ * @param {{ string: string, re: RegExp, from: number }} required
+ & @return {number}
+ */
+export function toNextMatch ({ string, re, from }) {
+  const searchResult = string.slice(from).search(re),
+        indexOf = searchResult === -1
+          ? -1
+          : from + searchResult
+
+  return indexOf
 }

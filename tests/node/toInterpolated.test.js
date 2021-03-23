@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { toInterpolated } from '../../src/util.js'
+import { toInterpolated } from '../../src/classes/Animateable.js'
 
 const suite = createSuite('toInterpolated (node)')
 
@@ -8,14 +8,14 @@ suite('interpolates numbers', context => {
   const value = toInterpolated({ previous: 0, next: 100, progress: .42 }),
         expected = 42
 
-  assert.ok(value, expected)
+  assert.is(value, expected)
 })
 
 suite('interpolates strings as colors', context => {
   const value = toInterpolated({ previous: 'white', next: '#000', progress: .5 }),
         expected = '#808080ff'
 
-  assert.ok(value, expected)
+  assert.is(value, expected)
 })
 
 suite('interpolates growing arrays', context => {

@@ -1,12 +1,5 @@
-import {
-  toPolarCoordinates,
-  get,
-  set,
-  push,
-  insert,
-  isArray,
-  isNumber,
-} from '../util.js'
+import { isArray, isNumber } from '../util.js'
+import { createInsert } from '../pipes.js'
 
 /**
  * @type {RecognizeableOptions}
@@ -196,4 +189,135 @@ export class Recognizeable {
   _recognizing () {
     this._computedStatus = 'recognizing'
   }
+}
+
+/**
+ * @param {{ xA: number, xB: number, yA: number, yB: number }} cartesian
+ * @return {{ distance: number, angle: { radians: number, degrees: number } }}
+ */
+ export function toPolarCoordinates ({ xA, xB, yA, yB }) {
+  const distance = Math.hypot(xB - xA, yB - yA),
+        angle = Math.atan2((yA - yB), (xB - xA)),
+        radians = angle >= 0
+          ? angle
+          : 2 * Math.PI + angle,
+        degrees = radians * 180 / Math.PI
+
+  return {
+    distance,
+    angle: { radians, degrees }
+  }
+}
+
+/**
+ * 
+ * @param {{ object: Record<any, any>, path: string }} required
+ * @return {any}
+ */
+export function get ({ object, path }) {
+  return toKeys(path).reduce((gotten, key) => {
+    if (!Array.isArray(gotten)) {
+      return gotten[key]
+    }
+
+    return key === 'last'
+      ? gotten[gotten.length - 1]
+      : gotten[key]
+  }, object)
+}
+
+/**
+ * 
+ * @param {string} path
+ * @return {(string | number)[]}
+ */
+export function toKeys (path) {
+  return path
+    ? path
+      .split('.')
+      .map(key => isNaN(Number(key)) ? key : Number(key))
+    : []
+}
+
+/**
+ * 
+ * @param {{ object: Record<any, any>, path: string, value: any }} required
+ * @return {void}
+ */
+export function set ({ object, path, value }) {
+  toKeys(path).forEach((key, index, array) => {
+    if (array.length === 1) {
+      object[key] = value
+      return
+    }
+
+    const p = toPath(array.slice(0, index))
+
+    if (!p) {
+      maybeAssign({
+        gotten: object[key],
+        key,
+        assign: value => (object[key] = value)
+      })
+    } else {
+      maybeAssign({
+        gotten: get({ object, path: p }),
+        key,
+        assign: value => set({ object, path: p, value })
+      })
+    }
+
+    if (index === array.length - 1) {
+      get({ object, path: p })[key] = value
+    }
+  })
+}
+
+/**
+ * 
+ * @param {(string | number)[]} keys
+ * @return {string}
+ */
+ function toPath (keys) {
+  return keys
+    .map(key => typeof key === 'string' ? key : `${key}`)
+    .reduce((path, key) => `${path}${'.' + key}`, '')
+    .replace(/^\./, '')
+}
+
+/**
+ * 
+ * @param {{ gotten: any, key: string | number, assign: (value: any) => void }} required 
+ * @return void
+ */
+ function maybeAssign ({ gotten, key, assign }) {
+  if (gotten === undefined) {
+    switch (typeof key) {
+      case 'number':
+        assign([])
+      case 'string':
+        assign({})
+    }
+  }
+}
+
+/**
+ * 
+ * @param {{ object: Record<any, any>, path: string, value: any }} required
+ * @return {void}
+ */
+export function push ({ object, path, value }) {  
+  const array = get({ object, path })
+  set({ object, path, value: [...array, value] })
+}
+
+/**
+ * 
+ * @param {{ object: Record<any, any>, path: string, value: any, index: number }} required
+ * @return {void}
+ */
+export function insert ({ object, path, value, index }) {
+  const inserted = createInsert({ item: value, index })(get({ object, path }))
+  
+  set({ object, path, value: inserted })
 }
