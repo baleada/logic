@@ -6,7 +6,7 @@ const defaultOptions = {
 }
 
 /**
- * @type {Navigateable.Class}
+ * @type { import(./Navigateable).Navigateable.Class }
  */
 export class Navigateable {
   /**

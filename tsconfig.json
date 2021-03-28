@@ -1,18 +1,31 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "esnext",
+    "module": "esnext",
     "types": [
       "resize-observer-browser",
       "dompurify"
     ],
-    "checkJs": true,
-    "outDir": "lib",
-    "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "outDir": "lib",
     "declaration": true,
     "declarationDir": "lib",
     "emitDeclarationOnly": true
   },
-  "files": ["lib/index.js"]
+  "include": [
+    "typescript-src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module":  "commonjs"
+    },
+    "include": [
+      "typescript-tests/**/*"
+    ]
+  },
 }
