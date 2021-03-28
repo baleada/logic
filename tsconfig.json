@@ -9,6 +9,10 @@
     "checkJs": true,
     "outDir": "lib",
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node"
-  }
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationDir": "lib",
+    "emitDeclarationOnly": true
+  },
+  "files": ["lib/index.js"]
 }

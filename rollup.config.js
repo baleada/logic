@@ -1,5 +1,6 @@
 import { configureable } from '@baleada/prepare'
 import toMetadata from './source-transforms/toMetadata'
+import typescript from '@rollup/plugin-typescript'
 
 const shared = configureable('rollup')
         .input(['src/classes.js', 'src/pipes.js'])
@@ -23,7 +24,8 @@ const shared = configureable('rollup')
       esm = shared
         .delete({ targets: 'lib/*', verbose: true })
         .esm({ file: 'lib/index.js', target: 'browser' })
-        .analyze()
+        .plugin(typescript())
+        // .analyze()
         .configure(),
       cjs = shared
         .cjs({ file: 'lib/index.cjs' })

@@ -5,6 +5,9 @@ const defaultOptions = {
   initialLocation: 0,
 }
 
+/**
+ * @type {Navigateable.Class}
+ */
 export class Navigateable {
   /**
    * @typedef {{ initialLocation?: number }} NavigateableOptions

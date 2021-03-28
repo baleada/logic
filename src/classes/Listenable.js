@@ -9,11 +9,16 @@ import {
   eventMatchesClickcombo,
 } from '../util.js'
 
+
+/**
+ * @typedef {object} ListenableOptions
+ * @property {RecognizeableOptions} [recognizeable]
+ */
+
 export class Listenable {
-  // TODO: import recognizeable types
   /**
    * @param {string} type
-   * @param {{ recognizeable?: any }} [options]
+   * @param {ListenableOptions} [options]
    */
   constructor (type, options = {}) {
     if (type === 'recognizeable') {

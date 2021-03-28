@@ -128,9 +128,6 @@ export class Fetchable {
     this._computedStatus = 'fetching'
 
     try {
-      /**
-       * @type {Response | Error}
-       */
       this._computedResponse = await fetch(this.resource, options)
       this._computedStatus = 'fetched'
     } catch (error) {

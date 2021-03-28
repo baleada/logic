@@ -149,8 +149,8 @@ export function comboItemNameToType (name) {
 }
 
 /**
- * @typedef {'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click'} ListenableClickComboItemType
- * @type {Map<ListenableClickComboItemType, (name: ListenableClickComboItemName) => boolean>}
+ * @typedef {'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click'} ListenableComboItemType
+ * @type {Map<ListenableComboItemType, (name: ListenableClickComboItemName) => boolean>}
  */
 const predicatesByType = new Map([
   [
@@ -222,7 +222,7 @@ export function createExceptAndOnlyListener (listener, options) {
 
 /**
  * @typedef {ListenableModifierAlias | string} ListenableKeyComboItemName
- * @typedef {{ name: ListenableKeyComboItemName, type: ListenableClickComboItemType }} ListenableKeyComboItem
+ * @typedef {{ name: ListenableKeyComboItemName, type: ListenableComboItemType }} ListenableKeyComboItem
  * @param {{ event: KeyboardEvent, combo: ListenableKeyComboItem[] }} required
  * @return {boolean}
  */
