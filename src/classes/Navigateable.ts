@@ -1,38 +1,34 @@
-/**
- * @type {NavigateableOptions}
- */
-const defaultOptions = {
+const defaultOptions: NavigateableOptions = {
   initialLocation: 0,
 }
 
-/**
- * @type { import(./Navigateable).Navigateable.Class }
- */
-export class Navigateable {
-  /**
-   * @typedef {{ initialLocation?: number }} NavigateableOptions
-   * @param {any[]} array 
-   * @param {NavigateableOptions} [options]
-   */
-  constructor (array, options = {}) {
+const defaultNextAndPreviousOptions: { distance?: number, loops?: boolean } = {
+  distance: 1,
+  loops: true,
+}
+
+export type NavigateableOptions = { initialLocation?: number }
+
+export class Navigateable<Item> {
+  constructor (array: Item[], options: NavigateableOptions = {}) {
     this.setArray(array)
-    this.navigate(options?.initialLocation || defaultOptions.initialLocation)
+    this.navigate(options?.initialLocation ?? defaultOptions.initialLocation)
     this._ready()
   }
+  
+  _computedStatus: 'ready' | 'navigated'
   _ready () {
-    /**
-     * @type {('ready' | 'navigated')}
-     */
     this._computedStatus = 'ready'
   }
 
-  /* Public getters */
+  _computedArray: Item[]
   get array () {
     return this._computedArray
   }
   set array (value) {
     this.setArray(value)
   }
+  _computedLocation: number
   get location () {
     return this._computedLocation
   }
@@ -46,34 +42,25 @@ export class Navigateable {
     return this.array[this.location]
   }
 
-  /**
-   * @param {any[]} array 
-   */
-  setArray (array) {
+  setArray (array: Item[]) {
     this._computedArray = array
     return this
   }
 
-  /**
-   * @param {number} newLocation
-   */
-  setLocation (newLocation) {
-    this.navigate(newLocation)
+  setLocation (location: number) {
+    this.navigate(location)
 
     return this
   }
 
-  /**
-   * @param {number} newLocation
-   */
-  navigate (newLocation) {
-    const ensuredNewLocation = newLocation < 0
-      ? 0 // WARNING: console.warn(`Cannot set newLocation: ${newLocation} is less than 0. Location has been set to 0 instead.` )
-      : newLocation > this.array.length - 1
-        ? this.array.length - 1 // WARNING: console.warn(`Cannot set new location: ${newLocation} is greater than ${this.array.length} (the array's length). Location has been set to the array's length instead.`)
-        : newLocation
+  navigate (location: number) {
+    const ensuredLocation = location < 0
+      ? 0
+      : location > this.array.length - 1
+        ? this.array.length - 1
+        : location
       
-    this._computedLocation = ensuredNewLocation
+    this._computedLocation = ensuredLocation
 
     this._navigated()
 
@@ -83,17 +70,8 @@ export class Navigateable {
     this._computedStatus = 'navigated'
   }
 
-  /**
-   * @param {{ distance?: number, loops?: boolean }} [options]
-   */
-  next (options = {}) {
-    options = {
-      distance: 1,
-      loops: true,
-      ...options,
-    }
-
-    const { distance, loops } = options,
+  next (options: { distance?: number, loops?: boolean } = {}) {
+    const { distance, loops } = { ...defaultNextAndPreviousOptions, ...options },
           lastLocation = this.array.length - 1,
           newLocation = (() => {
             if (this.location + distance <= lastLocation) {
@@ -120,16 +98,8 @@ export class Navigateable {
     return this
   }
 
-  /**
-   * @param {{ distance?: number, loops?: boolean }} [options]
-   */
-  previous (options = {}) {
-    options = {
-      distance: 1,
-      loops: true,
-      ...options,
-    }
-    const { distance, loops } = options,
+  previous (options: { distance?: number, loops?: boolean } = {}) {
+    const { distance, loops } = { ...defaultNextAndPreviousOptions, ...options },
           newLocation = (() => {
             if (this.location - distance >= 0) {
               return this.location - distance

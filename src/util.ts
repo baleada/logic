@@ -1,4 +1,4 @@
-import { createUnique } from './pipes.js'
+import { createUnique } from './pipes'
 
 // DISPATCHABLE
 /**
@@ -410,10 +410,7 @@ export function eventMatchesClickcombo ({ event, combo }) {
 
 
 // STOREABLE
-/**
- * @return {boolean}
- */
- export function domIsAvailable () {
+export function domIsAvailable (): boolean {
   try {
     return !!window
   } catch (error) {
@@ -423,58 +420,30 @@ export function eventMatchesClickcombo ({ event, combo }) {
 
 
 // PREDICATES
-/**
- * @param {unknown} value 
- * @return {value is any[]}
- */
-export function isArray (value) {
+export function isArray (value: unknown): value is any[] {
   return Array.isArray(value)
 }
 
-/**
- * @param {unknown} value 
- * @return {value is undefined}
- */
-export function isUndefined (value) {
+export function isUndefined (value: unknown): value is undefined {
   return value === undefined
 }
 
-/**
- * @param {unknown} value 
- * @return {value is (...args: any[]) => any}
- */
-export function isFunction (value) {
+export function isFunction (value: unknown): value is (...args: any[]) => any {
   return typeof value === 'function'
 }
 
-/**
- * @param {unknown} value 
- * @return {value is null}
- */
-export function isNull (value) {
+export function isNull (value: unknown): value is null {
   return value === null
 }
 
-/**
- * @param {unknown} value 
- * @return {value is number}
- */
-export function isNumber (value) {
+export function isNumber (value: unknown): value is number {
   return typeof value === 'number'
 }
 
-/**
- * @param {unknown} value 
- * @return {value is Record<any, any>}
- */
-export function isObject (value) {
+export function isObject (value: unknown): value is Record<any, any> {
   return typeof value === 'object'
 }
 
-/**
- * @param {unknown} value 
- * @return {value is string}
- */
-export function isString (value) {
+export function isString (value: unknown): value is string {
   return typeof value === 'string'
 }

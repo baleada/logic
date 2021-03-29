@@ -14,7 +14,7 @@
     "emitDeclarationOnly": true
   },
   "include": [
-    "typescript-src/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules"
@@ -25,7 +25,7 @@
       "module":  "commonjs"
     },
     "include": [
-      "typescript-tests/**/*"
+      "tests/**/*"
     ]
   },
 }
