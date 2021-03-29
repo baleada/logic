@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Copyable } from '../../src/classes.js'
+import { Copyable } from '../../src/classes/Copyable'
 
 const suite = createSuite('Copyable (node)')
 

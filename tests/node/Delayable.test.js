@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Delayable } from '../../src/classes.js'
+import { Delayable } from '../../src/classes/Delayable'
 
 const suite = createSuite('Delayable (node)')
 

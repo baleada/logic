@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Sanitizeable } from '../../src/classes.js'
+import { Sanitizeable } from '../../src/classes/Sanitizeable'
 
 const suite = createSuite('Sanitizeable (node)')
 

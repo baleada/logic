@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Grantable } from '../../src/classes.js'
+import { Grantable } from '../../src/classes/Grantable'
 
 const suite = createSuite('Grantable (node)')
 

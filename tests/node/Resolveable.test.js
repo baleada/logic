@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Resolveable } from '../../src/classes.js'
+import { Resolveable } from '../../src/classes/Resolveable'
 
 const suite = createSuite('Resolveable (node)')
 

@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Navigateable } from '../../src/classes.js'
+import { Navigateable } from '../../src/classes/Navigateable'
 
 const suite = createSuite('Navigateable (node)')
 
@@ -198,7 +198,6 @@ suite('last() navigates to last item', context => {
   assert.is(instance.location, instance.array.length - 1)
 })
 
-/* status */
 suite('status is "ready" after construction', context => {
   const instance = context.setup()
 
@@ -209,14 +208,18 @@ suite('status is "navigated" after any navigation function is called at least on
   const navigate = context.setup(),
         next = context.setup(),
         previous = context.setup(),
-        random = context.setup()
+        random = context.setup(),
+        first = context.setup(),
+        last = context.setup()
 
-  navigate.random()
-  next.random()
-  previous.random()
+  navigate.navigate(1)
+  next.next()
+  previous.previous()
   random.random()
+  first.first()
+  last.last()
 
-  assert.ok([navigate, next, previous, random].every(instance => instance.status === 'navigated'))
+  assert.ok([navigate, next, previous, random, first, last].every(instance => instance.status === 'navigated'))
 })
 
 suite.run()

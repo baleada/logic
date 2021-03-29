@@ -2,7 +2,6 @@
   "name": "@baleada/logic",
   "version": "0.18.0",
   "description": "UI logic for the Baleada toolkit",
-  "type": "module",
   "main": "lib/index.cjs",
   "module": "lib/index.js",
   "exports": {
@@ -18,10 +17,9 @@
   "scripts": {
     "prepare": "rollup --config rollup.config.js",
     "prepare:test": "rollup --config test.rollup.config.js",
-    "test:only": "run() { npx uvu tests/$2 $1.test.js$; }; run",
+    "test:only": "run() { npx uvu -r ts-node/register tests/$2 $1.test.ts$; }; run",
     "test": "npm run test:only .",
-    "dev": "vite",
-    "testcjs": "npx uvu -r ts-node/register typescript-tests"
+    "dev": "vite"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Searchable } from '../../src/classes.js'
+import { Searchable } from '../../src/classes/Searchable'
 import { Searcher } from 'fast-fuzzy'
 
 const suite = createSuite('Searchable (node)')
