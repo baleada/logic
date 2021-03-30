@@ -1,21 +1,32 @@
-/**
- * @type {CompleteableOptions}
- */
-const defaultOptions = {
+export type CompleteableOptions = {
+  segment?: {
+    from?: 'start' | 'selection' | 'divider',
+    to?: 'end' |'selection' |'divider'
+  },
+  divider?: RegExp,
+  initialSelection?: { start: number, end: number, direction: 'forward' | 'backward' | 'none' },
+}
+
+const defaultOptions: CompleteableOptions = {
   segment: {
-    from: 'start', // start|selection|divider
-    to: 'end', // end|selection|divider
+    from: 'start',
+    to: 'end',
   },
   divider: /\s/, // Keep an eye out for use cases where a { before, after } object would be needed, or where multi-character dividers need to be used
 }
 
+const defaultCompleteOptions = {
+  select: 'completionEnd',
+}
+
+
 export class Completeable {
-  /**
-   * @typedef {{ segment?: { from?: 'start' | 'selection' | 'divider', to?: 'end' |'selection' |'divider' }, divider?: RegExp, initialSelection?: CompleteableSelection }} CompleteableOptions
-   * @param {string} string
-   * @param {CompleteableOptions} [options]
-   */
-  constructor (string, options = {}) {
+  _segmentFrom: 'start' | 'selection' | 'divider'
+  _segmentTo: 'end' |'selection' |'divider'
+  _divider: RegExp
+  _computedDividerIndices: { before: number, after: number }
+
+  constructor (string: string, options: CompleteableOptions = {}) {
     this._constructing()
     this._segmentFrom = options?.segment?.from || defaultOptions.segment.from
     this._segmentTo = options?.segment?.to || defaultOptions.segment.to
@@ -30,10 +41,8 @@ export class Completeable {
   _constructing () {
     this._computedStatus = 'constructing'
   }
+  _computedStatus: 'constructing' | 'ready' | 'completing' | 'completed'
   _ready () {
-    /**
-     * @type {'constructing' | 'ready' | 'completing' | 'completed'}
-     */
     this._computedStatus = 'ready'
   }
 
@@ -62,10 +71,7 @@ export class Completeable {
     return this._computedDividerIndices
   }
   
-  /**
-   * @return {number}
-   */
-  _getSegmentStartIndex () {
+  _getSegmentStartIndex (): number {
     switch (this._segmentFrom) {
       case 'start':
         return 0
@@ -75,10 +81,7 @@ export class Completeable {
         return this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, toLastMatch returns -1, and this becomes 0
     }
   }
-  /**
-   * @return {number}
-   */
-  _getSegmentEndIndex () {
+  _getSegmentEndIndex (): number {
     switch (this._segmentTo) {
       case 'end':
         return this.string.length
@@ -89,29 +92,24 @@ export class Completeable {
     }
   }
 
-  /**
-   * @param {string} string 
-   */
-  setString (string) {
+  _computedString: string
+  setString (string: string) {
     this._computedString = string
 
     switch (this.status) {
-    case 'constructing':
-      // do nothing. Can't set divider indices before selection has been set.
-      break
-    default:
-      this._setDividerIndices()
-      break
+      case 'constructing':
+        // do nothing. Can't set divider indices before selection has been set.
+        break
+      default:
+        this._setDividerIndices()
+        break
     }
     
     return this
   }
 
-  /**
-   * @typedef {{ start: number, end: number, direction: 'forward' | 'backward' | 'none' }} CompleteableSelection
-   * @param {CompleteableSelection} selection 
-   */
-  setSelection (selection) {
+  _computedSelection: { start: number, end: number, direction: 'forward' | 'backward' | 'none' }
+  setSelection (selection: { start: number, end: number, direction: 'forward' | 'backward' | 'none' }) {
     this._computedSelection = selection
     this._setDividerIndices()
 
@@ -123,34 +121,17 @@ export class Completeable {
     const after = this._toNextMatch({ re: this._divider, from: this.selection.end })
     this._computedDividerIndices.after = after === -1 ? this.string.length + 1 : after
   }
-  /**
-   * @param {{ re: RegExp, from: number }} required
-   * @return number
-   */
-  _toLastMatch ({ re, from }) {
+  _toLastMatch ({ re, from }: { re: RegExp, from: number }): number {
     return toLastMatch({ string: this.string, re, from })
   }
-  /**
-   * @param {{ re: RegExp, from: number }} required
-   * @return number
-   */
-  _toNextMatch ({ re, from }) {
+  _toNextMatch ({ re, from }: { re: RegExp, from: number }): number {
     return toNextMatch({ string: this.string, re, from })
   }
 
-  /**
-   * @param {string} completion 
-   * @param {{ select?: 'completion' | 'completionEnd' }} [options] 
-   */
-  complete (completion, options = {}) {
+  complete (completion: string, options: { select?: 'completion' | 'completionEnd' } = {}) {
     this._completing()
 
-    options = {
-      select: 'completionEnd', // completion|completionEnd
-      ...options
-    }
-
-    const { select } = options,
+    const { select } = { ...defaultCompleteOptions, ...options },
           textBefore = this._getTextBefore(),
           textAfter = this._getTextAfter(),
           completedString = textBefore + completion + textAfter,
@@ -206,12 +187,7 @@ export class Completeable {
   }
 }
 
-/**
- * 
- * @param {{ string: string, re: RegExp, from: number }} required
- & @return {number}
- */
- export function toLastMatch ({ string, re, from }) {
+export function toLastMatch ({ string, re, from }: { string: string, re: RegExp, from: number }): number {
   let indexOf
   if (!re.test(string.slice(0, from)) || from === 0) {
     indexOf = -1
@@ -231,12 +207,7 @@ export class Completeable {
   return indexOf
 }
 
-/**
- * 
- * @param {{ string: string, re: RegExp, from: number }} required
- & @return {number}
- */
-export function toNextMatch ({ string, re, from }) {
+export function toNextMatch ({ string, re, from }: { string: string, re: RegExp, from: number }): number {
   const searchResult = string.slice(from).search(re),
         indexOf = searchResult === -1
           ? -1

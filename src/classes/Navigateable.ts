@@ -1,3 +1,5 @@
+export type NavigateableOptions = { initialLocation?: number }
+
 const defaultOptions: NavigateableOptions = {
   initialLocation: 0,
 }
@@ -6,8 +8,6 @@ const defaultNextAndPreviousOptions: { distance?: number, loops?: boolean } = {
   distance: 1,
   loops: true,
 }
-
-export type NavigateableOptions = { initialLocation?: number }
 
 export class Navigateable<Item> {
   constructor (array: Item[], options: NavigateableOptions = {}) {
