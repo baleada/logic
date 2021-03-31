@@ -1,57 +1,24 @@
-import { isArray, isNumber } from '../util.js'
-import { createInsert } from '../pipes.js'
+import { isArray, isNumber } from '../util'
+import { createInsert } from '../pipes'
 
-/**
- * @type {RecognizeableOptions}
- */
-const defaultOptions = {
-  maxSequenceLength: true,
-  handlers: {},
-}
+export class Recognizeable<EventType extends Event> {
+  _maxSequenceLength: number | true
+  _handlers: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
+  _handlerApi: HandlerApiFromConstructor<EventType>
 
-/**
- * @template {Event} T
- */
-export class Recognizeable {
-  /**
-   * @typedef {object} RecognizeableHandlerApiConstructed
-   * @property {toPolarCoordinates} toPolarCoordinates
-   * @property {() => 'recognized' | 'recognizing' | 'denied' | 'ready'} getStatus
-   * @property {(param?: { path: string }) => any} getMetadata
-   * @property {(required: { path: string, value: any }) => void} setMetadata
-   * @property {(required: { path: string, value: any }) => void} pushMetadata
-   * @property {(required: { path: string, value: any, index: number }) => void} insertMetadata
-   * @property {() => void} recognized
-   * @property {() => void} denied
-   * @property {(event: T) => any} listener
-   */
-
-  /**
-   * @typedef {object} RecognizeableHandlerApiRuntime
-   * @property {T} event
-   * @property {() => T[]} getSequence
-   */
-
-  /**
-   * @typedef {RecognizeableHandlerApiConstructed & RecognizeableHandlerApiRuntime} RecognizeableHandlerApi
-   */
-
-  /**
-   * @param {T[]} sequence
-   * @typedef {{ maxSequenceLength?: true | number, handlers?: Record<any, (handlerApi: RecognizeableHandlerApi) => any> }} RecognizeableOptions
-   * @param {RecognizeableOptions} [options]
-   */
-  constructor (sequence, options = {}) {
-    this._maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength
+  constructor (sequence: EventType[], options: RecognizeableOptions<EventType> = {}) {
+    const defaultOptions: RecognizeableOptions<EventType> = {
+      maxSequenceLength: true as const,
+      handlers: {},
+    }
+    
+    this._maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
     this._handlers = options?.handlers || defaultOptions.handlers
 
     this._resetComputedMetadata()
 
     this.setSequence(sequence)
 
-    /**
-     * @type {RecognizeableHandlerApiConstructed}
-     */
     this._handlerApi = {
       toPolarCoordinates,
       getStatus: () => this.status,
@@ -67,10 +34,8 @@ export class Recognizeable {
     this._ready()
   }
 
+  _computedMetadata: Record<any, any>
   _resetComputedMetadata () {
-    /**
-     * @type {Record<any, any>}
-     */
     this._computedMetadata = {}
   }
   
@@ -80,34 +45,23 @@ export class Recognizeable {
   _denied () {
     this._computedStatus = 'denied'
   }
+  _computedStatus: 'recognized' | 'recognizing' | 'denied' | 'ready'
   _ready () {
-    /**
-     * @type {'recognized' | 'recognizing' | 'denied' | 'ready'}
-     */
     this._computedStatus = 'ready'
   }
 
-  /**
-   * @param {{ path: string, value: any }} required
-   */
-  _setMetadata ({ path, value }) {
+  _setMetadata ({ path, value }: { path: string, value: any }) {
     set({ object: this.metadata, path, value })
   }
-  /**
-   * @param {{ path: string, value: any }} required
-   */
-  _pushMetadata ({ path, value }) {
+  _pushMetadata ({ path, value }: { path: string, value: any }) {
     this._ensureArray({ path })
     push({ object: this.metadata, path, value })
   }
-  /**
-   * @param {{ path: string, value: any, index: number }} required
-   */
-  _insertMetadata ({ path, value, index }) {
+  _insertMetadata ({ path, value, index }: { path: string, value: any, index: number }) {
     this._ensureArray({ path })
     insert({ object: this.metadata, path, value, index })
   }
-  _ensureArray ({ path }) {
+  _ensureArray ({ path }: { path: string }) {
     const currentValue = (() => {
       try {
         return get({ object: this.metadata, path })
@@ -140,25 +94,18 @@ export class Recognizeable {
     return this._computedMetadata
   }
 
-  /**
-   * @param {T[]} sequence 
-   */
-  setSequence (sequence) {
+  _computedSequence: EventType[]
+  setSequence (sequence: EventType[]) {
     this._computedSequence = Array.from(sequence)
     return this
   }
-  /**
-   * @param {(event: T) => any} listener 
-   */
-  setListener (listener) {
+  _computedListener: ((event: EventType) => any)
+  setListener (listener: ((event: EventType) => any)) {
     this._computedListener = listener
     return this
   }
 
-  /**
-   * @param {T} event 
-   */
-  recognize (event) {
+  recognize (event: EventType) {
     this._recognizing()
 
     const { type } = event,
@@ -191,11 +138,36 @@ export class Recognizeable {
   }
 }
 
-/**
- * @param {{ xA: number, xB: number, yA: number, yB: number }} cartesian
- * @return {{ distance: number, angle: { radians: number, degrees: number } }}
- */
- export function toPolarCoordinates ({ xA, xB, yA, yB }) {
+export type RecognizeableOptions<EventType> = {
+  maxSequenceLength?: true | number,
+  handlers?: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
+}
+
+type HandlerApiFromConstructor<EventType> = {
+  toPolarCoordinates: typeof toPolarCoordinates,
+  getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
+  getMetadata: (param?: { path: string }) => any,
+  setMetadata: (required: { path: string, value: any }) => void,
+  pushMetadata: (required: { path: string, value: any }) => void,
+  insertMetadata: (required: { path: string, value: any, index: number }) => void,
+  recognized: () => void,
+  denied: () => void,
+  listener: (event: EventType) => any,
+}
+
+type HandlerApiFromRuntime<EventType> = {
+  event: EventType,
+  getSequence: () => EventType[]
+}
+
+export type RecognizeableHandlerApi<EventType> = HandlerApiFromConstructor<EventType> & HandlerApiFromRuntime<EventType>
+
+export function toPolarCoordinates (
+  { xA, xB, yA, yB }: { xA: number, xB: number, yA: number, yB: number }
+): {
+  distance: number,
+  angle: { radians: number, degrees: number }
+} {
   const distance = Math.hypot(xB - xA, yB - yA),
         angle = Math.atan2((yA - yB), (xB - xA)),
         radians = angle >= 0
@@ -209,12 +181,7 @@ export class Recognizeable {
   }
 }
 
-/**
- * 
- * @param {{ object: Record<any, any>, path: string }} required
- * @return {any}
- */
-export function get ({ object, path }) {
+export function get ({ object, path }: { object: Record<any, any>, path: string }): any {
   return toKeys(path).reduce((gotten, key) => {
     if (!Array.isArray(gotten)) {
       return gotten[key]
@@ -226,12 +193,7 @@ export function get ({ object, path }) {
   }, object)
 }
 
-/**
- * 
- * @param {string} path
- * @return {(string | number)[]}
- */
-export function toKeys (path) {
+export function toKeys (path: string): (string | number)[] {
   return path
     ? path
       .split('.')
@@ -239,12 +201,7 @@ export function toKeys (path) {
     : []
 }
 
-/**
- * 
- * @param {{ object: Record<any, any>, path: string, value: any }} required
- * @return {void}
- */
-export function set ({ object, path, value }) {
+export function set ({ object, path, value }: { object: Record<any, any>, path: string, value: any }): void {
   toKeys(path).forEach((key, index, array) => {
     if (array.length === 1) {
       object[key] = value
@@ -273,24 +230,14 @@ export function set ({ object, path, value }) {
   })
 }
 
-/**
- * 
- * @param {(string | number)[]} keys
- * @return {string}
- */
- function toPath (keys) {
+function toPath (keys: (string | number)[]): string {
   return keys
     .map(key => typeof key === 'string' ? key : `${key}`)
     .reduce((path, key) => `${path}${'.' + key}`, '')
     .replace(/^\./, '')
 }
 
-/**
- * 
- * @param {{ gotten: any, key: string | number, assign: (value: any) => void }} required 
- * @return void
- */
- function maybeAssign ({ gotten, key, assign }) {
+function maybeAssign ({ gotten, key, assign }: { gotten: any, key: string | number, assign: (value: any) => void }): void {
   if (gotten === undefined) {
     switch (typeof key) {
       case 'number':
@@ -301,22 +248,12 @@ export function set ({ object, path, value }) {
   }
 }
 
-/**
- * 
- * @param {{ object: Record<any, any>, path: string, value: any }} required
- * @return {void}
- */
-export function push ({ object, path, value }) {  
+export function push ({ object, path, value }: { object: Record<any, any>, path: string, value: any }): void {  
   const array = get({ object, path })
   set({ object, path, value: [...array, value] })
 }
 
-/**
- * 
- * @param {{ object: Record<any, any>, path: string, value: any, index: number }} required
- * @return {void}
- */
-export function insert ({ object, path, value, index }) {
+export function insert ({ object, path, value, index }: { object: Record<any, any>, path: string, value: any, index: number }): void {
   const inserted = createInsert({ item: value, index })(get({ object, path }))
   
   set({ object, path, value: inserted })

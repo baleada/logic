@@ -19,7 +19,6 @@ const defaultCompleteOptions = {
   select: 'completionEnd',
 }
 
-
 export class Completeable {
   _segmentFrom: 'start' | 'selection' | 'divider'
   _segmentTo: 'end' |'selection' |'divider'
@@ -108,6 +107,7 @@ export class Completeable {
     return this
   }
 
+  // TODO: Support array of selections for multi cursor editing
   _computedSelection: { start: number, end: number, direction: 'forward' | 'backward' | 'none' }
   setSelection (selection: { start: number, end: number, direction: 'forward' | 'backward' | 'none' }) {
     this._computedSelection = selection
