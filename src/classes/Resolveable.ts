@@ -1,23 +1,14 @@
-import { createMapAsync } from '../pipes.js'
-import { isArray } from '../util.js'
+import { createMapAsync } from '../pipes'
+import { isArray } from '../util'
 
-/**
- * @template T
- */
-export class Resolveable {
-  /**
-   * 
-   * @param {(...args: any[]) => (Promise<T> | Promise<T>[])} getPromise 
-   * @param {{}} [options] 
-   */
-  constructor (getPromise, options = {}) {
+
+export class Resolveable<Value> {
+  constructor (getPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[]), options: {} = {}) {
     this.setGetPromise(getPromise)
     this._ready()
   }
+  _computedStatus: 'ready' | 'resolving' | 'resolved' | 'errored'
   _ready () {
-    /**
-     * @type {'ready' | 'resolving' | 'resolved' | 'errored'}
-     */
     this._computedStatus = 'ready'
   }
 
@@ -34,33 +25,27 @@ export class Resolveable {
     return this._computedResponse
   }
 
-  /**
-   * @param {(...args: any[]) => (Promise<T> | Promise<T>[])} getPromise 
-   */
-  setGetPromise (getPromise) {
+  _computedGetPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[])
+  setGetPromise (getPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[])) {
     this._computedGetPromise = getPromise
 
     return this
   }
   
-  /**
-   * @type {(...args: any[]) => Promise<this>}
-   */
-  async resolve () {
+
+  _computedResponse: Value | Value[] | Error
+  async resolve (...args: any[]) {
     this._resolving()
     try {
-      const promises = this.getPromise(...arguments)
+      const promises = this.getPromise(...args)
 
-      /**
-       * @type {T | T[] | Error}
-       */
       this._computedResponse = isArray(promises)
-        ? await createMapAsync(async promise => await promise)(promises)
+        ? await createMapAsync<Promise<Value>, Value>(async promise => await promise)(promises)
         : await promises
 
       this._resolved()    
     } catch (error) {
-      this._computedResponse = error
+      this._computedResponse = error as Error
       this._errored()    
     }
     

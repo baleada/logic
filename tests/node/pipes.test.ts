@@ -14,7 +14,7 @@ import {
   createClip,
   createClamp,
   createRename,
-} from '../../src/pipes.js'
+} from '../../src/pipes'
 
 const suite = createSuite('pipes (node)')
 

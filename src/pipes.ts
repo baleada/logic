@@ -24,7 +24,7 @@ export function createForEachAsync<Item> (forEach: (item?: Item, index?: number,
   }
 }
 
-export function createMapAsync<Item, Mapped> (map: (item?: Item, index?: number, array?: Item[]) => Mapped): ArrayFunctionAsync<Item, Mapped[]> {
+export function createMapAsync<Item, Mapped> (map: (item?: Item, index?: number, array?: Item[]) => Promise<Mapped>): ArrayFunctionAsync<Item, Mapped[]> {
   return async array => {
     return await createReduceAsync<Item, Mapped[]>(
       async (resolvedMaps, item, index, a) => [...resolvedMaps, await map(item, index, a)],
@@ -33,7 +33,7 @@ export function createMapAsync<Item, Mapped> (map: (item?: Item, index?: number,
   }
 }
 
-export function createFilterAsync<Item> (filter: (item?: Item, index?: number, array?: Item[]) => boolean): ArrayFunctionAsync<Item, Item[]> {
+export function createFilterAsync<Item> (filter: (item?: Item, index?: number, array?: Item[]) => Promise<boolean>): ArrayFunctionAsync<Item, Item[]> {
   return async array => {
     const mappedAsync = await createMapAsync<Item, boolean>(filter)(array)
     return array.filter((_, index) => mappedAsync[index])
