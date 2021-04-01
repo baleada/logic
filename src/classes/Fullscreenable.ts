@@ -1,17 +1,10 @@
-export class Fullscreenable {
-  /**
-   * 
-   * @param {(...args: any[]) => Element} getElement
-   * @param {{}} [options]
-   */
-  constructor (getElement, options = {}) {
+export class Fullscreenable<ElementType extends Element> {
+  constructor (getElement: ((...args: any[]) => ElementType), options: {} = {}) {
     this.setGetElement(getElement)
     this._ready()
   }
+  _computedStatus: 'ready' | 'fullscreened' | 'errored' | 'exited'
   _ready () {
-    /**
-     * @type {'ready' | 'fullscreened' | 'errored' | 'exited'}
-     */
     this._computedStatus = 'ready'
   }
 
@@ -31,31 +24,24 @@ export class Fullscreenable {
     return this._computedError
   }
 
-  /**
-   * @param {(...args: any[]) => Element} getElement 
-   */
-  setGetElement (getElement) {
+  _computedGetElement: ((...args: any[]) => ElementType)
+  setGetElement (getElement: ((...args: any[]) => ElementType)) {
     this._computedGetElement = () => getElement()
     return this
   }
 
-  /**
-   * @param {FullscreenOptions} [options]
-   */
-  async enter (options = {}) {
+  async enter (options: FullscreenOptions = {}) {
     await this.fullscreen(options)
     return this
   }
   
-  /**
-   * @param {FullscreenOptions} [options]
-   */
-  async fullscreen (options = {}) {
+  _computedError: Error
+  async fullscreen (options: FullscreenOptions = {}) {
     try {
       await this.element.requestFullscreen(options)
       this._fullscreened()
     } catch (error) {
-      this._computedError = error
+      this._computedError = error as Error
       this._errored()
     }
 

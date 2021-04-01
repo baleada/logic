@@ -1,17 +1,13 @@
 export class Copyable {
-  /**
-   * @param {string} string
-   * @param {{ clipboard?: { text: string } }} [options]
-   */
-  constructor (string, options = {}) {
+  _clipboard: { text: string }
+
+  constructor (string: string, options: { clipboard?: { text: string } } = {}) {
     this._clipboard = options.clipboard
     this.setString(string)
     this._ready()
   }
+  _computedStatus: 'ready' | 'copying' | 'copied' | 'errored'
   _ready () {
-    /**
-     * @type {'ready' | 'copying' | 'copied' | 'errored'}
-     */
     this._computedStatus = 'ready'
   }
   
@@ -34,26 +30,22 @@ export class Copyable {
     return this._computedResponse
   }
   
-  /**
-   * @param {string} string 
-   */
-  setString (string) {
+  _computedString: string
+  setString (string: string) {
     this._computedString = string
     return this
   }
   
-  /**
-   * @param {{ type?: 'clipboard' | 'deprecated' }} [options]
-   */
-  async copy (options = {}) {    
+  _computedResponse: undefined
+  async copy (options: { type: 'clipboard' | 'deprecated' } = { type: 'clipboard' }) {    
     this._copying()
     
-    const { type = 'clipboard' } = options
+    const { type } = options
 
     switch (type) {
       case 'clipboard':
         try {
-          this._computedResponse = await navigator.clipboard.writeText(this.string)
+          this._computedResponse = await navigator.clipboard.writeText(this.string) as undefined
           
           if (this._clipboard) {
             this._clipboard.text = this.string

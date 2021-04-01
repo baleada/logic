@@ -4,22 +4,15 @@ import {
   domIsAvailable,
 } from '../util.js'
 
-/**
- * @type {StoreableOptions}
- */
-const defaultOptions = {
+const defaultOptions: StoreableOptions = {
   type: 'local',
   statusKeySuffix: '_status',
 }
 
 export class Storeable {
-  /**
-   * 
-   * @param {string} key
-   * @typedef {{ type?: 'local' | 'session', statusKeySuffix?: string }} StoreableOptions
-   * @param {StoreableOptions} [options]
-   */
-  constructor (key, options = {}) {
+  _type: 'local' | 'session'
+  _statusKeySuffix: string
+  constructor (key: string, options: StoreableOptions = {}) {
     this._constructing()
     this._type = options.type ?? defaultOptions.type
     this._statusKeySuffix = options.statusKeySuffix ?? defaultOptions.statusKeySuffix
@@ -30,10 +23,8 @@ export class Storeable {
   _constructing () {
     this._computedStatus = 'constructing'
   }
+  _computedStatus: 'ready' | 'constructing' | 'stored' | 'errored' | 'removed'
   _ready () {
-    /**
-     * @type {'ready' | 'constructing' | 'stored' | 'errored' | 'removed'}
-     */
     this._computedStatus = 'ready'
 
     if (domIsAvailable()) {
@@ -74,10 +65,9 @@ export class Storeable {
     return this._computedError
   }
 
-  /**
-   * @param {string} key 
-   */
-  setKey (key) {
+  _computedKey: string
+  _computedStatusKey: string
+  setKey (key: string) {
     let string
     switch (this.status) {
     case 'constructing':
@@ -104,19 +94,15 @@ export class Storeable {
     return this
   }
 
-  /**
-   * @param {string} string 
-   */
-  store (string) {
+  _computedString: string
+  _computedError: Error
+  store (string: string) {
     try {
       this.storage.setItem(this.key, string)
       this._computedString = string // This assignment allows reactivity tools to detect data change
       this._stored()
     } catch (error) {
-      /**
-       * @type {Error}
-       */
-      this._computedError = error
+      this._computedError = error as Error
       this._errored()
     }
     
@@ -148,4 +134,9 @@ export class Storeable {
     this.storage.removeItem(this._computedStatusKey)
     return this
   }
+}
+
+export type StoreableOptions = {
+  type?: 'local' | 'session',
+  statusKeySuffix?: string
 }
