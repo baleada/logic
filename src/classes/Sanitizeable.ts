@@ -1,26 +1,21 @@
-import createDOMPurify from 'dompurify'
-import { domIsAvailable } from '../util.js'
+import createDOMPurify, { DOMPurifyI, Config } from 'dompurify'
+import { domIsAvailable } from '../util'
 
 export class Sanitizeable {
-  /**
-   * 
-   * @param {string} html
-   * @param {createDOMPurify.Config} [options] 
-   */
-  constructor (html, options) {
+  _domPurifyConfig: Config
+  constructor (html: string, options?: Config) {
     this._computedHtml = html
     this._domPurifyConfig = options
     this._ready()
   }
+  _computedDompurify: DOMPurifyI
+  _computedStatus: 'ready' | 'sanitized'
   _ready () {
     if (domIsAvailable()) {
       this._computedDompurify = createDOMPurify()
       this._computedDompurify.setConfig(this._domPurifyConfig)
     }
 
-    /**
-     * @type {'ready' | 'sanitized'}
-     */
     this._computedStatus = 'ready'
   }
 
@@ -42,10 +37,8 @@ export class Sanitizeable {
     return this._computedStatus
   }
 
-  /**
-   * @param {string} html
-   */
-  setHtml (html) {
+  _computedHtml: string
+  setHtml (html: string) {
     this._computedHtml = html
     return this
   }
@@ -59,3 +52,5 @@ export class Sanitizeable {
     this._computedStatus = 'sanitized'
   }
 }
+
+export type SanitizeableOptions = Config

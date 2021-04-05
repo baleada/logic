@@ -4,6 +4,7 @@
     "module": "esnext",
     "types": [
       "resize-observer-browser",
+      "requestidlecallback",
       "dompurify"
     ],
     "moduleResolution": "node",

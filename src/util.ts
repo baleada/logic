@@ -1,12 +1,11 @@
 import { createUnique } from './pipes'
+import type { ListenOptions } from './classes/Listenable'
 
 // DISPATCHABLE
-/**
- * 
- * @param {(ListenableKeyComboItemName | ListenableClickComboItemName)[]} combo 
- * @param {{ init?: EventInit, keyDirection?: 'up' | 'down' }} [options]
- */
-export function toEvent (combo, options = {}) {
+export function toEvent (
+  combo: (ListenableKeyComboItemName | ListenableClickComboItemName)[],
+  options: { init?: EventInit, keyDirection?: 'up' | 'down' } = {}
+) {
   const modifiers = combo.slice(0, combo.length - 1),
         { 0: name } = combo.slice(combo.length - 1),
         type = comboItemNameToType(name),
@@ -42,40 +41,31 @@ export function toEvent (combo, options = {}) {
 
 
 // LISTENABLE
-/**
- * @typedef {'intersect' | 'mutate' | 'resize'} ObserverType
- * @param {{ type: ObserverType, listener: (entries: any[]) => any }} required
- * @param {IntersectionObserverInit} [options]
- * @typedef {any} ResizeObserver
- * TODO: narrow when resize observer gets TS support
- * @return {IntersectionObserver | MutationObserver | ResizeObserver}
- */
-export function toObserver ({ type, listener }, options) {
+export function toObserver(
+  { type, listener }: {
+    type: 'intersect' | 'mutate' | 'resize',
+    listener:  IntersectionObserverCallback | MutationCallback | ResizeObserverCallback,
+  },
+  options?: IntersectionObserverInit
+) {
   switch (type) {
     case 'intersect':
-      return new IntersectionObserver(listener, options)
+      return new IntersectionObserver(listener as IntersectionObserverCallback, options)
     case 'mutate':
-      return new MutationObserver(listener)
+      return new MutationObserver(listener as MutationCallback)
     case 'resize':
-      // @ts-ignore
-      return new ResizeObserver(listener)
+      return new ResizeObserver(listener as ResizeObserverCallback)
   }
 }
 
-/**
- * @param {*} type 
- */
-export function toCategory (type) {
-  return [...predicatesByCategory.keys()]
-    .find(category => predicatesByCategory.get(category)(type))
+
+export function toCategory (type: string) {
+  return [...predicatesByCategory.keys()].find(category => predicatesByCategory.get(category)(type))
 }
 
-/**
- * @typedef {'recognizeable' | 'observation' | 'mediaquery' | 'idle' | 'visibilitychange' | 'keycombo' | 'leftclickcombo' | 'rightclickcombo' | 'event'} ListenableCategory
- * @typedef {string} ListenableType
- * @type {Map<ListenableCategory, (type: ListenableType) => boolean>}
- */
-const predicatesByCategory = new Map([
+export type ListenableCategory = 'recognizeable' | 'observation' | 'mediaquery' | 'idle' | 'visibilitychange' | 'keycombo' | 'leftclickcombo' | 'rightclickcombo' | 'event'
+export type ListenableType = string
+const predicatesByCategory = new Map<ListenableCategory, ((type: ListenableType) => boolean)>([
   [
     'recognizeable',
     type => type === 'recognizeable'
@@ -86,7 +76,7 @@ const predicatesByCategory = new Map([
   ],
   [
     'mediaquery',
-    type => categoryREs.mediaQuery.test(type)
+    type => categoryREs.mediaquery.test(type)
   ],
   [
     'idle',
@@ -114,45 +104,30 @@ const predicatesByCategory = new Map([
   ]
 ])
 
-/**
- * @type {{ observation: RegExp, mediaQuery: RegExp, keycombo: RegExp, leftclickcombo: RegExp, rightclickcombo: RegExp }}
- */
-const categoryREs = {
+const categoryREs: { [category: string]: RegExp } = {
   observation: /^(?:intersect|mutate|resize)$/,
-  mediaQuery: /^\(.+\)$/,
+  mediaquery: /^\(.+\)$/,
   keycombo: /^((!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|space|arrow|vertical|horizontal|up|right|down|left|enter|backspace|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete|cmd|command|meta|shift|ctrl|control|alt|opt))\+)*(!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|space|arrow|vertical|horizontal|up|right|down|left|enter|backspace|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete|cmd|command|meta|shift|ctrl|control|alt|opt))$/,
   leftclickcombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt))\+){0,4}(click|mousedown|mouseup)$/,
   rightclickcombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt))\+){0,4}rightclick$/,
 }
 
-/**
- * 
- * @param {ListenableType} type
- * @param {string} [delimiter]
- * @return {ListenableClickComboItemName[]}
- */
-export function toCombo (type, delimiter = '+') {
+const unique = createUnique<ListenableType>()
+export function toCombo (type: ListenableType, delimiter: string = '+'): string[] {
   // If the delimiter is used as a character in the type,
   // two empty strings will be produced by the split.
   // createUnique ensures those two are combined into one.
-  return createUnique()(type.split(delimiter))
+  return unique(type.split(delimiter))
     .map(name => (name === '' ? delimiter : name))
 }
 
-// TODO: Better type
-/**
- * @typedef {string} ListenableClickComboItemName
- * @param {ListenableClickComboItemName} name 
- */
-export function comboItemNameToType (name) {
+export function comboItemNameToType (name: string) {
   return [...predicatesByType.keys()].find(type => predicatesByType.get(type)(name)) ?? 'custom'
 }
 
-/**
- * @typedef {'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click'} ListenableComboItemType
- * @type {Map<ListenableComboItemType, (name: ListenableClickComboItemName) => boolean>}
- */
-const predicatesByType = new Map([
+export type ListenableComboItemType = 'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click'
+
+const predicatesByType: Map<ListenableComboItemType, (name: string) => boolean> = new Map([
   [
     'singleCharacter',
     name => typeREs.singleCharacter.test(name)
@@ -175,10 +150,7 @@ const predicatesByType = new Map([
   ],
 ])
 
-/**
-  * @type {{ singleCharacter: RegExp, arrow: RegExp, other: RegExp, modifier: RegExp, click: RegExp }}
-  */
-const typeREs = {
+const typeREs: Record<ListenableComboItemType, RegExp> = {
   singleCharacter: /^!?[a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]$/,
   arrow: /^!?(arrow|vertical|horizontal|up|down|right|left)$/,
   other: /^!?(enter|backspace|space|tab|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete)$/,
@@ -186,31 +158,20 @@ const typeREs = {
   click: /^(rightclick|click|mousedown|mouseup)$/,
 }
 
-/**
- * 
- * @param {*} listener 
- * @param {*} options 
- */
- export function toAddEventListenerParams (listener, options) {
+export function toAddEventListenerParams<EventType extends Event> (listener: (event: EventType) => any, options: ListenOptions<EventType>) {
   const { addEventListener, useCapture, wantsUntrusted } = options,
-        exceptAndOnlyListener = createExceptAndOnlyListener(listener, options),
+        exceptAndOnlyListener = createExceptAndOnlyListener<EventType>(listener, options),
         listenerOptions = [addEventListener || useCapture, wantsUntrusted]
 
   return { exceptAndOnlyListener, listenerOptions }
 }
 
-/**
- * 
- * @param {(event: any) => any} listener 
- * @param {{ except?: string[], only?: string[] }} options
- * @return {(event: any) => any}
- */
-export function createExceptAndOnlyListener (listener, options) {
+export function createExceptAndOnlyListener<EventType extends Event> (listener: (event: EventType) => any, options: ListenOptions<EventType>): (event: EventType) => any {
   const { except = [], only = [] } = options
   
-  return event => {
+  return (event: EventType) => {
     const { target } = event,
-          [matchesOnly, matchesExcept] = [only, except].map(selectors => selectors.some(selector => target.matches(selector)))
+          [matchesOnly, matchesExcept] = [only, except].map(selectors => selectors.some(selector => (target as Element).matches(selector)))
 
     if (matchesOnly) {
       listener(event)
@@ -254,20 +215,15 @@ export function createExceptAndOnlyListener (listener, options) {
   })
 }
 
-/**
- * @typedef {'ArrowUp' | 'ArrowRight' | 'ArrowDown' | 'ArrowLeft' | 'Enter' | 'Backspace' | 'Tab' | ' ' | 'Shift' | 'Meta' | 'Meta' | 'Meta' | 'Control' | 'Control' | 'Alt' | 'Alt' | 'Fn' | 'CapsLock' | 'End' | 'Home' | 'PageDown' | 'PageUp' | 'Escape' | 'Camera' | 'Delete' | 'F1' | 'F2' | 'F3' | 'F4' | 'F5' | 'F6' | 'F7' | 'F8' | 'F9' | 'F10' | 'F11' | 'F12' | 'F13' | 'F14' | 'F15' | 'F16' | 'F17' | 'F18' | 'F19' | 'F20'} ListenableKey
- * @typedef {'up' | 'right' | 'down' | 'left' | 'enter' | 'backspace' | 'tab' | 'space' | 'shift' | 'meta' | 'command' | 'cmd' | 'control' | 'ctrl' | 'alt' | 'opt' | 'fn' | 'capslock' | 'end' | 'home' | 'pagedown' | 'pageup' | 'esc' | 'camera' | 'delete' | 'f1' | 'f2' | 'f3' | 'f4' | 'f5' | 'f6' | 'f7' | 'f8' | 'f9' | 'f10' | 'f11' | 'f12' | 'f13' | 'f14' | 'f15' | 'f16' | 'f17' | 'f18' | 'f19' | 'f20'} ListenableKeyAlias
- * @param {string} name 
- * @return {string}
- */
-export function toKey (name) {
-  return name in keysByName ? keysByName[name] : name
+export function toKey (name: ListenableKeyAlias) {
+  return keysByName[name]
 }
 
-/**
- * @type {{'up': ListenableKey, 'right': ListenableKey, 'down': ListenableKey, 'left': ListenableKey, 'enter': ListenableKey, 'backspace': ListenableKey, 'tab': ListenableKey, 'space': ListenableKey, 'shift': ListenableKey, 'meta': ListenableKey, 'command': ListenableKey, 'cmd': ListenableKey, 'control': ListenableKey, 'ctrl': ListenableKey, 'alt': ListenableKey, 'opt': ListenableKey, 'fn': ListenableKey, 'capslock': ListenableKey, 'end': ListenableKey, 'home': ListenableKey, 'pagedown': ListenableKey, 'pageup': ListenableKey, 'esc': ListenableKey, 'camera': ListenableKey, 'delete': ListenableKey, 'f1': ListenableKey, 'f2': ListenableKey, 'f3': ListenableKey, 'f4': ListenableKey, 'f5': ListenableKey, 'f6': ListenableKey, 'f7': ListenableKey, 'f8': ListenableKey, 'f9': ListenableKey, 'f10': ListenableKey, 'f11': ListenableKey, 'f12': ListenableKey, 'f13': ListenableKey, 'f14': ListenableKey, 'f15': ListenableKey, 'f16': ListenableKey, 'f17': ListenableKey, 'f18': ListenableKey, 'f19': ListenableKey, 'f20': ListenableKey}}
- */
-const keysByName = {
+export type ListenableKey = string
+// 'ArrowUp' | 'ArrowRight' | 'ArrowDown' | 'ArrowLeft' | 'Enter' | 'Backspace' | 'Tab' | ' ' | 'Shift' | 'Meta' | 'Meta' | 'Meta' | 'Control' | 'Control' | 'Alt' | 'Alt' | 'Fn' | 'CapsLock' | 'End' | 'Home' | 'PageDown' | 'PageUp' | 'Escape' | 'Camera' | 'Delete' | 'F1' | 'F2' | 'F3' | 'F4' | 'F5' | 'F6' | 'F7' | 'F8' | 'F9' | 'F10' | 'F11' | 'F12' | 'F13' | 'F14' | 'F15' | 'F16' | 'F17' | 'F18' | 'F19' | 'F20'
+export type ListenableKeyAlias = 'up' | 'right' | 'down' | 'left' | 'enter' | 'backspace' | 'tab' | 'space' | 'shift' | 'meta' | 'command' | 'cmd' | 'control' | 'ctrl' | 'alt' | 'opt' | 'fn' | 'capslock' | 'end' | 'home' | 'pagedown' | 'pageup' | 'esc' | 'camera' | 'delete' | 'f1' | 'f2' | 'f3' | 'f4' | 'f5' | 'f6' | 'f7' | 'f8' | 'f9' | 'f10' | 'f11' | 'f12' | 'f13' | 'f14' | 'f15' | 'f16' | 'f17' | 'f18' | 'f19' | 'f20'
+
+const keysByName: Record<ListenableKeyAlias, ListenableKey> = {
   up: 'ArrowUp',
   right: 'ArrowRight',
   down: 'ArrowDown',
@@ -293,26 +249,26 @@ const keysByName = {
   esc: 'Escape',
   camera: 'Camera',
   delete: 'Delete',
-  'f1': 'F1',
-  'f2': 'F2',
-  'f3': 'F3',
-  'f4': 'F4',
-  'f5': 'F5',
-  'f6': 'F6',
-  'f7': 'F7',
-  'f8': 'F8',
-  'f9': 'F9',
-  'f10': 'F10',
-  'f11': 'F11',
-  'f12': 'F12',
-  'f13': 'F13',
-  'f14': 'F14',
-  'f15': 'F15',
-  'f16': 'F16',
-  'f17': 'F17',
-  'f18': 'F18',
-  'f19': 'F19',
-  'f20': 'F20',
+  f1: 'F1',
+  f2: 'F2',
+  f3: 'F3',
+  f4: 'F4',
+  f5: 'F5',
+  f6: 'F6',
+  f7: 'F7',
+  f8: 'F8',
+  f9: 'F9',
+  f10: 'F10',
+  f11: 'F11',
+  f12: 'F12',
+  f13: 'F13',
+  f14: 'F14',
+  f15: 'F15',
+  f16: 'F16',
+  f17: 'F17',
+  f18: 'F18',
+  f19: 'F19',
+  f20: 'F20',
 }
 
 /**

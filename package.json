@@ -48,6 +48,7 @@
     "@baleada/prepare": "^0.4.43",
     "@rollup/plugin-typescript": "^8.2.0",
     "@types/dompurify": "^2.2.1",
+    "@types/requestidlecallback": "^0.3.1",
     "@types/resize-observer-browser": "^0.1.5",
     "@vue/compiler-sfc": "^3.0.5",
     "npm": "^7.6.3",

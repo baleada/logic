@@ -1,7 +1,7 @@
 import { isArray, isNumber } from '../util'
 import { createInsert } from '../pipes'
 
-export class Recognizeable<EventType extends Event> {
+export class Recognizeable<EventType> {
   _maxSequenceLength: number | true
   _handlers: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
   _handlerApi: HandlerApiFromConstructor<EventType>

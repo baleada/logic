@@ -1,4 +1,5 @@
-import { Recognizeable } from './Recognizeable.js'
+import { Recognizeable } from './Recognizeable'
+import type { RecognizeableOptions } from './Recognizeable'
 import {
   toObserver,
   toCategory,
@@ -7,20 +8,14 @@ import {
   toAddEventListenerParams,
   eventMatchesKeycombo,
   eventMatchesClickcombo,
+  ListenableCategory,
 } from '../util.js'
 
-
-/**
- * @typedef {object} ListenableOptions
- * @property {RecognizeableOptions} [recognizeable]
- */
-
-export class Listenable {
-  /**
-   * @param {string} type
-   * @param {ListenableOptions} [options]
-   */
-  constructor (type, options = {}) {
+export class Listenable<EventType> {
+  _computedRecognizeable: Recognizeable<EventType>
+  _computedRecognizeableEvents: string[]
+  _computedActive: Set<ListenableActive<EventType>> // TODO: better type
+  constructor (type: string, options: ListenableOptions<EventType> = {}) {
     if (type === 'recognizeable') {
       this._computedRecognizeable = new Recognizeable([], options.recognizeable)
       this._computedRecognizeableEvents = Object.keys(options.recognizeable?.handlers || {})
@@ -31,6 +26,7 @@ export class Listenable {
     this.setType(type)
     this._ready()
   }
+  _computedStatus: 'ready' | 'listening' | 'stopped'
   _ready () {
     this._computedStatus = 'ready'
   }
@@ -51,20 +47,22 @@ export class Listenable {
     return this._computedRecognizeable
   }
 
-  setType (type) {
+  _computedType: string
+  _computedCategory: ListenableCategory
+  setType (type: string) {
     this.stop()
     this._computedType = type
     this._computedCategory = toCategory(type)
     return this
   }
 
-  listen (listener, options = {}) {
+  listen (listener, options: ListenOptions = {}) {
     switch (this._computedCategory) {
       case 'observation':
         this._observationListen(listener, options)
         break
       case 'mediaquery':
-        this._mediaQueryListen(listener, options)
+        this._mediaQueryListen(listener)
         break
       case 'idle':
         this._idleListen(listener, options)
@@ -91,9 +89,9 @@ export class Listenable {
 
     return this
   }
-  _observationListen (listener, options) {
+  _observationListen (listener, options: ListenOptions) {
     const { observer: observerOptions, observe: observeOptions, target = document.querySelector('html') } = options,
-          observerInstance = toObserver({ type: this.type, listener, options: observerOptions })
+          observerInstance = toObserver({ type: this.type as 'intersect' | 'mutate' | 'resize', listener }, observerOptions)
 
     observerInstance.observe(target, observeOptions)
     this.active.add({ target, id: observerInstance, category: 'observation' })
@@ -104,14 +102,14 @@ export class Listenable {
     target.addEventListener('change', listener)
     this.active.add({ target, id: ['change', listener], category: 'mediaquery' })
   }
-  _idleListen (listener, options) {
-    const { requestIdleCallback = {} } = options,
+  _idleListen (listener, options: ListenOptions) {
+    const { requestIdleCallback } = options,
           id = window.requestIdleCallback(listener, requestIdleCallback)
 
     this.active.add({ id, category: 'idle' })
   }
-  _recognizeableListen (listener, options) {
-    const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams(listener, options),
+  _recognizeableListen (listener, options: ListenOptions) {
+    const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams<EventType>(listener, options),
           eventListeners = this._computedRecognizeableEvents.map(name => {
             return [name, event => {
               this.recognizeable.recognize(event)
@@ -134,27 +132,27 @@ export class Listenable {
     
     this._eventListen(listener, options)
   }
-  _keycomboListen (naiveListener, options) {
+  _keycomboListen (listener, options: ListenOptions) {
     const combo = toCombo(this.type, options.comboDelimiter).map(name => ({ name, type: comboItemNameToType(name) })),
-          listener = event => {            
+          guardedListener = (event: EventType) => {            
             if (eventMatchesKeycombo({ event, combo })) {
-              naiveListener(event)
+              listener(event)
             }
           }
     
-    this._eventListen(listener, options)
+    this._eventListen(guardedListener, options)
   }
-  _clickcomboListen (naiveListener, options) {
+  _clickcomboListen (listener, options: ListenOptions) {
     const combo = toCombo(this.type, options.comboDelimiter),
-          listener = event => {
+          guardedListener = (event: EventType) => {
             if (eventMatchesClickcombo({ event, combo })) {
-              naiveListener(event)
+              listener(event)
             }
           }
     
-    this._eventListen(listener, options)
+    this._eventListen(guardedListener, options)
   }
-  _eventListen (listener, options) {
+  _eventListen (listener, options: ListenOptions) {
     const type = (() => {
       switch (this._computedCategory) {
         case 'keycombo':
@@ -173,7 +171,7 @@ export class Listenable {
 
     this._addEventListeners(eventListeners, options)
   }
-  _addEventListeners (eventListeners, options) {
+  _addEventListeners (eventListeners, options: ListenOptions) {
     const { target = document } = options
 
     eventListeners.forEach(eventListener => {
@@ -185,7 +183,9 @@ export class Listenable {
     this._computedStatus = 'listening'
   }
 
-  stop (target) {
+  stop (options: { target?: Element } = {}) {
+    const { target } = options
+
     switch (this.status) {
       case 'ready':
       case undefined:
@@ -193,12 +193,12 @@ export class Listenable {
         // and shouldn't use web APIs during construction.
         break
       default:
-        const stoppable = [...this.active].filter(({ target: t }) => !target || t === target), // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
-              shouldUpdateStatus = stoppable.length === this.active.size
+        const stoppables = [...this.active].filter(active => !('target' in active) || active.target === target), // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
+              shouldUpdateStatus = stoppables.length === this.active.size
 
-        stoppable.forEach(stoppable => {
-          const { target: t, id, category } = stoppable
-          stopsByCategory[category]({ target: t, id })
+        stoppables.forEach(stoppable => {
+          const { category } = stoppable
+          stopsByCategory[category](stoppable)
           this.active.delete(stoppable)
         })
         
@@ -216,7 +216,36 @@ export class Listenable {
   }
 }
 
-const stopsByCategory = {
+export type ListenableOptions<EventType> = { recognizeable?: RecognizeableOptions<EventType> }
+export type ListenOptions = {
+  target?: Element,
+
+  observer?: IntersectionObserverInit,
+  observe?: ResizeObserverOptions | MutationObserverInit
+
+  requestIdleCallback?: IdleRequestOptions,
+
+  addEventListener?: AddEventListenerOptions,
+  useCapture?: boolean,
+  wantsUntrusted?: boolean,
+
+  except?: string[],
+  only?: string[],
+
+  comboDelimiter?: string,
+  keyDirection?: 'up' | 'down',
+}
+export type ListenableActive<EventType> = { category: ListenableCategory } & (
+  { target: Element, id: IntersectionObserver | MutationObserver | ResizeObserver } 
+  |
+  { target: Element | Document, id: (event: EventType) => any }
+  |
+  { target: MediaQueryList, id: ['change', (event: EventType) => any] }
+  |
+  { id: number }
+)
+
+const stopsByCategory: { [category: string] : (stoppable: Stoppable) => any }  = {
   observation: ({ id }) => id.disconnect(),
   mediaquery: ({ target, id }) => target.removeEventListener(...id),
   idle: ({ id }) => window.cancelIdleCallback(id),
