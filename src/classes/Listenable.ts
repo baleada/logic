@@ -11,7 +11,59 @@ import {
   ListenableCategory,
 } from '../util.js'
 
-export class Listenable<EventType> {
+type ListenableSupportedType = IntersectionObserverEntry | MutationRecord | ResizeObserverEntry | MediaQueryListEvent | IdleDeadline | KeyboardEvent | MouseEvent | CustomEvent | Event
+type ListenableSupportedObservation = IntersectionObserverEntry | MutationRecord | ResizeObserverEntry
+
+type ListenableOptions<EventType> = { recognizeable?: RecognizeableOptions<EventType> }
+
+export type ListenCallback<EventType> = 
+  EventType extends IntersectionObserverEntry ? IntersectionObserverCallback :
+  EventType extends MutationRecord ? MutationCallback :
+  EventType extends ResizeObserverEntry ? ResizeObserverCallback :
+  EventType extends IdleDeadline ? IdleRequestCallback :
+  EventType extends MediaQueryListEvent | KeyboardEvent | MouseEvent | CustomEvent | Event ? (event: EventType) => any :
+  () => void
+
+export type ListenOptions<EventType> = 
+  EventType extends IntersectionObserverEntry ? { observer?: IntersectionObserverInit } & ObservationListenOptions :
+  EventType extends MutationRecord ? { observe?: MutationObserverInit } & ObservationListenOptions :
+  EventType extends ResizeObserverEntry ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
+  EventType extends MediaQueryListEvent ? {} :
+  EventType extends IdleDeadline ? { requestIdleCallback?: IdleRequestOptions } :
+  EventType extends KeyboardEvent ? { comboDelimiter?: string, keyDirection?: 'up' | 'down' } & EventListenOptions :
+  EventType extends MouseEvent ? { comboDelimiter?: string } & EventListenOptions :
+  EventType extends CustomEvent | Event ? EventListenOptions :
+  {}
+
+type ObservationListenOptions = { target?: Element }
+
+type EventListenOptions = {
+  target?: Element | Document | Window
+  addEventListener?: AddEventListenerOptions,
+  useCapture?: boolean,
+  wantsUntrusted?: boolean,
+  except?: string[],
+  only?: string[],
+}
+
+type ListenableActive<EventType> = { category: ListenableCategory } & (
+  EventType extends IntersectionObserverEntry ? { target: Element, id: IntersectionObserver } :
+  EventType extends MutationRecord ? { target: Element, id: MutationObserver } :
+  EventType extends ResizeObserverEntry ? { target: Element, id: ResizeObserver } :
+  EventType extends MediaQueryListEvent ? { target: MediaQueryList, id: [type: string, listener: ListenCallback<EventType>] } :
+  EventType extends IdleDeadline ? { target: Window, id: number } :
+  EventType extends KeyboardEvent | MouseEvent | CustomEvent ? { target: Element | Document, id: ListenableActiveEventId<EventType> } :
+  {}
+)
+
+type ListenableActiveEventId<EventType> = [
+  type: string,
+  exceptAndOnlyListener: ListenCallback<EventType>,
+  optionsOrUseCapture: AddEventListenerOptions | boolean,
+  wantsUntrusted: boolean
+]
+
+export class Listenable<EventType extends ListenableSupportedType> {
   _computedRecognizeable: Recognizeable<EventType>
   _computedRecognizeableEvents: string[]
   _computedActive: Set<ListenableActive<EventType>> // TODO: better type
@@ -56,16 +108,16 @@ export class Listenable<EventType> {
     return this
   }
 
-  listen (listener, options: ListenOptions = {}) {
+  listen (listener: ListenCallback<EventType>, options?: ListenOptions<EventType>) {
     switch (this._computedCategory) {
       case 'observation':
-        this._observationListen(listener, options)
+        this._observationListen(listener as ListenCallback<ListenableSupportedObservation>, options as ListenOptions<ListenableSupportedObservation>)
         break
       case 'mediaquery':
-        this._mediaQueryListen(listener)
+        this._mediaQueryListen(listener as (event: MediaQueryListEvent) => any)
         break
       case 'idle':
-        this._idleListen(listener, options)
+        this._idleListen(listener as ListenCallback<IdleDeadline>, options as ListenOptions<IdleDeadline>)
         break
       case 'recognizeable':
         this._recognizeableListen(listener, options)
@@ -89,26 +141,26 @@ export class Listenable<EventType> {
 
     return this
   }
-  _observationListen (listener, options: ListenOptions) {
-    const { observer: observerOptions, observe: observeOptions, target = document.querySelector('html') } = options,
-          observerInstance = toObserver({ type: this.type as 'intersect' | 'mutate' | 'resize', listener }, observerOptions)
+  _observationListen (listener: ListenCallback<ListenableSupportedObservation>, options: ListenOptions<ListenableSupportedObservation>) {
+    const { target = document.querySelector('html') } = options,
+          observerInstance = toObserver({ type: this.type as 'intersect' | 'mutate' | 'resize', listener }, 'observer' in options ? (options as ListenOptions<IntersectionObserverEntry>).observer : {})
 
-    observerInstance.observe(target, observeOptions)
+    observerInstance.observe(target, 'observe' in options ? ((options as ListenOptions<MutationRecord | ResizeObserverEntry>).observe as EventType extends MutationRecord ? MutationObserverInit : ResizeObserverOptions) : {})
     this.active.add({ target, id: observerInstance, category: 'observation' })
   }
-  _mediaQueryListen (listener) {
+  _mediaQueryListen (listener: ListenCallback<MediaQueryListEvent>) {
     const target = window.matchMedia(this.type)
 
     target.addEventListener('change', listener)
     this.active.add({ target, id: ['change', listener], category: 'mediaquery' })
   }
-  _idleListen (listener, options: ListenOptions) {
+  _idleListen (listener: IdleRequestCallback, options: ListenOptions<IdleDeadline>) {
     const { requestIdleCallback } = options,
           id = window.requestIdleCallback(listener, requestIdleCallback)
 
-    this.active.add({ id, category: 'idle' })
+    this.active.add({ target: window, id, category: 'idle' })
   }
-  _recognizeableListen (listener, options: ListenOptions) {
+  _recognizeableListen (listener: ListenCallback<EventType>, options: ListenOptions<EventType>) {
     const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams<EventType>(listener, options),
           eventListeners = this._computedRecognizeableEvents.map(name => {
             return [name, event => {
@@ -124,7 +176,7 @@ export class Listenable<EventType> {
 
     this._addEventListeners(eventListeners, options)
   }
-  _visibilityChangeListen (listener, naiveOptions) {
+  _visibilityChangeListen (listener: ListenCallback<EventType>, naiveOptions) {
     const options = {
       ...naiveOptions,
       target: document,
@@ -132,7 +184,7 @@ export class Listenable<EventType> {
     
     this._eventListen(listener, options)
   }
-  _keycomboListen (listener, options: ListenOptions) {
+  _keycomboListen (listener: ListenCallback<EventType>, options: ListenOptions<EventType>) {
     const combo = toCombo(this.type, options.comboDelimiter).map(name => ({ name, type: comboItemNameToType(name) })),
           guardedListener = (event: EventType) => {            
             if (eventMatchesKeycombo({ event, combo })) {
@@ -142,7 +194,7 @@ export class Listenable<EventType> {
     
     this._eventListen(guardedListener, options)
   }
-  _clickcomboListen (listener, options: ListenOptions) {
+  _clickcomboListen (listener: ListenCallback<EventType>, options: ListenOptions<EventType>) {
     const combo = toCombo(this.type, options.comboDelimiter),
           guardedListener = (event: EventType) => {
             if (eventMatchesClickcombo({ event, combo })) {
@@ -152,7 +204,7 @@ export class Listenable<EventType> {
     
     this._eventListen(guardedListener, options)
   }
-  _eventListen (listener, options: ListenOptions) {
+  _eventListen (listener: ListenCallback<EventType>, options: ListenOptions<EventType>) {
     const type = (() => {
       switch (this._computedCategory) {
         case 'keycombo':
@@ -166,12 +218,15 @@ export class Listenable<EventType> {
       }
     })()
 
-    const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams(listener, options),
-          eventListeners = [[type, exceptAndOnlyListener, ...listenerOptions]]
+    const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams<EventType>(listener, options),
+          eventListeners: ListenableActiveEventId<EventType>[] = [[type, exceptAndOnlyListener, ...listenerOptions]]
 
     this._addEventListeners(eventListeners, options)
   }
-  _addEventListeners (eventListeners, options: ListenOptions) {
+  _addEventListeners (
+    eventListeners: ListenableActiveEventId<EventType>[],
+    options: ListenOptions<EventType>
+  ) {
     const { target = document } = options
 
     eventListeners.forEach(eventListener => {
@@ -216,38 +271,13 @@ export class Listenable<EventType> {
   }
 }
 
-export type ListenableOptions<EventType> = { recognizeable?: RecognizeableOptions<EventType> }
-export type ListenOptions = {
-  target?: Element,
-
-  observer?: IntersectionObserverInit,
-  observe?: ResizeObserverOptions | MutationObserverInit
-
-  requestIdleCallback?: IdleRequestOptions,
-
-  addEventListener?: AddEventListenerOptions,
-  useCapture?: boolean,
-  wantsUntrusted?: boolean,
-
-  except?: string[],
-  only?: string[],
-
-  comboDelimiter?: string,
-  keyDirection?: 'up' | 'down',
-}
-export type ListenableActive<EventType> = { category: ListenableCategory } & (
-  { target: Element, id: IntersectionObserver | MutationObserver | ResizeObserver } 
-  |
-  { target: Element | Document, id: (event: EventType) => any }
-  |
-  { target: MediaQueryList, id: ['change', (event: EventType) => any] }
-  |
-  { id: number }
-)
-
-const stopsByCategory: { [category: string] : (stoppable: Stoppable) => any }  = {
-  observation: ({ id }) => id.disconnect(),
-  mediaquery: ({ target, id }) => target.removeEventListener(...id),
-  idle: ({ id }) => window.cancelIdleCallback(id),
-  event: ({ target, id }) => target.removeEventListener(...id),
+const stopsByCategory = {
+  observation: <EventType>({ id }: ListenableActive<EventType>) => 
+    (id as IntersectionObserver | MutationObserver | ResizeObserver).disconnect(),
+  mediaquery: <EventType>({ target, id }: ListenableActive<EventType>) => 
+    (target as MediaQueryList).removeEventListener(id[0], id[1]),
+  idle: <EventType>({ target, id }: ListenableActive<EventType>) => 
+    (target as Window).cancelIdleCallback(id as number),
+  event: <EventType>({ target, id }: ListenableActive<EventType>) => 
+    target.removeEventListener(...id),
 }

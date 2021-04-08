@@ -1,5 +1,5 @@
 import { createUnique } from './pipes'
-import type { ListenOptions } from './classes/Listenable'
+import type { ListenCallback, ListenOptions } from './classes/Listenable'
 
 // DISPATCHABLE
 export function toEvent (
@@ -41,10 +41,10 @@ export function toEvent (
 
 
 // LISTENABLE
-export function toObserver(
+export function toObserver<EventType>(
   { type, listener }: {
     type: 'intersect' | 'mutate' | 'resize',
-    listener:  IntersectionObserverCallback | MutationCallback | ResizeObserverCallback,
+    listener: ListenCallback<EventType>
   },
   options?: IntersectionObserverInit
 ) {
@@ -158,15 +158,17 @@ const typeREs: Record<ListenableComboItemType, RegExp> = {
   click: /^(rightclick|click|mousedown|mouseup)$/,
 }
 
-export function toAddEventListenerParams<EventType extends Event> (listener: (event: EventType) => any, options: ListenOptions<EventType>) {
+type ListenableSupportedEvent = KeyboardEvent | MouseEvent
+
+export function toAddEventListenerParams<EventType extends ListenableSupportedEvent> (listener: (event: EventType) => any, options: ListenOptions) {
   const { addEventListener, useCapture, wantsUntrusted } = options,
         exceptAndOnlyListener = createExceptAndOnlyListener<EventType>(listener, options),
-        listenerOptions = [addEventListener || useCapture, wantsUntrusted]
+        listenerOptions: [optionsOrUseCapture: AddEventListenerOptions | boolean, wantsUntrusted: boolean] = [addEventListener || useCapture, wantsUntrusted]
 
   return { exceptAndOnlyListener, listenerOptions }
 }
 
-export function createExceptAndOnlyListener<EventType extends Event> (listener: (event: EventType) => any, options: ListenOptions<EventType>): (event: EventType) => any {
+export function createExceptAndOnlyListener<EventType extends ListenableSupportedEvent> (listener: (event: EventType) => any, options: ListenOptions): (event: EventType) => any {
   const { except = [], only = [] } = options
   
   return (event: EventType) => {
@@ -175,8 +177,12 @@ export function createExceptAndOnlyListener<EventType extends Event> (listener: 
 
     if (matchesOnly) {
       listener(event)
-    } else if (only.length === 0 && !matchesExcept) {
+      return
+    }
+    
+    if (only.length === 0 && !matchesExcept) {
       listener(event)
+      return
     }
   }
 }
@@ -220,8 +226,7 @@ export function toKey (name: ListenableKeyAlias) {
 }
 
 export type ListenableKey = string
-// 'ArrowUp' | 'ArrowRight' | 'ArrowDown' | 'ArrowLeft' | 'Enter' | 'Backspace' | 'Tab' | ' ' | 'Shift' | 'Meta' | 'Meta' | 'Meta' | 'Control' | 'Control' | 'Alt' | 'Alt' | 'Fn' | 'CapsLock' | 'End' | 'Home' | 'PageDown' | 'PageUp' | 'Escape' | 'Camera' | 'Delete' | 'F1' | 'F2' | 'F3' | 'F4' | 'F5' | 'F6' | 'F7' | 'F8' | 'F9' | 'F10' | 'F11' | 'F12' | 'F13' | 'F14' | 'F15' | 'F16' | 'F17' | 'F18' | 'F19' | 'F20'
-export type ListenableKeyAlias = 'up' | 'right' | 'down' | 'left' | 'enter' | 'backspace' | 'tab' | 'space' | 'shift' | 'meta' | 'command' | 'cmd' | 'control' | 'ctrl' | 'alt' | 'opt' | 'fn' | 'capslock' | 'end' | 'home' | 'pagedown' | 'pageup' | 'esc' | 'camera' | 'delete' | 'f1' | 'f2' | 'f3' | 'f4' | 'f5' | 'f6' | 'f7' | 'f8' | 'f9' | 'f10' | 'f11' | 'f12' | 'f13' | 'f14' | 'f15' | 'f16' | 'f17' | 'f18' | 'f19' | 'f20'
+export type ListenableKeyAlias = 'up' | 'right' | 'down' | 'left' | 'enter' | 'backspace' | 'tab' | 'space' | 'shift' | 'meta' | 'command' | 'cmd' | 'control' | 'ctrl' | 'alt' | 'opt' | 'option' | 'fn' | 'capslock' | 'end' | 'home' | 'pagedown' | 'pageup' | 'esc' | 'camera' | 'delete' | 'f1' | 'f2' | 'f3' | 'f4' | 'f5' | 'f6' | 'f7' | 'f8' | 'f9' | 'f10' | 'f11' | 'f12' | 'f13' | 'f14' | 'f15' | 'f16' | 'f17' | 'f18' | 'f19' | 'f20'
 
 const keysByName: Record<ListenableKeyAlias, ListenableKey> = {
   up: 'ArrowUp',
@@ -240,6 +245,7 @@ const keysByName: Record<ListenableKeyAlias, ListenableKey> = {
   ctrl: 'Control',
   alt: 'Alt',
   opt: 'Alt',
+  option: 'Alt',
   fn: 'Fn',
   capslock: 'CapsLock',
   end: 'End',
@@ -271,11 +277,8 @@ const keysByName: Record<ListenableKeyAlias, ListenableKey> = {
   f20: 'F20',
 }
 
-/**
- * @typedef {(required: { event: KeyboardEvent, name?: string }) => boolean} ArrowPredicate
- * @type {{ arrow: ArrowPredicate, '!arrow': ArrowPredicate, vertical: ArrowPredicate, '!vertical': ArrowPredicate, horizontal: ArrowPredicate, '!horizontal': ArrowPredicate, default: ArrowPredicate }}
- */
-const predicatesByArrow = {
+export type ListenableArrowAlias = 'arrow' | '!arrow' | 'vertical' | '!vertical' | 'horizontal' | '!horizontal' | 'default'
+const predicatesByArrow: Record<ListenableArrowAlias, (required: { event: KeyboardEvent, name?: string }) => boolean> = {
   'arrow': ({ event }) => ['arrowup', 'arrowright', 'arrowdown', 'arrowleft'].includes(event.key.toLowerCase()),
   '!arrow': ({ event }) => !['arrowup', 'arrowright', 'arrowdown', 'arrowleft'].includes(event.key.toLowerCase()),
   'vertical': ({ event }) => ['arrowup', 'arrowdown'].includes(event.key.toLowerCase()),
@@ -287,52 +290,41 @@ const predicatesByArrow = {
     : event.key.toLowerCase() === `arrow${name.toLowerCase()}`,
 }
 
+type ListenableModifierAlias = 'cmd' | 'command' | 'ctrl' | 'opt' | 'option'
+type ListenableModifier = 'meta' | 'command' | 'control' | 'alt' | 'shift'
 
-/**
- * @typedef {'cmd' | 'command' | 'meta' | 'shift' | 'ctrl' | 'control' | 'alt' | 'opt'} ListenableModifierAlias 
- * @typedef {'meta' | 'command' | 'control' | 'alt' | 'shift'} ListenableModifier
- * @param {string} alias
- * @return {ListenableModifier}
- */
-export function toModifier (alias) {
-  return modifiersByAlias[alias] || alias
+export function toModifier (modifierOrAlias: ListenableModifier | ListenableModifierAlias) {
+  return modifierOrAlias in modifiersByAlias ? modifiersByAlias[modifierOrAlias] : modifierOrAlias
 }
 
-/**
- * @type {{ cmd: ListenableModifier, command: ListenableModifier, ctrl: ListenableModifier, opt: ListenableModifier }}
- */
-const modifiersByAlias = {
+const modifiersByAlias: Record<ListenableModifierAlias, ListenableModifier> = {
   cmd: 'meta',
   command: 'meta',
   ctrl: 'control',
   opt: 'alt',
+  option: 'alt',
 }
 
-/**
- * @typedef {'shiftKey' | 'metaKey' | 'ctrlKey' | 'altKey' | 'altKey'} ListenableModifierFlag
- * @param {string} alias
- * @return {ListenableModifierFlag}
- */
-export function toModifierFlag (alias) {
-  return flagsByAlias[alias]
+type ListenableModifierFlag = 'shiftKey' | 'metaKey' | 'ctrlKey' | 'altKey'
+
+export function toModifierFlag (modifierOrAlias: ListenableModifier | ListenableModifierAlias) {
+  return flagsByModifierOrAlias[modifierOrAlias]
 }
 
-/**
- * @type {{shift: ListenableModifierFlag, cmd: ListenableModifierFlag, ctrl: ListenableModifierFlag, alt: ListenableModifierFlag, opt: ListenableModifierFlag }}
- */
-const flagsByAlias = {
+const flagsByModifierOrAlias: Record<ListenableModifier | ListenableModifierAlias, ListenableModifierFlag> = {
   shift: 'shiftKey',
   cmd: 'metaKey',
+  command: 'metaKey',
+  meta: 'metaKey',
   ctrl: 'ctrlKey',
+  control: 'ctrlKey',
   alt: 'altKey',
   opt: 'altKey',
+  option: 'altKey',
 }
 
-/**
-* @param {{ event: any, alias: string }} required
-* @return {boolean}
-*/
-export function isModified ({ event, alias }) {
+
+export function isModified<EventType extends ListenableSupportedEvent> ({ event, alias }: { event: EventType, alias: string }) {
   return predicatesByModifier[alias]?.(event)
 }
 
@@ -340,12 +332,16 @@ export function isModified ({ event, alias }) {
  * @typedef {(event: any) => boolean} ListenableModifierPredicate
  * @type {{ shift: ListenableModifierPredicate, cmd: ListenableModifierPredicate, ctrl: ListenableModifierPredicate, alt: ListenableModifierPredicate, opt: ListenableModifierPredicate }}
  */
-const predicatesByModifier = {
-  shift: event => event.shiftKey,
-  cmd: event => event.metaKey,
-  ctrl: event => event.ctrlKey,
-  alt: event => event.altKey,
-  opt: event => event.altKey,
+const predicatesByModifier: Record<ListenableModifier | ListenableModifierAlias, Function> = {
+  shift: <EventType extends ListenableSupportedEvent>(event: EventType): boolean => event.shiftKey,
+  cmd: <EventType extends ListenableSupportedEvent>(event: EventType): boolean => event.metaKey,
+  command: <EventType extends ListenableSupportedEvent>(event: EventType): boolean => event.metaKey,
+  meta: <EventType extends ListenableSupportedEvent>(event: EventType): boolean => event.metaKey,
+  ctrl: <EventType extends ListenableSupportedEvent>(event: EventType): boolean => event.ctrlKey,
+  control: <EventType extends ListenableSupportedEvent>(event: EventType): boolean => event.ctrlKey,
+  alt: <EventType extends ListenableSupportedEvent>(event: EventType): boolean => event.altKey,
+  opt: <EventType extends ListenableSupportedEvent>(event: EventType): boolean => event.altKey,
+  option: <EventType extends ListenableSupportedEvent>(event: EventType): boolean => event.altKey,
 }
 
 

@@ -4,12 +4,37 @@ import { Listenable } from './Listenable.js'
 import { isFunction, isUndefined, isNumber, isString, isArray } from '../util.js'
 import { createUnique } from '../pipes.js'
 
-/**
- * @type {AnimateableOptions}
- */
-const defaultOptions = {
+type AnimateableKeyframe = {
+  progress: number,
+  data: {
+    [key: string]: number | string | any[]
+  },
+  timing?: AnimateableTiming
+}
+
+type AnimateableOptions = {
+  duration?: number,
+  timing?: AnimateableTiming,
+  iterations?: number | true,
+  alternates?: boolean
+}
+
+type AnimateableTiming = [number, number, number, number]
+
+type AnimateableControlPoints = [{ x: number, y: number }, { x: number, y: number }]
+
+type AnimateableFrameHandler = (frame?: AnimateableFrame) => any
+
+type AnimateableFrame = { progress: { [key: string]: { time: number, animation: number } }, data: { [key: string]: number | string | any[] }, timestamp: number }
+
+type AnimateOptions = { interpolate?: {} }
+
+type AnimateType = 'play' | 'reverse' | 'seek'
+
+
+const defaultOptions: AnimateableOptions = {
         duration: 0,
-        // delay can be handled by delayable
+        // delay not supported, because it can be handled by delayable
         timing: [
           0, 0,
           1, 1,
@@ -19,48 +44,41 @@ const defaultOptions = {
       }
 
 export class Animateable {
-  /**
-   * @typedef {[number, number, number, number]} AnimateableTiming
-   * @typedef {{ progress: number, data: { [key: string]: (number | string | any[]) }, timing?: AnimateableTiming }} AnimateableKeyframe
-   * @typedef {{ duration?: number, timing?: AnimateableTiming, iterations?: number | true, alternates?: boolean }} AnimateableOptions
-   * @param {AnimateableKeyframe[]} keyframes
-   * @param {AnimateableOptions} [options]
-   */
-  constructor (keyframes, options = {}) {
+  _initialDuration: number
+  _iterationLimit: number | true
+  _alternates: boolean
+  _controlPoints: AnimateableControlPoints
+  _reversedControlPoints: AnimateableControlPoints
+  _toAnimationProgress: BezierEasing.EasingFunction
+  _reversedToAnimationProgress: BezierEasing.EasingFunction
+  _playCache: { handle?: AnimateableFrameHandler, options?: AnimateOptions }
+  _reverseCache: { handle?: AnimateableFrameHandler, options?: AnimateOptions }
+  _pauseCache: { status?: 'playing' | 'reversing', timeProgress?: number }
+  _seekCache: { timeProgress?: number }
+  _alternateCache: { status: 'ready' | 'playing' | 'reversing' }
+  _visibilitychange: Listenable<Event>
+  _getEaseables: GetEasables
+  _getReversedEaseables: GetEasables
+  constructor (keyframes: AnimateableKeyframe[], options: AnimateableOptions = {}) {
     this._initialDuration = options?.duration || defaultOptions.duration
     this._controlPoints = fromTimingToControlPoints(options?.timing || defaultOptions.timing)
     this._iterationLimit = options?.iterations || defaultOptions.iterations
     this._alternates = options?.alternates || defaultOptions.alternates
 
-    this._reversedControlPoints = fromTimingToReversedControlPoints(this._controlPoints)
+    this._reversedControlPoints = fromControlPointsToReversedControlPoints(this._controlPoints)
     
     this._toAnimationProgress = createToAnimationProgress(this._controlPoints)
     this._reversedToAnimationProgress = createToAnimationProgress(this._reversedControlPoints)
 
-    /**
-     * @type {{ handle?: AnimateableFrameHandler, options?: AnimateOptions }}
-     */
     this._playCache = {}
-    /**
-     * @type {{ handle?: AnimateableFrameHandler, options?: AnimateOptions }}
-     */
     this._reverseCache = {}
-    /**
-     * @type {{ status?: 'playing' | 'reversing', timeProgress?: number }}
-     */
     this._pauseCache = {}
-    /**
-     * @type {{ timeProgress?: number }}
-     */
     this._seekCache = {}
-    /**
-     * @type {{ status: 'ready' | 'playing' | 'reversing' }}
-     */
     this._alternateCache = { status: 'ready' }
     this._visibilitychange = new Listenable('visibilitychange')
 
     this._getEaseables = createGetEaseables(({ keyframe }) => keyframe.timing ? fromTimingToControlPoints(keyframe.timing) : this._controlPoints)
-    this._getReversedEaseables = createGetEaseables(({ keyframe, index, array }) => keyframe.timing ? fromTimingToReversedControlPoints(fromTimingToControlPoints(array[index + 1].timing)) : this._reversedControlPoints)
+    this._getReversedEaseables = createGetEaseables(({ keyframe, index, array }) => keyframe.timing ? fromControlPointsToReversedControlPoints(fromTimingToControlPoints(array[index + 1].timing)) : this._reversedControlPoints)
     
     this.setKeyframes(keyframes)
     this.setPlaybackRate(1)
@@ -69,24 +87,25 @@ export class Animateable {
     this._resetProgress()
     this._resetIterations()
   }
+  _computedStatus: 'ready' | 'playing' | 'played' | 'reversing' | 'reversed' | 'paused' | 'sought' | 'stopped'
   _ready () {
-    /**
-     * @type {'ready' | 'playing' | 'played' | 'reversing' | 'reversed' | 'paused' | 'sought' | 'stopped'}
-     */
     this._computedStatus = 'ready'
   }
+  _computedTime: { elapsed: number, remaining: number }
   _resetTime () {
     this._computedTime = {
       elapsed: 0,
       remaining: this._duration,
     }
   }
+  _computedProgress: { time: number, animation: number }
   _resetProgress () {
     this._computedProgress = {
       time: 0,
       animation: 0,
     }
   }
+  _computedIterations: number
   _resetIterations () {
     this._computedIterations = 0
   }
@@ -119,10 +138,12 @@ export class Animateable {
     return this._computedProgress
   }
 
-  /**
-   * @param {AnimateableKeyframe[]} keyframes 
-   */
-  setKeyframes (keyframes) {
+  _computedKeyframes: AnimateableKeyframe[]
+  _reversedKeyframes: AnimateableKeyframe[]
+  _properties: string[]
+  _easeables: Easeable[]
+  _reversedEaseables: Easeable[]
+  setKeyframes (keyframes: AnimateableKeyframe[]) {
     this.stop()
 
     // Sort by progress without mutating original
@@ -138,10 +159,10 @@ export class Animateable {
     return this
   }
 
-  /**
-   * @param {number} playbackRate 
-   */
-  setPlaybackRate (playbackRate) {
+  _computedPlaybackRate: number
+  _duration: number
+  _totalTimeInvisible: number
+  setPlaybackRate (playbackRate: number) {
     const ensuredPlaybackRate = Math.max(0, playbackRate) // negative playback rate is not supported
     this._computedPlaybackRate = ensuredPlaybackRate
     this._duration = (1 / ensuredPlaybackRate) * this._initialDuration
@@ -158,11 +179,7 @@ export class Animateable {
     return this
   }
 
-  /**
-   * @param {AnimateableFrameHandler} handle 
-   * @param {AnimateOptions} [options]
-   */
-  play (handle, options) { // Play from current time progress
+  play (handle: AnimateableFrameHandler, options: AnimateOptions) { // Play from current time progress
     this._playCache = {
       handle,
       options,
@@ -234,11 +251,7 @@ export class Animateable {
     this._computedStatus = 'played'
   }
 
-  /**
-   * @param {AnimateableFrameHandler} handle 
-   * @param {AnimateOptions} [options]
-   */
-  reverse (handle, options) { // Reverse from current time progress
+  reverse (handle: AnimateableFrameHandler, options: AnimateOptions) { // Reverse from current time progress
     this._reverseCache = {
       handle,
       options,
@@ -310,11 +323,9 @@ export class Animateable {
     this._computedStatus = 'reversed'
   }
 
+  _invisibleAt: number
   _listenForVisibilitychange () {
     if (this._visibilitychange.active.size === 0) {
-      /**
-       * @type {number}
-       */
       this._totalTimeInvisible = 0
 
       this._visibilitychange.listen(({ timeStamp: timestamp }) => {
@@ -330,14 +341,8 @@ export class Animateable {
     }
   }
 
-  /**
-   * @typedef {(frame?: AnimateableFrame) => any} AnimateableFrameHandler
-   * @typedef {{ progress: { [key: string]: { time: number, animation: number } }, data: { [key: string]: number | string | any[] }, timestamp: number }} AnimateableFrame
-   * @typedef {{ interpolate?: any }} AnimateOptions
-   * @param {'play' | 'reverse' | 'seek'} type
-   * @return {(handle: (frame?: AnimateableFrame) => any, options?: AnimateOptions) => this}
-   */
-  _createAnimate (type) {
+  _computedRequest: number
+  _createAnimate (type: AnimateType): (handle: (frame?: AnimateableFrame) => any, options?: AnimateOptions) => this {
     return (handle, options = {}) => {
       const { interpolate: interpolateOptions } = options
 
@@ -373,11 +378,8 @@ export class Animateable {
       return this
     }
   }
-  /**
-   * @param {'play' | 'reverse' | 'seek'} type
-   * @param {number} timestamp
-   */
-  _setStartTimeAndStatus (type, timestamp) {
+  _startTime: number
+  _setStartTimeAndStatus (type: AnimateType, timestamp: number) {
     switch (type) {
       case 'play':
         switch (this.status) {
@@ -436,10 +438,7 @@ export class Animateable {
         break
     }
   }
-  /**
-   * @param {'play' | 'reverse' | 'seek'} type
-   */
-  _getToAnimationProgress (type) {
+  _getToAnimationProgress (type: AnimateType) {
     switch (type) {
       case 'play':
       case 'seek':
@@ -448,13 +447,17 @@ export class Animateable {
         return this._reversedToAnimationProgress.bind(this)
     }
   }
-  /**
-   * @param {'play' | 'reverse' | 'seek'} type 
-   * @param {number} naiveTimeProgress 
-   * @param {number} interpolateOptions 
-   * @return {{ progress: { [key: string]: { time: number, animation: number } }, data: { [key: string]: number | string | any[] }}}
-   */
-  _getFrame (type, naiveTimeProgress, interpolateOptions) {
+  _getFrame (type: AnimateType, naiveTimeProgress: number, interpolateOptions: {}): {
+    progress: {
+      [key: string]: {
+        time: number,
+        animation: number
+      }
+    }, 
+    data: {
+      [key: string]: number | string | any[]
+    }
+  } {
     const easeables = (() => {
       switch (type) {
         case 'play':
@@ -483,13 +486,7 @@ export class Animateable {
         }
       }, { data: {}, progress: {} })
   }
-  /**
-   * @param {'play' | 'reverse' | 'seek'} type
-   * @param {number} timeRemaining
-   * @param {AnimateableFrameHandler} handle
-   * @param {AnimateOptions} options 
-   */
-  _recurse (type, timeRemaining, handle, options) {
+  _recurse (type: AnimateType, timeRemaining: number, handle: AnimateableFrameHandler, options: AnimateOptions) {
     switch (type) {
       case 'play':
         if (timeRemaining <= 0) {
@@ -569,7 +566,7 @@ export class Animateable {
 
           window.requestAnimationFrame(timestamp => {
             this._pauseCache = {
-              status: /** @type {'playing' | 'reversing'} */ (this.status),
+              status: this.status as 'playing' | 'reversing',
               timeProgress: (timestamp - this._startTime) / this._duration,
             }
     
@@ -581,7 +578,7 @@ export class Animateable {
 
           window.requestAnimationFrame(timestamp => {
             this._pauseCache = {
-              status: /** @type {'playing' | 'reversing'} */ (this.status),
+              status: this.status as 'playing' | 'reversing',
               timeProgress: (timestamp - this._startTime) / this._duration,
             }
       
@@ -595,7 +592,7 @@ export class Animateable {
           
           window.requestAnimationFrame(timestamp => {
             this._pauseCache = {
-              status: /** @type {'playing' | 'reversing'} */ (this.status),
+              status: this.status as 'playing' | 'reversing',
               timeProgress: (timestamp - this._startTime) / this._duration,
             }
     
@@ -607,7 +604,7 @@ export class Animateable {
           
           window.requestAnimationFrame(timestamp => {
             this._pauseCache = {
-              status: /** @type {'playing' | 'reversing'} */ (this.status),
+              status: this.status as 'playing' | 'reversing',
               timeProgress: (timestamp - this._startTime) / this._duration,
             }
       
@@ -625,11 +622,7 @@ export class Animateable {
     window.cancelAnimationFrame(this.request)
   }
 
-  /**
-   * @param {number} timeProgress 
-   * @param {{ handle?: AnimateableFrameHandler } & AnimateOptions} [options]
-   */
-  seek (timeProgress, options) { // Store time progress. Continue playing or reversing if applicable.
+  seek (timeProgress: number, options?: { handle?: AnimateableFrameHandler } & AnimateOptions) { // Store time progress. Continue playing or reversing if applicable.
     const iterations = Math.floor(timeProgress),
           naiveIterationProgress = timeProgress - iterations,
           { handle: naiveHandle } = options
@@ -793,29 +786,31 @@ export class Animateable {
   }
 }
 
-/**
- * @typedef {{ property: string, value: { previous: string | number | any[], next: string | number | any[] }, progress: { start: number, end: number }, hasCustomTiming: boolean, toAnimationProgress: BezierEasing.EasingFunction }} Easeable
- * @param {(required: { keyframe: AnimateableKeyframe, index: number, array: AnimateableKeyframe[] }) => [{ x: number, y: number }, { x: number, y: number }]} fromKeyframeToControlPoints
- * @return {(required: { properties: string[], keyframes: AnimateableKeyframe[] }) => Easeable[]}
- */
-export function createGetEaseables (fromKeyframeToControlPoints) {
+type Easeable = {
+  property: string,
+  value: { previous: string | number | any[], next: string | number | any[] },
+  progress: { start: number, end: number },
+  hasCustomTiming: boolean,
+  toAnimationProgress: BezierEasing.EasingFunction
+}
+
+type GetEasables = (required: { properties: string[], keyframes: AnimateableKeyframe[] }) => Easeable[]
+
+type FromKeyframeToControlPoints = (
+  { keyframe, index, array }: {
+    keyframe: AnimateableKeyframe,
+    index: number,
+    array: AnimateableKeyframe[]
+  }
+) => AnimateableControlPoints
+
+export function createGetEaseables (fromKeyframeToControlPoints: FromKeyframeToControlPoints): GetEasables {
   return ({ properties, keyframes }) => {
     return properties.reduce(
-      /**
-        * @param {Easeable[]} easeables 
-        * @param {string} property 
-        */
-      (easeables, property) => {
+      (easeables: Easeable[], property: string) => {
         const propertyKeyframes = keyframes.filter(({ data }) => data.hasOwnProperty(property)),
               propertyEaseables = propertyKeyframes.reduce(
-                /**
-                  * @param {Easeable[]} propertyEaseables
-                  * @param {AnimateableKeyframe} keyframe
-                  * @param {number} index
-                  * @param {AnimateableKeyframe[]} array
-                  * @return {Easeable[]}
-                  */
-                (propertyEaseables, keyframe, index, array) => {
+                (propertyEaseables: Easeable[], keyframe: AnimateableKeyframe, index: number, array: AnimateableKeyframe[]): Easeable[] => {
                   const previous = keyframe.data[property],
                         next = index === array.length - 1 ? previous : array[index + 1].data[property],
                         start = keyframe.progress,
@@ -838,12 +833,12 @@ export function createGetEaseables (fromKeyframeToControlPoints) {
                 },
                 []
               ),
-              firstEaseable = /** @type {Easeable} */ ({
+              firstEaseable = {
                 property,
                 value: { previous: propertyEaseables[0].value.previous, next: propertyEaseables[0].value.previous },
                 progress: { start: -1, end: propertyEaseables[0].progress.start },
                 toAnimationProgress: timeProgress => 1,
-              })
+              } as Easeable
         
         return [
           ...easeables,
@@ -854,23 +849,14 @@ export function createGetEaseables (fromKeyframeToControlPoints) {
       []
     )
   }
-
 }
 
-/**
- * 
- * @param {AnimateableKeyframe[]} keyframes
- */
- export function toProperties (keyframes) {
-  return createUnique()(keyframes.map(({ data }) => Object.keys(data)).flat())
+
+export function toProperties (keyframes: AnimateableKeyframe[]): string[] {
+  return createUnique<string>()(keyframes.map(({ data }) => Object.keys(data)).flat())
 }
 
-/**
- * 
- * @param {[number, number, number, number]} timing
- * @return {[{ x: number, y: number }, { x: number, y: number }]}
- */
- export function fromTimingToControlPoints(timing) {
+export function fromTimingToControlPoints(timing: AnimateableTiming): AnimateableControlPoints {
   const { 0: point1x, 1: point1y, 2: point2x, 3: point2y } = timing
   
   return [
@@ -879,34 +865,28 @@ export function createGetEaseables (fromKeyframeToControlPoints) {
   ]
 }
 
-/**
- * @param {[{ x: number, y: number }, { x: number, y: number }]} points
- * @return {[{ x: number, y: number }, { x: number, y: number }]}
- */
-export function fromTimingToReversedControlPoints (points) {
-  // This easy reversal is why the control point objects are preferable
+export function fromControlPointsToReversedControlPoints (points: AnimateableControlPoints): AnimateableControlPoints {
+  // This less complex reversal is why the control point objects are preferable
   return [
     { x: 1 - points[1].x, y: 1 - points[1].y },
     { x: 1 - points[0].x, y: 1 - points[0].y },
   ]
 }
 
-/**
- * @param {[{ x: number, y: number }, { x: number, y: number }]} points
- * @return {BezierEasing.EasingFunction}
- */
- export function createToAnimationProgress (points) {
+
+export function createToAnimationProgress (points: AnimateableControlPoints) {
   const { 0: { x: point1x, y: point1y }, 1: { x: point2x, y: point2y } } = points
   return BezierEasing(point1x, point1y, point2x, point2y)
 }
 
-/**
- * @template {string | number | any[]} T
- * @param {{ previous?: T, next: T, progress: number }} required
- * @param {object} [options]
- * @return T
- */
-export function toInterpolated ({ previous, next, progress }, options = {}) {
+export function toInterpolated (
+  { previous, next, progress }: {
+    previous: string | number | any[] | undefined,
+    next: string | number | any[],
+    progress: number
+  },
+  options = {}
+) {
   if (isUndefined(previous)) {
     return next
   }
