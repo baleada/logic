@@ -8,6 +8,7 @@ import {
   createDelete,
   createInsert,
   createReorder,
+  createSwap,
   createReplace,
   createUnique,
   createSlug,
@@ -27,7 +28,7 @@ suite.before.each(context => {
 
 
 // ARRAY
-const reduceStub = number => new Promise(function(resolve, reject) {
+const reduceStub = (number: number): Promise<number> => new Promise(function(resolve, reject) {
   setTimeout(function() {
     resolve(number)
   }, 10)
@@ -159,6 +160,23 @@ suite('createReorder({ from: { start, itemCount != 0 }, to: index }) moves `item
   })(context.array)
 
   assert.equal(value, ['mantequilla', 'tortilla', 'frijoles', 'aguacate', 'huevito'])
+})
+
+suite.only(`createSwap({ from , to }) swaps the item at from with the item at to`, context => {
+  assert.equal(
+    createSwap({ from: 0, to: 4 })(context.array),
+    ['huevito', 'frijoles', 'mantequilla', 'aguacate', 'tortilla']
+  )
+  
+  assert.equal(
+    createSwap({ from: 4, to: 0 })(context.array),
+    ['huevito', 'frijoles', 'mantequilla', 'aguacate', 'tortilla']
+  )
+  
+  assert.equal(
+    createSwap({ from: 0, to: 1 })(context.array),
+    ['frijoles', 'tortilla', 'mantequilla', 'aguacate', 'huevito']
+  )
 })
 
 suite('createReplace({ item, index }) replaces the item at index with a new item', context => {

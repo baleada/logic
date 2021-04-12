@@ -111,6 +111,21 @@ export function createReorder<Item> ({ from, to }: { from: { start: number, item
   }
 }
 
+export function createSwap<Item> ({ from, to }: { from: number, to: number }): ArrayFunction<Item, Item[]> {
+  return array => {
+    const ensuredFrom = from < to ? from : to,
+          ensuredTo = from < to ? to : from
+    
+    return [
+      ...array.slice(0, ensuredFrom),
+      array[ensuredTo],
+      ...array.slice(ensuredFrom + 1, ensuredTo),
+      array[ensuredFrom],
+      ...array.slice(ensuredTo)
+    ]
+  }
+}
+
 export function createReplace<Item> ({ index, item }: { index: number, item: Item }): ArrayFunction<Item, Item[]> {
   return array => {
     return [

@@ -1,7 +1,9 @@
 import { isArray, isNumber } from '../util'
 import { createInsert } from '../pipes'
 
-export class Recognizeable<EventType> {
+export type RecognizeableSupportedEvent = KeyboardEvent | MouseEvent
+
+export class Recognizeable<EventType extends RecognizeableSupportedEvent> {
   _maxSequenceLength: number | true
   _handlers: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
   _handlerApi: HandlerApiFromConstructor<EventType>

@@ -1,19 +1,12 @@
-import { toEvent, toCombo } from '../util.js'
+import { toEvent, toCombo } from '../util'
 
 export class Dispatchable {
-  /**
-   * 
-   * @param {string} type
-   * @param {{}} [options]
-   */
-  constructor (type, options = {}) {
+  constructor (type: string, options: {} = {}) {
     this.setType(type)
     this._ready()
   }
+  _computedStatus: 'ready' | 'dispatched'
   _ready () {
-    /**
-     * @type {'ready' | 'dispatched'}
-     */
     this._computedStatus = 'ready'
   }
 
@@ -30,18 +23,20 @@ export class Dispatchable {
     return this._computedStatus
   }
 
-  /**
-   * @param {string} type 
-   */
+  _computedType: string
   setType (type) {
     this._computedType = type
     return this
   }
 
-  /**
-   * @param {{ target?: Window | Element, keyDirection?: 'up' | 'down', init?: EventInit }} [options]
-   */
-  dispatch (options = {}) {
+  _computedCancelled: boolean
+  dispatch (
+    options: {
+      target?: Window & typeof globalThis | Document | Element,
+      keyDirection?: 'up' | 'down',
+      init?: EventInit
+    } = {}
+  ) {
     const { target = window, keyDirection = 'down', init = {} } = options,
           event = toEvent(toCombo(this.type), { keyDirection: keyDirection, init })
 
