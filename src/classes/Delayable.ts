@@ -1,4 +1,12 @@
-import { Animateable } from './Animateable.js'
+import { Animateable } from './Animateable'
+import type { AnimateableFrameHandler } from './Animateable'
+
+type DelayableOptions = {
+  delay?: number,
+  executions?: number | true,
+}
+
+type DelayableFunction = (timestamp: number) => any
 
 const defaultOptions = {
   delay: 0,
@@ -6,7 +14,8 @@ const defaultOptions = {
 }
 
 export class Delayable {
-  constructor (callback, options) {
+  _animateable: Animateable
+  constructor (fn: DelayableFunction, options: DelayableOptions = {}) {
     this._animateable = new Animateable(
       [
         { progress: 0, data: { progress: 0 } },
@@ -18,18 +27,19 @@ export class Delayable {
       }
     )
 
-    this.setCallback(callback)
+    this.setFn(fn)
     this._ready()
   }
+  _computedStatus: 'ready' | 'delaying' | 'delayed' | 'paused' | 'sought' | 'stopped'
   _ready () {
     this._computedStatus = 'ready'
   }
 
-  get callback () {
-    return this._computedCallback
+  get fn () {
+    return this._computedFn
   }
-  set callback (callback) {
-    this.setCallback(callback)
+  set fn (fn) {
+    this.setFn(fn)
   }
   get status () {
     return this._computedStatus
@@ -44,12 +54,36 @@ export class Delayable {
     return this._animateable.progress.time
   }
 
-  setCallback (naiveCallback) {
+  _computedFn: DelayableFunction
+  setFn (fn: DelayableFunction) {
     this.stop()
 
-    this._computedCallback = guardUntilDelayed(naiveCallback)
+    this._computedFn = fn
+    this._setFrameHandler(fn)
 
     return this
+  }
+  _frameHandler: AnimateableFrameHandler
+  _setFrameHandler (fn: DelayableFunction) {
+    this._frameHandler = frame => {
+      const { data: { progress }, timestamp } = frame
+
+      // Don't call delayable function until progress is 1
+      if (progress === 1) {
+        fn(timestamp)
+        this._delayed()
+      } else {
+        switch (this.status) {
+        case 'ready':
+        case 'paused':
+        case 'sought':
+        case 'delayed':
+        case 'stopped':
+          this._delaying()
+          break
+        }
+      }
+    }
   }
   _delaying () {
     this._computedStatus = 'delaying'
@@ -65,14 +99,14 @@ export class Delayable {
       break
     case 'sought':
       this.seek(0)
-      this._animateable.play(frame => this.callback(frame))
+      this._animateable.play(frame => this._frameHandler(frame))
       break
     case 'ready':
     case 'paused':
     case 'delayed':
     case 'stopped':
-      this._animateable.play(frame => this.callback(frame))
-    }    
+      this._animateable.play(frame => this._frameHandler(frame))
+    }
 
     return this
   }
@@ -95,7 +129,7 @@ export class Delayable {
     switch (this.status) {
     case 'paused':
     case 'sought':
-      this._animateable.play(frame => this.callback(frame))
+      this._animateable.play(frame => this._frameHandler(frame))
       break
     case 'ready':
     case 'delaying':
@@ -108,21 +142,24 @@ export class Delayable {
     return this
   }
 
-  seek (timeProgress) {
+  seek (timeProgress: number) {
     const executions = Math.floor(timeProgress)
 
-  if (executions > 0) {
-    window.requestAnimationFrame(timestamp => {
+    if (executions > 0) {
+      window.requestAnimationFrame(timestamp => {
         for (let i = 0; i < executions; i++) {
-          this.callback({
+          this._frameHandler({
             data: { progress: 1 },
-            timestamp
+            progress: {
+              progress: { time: 1, animation: 1 },
+            },
+            timestamp,
           })
         }
       })
     }
 
-    this._animateable.seek(timeProgress, timestamp => this.callback(timestamp))
+    this._animateable.seek(timeProgress, { handle: frame => this._frameHandler(frame) })
     this._sought()
 
     return this
@@ -140,27 +177,4 @@ export class Delayable {
   _stopped () {
     this._computedStatus = 'stopped'
   }
-}
-
-function guardUntilDelayed (naiveCallback) {
-  function callback (frame) {
-    const { data: { progress }, timestamp } = frame
-
-    if (progress === 1) {
-      naiveCallback(timestamp)
-      this._delayed()
-    } else {
-      switch (this.status) {
-      case 'ready':
-      case 'paused':
-      case 'sought':
-      case 'delayed':
-      case 'stopped':
-        this._delaying()
-        break
-      }
-    }
-  }
-
-  return callback
 }

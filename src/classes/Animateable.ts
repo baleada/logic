@@ -23,9 +23,17 @@ type AnimateableTiming = [number, number, number, number]
 
 type AnimateableControlPoints = [{ x: number, y: number }, { x: number, y: number }]
 
-type AnimateableFrameHandler = (frame?: AnimateableFrame) => any
+export type AnimateableFrameHandler = (frame?: AnimateableFrame) => any
 
-type AnimateableFrame = { progress: { [key: string]: { time: number, animation: number } }, data: { [key: string]: number | string | any[] }, timestamp: number }
+type AnimateableFrame = {
+  progress: {
+    [key: string]: { time: number, animation: number }
+  },
+  data: {
+    [key: string]: number | string | any[]
+  },
+  timestamp: number
+}
 
 type AnimateOptions = { interpolate?: {} }
 
@@ -179,7 +187,7 @@ export class Animateable {
     return this
   }
 
-  play (handle: AnimateableFrameHandler, options: AnimateOptions) { // Play from current time progress
+  play (handle: AnimateableFrameHandler, options?: AnimateOptions) { // Play from current time progress
     this._playCache = {
       handle,
       options,
@@ -251,7 +259,7 @@ export class Animateable {
     this._computedStatus = 'played'
   }
 
-  reverse (handle: AnimateableFrameHandler, options: AnimateOptions) { // Reverse from current time progress
+  reverse (handle: AnimateableFrameHandler, options?: AnimateOptions) { // Reverse from current time progress
     this._reverseCache = {
       handle,
       options,
@@ -486,7 +494,7 @@ export class Animateable {
         }
       }, { data: {}, progress: {} })
   }
-  _recurse (type: AnimateType, timeRemaining: number, handle: AnimateableFrameHandler, options: AnimateOptions) {
+  _recurse (type: AnimateType, timeRemaining: number, handle: AnimateableFrameHandler, options?: AnimateOptions) {
     switch (type) {
       case 'play':
         if (timeRemaining <= 0) {
