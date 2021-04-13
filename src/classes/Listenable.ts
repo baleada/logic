@@ -65,11 +65,12 @@ type ListenableActiveEventId<EventType> = [
 export class Listenable<EventType extends ListenableSupportedType> {
   _computedRecognizeable: Recognizeable<RecognizeableSupportedEvent>
   _computedRecognizeableEvents: string[]
-  _computedActive: Set<ListenableActive<EventType>> // TODO: better type
-  constructor (type: string, options: ListenableOptions<EventType> = {}) {
+  _computedActive: Set<ListenableActive<EventType>>
+  constructor (type: string, options?: ListenableOptions<EventType>) {
     if (type === 'recognizeable') { // Based on the type param, can assume that EventType is a safe type
-      this._computedRecognizeable = new Recognizeable([], (options as ListenableOptions<RecognizeableSupportedEvent>).recognizeable)
-      this._computedRecognizeableEvents = Object.keys(options.recognizeable?.handlers || {})
+      const recognizeableOptions = (options as ListenableOptions<RecognizeableSupportedEvent>).recognizeable as RecognizeableOptions<RecognizeableSupportedEvent>
+      this._computedRecognizeable = new Recognizeable([], recognizeableOptions)
+      this._computedRecognizeableEvents = Object.keys(recognizeableOptions?.handlers || {})
     }    
 
     this._computedActive = new Set()
@@ -125,7 +126,7 @@ export class Listenable<EventType extends ListenableSupportedType> {
         this._idleListen(listener as ListenCallback<IdleDeadline>, options as ListenOptions<IdleDeadline>)
         break
       case 'recognizeable':
-        this._recognizeableListen(listener as ListenCallback<EventType>, options as ListenOptions<EventType>)
+        this._recognizeableListen(listener as ListenCallback<RecognizeableSupportedEvent>, options as ListenOptions<RecognizeableSupportedEvent>)
         break
       case 'visibilitychange':
         this._visibilityChangeListen(listener as ListenCallback<Event>, options as ListenOptions<Event>)
@@ -182,7 +183,7 @@ export class Listenable<EventType extends ListenableSupportedType> {
   _recognizeableListen (listener: ListenCallback<RecognizeableSupportedEvent>, options: ListenOptions<RecognizeableSupportedEvent>) {
     const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams<RecognizeableSupportedEvent>(listener, options),
           eventListeners = this._computedRecognizeableEvents.map(name => {
-            return [name, (event: KeyboardEvent | MouseEvent) => {
+            return [name, (event: RecognizeableSupportedEvent) => {
               this.recognizeable.recognize(event)
 
               if (this.recognizeable.status === 'recognized') {

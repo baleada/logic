@@ -3,7 +3,7 @@ import toMetadata from './source-transforms/toMetadata'
 import typescript from '@rollup/plugin-typescript'
 
 const shared = configureable('rollup')
-        .input(['src/classes.js', 'src/pipes.js'])
+        .input(['src/classes.ts', 'src/pipes.ts'])
         .multi()
         .resolve()
         .external([
@@ -29,6 +29,7 @@ const shared = configureable('rollup')
         .configure(),
       cjs = shared
         .cjs({ file: 'lib/index.cjs' })
+        .plugin(typescript())
         .configure(),
       metadataEsm = metadataShared    
         .delete({ targets: 'metadata/*', verbose: true })

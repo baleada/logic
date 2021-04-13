@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs'
 
 export default function toMetadata () {
-  const classes = readFileSync('./src/classes.js', 'utf8'),
-        pipes = readFileSync('./src/pipes.js', 'utf8'),
+  const classes = readFileSync('./src/classes.ts', 'utf8'),
+        pipes = readFileSync('./src/pipes.ts', 'utf8'),
         classMetadata = toClassMetadata(classes),
         subclassMetadata = toPipesMetadata(pipes),
         metadata = {
@@ -20,12 +20,16 @@ function toClassMetadata (classes) {
   return [...new Set(classes.match(/[A-Z]\w+/g))]
     .map(name => ({
       name,
-      needsCleanup: toNeedsCleanup(`src/classes/${name}.js`),
+      needsCleanup: toNeedsCleanup(`src/classes/${name}.ts`),
     }))
 }
 
 function toPipesMetadata (pipes) {
-  return [...new Set(pipes.match(/create\w+/g))]
+  return [...new Set(
+    pipes
+      .match(/export function create\w+/g)
+      .map(match => match.replace('export function ', ''))
+  )]
 }
 
 const needsCleanupRE = /\n\s+stop ?\(.*?\) {/ // If the class has a `stop` method, it needs cleanup

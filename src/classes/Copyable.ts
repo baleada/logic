@@ -20,7 +20,6 @@ export class Copyable {
   get status () {
     return this._computedStatus
   }
-  // TODO: Test this, including in firefox
   get isClipboardText () {
     return this._clipboard
       ? this._clipboard.text === this.string

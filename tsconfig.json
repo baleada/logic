@@ -5,7 +5,8 @@
     "types": [
       "resize-observer-browser",
       "requestidlecallback",
-      "dompurify"
+      "dompurify",
+      "@sindresorhus/slugify"
     ],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,

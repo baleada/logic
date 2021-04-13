@@ -1,4 +1,4 @@
-import * as slugify from '@sindresorhus/slugify'
+import slugify from '@sindresorhus/slugify'
 
 // REDUCE
 export function createReduceAsync<Item, Accumulator> (
