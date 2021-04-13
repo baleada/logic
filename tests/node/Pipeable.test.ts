@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Pipeable } from '../../src/pipes.js'
+import { Pipeable } from '../../src/pipes'
 
 const suite = createSuite('Pipeable (node)')
 

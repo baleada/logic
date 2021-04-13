@@ -1,8 +1,8 @@
 import BezierEasing from 'bezier-easing'
 import mix from 'mix-css-color'
-import { Listenable } from './Listenable.js'
-import { isFunction, isUndefined, isNumber, isString, isArray } from '../util.js'
-import { createUnique } from '../pipes.js'
+import { Listenable } from './Listenable'
+import { isFunction, isUndefined, isNumber, isString, isArray } from '../util'
+import { createUnique } from '../pipes'
 
 type AnimateableKeyframe = {
   progress: number,

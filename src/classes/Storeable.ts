@@ -2,7 +2,7 @@ import {
   isNull,
   isString,
   domIsAvailable,
-} from '../util.js'
+} from '../util'
 
 const defaultOptions: StoreableOptions = {
   type: 'local',
@@ -44,7 +44,7 @@ export class Storeable {
     if (domIsAvailable()) {
       const storedStatus = this.storage.getItem(this._computedStatusKey)
       if (this._computedStatus !== storedStatus && isString(storedStatus)) {
-        this._computedStatus = /** @type {'ready' | 'constructing' | 'stored' | 'errored' | 'removed'} */ (storedStatus)
+        this._computedStatus = (storedStatus as 'ready' | 'constructing' | 'stored' | 'errored' | 'removed')
       }
     }
 

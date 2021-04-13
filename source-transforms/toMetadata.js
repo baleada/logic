@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs'
-import { Pipeable, createUnique } from '../src/pipes.js'
 
 export default function toMetadata () {
   const classes = readFileSync('./src/classes.js', 'utf8'),
@@ -18,8 +17,7 @@ export default function toMetadata () {
 }
 
 function toClassMetadata (classes) {
-  return new Pipeable(classes.match(/[A-Z]\w+/g))
-    .pipe(createUnique())
+  return [...new Set(classes.match(/[A-Z]\w+/g))]
     .map(name => ({
       name,
       needsCleanup: toNeedsCleanup(`src/classes/${name}.js`),
@@ -27,8 +25,7 @@ function toClassMetadata (classes) {
 }
 
 function toPipesMetadata (pipes) {
-  return new Pipeable(pipes.match(/create\w+/g))
-    .pipe(createUnique())
+  return [...new Set(pipes.match(/create\w+/g))]
 }
 
 const needsCleanupRE = /\n\s+stop ?\(.*?\) {/ // If the class has a `stop` method, it needs cleanup

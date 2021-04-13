@@ -162,19 +162,19 @@ suite('createReorder({ from: { start, itemCount != 0 }, to: index }) moves `item
   assert.equal(value, ['mantequilla', 'tortilla', 'frijoles', 'aguacate', 'huevito'])
 })
 
-suite.only(`createSwap({ from , to }) swaps the item at from with the item at to`, context => {
+suite(`createSwap({ indices }) swaps the item at the first index with the item at the second index`, context => {
   assert.equal(
-    createSwap({ from: 0, to: 4 })(context.array),
+    createSwap({ indices: [0, 4] })(context.array),
     ['huevito', 'frijoles', 'mantequilla', 'aguacate', 'tortilla']
   )
   
   assert.equal(
-    createSwap({ from: 4, to: 0 })(context.array),
+    createSwap({ indices: [4, 0] })(context.array),
     ['huevito', 'frijoles', 'mantequilla', 'aguacate', 'tortilla']
   )
   
   assert.equal(
-    createSwap({ from: 0, to: 1 })(context.array),
+    createSwap({ indices: [0, 1] })(context.array),
     ['frijoles', 'tortilla', 'mantequilla', 'aguacate', 'huevito']
   )
 })

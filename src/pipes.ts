@@ -1,5 +1,4 @@
-import { isObject } from './util'
-import slugify from '@sindresorhus/slugify'
+import * as slugify from '@sindresorhus/slugify'
 
 // REDUCE
 export function createReduceAsync<Item, Accumulator> (
@@ -111,18 +110,35 @@ export function createReorder<Item> ({ from, to }: { from: { start: number, item
   }
 }
 
-export function createSwap<Item> ({ from, to }: { from: number, to: number }): ArrayFunction<Item, Item[]> {
+function isObject (value: unknown): value is Record<any, any> {
+  return typeof value === 'object'
+}
+
+export function createSwap<Item> ({ indices }: { indices: [number, number] }): ArrayFunction<Item, Item[]> {
   return array => {
-    const ensuredFrom = from < to ? from : to,
-          ensuredTo = from < to ? to : from
-    
-    return [
-      ...array.slice(0, ensuredFrom),
-      array[ensuredTo],
-      ...array.slice(ensuredFrom + 1, ensuredTo),
-      array[ensuredFrom],
-      ...array.slice(ensuredTo)
-    ]
+    const { 0: from, 1: to } = indices,
+          { reorderFrom, reorderTo } = ((): { reorderFrom: ArrayFunction<Item, Item[]>, reorderTo: ArrayFunction<Item, Item[]> } => {
+            if (from < to) {
+              return {
+                reorderFrom: createReorder<Item>({ from, to }),
+                reorderTo: createReorder<Item>({ from: to - 1, to: from })
+              }
+            }
+
+            if (from > to) {
+              return {
+                reorderFrom: createReorder<Item>({ from, to }),
+                reorderTo: createReorder<Item>({ from: to + 1, to: from })
+              }
+            }
+
+            return {
+              reorderFrom: array => array,
+              reorderTo: array => array,
+            }
+          })()
+
+    return new Pipeable(array).pipe(reorderFrom, reorderTo)
   }
 }
 
@@ -186,50 +202,17 @@ export function createRename<Key, Value> ({ from, to }: { from: Key, to: Key }):
 
 
 // PIPEABLE
-export class Pipeable<Input> {
-  constructor (private state: Input) {}
+export class Pipeable {
+  constructor (private state) {}
 
-  pipe<Output> (...fns: PipeFunction<Input, Output>[]): Output
-  pipe<Output> (...fns: [PipeFunction<Input, any>, PipeFunction<any, Output>]): Output
-  pipe<Output> (...fns: [PipeFunction<Input, any>, ...PipeFunction<any, any>[], PipeFunction<any, Output>]): Output {
+  pipe (...fns: ((...args: any[]) => any)[]) {
     return fns.reduce((piped, fn, index) => fn(piped, index), this.state)
   }
 
-  async pipeAsync<Output> (
-    ...fns: PipeFunctionAsync<Input, Output>[]
-  ): Promise<Output>
-  async pipeAsync<Output> (
-    ...fns: [
-      PipeFunctionAsync<Input, any>,
-      PipeFunctionAsync<any, Output>
-    ]
-  ): Promise<Output>
-  async pipeAsync<Output> (
-    ...fns: [
-      PipeFunctionAsync<Input, any>,
-      ...PipeFunctionAsync<any, any>[],
-      PipeFunctionAsync<any, Output>
-    ]
-  ): Promise<Output> {
+  async pipeAsync (...fns: ((...args: any[]) => Promise<any>)[]): Promise<any> {
     return await createReduceAsync<any, any>(
       async (piped, fn, index) => await fn(piped, index),
       this.state
     )(fns)
   }
 }
-
-type PipeFunction<Input, Output> = (piped: Input, index: number) => Output
-type PipeFunctionAsync<Input, Output> = (piped: Input, index: number) => Promise<Output>
-
-const p = new Pipeable('stub')
-p.pipe<string>(
-  thing => "stub",
-  thing => 42,
-  stub => 'thing'
-)
-p.pipeAsync<string>(
-  async stub => await 'thing',
-  async stub => await 42,
-  async stub => await 'thing',
-  async stub => await 'thing',
-)

@@ -204,10 +204,6 @@ export function isNumber (value: unknown): value is number {
   return typeof value === 'number'
 }
 
-export function isObject (value: unknown): value is Record<any, any> {
-  return typeof value === 'object'
-}
-
 export function isString (value: unknown): value is string {
   return typeof value === 'string'
 }

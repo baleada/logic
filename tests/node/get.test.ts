@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { get } from '../../src/classes/Recognizeable.js'
+import { get } from '../../src/classes/Recognizeable'
 
 const suite = createSuite('get')
 
