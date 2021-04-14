@@ -12,7 +12,7 @@ suite.before(context => {
 
 suite(`doesn't guard when except and only are empty`, ({ eventStub }) => {
   let value = 0
-  createExceptAndOnlyListener(
+  createExceptAndOnlyListener<KeyboardEvent>(
     () => value++,
     {}
   )(eventStub)
@@ -22,7 +22,7 @@ suite(`doesn't guard when except and only are empty`, ({ eventStub }) => {
 
 suite(`guards against except when only is empty`, ({ eventStub }) => {
   let value = 0
-  createExceptAndOnlyListener(
+  createExceptAndOnlyListener<KeyboardEvent>(
     () => value++,
     { except: ['stub'] }
   )(eventStub)
@@ -32,7 +32,7 @@ suite(`guards against except when only is empty`, ({ eventStub }) => {
 
 suite(`guards against mismatches when only is not empty`, ({ eventStub }) => {
   let value = 0
-  createExceptAndOnlyListener(
+  createExceptAndOnlyListener<KeyboardEvent>(
     () => value++,
     { only: ['example'] }
   )(eventStub)
@@ -42,7 +42,7 @@ suite(`guards against mismatches when only is not empty`, ({ eventStub }) => {
 
 suite(`ignores except when only matches`, ({ eventStub }) => {
   let value = 0
-  createExceptAndOnlyListener(
+  createExceptAndOnlyListener<KeyboardEvent>(
     () => value++,
     { only: ['stub'], except: ['stub'] }
   )(eventStub)

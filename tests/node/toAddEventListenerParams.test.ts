@@ -24,14 +24,16 @@ suite(`listener options includes useCapture when addEventListener is falsy`, con
   assert.is(value, expected)
 })
 
-suite.skip(`listener options includes wantsUntrusted`, context => {
-  const { listenerOptions: { 1: value } } = toAddEventListenerParams(
-          () => {},
-          { wantsUntrusted: true }
-        ),
-        expected = true
+// Decided not to support wantsUntrusted for now, due to type safety issues.
+// Will support again if I find an addEventListener type definition with wantsUntrusted support. 
+// suite.skip(`listener options includes wantsUntrusted`, context => {
+//   const { listenerOptions: { 1: value } } = toAddEventListenerParams(
+//           () => {},
+//           { wantsUntrusted: true }
+//         ),
+//         expected = true
 
-  assert.is(value, expected)
-})
+//   assert.is(value, expected)
+// })
 
 suite.run()

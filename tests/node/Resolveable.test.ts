@@ -82,7 +82,7 @@ suite(`stores the error`, async context => {
   const instance = new Resolveable(() => withErrorStub())
   await instance.resolve()
 
-  assert.equal(instance.response.message, errorMessageStub)
+  assert.equal(instance.response instanceof Error ? instance.response.message : '', errorMessageStub)
 })
 
 suite(`stores the response from promise arrays`, async context => {
@@ -96,7 +96,7 @@ suite(`stores the error from promise arrays`, async context => {
   const instance = new Resolveable(() => [...(new Array(4)).fill(withSuccessStub()), withErrorStub()])
   await instance.resolve()
 
-  assert.equal(instance.response.message, errorMessageStub)
+  assert.equal(instance.response instanceof Error ? instance.response.message : '', errorMessageStub)
 })
 
 suite.run()

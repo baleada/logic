@@ -49,10 +49,10 @@ const conditionStub = item => new Promise(function(resolve, reject) {
           resolve(item % 2 === 0)
         }, 10, item)
       }),
-      filterArrayStub = (new Array(5)).fill().map((_, index) => index)
+      filterArrayStub = (new Array(5)).fill(undefined).map((_, index) => index)
 
 suite(`async filters`, async context => {
-  const value = await createFilterAsync(conditionStub)(filterArrayStub),
+  const value = await createFilterAsync(conditionStub as (item: number) => Promise<boolean>)(filterArrayStub),
         expected = [0, 2, 4]
 
   assert.equal(value, expected)
@@ -64,7 +64,7 @@ const forEachResponseStub = 'stub',
           resolve(forEachResponseStub)
         }, 10)
       }),
-      forEachArrayStub = (new Array(5)).fill()
+      forEachArrayStub = (new Array(5)).fill(undefined)
 
 suite(`async forEaches`, async context => {
   let value = []
@@ -87,7 +87,7 @@ const mapResponseStub = 'stub',
           resolve(mapResponseStub)
         }, 10)
       }),
-      mapStub = (new Array(5)).fill()
+      mapStub = (new Array(5)).fill(undefined)
 
 suite(`async maps`, async context => {
   const value = await createMapAsync(async item => await withMapSuccessStub())(mapStub),

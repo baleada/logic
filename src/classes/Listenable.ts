@@ -30,10 +30,10 @@ type ListenOptions<EventType> =
   EventType extends MutationRecord ? { observe?: MutationObserverInit } & ObservationListenOptions :
   EventType extends ResizeObserverEntry ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
   EventType extends MediaQueryListEvent ? {} :
-  EventType extends IdleDeadline ? { requestIdleCallback?: IdleRequestOptions } :
   EventType extends KeyboardEvent ? { comboDelimiter?: string, keyDirection?: 'up' | 'down' } & EventListenOptions :
   EventType extends MouseEvent ? { comboDelimiter?: string } & EventListenOptions :
   EventType extends CustomEvent | Event ? EventListenOptions :
+  EventType extends IdleDeadline ? { requestIdleCallback?: IdleRequestOptions } :
   {}
 
 type ObservationListenOptions = { target?: Element }
@@ -397,13 +397,7 @@ export function createExceptAndOnlyListener<EventType extends ListenableSupporte
   }
 }
 
-/**
- * @typedef {ListenableModifierAlias | string} ListenableKeyComboItemName
- * @typedef {{ name: ListenableKeyComboItemName, type: ListenableComboItemType }} ListenableKeyComboItem
- * @param {{ event: KeyboardEvent, combo: ListenableKeyComboItem[] }} required
- * @return {boolean}
- */
- export function eventMatchesKeycombo ({ event, combo }) {
+export function eventMatchesKeycombo ({ event, combo }: { event: KeyboardEvent, combo: ({ name: string, type: string })[] }): boolean {
   return combo.every(({ name, type }, index) => {
     switch (type) {
       case 'singleCharacter':
@@ -420,8 +414,8 @@ export function createExceptAndOnlyListener<EventType extends ListenableSupporte
       case 'modifier':
         if (index === combo.length - 1) {
           return name.startsWith('!')
-            ? event.key.toLowerCase() !== toModifier(name.slice(1)).toLowerCase()
-            : event.key.toLowerCase() === toModifier(name).toLowerCase()
+            ? event.key.toLowerCase() !== toModifier(name.slice(1) as ListenableModifier | ListenableModifierAlias).toLowerCase()
+            : event.key.toLowerCase() === toModifier(name as ListenableModifier | ListenableModifierAlias).toLowerCase()
         }
 
         return name.startsWith('!')
@@ -462,7 +456,7 @@ const predicatesByModifier: Record<ListenableModifier | ListenableModifierAlias,
 
 
 type ListenableClickComboItem = ListenableModifier | ListenableModifierAlias | 'click'
-export function eventMatchesClickcombo ({ event, combo }: { event: KeyboardEvent | MouseEvent, combo: string[] }): boolean {
+export function eventMatchesClickcombo ({ event, combo }: { event: MouseEvent, combo: string[] }): boolean {
   return combo.every(name => (
     comboItemNameToType(name) === 'click'
     ||

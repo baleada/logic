@@ -4,7 +4,7 @@ import { Fullscreenable } from '../../src/classes/Fullscreenable'
 
 const suite = createSuite('Fullscreenable (node)')
 
-const elementStub = {}
+const elementStub = {} as Element
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Fullscreenable(

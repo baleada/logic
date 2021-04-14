@@ -19,15 +19,15 @@ suite('interpolates strings as colors', context => {
 })
 
 suite('interpolates growing arrays', context => {
-  const value = toInterpolated({ previous: Array(0).fill(), next: Array(100).fill(), progress: .42 }),
-        expected = Array(42).fill()
+  const value = toInterpolated({ previous: Array(0).fill(undefined), next: Array(100).fill(undefined), progress: .42 }),
+        expected = Array(42).fill(undefined)
 
   assert.equal(value, expected)
 })
 
 suite('interpolates shrinking arrays', context => {
-  const value = toInterpolated({ previous: Array(100).fill(), next: Array(0).fill(), progress: .42 }),
-        expected = Array(100 - 42).fill()
+  const value = toInterpolated({ previous: Array(100).fill(undefined), next: Array(0).fill(undefined), progress: .42 }),
+        expected = Array(100 - 42).fill(undefined)
 
   assert.equal(value, expected)
 })
