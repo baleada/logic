@@ -108,7 +108,7 @@ export class Listenable<EventType extends ListenableSupportedType> {
     return this
   }
 
-  listen (listener: ListenCallback<EventType>, options?: ListenOptions<EventType>) {
+  listen (listener: ListenCallback<EventType>, options: ListenOptions<EventType> = {} as ListenOptions<EventType>) {
     switch (this._computedImplementation) {
       case 'intersection':
         this._intersectionListen(listener as ListenCallback<IntersectionObserverEntry>, options as ListenOptions<IntersectionObserverEntry>)
@@ -265,8 +265,10 @@ export class Listenable<EventType extends ListenableSupportedType> {
         // and shouldn't use web APIs during construction.
         break
       default:
-        const stoppables = [...this.active].filter(active => !('target' in active) || active.target === target), // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
+        const stoppables = [...this.active].filter(active => !target || active.target === target), // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
               shouldUpdateStatus = stoppables.length === this.active.size
+
+        console.log(stoppables)
 
         stoppables.forEach(stoppable => {
           stop<EventType>(stoppable)

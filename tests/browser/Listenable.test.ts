@@ -102,7 +102,7 @@ suite(`listen(...) handles visibility change`, async ({ puppeteer: { page } }) =
           // @ts-ignore
           const instance = new window.Logic.Listenable('visibilitychange')
           instance.listen(() => {})
-          return instance.active.values().next().value.category === 'event'
+          return instance.active.size === 1
         }),
         expected = true
 
@@ -114,7 +114,7 @@ suite(`listen(...) handles keycombos`, async ({ puppeteer: { page } }) => {
           // @ts-ignore
           const instance = new window.Logic.Listenable('cmd+b')
           instance.listen(() => {})
-          return instance.active.values().next().value.category === 'event'
+          return instance.active.size === 1
         }),
         expected = true
 
@@ -126,7 +126,7 @@ suite(`listen(...) handles left click combos`, async ({ puppeteer: { page } }) =
           // @ts-ignore
           const instance = new window.Logic.Listenable('cmd+click')
           instance.listen(() => {})
-          return instance.active.values().next().value.category === 'event'
+          return instance.active.size === 1
         }),
         expected = true
 
@@ -138,7 +138,7 @@ suite(`listen(...) handles right click combos`, async ({ puppeteer: { page } }) 
           // @ts-ignore
           const instance = new window.Logic.Listenable('cmd+rightclick')
           instance.listen(() => {})
-          return instance.active.values().next().value.category === 'event'
+          return instance.active.size === 1
         }),
         expected = true
 
@@ -150,7 +150,7 @@ suite(`listen(...) handles recognizeable`, async ({ puppeteer: { page } }) => {
           // @ts-ignore
           const instance = new window.Logic.Listenable('recognizeable', { recognizeable: { handlers: { 'keydown': () => {}, 'mousedown': () => {} } } })
           instance.listen(() => {})
-          return instance.active.size === 2 && [...instance.active].every(({ category }) => category === 'event')
+          return instance.active.size === 2
         }),
         expected = true
 
@@ -281,7 +281,7 @@ suite(`stop(...) can be limited to a target`, async ({ puppeteer: { page } }) =>
           instance.listen(() => {})
           instance.listen(() => {}, { target: document.body })
           const before = instance.active.size
-          instance.stop(document.body)
+          instance.stop({ target: document.body })
           return { before, after: instance.active.size }
         }),
         expected = { before: 2, after: 1 }
@@ -295,7 +295,7 @@ suite(`status is 'listening' when stop(...) is limited to a target such that not
           const instance = new window.Logic.Listenable('stub')
           instance.listen(() => {})
           instance.listen(() => {}, { target: document.body })
-          instance.stop(document.body)
+          instance.stop({ target: document.body })
           return instance.status
         }),
         expected = 'listening'
