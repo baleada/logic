@@ -1,6 +1,6 @@
-import * as classes from '@src/classes.js'
-import * as pipes from '@src/pipes.js'
-import * as util from '@src/util.js'
+import * as classes from '@src/classes'
+import * as pipes from '@src/pipes'
+import * as util from '@src/util'
 
 import { createApp, nextTick } from 'vue'
 import App from './App.vue'

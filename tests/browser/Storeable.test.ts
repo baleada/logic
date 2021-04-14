@@ -1,5 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
+// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
@@ -16,6 +17,7 @@ suite.before.each(async ({ puppeteer: { page } }) => {
 
 suite(`status is stored in browser when DOM is available`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           
           const value = JSON.parse(JSON.stringify(instance.storage))
@@ -31,6 +33,7 @@ suite(`status is stored in browser when DOM is available`, async ({ puppeteer: {
 
 suite(`status is 'stored' after successful store(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           instance.store('baleada')
           
@@ -47,6 +50,7 @@ suite(`status is 'stored' after successful store(...)`, async ({ puppeteer: { pa
 
 suite(`status is 'removed' after successful remove(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           instance.store('baleada')
           instance.remove()
@@ -73,6 +77,7 @@ suite.skip(`status is 'errored' after unsuccessful store(...)`, async ({ puppete
 
 suite(`status is not stored in browser after successful removeStatus(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           instance.removeStatus()
           
@@ -89,6 +94,7 @@ suite(`status is not stored in browser after successful removeStatus(...)`, asyn
 
 suite(`setKey(...) updates browser storage keys when status is 'stored'`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           instance
             .store('baleada')
@@ -107,6 +113,7 @@ suite(`setKey(...) updates browser storage keys when status is 'stored'`, async 
 
 suite(`setKey(...) updates browser storage keys when status is 'removed'`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           instance
             .store('baleada')
@@ -126,6 +133,7 @@ suite(`setKey(...) updates browser storage keys when status is 'removed'`, async
 
 suite(`store(...) stores item in browser storage`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           instance.store('baleada')
           
@@ -142,6 +150,7 @@ suite(`store(...) stores item in browser storage`, async ({ puppeteer: { page },
 
 suite(`string accesses stored item`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           instance.store('baleada')
           
@@ -158,6 +167,7 @@ suite(`string accesses stored item`, async ({ puppeteer: { page }, key }) => {
 
 suite(`remove(...) removes item from browser storage`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           instance
             .store('baleada')
@@ -176,6 +186,7 @@ suite(`remove(...) removes item from browser storage`, async ({ puppeteer: { pag
 
 suite(`respects statusKeySuffix option`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key, { statusKeySuffix: '_stub' })
           
           const value = JSON.parse(JSON.stringify(instance.storage))
@@ -191,6 +202,7 @@ suite(`respects statusKeySuffix option`, async ({ puppeteer: { page }, key }) =>
 
 suite(`statusKeySuffix defaults to '_status'`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           const instance = new window.Logic.Storeable(key)
           
           const value = JSON.parse(JSON.stringify(instance.storage))
@@ -206,6 +218,7 @@ suite(`statusKeySuffix defaults to '_status'`, async ({ puppeteer: { page }, key
 
 suite(`respects type option`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           new window.Logic.Storeable(key, { type: 'session' })
   
           const value = JSON.parse(JSON.stringify(window.sessionStorage))
@@ -221,6 +234,7 @@ suite(`respects type option`, async ({ puppeteer: { page }, key }) => {
 
 suite(`type defaults to localStorage`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
+          // @ts-ignore
           new window.Logic.Storeable(key)
   
           const value = JSON.parse(JSON.stringify(window.localStorage))

@@ -1,5 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
+// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
@@ -14,6 +15,7 @@ suite.before.each(async ({ puppeteer: { page } }) => {
 
 suite(`status is 'querying' immediately after query(...)`, async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
+          // @ts-ignore
           const instance = new window.Logic.Grantable(descriptor)
           instance.query()
           return instance.status
@@ -25,6 +27,7 @@ suite(`status is 'querying' immediately after query(...)`, async ({ puppeteer: {
 
 suite(`status is 'queried' after successful query(...)`, async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
+          // @ts-ignore
           const instance = new window.Logic.Grantable(descriptor)
           await instance.query()
           return instance.status
@@ -36,6 +39,7 @@ suite(`status is 'queried' after successful query(...)`, async ({ puppeteer: { p
 
 suite(`status is 'errored' after unsuccessful query(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Grantable({ name: 'stub' })
           await instance.query()
           return instance.status
@@ -47,6 +51,7 @@ suite(`status is 'errored' after unsuccessful query(...)`, async ({ puppeteer: {
 
 suite(`permission is stored after successful query(...)`, async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
+          // @ts-ignore
           const instance = new window.Logic.Grantable(descriptor)
           await instance.query()
           return instance.permission.state

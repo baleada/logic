@@ -1,5 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
+// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
@@ -12,6 +13,7 @@ suite.before.each(async ({ puppeteer: { page } }) => {
 
 suite(`status is 'dispatched' after successful dispatch(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Dispatchable('stub')
           instance.dispatch()
           return instance.status
@@ -23,6 +25,7 @@ suite(`status is 'dispatched' after successful dispatch(...)`, async ({ puppetee
 
 suite(`dispatch(...) target defaults to window`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Dispatchable('stub')
           window.addEventListener('stub', event => result = event.type)
 
@@ -38,6 +41,7 @@ suite(`dispatch(...) target defaults to window`, async ({ puppeteer: { page } })
 
 suite(`dispatch(...) can customize target`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Dispatchable('stub'),
                 el = document.createElement('span')
 
@@ -55,6 +59,7 @@ suite(`dispatch(...) can customize target`, async ({ puppeteer: { page } }) => {
 
 suite(`dispatch(...) handles keyboard events, defaulting to keydown`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Dispatchable('b')
           window.addEventListener('keydown', event => result = event.type)
 
@@ -70,6 +75,7 @@ suite(`dispatch(...) handles keyboard events, defaulting to keydown`, async ({ p
 
 suite(`dispatch(...) can optionally use keyup`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Dispatchable('b')
           window.addEventListener('keyup', event => result = event.type)
 
@@ -85,6 +91,7 @@ suite(`dispatch(...) can optionally use keyup`, async ({ puppeteer: { page } }) 
 
 suite(`dispatch(...) can optionally init event`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Dispatchable('stub')
           window.addEventListener('stub', event => result = event.bubbles)
 
@@ -100,6 +107,7 @@ suite(`dispatch(...) can optionally init event`, async ({ puppeteer: { page } })
 
 suite(`dispatch(...) updates cancelled`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Dispatchable('stub'),
                 before = instance.cancelled
 

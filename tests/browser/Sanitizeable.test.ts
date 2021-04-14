@@ -1,5 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
+// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
@@ -16,6 +17,7 @@ suite.before.each(async ({ puppeteer: { page } }) => {
 
 suite(`sanitize(...) sanitizes html`, async ({ puppeteer: { page }, html }) => {
   const value = await page.evaluate(async html => {
+          // @ts-ignore
           const instance = new window.Logic.Sanitizeable(html)
           instance.sanitize()
           return instance.html
@@ -27,6 +29,7 @@ suite(`sanitize(...) sanitizes html`, async ({ puppeteer: { page }, html }) => {
 
 suite(`status is 'sanitized' after successful sanitize(...)`, async ({ puppeteer: { page }, html }) => {
   const value = await page.evaluate(async html => {
+          // @ts-ignore
           const instance = new window.Logic.Sanitizeable(html)
           instance.sanitize()
           return instance.status
@@ -38,6 +41,7 @@ suite(`status is 'sanitized' after successful sanitize(...)`, async ({ puppeteer
 
 suite(`dompurify is available when DOM is available`, async ({ puppeteer: { page }, html }) => {
   const value = await page.evaluate(async html => {
+          // @ts-ignore
           const instance = new window.Logic.Sanitizeable(html)
           return instance.dompurify.isSupported
         }, html),

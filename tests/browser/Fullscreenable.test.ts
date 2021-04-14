@@ -1,5 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
+// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
@@ -15,6 +16,7 @@ suite.before.each(async ({ puppeteer: { page } }) => {
 
 suite(`element gets the element`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Fullscreenable(() => document.body)
           return document.body.isSameNode(instance.element)
         }),
@@ -25,6 +27,7 @@ suite(`element gets the element`, async ({ puppeteer: { page } }) => {
 
 suite(`status is 'fullscreened' after successful fullscreen(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.fullscreen()
           return instance.status
@@ -36,6 +39,7 @@ suite(`status is 'fullscreened' after successful fullscreen(...)`, async ({ pupp
 
 suite(`status is 'exited' after successful exit(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.fullscreen()
           await instance.exit()
@@ -48,6 +52,7 @@ suite(`status is 'exited' after successful exit(...)`, async ({ puppeteer: { pag
 
 suite(`enter(...) is an alias for fullscreen(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.enter()
           return instance.status
@@ -59,6 +64,7 @@ suite(`enter(...) is an alias for fullscreen(...)`, async ({ puppeteer: { page }
 
 suite(`status is 'errored' after unsuccessful fullscreen(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Fullscreenable(() => ({}))
           await instance.fullscreen()
           return instance.status
@@ -70,6 +76,7 @@ suite(`status is 'errored' after unsuccessful fullscreen(...)`, async ({ puppete
 
 suite(`stores the error after unsuccessful fullscreen(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Fullscreenable(() => ({}))
           await instance.fullscreen()
           return instance.error.name
@@ -81,8 +88,10 @@ suite(`stores the error after unsuccessful fullscreen(...)`, async ({ puppeteer:
 
 suite(`status is 'errored' after unsuccessful exit(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.fullscreen()
+          // @ts-ignore
           document.exitFullscreen = ''
           await instance.exit()
           return instance.status
@@ -94,8 +103,10 @@ suite(`status is 'errored' after unsuccessful exit(...)`, async ({ puppeteer: { 
 
 suite(`stores the error after unsuccessful exit(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-ignore
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.fullscreen()
+          // @ts-ignore
           document.exitFullscreen = ''
           await instance.exit()
           return instance.error.name
