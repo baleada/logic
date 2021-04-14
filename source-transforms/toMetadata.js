@@ -25,11 +25,7 @@ function toClassMetadata (classes) {
 }
 
 function toPipesMetadata (pipes) {
-  return [...new Set(
-    pipes
-      .match(/export function create\w+/g)
-      .map(match => match.replace('export function ', ''))
-  )]
+  return [...new Set(pipes.match(/create\w+/g))]
 }
 
 const needsCleanupRE = /\n\s+stop ?\(.*?\) {/ // If the class has a `stop` method, it needs cleanup

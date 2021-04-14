@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { eventMatchesKeycombo } from '../../src/util.js'
+import { eventMatchesKeycombo } from '../../src/classes/Listenable'
 
 const suite = createSuite('eventMatchesKeycombo (node)')
 
