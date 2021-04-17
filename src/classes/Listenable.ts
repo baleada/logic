@@ -10,14 +10,14 @@ import {
 } from '../util'
 import type { ListenableModifier, ListenableModifierAlias } from '../util'
 
-type ListenableSupportedType = IntersectionObserverEntry | MutationRecord | ResizeObserverEntry | MediaQueryListEvent | IdleDeadline | KeyboardEvent | MouseEvent | CustomEvent | Event
-type ListenableSupportedEvent = KeyboardEvent | MouseEvent | CustomEvent | Event
+export type ListenableSupportedType = IntersectionObserverEntry | MutationRecord | ResizeObserverEntry | MediaQueryListEvent | IdleDeadline | KeyboardEvent | MouseEvent | CustomEvent | Event
+export type ListenableSupportedEvent = KeyboardEvent | MouseEvent | CustomEvent | Event
 
-type ListenableOptions<EventType> = 
+export type ListenableOptions<EventType> = 
   EventType extends RecognizeableSupportedEvent ? { recognizeable?: RecognizeableOptions<EventType> } :
   {}
 
-type ListenCallback<EventType> = 
+export type ListenCallback<EventType> = 
   EventType extends IntersectionObserverEntry ? IntersectionObserverCallback :
   EventType extends MutationRecord ? MutationCallback :
   EventType extends ResizeObserverEntry ? ResizeObserverCallback :
@@ -25,7 +25,7 @@ type ListenCallback<EventType> =
   EventType extends MediaQueryListEvent | KeyboardEvent | MouseEvent | CustomEvent | Event ? (event: EventType) => any :
   () => void
 
-type ListenOptions<EventType> = 
+export type ListenOptions<EventType> = 
   EventType extends IntersectionObserverEntry ? { observer?: IntersectionObserverInit } & ObservationListenOptions :
   EventType extends MutationRecord ? { observe?: MutationObserverInit } & ObservationListenOptions :
   EventType extends ResizeObserverEntry ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
@@ -47,7 +47,7 @@ type EventListenOptions = {
   only?: string[],
 }
 
-type ListenableActive<EventType> = 
+export type ListenableActive<EventType> = 
   EventType extends IntersectionObserverEntry ? { target: Element, id: IntersectionObserver } :
   EventType extends MutationRecord ? { target: Element, id: MutationObserver } :
   EventType extends ResizeObserverEntry ? { target: Element, id: ResizeObserver } :

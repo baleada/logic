@@ -4,6 +4,11 @@ import {
   domIsAvailable,
 } from '../util'
 
+export type StoreableOptions = {
+  type?: 'local' | 'session',
+  statusKeySuffix?: string
+}
+
 const defaultOptions: StoreableOptions = {
   type: 'local',
   statusKeySuffix: '_status',
@@ -134,9 +139,4 @@ export class Storeable {
     this.storage.removeItem(this._computedStatusKey)
     return this
   }
-}
-
-export type StoreableOptions = {
-  type?: 'local' | 'session',
-  statusKeySuffix?: string
 }

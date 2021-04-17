@@ -1,9 +1,10 @@
 import { createMapAsync } from '../pipes'
 import { isArray } from '../util'
 
+export type ResolveableOptions = {}
 
 export class Resolveable<Value> {
-  constructor (getPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[]), options: {} = {}) {
+  constructor (getPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[]), options: ResolveableOptions = {}) {
     this.setGetPromise(getPromise)
     this._ready()
   }

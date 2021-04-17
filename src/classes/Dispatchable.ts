@@ -1,7 +1,9 @@
 import { toEvent, toCombo } from '../util'
 
+export type DispatchableOptions = {}
+
 export class Dispatchable {
-  constructor (type: string, options: {} = {}) {
+  constructor (type: string, options: DispatchableOptions = {}) {
     this.setType(type)
     this._ready()
   }

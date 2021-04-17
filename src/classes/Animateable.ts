@@ -4,7 +4,7 @@ import { Listenable } from './Listenable'
 import { isFunction, isUndefined, isNumber, isString, isArray } from '../util'
 import { createUnique } from '../pipes'
 
-type AnimateableKeyframe = {
+export type AnimateableKeyframe = {
   progress: number,
   data: {
     [key: string]: number | string | any[]
@@ -12,7 +12,7 @@ type AnimateableKeyframe = {
   timing?: AnimateableTiming
 }
 
-type AnimateableOptions = {
+export type AnimateableOptions = {
   duration?: number,
   timing?: AnimateableTiming,
   iterations?: number | true,
@@ -25,7 +25,7 @@ type AnimateableControlPoints = [{ x: number, y: number }, { x: number, y: numbe
 
 export type AnimateableFrameHandler = (frame?: AnimateableFrame) => any
 
-type AnimateableFrame = {
+export type AnimateableFrame = {
   progress: {
     [key: string]: { time: number, animation: number }
   },
@@ -35,21 +35,20 @@ type AnimateableFrame = {
   timestamp: number
 }
 
-type AnimateOptions = { interpolate?: {} }
+export type AnimateOptions = { interpolate?: {} }
 
 type AnimateType = 'play' | 'reverse' | 'seek'
 
-
 const defaultOptions: AnimateableOptions = {
-        duration: 0,
-        // delay not supported, because it can be handled by delayable
-        timing: [
-          0, 0,
-          1, 1,
-        ], // linear by default
-        iterations: 1,
-        alternates: false,
-      }
+  duration: 0,
+  // delay not supported, because it can be handled by delayable
+  timing: [
+    0, 0,
+    1, 1,
+  ], // linear by default
+  iterations: 1,
+  alternates: false,
+}
 
 export class Animateable {
   _initialDuration: number

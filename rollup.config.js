@@ -1,6 +1,7 @@
 import { configureable } from '@baleada/prepare'
 import toMetadata from './source-transforms/toMetadata'
 import typescript from '@rollup/plugin-typescript'
+import pluginDts from 'rollup-plugin-dts'
 
 const shared = configureable('rollup')
         .input(['src/classes.ts', 'src/pipes.ts'])
@@ -31,6 +32,12 @@ const shared = configureable('rollup')
         .cjs({ file: 'lib/index.cjs' })
         .plugin(typescript())
         .configure(),
+      dts = configureable('rollup')
+        .input(['types/classes.d.ts', 'types/pipes.d.ts'])
+        .multi()
+        .output({ file: 'lib/index.d.ts', format: 'esm' })
+        .plugin(pluginDts())
+        .configure(),
       metadataEsm = metadataShared    
         .delete({ targets: 'metadata/*', verbose: true })
         .esm({ file: 'metadata/index.js', target: 'node' })
@@ -42,6 +49,7 @@ const shared = configureable('rollup')
 export default [
   esm,
   cjs,
+  dts,
   metadataEsm,
   metadataCjs,
 ]

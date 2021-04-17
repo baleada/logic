@@ -1,6 +1,8 @@
 import createDOMPurify, { DOMPurifyI, Config } from 'dompurify'
 import { domIsAvailable } from '../util'
 
+export type SanitizeableOptions = Config
+
 export class Sanitizeable {
   _domPurifyConfig: Config
   constructor (html: string, options?: Config) {
@@ -53,4 +55,3 @@ export class Sanitizeable {
   }
 }
 
-export type SanitizeableOptions = Config

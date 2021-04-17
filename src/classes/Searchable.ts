@@ -1,6 +1,8 @@
 import { Searcher } from 'fast-fuzzy'
 import type { FullOptions as SearcherOptions, MatchData as SearcherMatchData } from 'fast-fuzzy'
 
+export type SearchableOptions<Item> = SearcherOptions<Item>
+
 export class Searchable<Item extends string | object> {
   _searcherOptions: SearcherOptions<Item>
   _computedResults: SearcherMatchData<Item>[] | Item[]

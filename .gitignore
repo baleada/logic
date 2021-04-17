@@ -89,7 +89,4 @@ sw.*
 # Published version
 metadata
 lib
-
-# Docs
-docs
-docs-json
+types

@@ -1,12 +1,12 @@
 import { Animateable } from './Animateable'
 import type { AnimateableFrameHandler } from './Animateable'
 
-type DelayableOptions = {
+export type DelayableOptions = {
   delay?: number,
   executions?: number | true,
 }
 
-type DelayableFunction = (timestamp: number) => any
+export type DelayableFunction = (timestamp: number) => any
 
 const defaultOptions = {
   delay: 0,

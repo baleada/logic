@@ -14,7 +14,7 @@ export function createReduceAsync<Item, Accumulator> (
 }
 
 // ARRAY ASYNC
-type ArrayFunctionAsync<Item, Returned> = (array: Item[]) => Promise<Returned>
+export type ArrayFunctionAsync<Item, Returned> = (array: Item[]) => Promise<Returned>
 
 export function createForEachAsync<Item> (forEach: (item?: Item, index?: number, array?: Item[]) => any): ArrayFunctionAsync<Item, any> {
   return async array => {
@@ -40,7 +40,7 @@ export function createFilterAsync<Item> (filter: (item?: Item, index?: number, a
 }
 
 // ARRAY
-type ArrayFunction<Item, Returned> = (array: Item[]) => Returned
+export type ArrayFunction<Item, Returned> = (array: Item[]) => Returned
 
 export function createDelete<Item> (required: { index: number } | { item: Item }): ArrayFunction<Item, Item[]> {
   return array => {
@@ -160,7 +160,7 @@ export function createUnique<Item> (): ArrayFunction<Item, Item[]> {
 
 
 // STRING
-type StringFunction<Returned> = (string: string) => Returned
+export type StringFunction<Returned> = (string: string) => Returned
 
 export function createSlug (options?: slugify.Options): StringFunction<string> {
   return string => {
@@ -176,7 +176,7 @@ export function createClip (required: string | RegExp): StringFunction<string> {
 
 
 // NUMBER
-type NumberFunction<Returned> = (number: number) => Returned
+export type NumberFunction<Returned> = (number: number) => Returned
 
 export function createClamp ({ min, max }: { min: number, max: number }): NumberFunction<number> {
   return number => {
@@ -187,7 +187,7 @@ export function createClamp ({ min, max }: { min: number, max: number }): Number
 
 
 // MAP
-type MapFunction<Key, Value, Returned> = (map: Map<Key, Value>) => Returned
+export type MapFunction<Key, Value, Returned> = (map: Map<Key, Value>) => Returned
 
 export function createRename<Key, Value> ({ from, to }: { from: Key, to: Key }): MapFunction<Key, Value, Map<Key, Value>> {
   return map => {
@@ -203,7 +203,7 @@ export function createRename<Key, Value> ({ from, to }: { from: Key, to: Key }):
 
 // PIPEABLE
 export class Pipeable {
-  constructor (private state) {}
+  constructor (private state: any) {}
 
   pipe (...fns: ((...args: any[]) => any)[]) {
     return fns.reduce((piped, fn, index) => fn(piped, index), this.state)

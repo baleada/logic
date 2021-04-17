@@ -1,5 +1,7 @@
+export type GrantableOptions = {}
+
 export class Grantable<DescriptorType extends PermissionDescriptor> {
-  constructor (descriptor: DescriptorType, options: {} = {}) {
+  constructor (descriptor: DescriptorType, options: GrantableOptions = {}) {
     this.setDescriptor(descriptor)
     this._ready()
   }

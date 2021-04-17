@@ -1,7 +1,11 @@
+export type CopyableOptions = {
+  clipboard?: { text: string }
+}
+
 export class Copyable {
   _clipboard: { text: string }
 
-  constructor (string: string, options: { clipboard?: { text: string } } = {}) {
+  constructor (string: string, options: CopyableOptions = {}) {
     this._clipboard = options.clipboard
     this.setString(string)
     this._ready()

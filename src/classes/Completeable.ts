@@ -15,7 +15,7 @@ const defaultOptions: CompleteableOptions = {
   divider: /\s/, // Keep an eye out for use cases where a { before, after } object would be needed, or where multi-character dividers need to be used
 }
 
-const defaultCompleteOptions = {
+const defaultCompleteOptions: { select?: 'completion' | 'completionEnd' } = {
   select: 'completionEnd',
 }
 

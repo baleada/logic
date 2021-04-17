@@ -10,9 +10,8 @@
     ],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "outDir": "lib",
     "declaration": true,
-    "declarationDir": "lib",
+    "declarationDir": "types",
     "emitDeclarationOnly": true
   },
   "include": [

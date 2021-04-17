@@ -3,6 +3,30 @@ import { createInsert } from '../pipes'
 
 export type RecognizeableSupportedEvent = KeyboardEvent | MouseEvent
 
+export type RecognizeableOptions<EventType> = {
+  maxSequenceLength?: true | number,
+  handlers?: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
+}
+
+type HandlerApiFromConstructor<EventType> = {
+  toPolarCoordinates: typeof toPolarCoordinates,
+  getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
+  getMetadata: (param?: { path: string }) => any,
+  setMetadata: (required: { path: string, value: any }) => void,
+  pushMetadata: (required: { path: string, value: any }) => void,
+  insertMetadata: (required: { path: string, value: any, index: number }) => void,
+  recognized: () => void,
+  denied: () => void,
+  listener: (event: EventType) => any,
+}
+
+type HandlerApiFromRuntime<EventType> = {
+  event: EventType,
+  getSequence: () => EventType[]
+}
+
+export type RecognizeableHandlerApi<EventType> = HandlerApiFromConstructor<EventType> & HandlerApiFromRuntime<EventType>
+
 export class Recognizeable<EventType extends RecognizeableSupportedEvent> {
   _maxSequenceLength: number | true
   _handlers: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
@@ -139,30 +163,6 @@ export class Recognizeable<EventType extends RecognizeableSupportedEvent> {
     this._computedStatus = 'recognizing'
   }
 }
-
-export type RecognizeableOptions<EventType> = {
-  maxSequenceLength?: true | number,
-  handlers?: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
-}
-
-type HandlerApiFromConstructor<EventType> = {
-  toPolarCoordinates: typeof toPolarCoordinates,
-  getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
-  getMetadata: (param?: { path: string }) => any,
-  setMetadata: (required: { path: string, value: any }) => void,
-  pushMetadata: (required: { path: string, value: any }) => void,
-  insertMetadata: (required: { path: string, value: any, index: number }) => void,
-  recognized: () => void,
-  denied: () => void,
-  listener: (event: EventType) => any,
-}
-
-type HandlerApiFromRuntime<EventType> = {
-  event: EventType,
-  getSequence: () => EventType[]
-}
-
-export type RecognizeableHandlerApi<EventType> = HandlerApiFromConstructor<EventType> & HandlerApiFromRuntime<EventType>
 
 export function toPolarCoordinates (
   { xA, xB, yA, yB }: { xA: number, xB: number, yA: number, yB: number }
