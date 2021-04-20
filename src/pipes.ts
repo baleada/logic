@@ -1,4 +1,5 @@
 import slugify from '@sindresorhus/slugify'
+import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
 
 // REDUCE
 export function createReduceAsync<Item, Accumulator> (
@@ -162,7 +163,7 @@ export function createUnique<Item> (): ArrayFunction<Item, Item[]> {
 // STRING
 export type StringFunction<Returned> = (string: string) => Returned
 
-export function createSlug (options?: slugify.Options): StringFunction<string> {
+export function createSlug (options?: SlugifyOptions): StringFunction<string> {
   return string => {
     return slugify(string, options)
   }

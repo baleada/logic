@@ -9,7 +9,7 @@ export default function toMetadata () {
           classes: classMetadata,
           pipes: subclassMetadata,
         },
-        code = `export default ${JSON.stringify(metadata, null, 2)}`
+        code = `export const metadata = ${JSON.stringify(metadata, null, 2)}`
 
   console.log(`toMetadata: Scraped metadata for ${metadata.classes.length} classes and ${metadata.pipes.length} pipes`)
 

@@ -1,12 +1,8 @@
 import { configureable } from '@baleada/prepare'
 import toMetadata from './source-transforms/toMetadata'
-import typescript from '@rollup/plugin-typescript'
-import pluginDts from 'rollup-plugin-dts'
 
-const shared = configureable('rollup')
+const shared = new configureable.Rollup()
         .input(['src/classes.ts', 'src/pipes.ts'])
-        .multi()
-        .resolve()
         .external([
           'bezier-easing',
           'mix-css-color',
@@ -14,8 +10,10 @@ const shared = configureable('rollup')
           '@sindresorhus/slugify',
           'dompurify',
           /@babel\/runtime/,
-        ]),
-      metadataShared = configureable('rollup')
+        ])
+        .resolve()
+        .typescript(),
+      metadataShared = new configureable.Rollup()
         .input('src/metadata.js')
         .virtual({
           test: ({ id }) => id.endsWith('src/metadata.js'),
@@ -25,18 +23,15 @@ const shared = configureable('rollup')
       esm = shared
         .delete({ targets: 'lib/*', verbose: true })
         .esm({ file: 'lib/index.js', target: 'browser' })
-        .plugin(typescript())
         // .analyze()
         .configure(),
       cjs = shared
         .cjs({ file: 'lib/index.cjs' })
-        .plugin(typescript())
         .configure(),
-      dts = configureable('rollup')
+      dts = new configureable.Rollup()
         .input(['types/classes.d.ts', 'types/pipes.d.ts'])
-        .multi()
         .output({ file: 'lib/index.d.ts', format: 'esm' })
-        .plugin(pluginDts())
+        .dts()
         .configure(),
       metadataEsm = metadataShared    
         .delete({ targets: 'metadata/*', verbose: true })
