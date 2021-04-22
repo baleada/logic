@@ -5,7 +5,7 @@ import * as util from '@src/util'
 import { createApp, nextTick } from 'vue'
 import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import routes from './pages/routes.js'
+import routes from 'virtual:generated-pages'
 
 import DOMPurify from 'dompurify'
 

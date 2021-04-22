@@ -268,8 +268,6 @@ export class Listenable<EventType extends ListenableSupportedType> {
         const stoppables = [...this.active].filter(active => !target || active.target === target), // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
               shouldUpdateStatus = stoppables.length === this.active.size
 
-        console.log(stoppables)
-
         stoppables.forEach(stoppable => {
           stop<EventType>(stoppable)
           this.active.delete(stoppable)

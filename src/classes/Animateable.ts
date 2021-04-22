@@ -629,14 +629,14 @@ export class Animateable {
     window.cancelAnimationFrame(this.request)
   }
 
-  seek (timeProgress: number, options?: { handle?: AnimateableFrameHandler } & AnimateOptions) { // Store time progress. Continue playing or reversing if applicable.
+  seek (timeProgress: number, options: { handle?: AnimateableFrameHandler } & AnimateOptions = {}) { // Store time progress. Continue playing or reversing if applicable.
     const iterations = Math.floor(timeProgress),
           naiveIterationProgress = timeProgress - iterations,
           { handle: naiveHandle } = options
 
     this._computedIterations = iterations
 
-    let ensuredTimeProgress, handle
+    let ensuredTimeProgress: number, handle: AnimateableFrameHandler
 
     if (this._alternates) {
       if (naiveIterationProgress <= .5) {
@@ -696,7 +696,10 @@ export class Animateable {
             this._sought()
 
             handle = naiveHandle
-            this._createAnimate('seek')(handle, options)
+
+            if (handle) {
+              this._createAnimate('seek')(handle, options)
+            }
 
             break
         }
@@ -728,7 +731,10 @@ export class Animateable {
           this._sought()
 
           handle = naiveHandle
-          this._createAnimate('seek')(handle, options)
+
+          if (handle) {
+            this._createAnimate('seek')(handle, options)
+          }
 
           break
       }    

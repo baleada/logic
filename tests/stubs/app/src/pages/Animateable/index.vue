@@ -17,7 +17,7 @@
 
 <script>
 import { ref } from 'vue'
-import { Animateable } from '@src/index.js'
+import { Animateable } from '@src/classes'
 import { easingsNetInOutBack } from '@baleada/animateable-utils'
 
 export default {
@@ -91,7 +91,7 @@ export default {
       instance.stop()
     }
     function seek () {
-      instance.seek(1.25, frameHandle)
+      instance.seek(1.25, { handle: frameHandle })
     }
 
     return {
