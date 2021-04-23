@@ -1,15 +1,16 @@
 import { configureable } from '@baleada/prepare'
 
-const shared = new configureable.Rollup()
+const external = [
+        'bezier-easing',
+        'mix-css-color',
+        'fast-fuzzy',
+        '@sindresorhus/slugify',
+        'dompurify',
+        /@babel\/runtime/,
+      ],
+      shared = new configureable.Rollup()
         .input(['src/classes.ts', 'src/pipes.ts'])
-        .external([
-          'bezier-easing',
-          'mix-css-color',
-          'fast-fuzzy',
-          '@sindresorhus/slugify',
-          'dompurify',
-          /@babel\/runtime/,
-        ])
+        .external(external)
         .resolve()
         .typescript(),
       esm = shared
@@ -22,6 +23,11 @@ const shared = new configureable.Rollup()
         .configure(),
       dts = new configureable.Rollup()
         .input(['types/classes.d.ts', 'types/pipes.d.ts'])
+        .external([
+          ...external,
+          '@types/resize-observer-browser',
+          '@types/requestidlecallback',
+        ])
         .output({ file: 'lib/index.d.ts', format: 'esm' })
         .dts()
         .configure(),

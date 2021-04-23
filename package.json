@@ -47,10 +47,7 @@
   "devDependencies": {
     "@baleada/animateable-utils": "^0.0.2",
     "@baleada/prepare": "^0.5.1",
-    "@types/dompurify": "^2.2.1",
     "@types/node": "^14.14.41",
-    "@types/requestidlecallback": "^0.3.1",
-    "@types/resize-observer-browser": "^0.1.5",
     "@vue/compiler-sfc": "^3.0.5",
     "rollup": "^2.33.3",
     "tailwindcss": "^2.1.1",
@@ -62,8 +59,11 @@
     "vue-router": "^4.0.3"
   },
   "dependencies": {
-    "@babel/runtime": "^7.12.1",
+    "@babel/runtime": "^7.13.17",
     "@sindresorhus/slugify": "^2.0.0",
+    "@types/dompurify": "^2.2.1",
+    "@types/requestidlecallback": "^0.3.1",
+    "@types/resize-observer-browser": "^0.1.5",
     "bezier-easing": "^2.1.0",
     "dompurify": "^2.2.6",
     "fast-fuzzy": "^1.10.8",
