@@ -1,13 +1,15 @@
 import { Resolveable } from './Resolveable'
 import { isFunction } from '../util'
 
+export type FetchableOptions = {}
+
 export class Fetchable {
   _computedArrayBuffer: Resolveable<ArrayBuffer | undefined>
   _computedBlob: Resolveable<Blob | undefined>
   _computedFormData: Resolveable<FormData | undefined>
   _computedJson: Resolveable<any | undefined>
   _computedText: Resolveable<string | undefined>
-  constructor (resource: string, options: {} = {}) {
+  constructor (resource: string, options: FetchableOptions = {}) {
     this.setResource(resource)
 
     this._computedArrayBuffer = new Resolveable(async () => 'arrayBuffer' in this.response ? await this.response.arrayBuffer() : await undefined)

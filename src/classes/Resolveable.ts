@@ -3,8 +3,10 @@ import { isArray } from '../util'
 
 export type ResolveableOptions = {}
 
+export type ResolveableGetPromise<Value> = (...args: any[]) => (Promise<Value> | Promise<Value>[])
+
 export class Resolveable<Value> {
-  constructor (getPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[]), options: ResolveableOptions = {}) {
+  constructor (getPromise: ResolveableGetPromise<Value>, options: ResolveableOptions = {}) {
     this.setGetPromise(getPromise)
     this._ready()
   }

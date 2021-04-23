@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "types": [],
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    // "declarationDir": "metadata",
+    // "emitDeclarationOnly": false
+  },
+  "files": [
+    "metadata/index.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+}

@@ -3,6 +3,7 @@
     "target": "esnext",
     "module": "esnext",
     "types": [
+      "node",
       "resize-observer-browser",
       "requestidlecallback",
       "dompurify",
@@ -15,7 +16,7 @@
     "emitDeclarationOnly": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
   ],
   "exclude": [
     "node_modules"

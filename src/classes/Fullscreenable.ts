@@ -1,7 +1,9 @@
 export type FullscreenableOptions = {}
 
+export type FullscreenableGetElement<ElementType> = ((...args: any[]) => ElementType)
+
 export class Fullscreenable<ElementType extends Element> {
-  constructor (getElement: ((...args: any[]) => ElementType), options: FullscreenableOptions = {}) {
+  constructor (getElement: FullscreenableGetElement<ElementType>, options: FullscreenableOptions = {}) {
     this.setGetElement(getElement)
     this._ready()
   }
