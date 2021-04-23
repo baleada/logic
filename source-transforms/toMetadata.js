@@ -63,7 +63,7 @@ function toGeneric (contents) {
   return contents.match(genericRE)?.[1] || ''
 }
 
-const optionsGenericRE = /constructor.*?options: \w+Options<(.*?)>/
+const optionsGenericRE = /constructor.*?options\??: \w+Options<(.*?)>/
 function toOptionsGeneric (contents) {
   return contents.match(optionsGenericRE)?.[1] || ''
 }
