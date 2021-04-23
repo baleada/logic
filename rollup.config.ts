@@ -1,5 +1,4 @@
 import { configureable } from '@baleada/prepare'
-import { toMetadata } from './source-transforms/toMetadata'
 
 const shared = new configureable.Rollup()
         .input(['src/classes.ts', 'src/pipes.ts'])
@@ -27,31 +26,27 @@ const shared = new configureable.Rollup()
         .dts()
         .configure(),
       metadataShared = new configureable.Rollup()
-        .input('metadata.ts')
-        // .virtual({
-        //   test: ({ id }) => id.endsWith('src/metadata.js'),
-        //   transform: toMetadata,
-        // })
-        .resolve(),
-      metadataTs = metadataShared
-        .output({ file: 'metadata/index.ts' })
+        .input('metadata/index.ts')
+        .typescript({ tsconfig: 'tsconfig.metadata.json' }),
+      metadataEsm = metadataShared
+        .esm({ file: 'metadata/index.js', target: 'node' })
+        .configure(),
+      metadataCjs = metadataShared    
+        .delete({ hook: 'buildEnd', targets: 'metadata/index.ts', verbose: true })
+        .cjs({ file: 'metadata/index.cjs' })
         .configure()
-        // metadataEsm = metadataShared    
-        //   .delete({ targets: 'metadata/*', verbose: true })
-        //   .esm({ file: 'metadata/index.js', target: 'node' })
-        //   .configure(),
-        // metadataCjs = metadataShared    
-        //   .cjs({ file: 'metadata/index.cjs' })
-        //   .configure()
+      // metadataDts = metadataShared
+      //   .output({ file: 'metadata/index.ts' })
+      //   .configure()
 
 
 export default [
   esm,
   cjs,
   dts,
-  // metadataEsm,
-  // metadataCjs,
-  metadataTs,
+  metadataEsm,
+  metadataCjs,
+  // metadataDts,
 ]
 
 export { shared }

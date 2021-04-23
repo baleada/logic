@@ -4,8 +4,8 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "declaration": true,
-    // "declarationDir": "metadata",
-    // "emitDeclarationOnly": false
+    "declarationDir": "metadata",
+    "emitDeclarationOnly": true
   },
   "files": [
     "metadata/index.ts",

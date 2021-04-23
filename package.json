@@ -16,9 +16,8 @@
     }
   },
   "scripts": {
-    "it": "node scripts/metadata.js",
     "metadata": "node scripts/metadata.js && tsc --project tsconfig.metadata.json",
-    "prepare": "tsc && npm run metadata && rollup --config rollup.config.ts",
+    "prepare": "npm run metadata && tsc && rollup --config rollup.config.ts",
     "test:only": "run() { uvu -r ts-node/register tests/$2 $1.test.ts$; }; run",
     "test": "npm run test:only .",
     "dev": "vite"
