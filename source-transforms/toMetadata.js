@@ -16,6 +16,7 @@ export type Metadatum = {
   name: string,
   needsCleanup: boolean,
   generic: string,
+  optionsGeneric: string,
   state: string,
   stateType: string,
 }
@@ -44,6 +45,7 @@ function toClassMetadata (classes) {
         name,
         needsCleanup: toNeedsCleanup(contents),
         generic: toGeneric(contents),
+        optionsGeneric: toOptionsGeneric(contents),
         state: toState(contents),
         stateType: toStateType(contents),
       }
@@ -55,9 +57,15 @@ function toNeedsCleanup (contents) {
   return needsCleanupRE.test(contents)
 }
 
+
 const genericRE = /export class \w+<(.*?)>/
 function toGeneric (contents) {
   return contents.match(genericRE)?.[1] || ''
+}
+
+const optionsGenericRE = /constructor.*?options: \w+Options<(.*?)>/
+function toOptionsGeneric (contents) {
+  return contents.match(optionsGenericRE)?.[1] || ''
 }
 
 const stateAndStateTypeRE = /constructor \((.*?),/
