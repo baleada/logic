@@ -17,7 +17,7 @@
 
 <script>
 import { ref } from 'vue'
-import { Animateable } from '@src/classes'
+import { Animateable } from '../../../../../../src/classes'
 import { easingsNetInOutBack } from '@baleada/animateable-utils'
 
 export default {

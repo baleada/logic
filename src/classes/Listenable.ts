@@ -17,10 +17,10 @@ export type ListenableOptions<EventType> =
   EventType extends RecognizeableSupportedEvent ? { recognizeable?: RecognizeableOptions<EventType> } :
   {}
 
-export type ListenCallback<EventType> = 
-  EventType extends IntersectionObserverEntry ? IntersectionObserverCallback :
-  EventType extends MutationRecord ? MutationCallback :
-  EventType extends ResizeObserverEntry ? ResizeObserverCallback :
+export type ListenHandle<EventType> = 
+  EventType extends IntersectionObserverEntry ? (entries: IntersectionObserverEntry[]) => any :
+  EventType extends MutationRecord ? (entries: MutationRecord[]) => any :
+  EventType extends ResizeObserverEntry ? (entries: ResizeObserverEntry[]) => any :
   EventType extends IdleDeadline ? IdleRequestCallback :
   EventType extends MediaQueryListEvent | KeyboardEvent | MouseEvent | CustomEvent | Event ? (event: EventType) => any :
   () => void
@@ -51,14 +51,14 @@ export type ListenableActive<EventType> =
   EventType extends IntersectionObserverEntry ? { target: Element, id: IntersectionObserver } :
   EventType extends MutationRecord ? { target: Element, id: MutationObserver } :
   EventType extends ResizeObserverEntry ? { target: Element, id: ResizeObserver } :
-  EventType extends MediaQueryListEvent ? { target: MediaQueryList, id: [type: string, listener: ListenCallback<EventType>] } :
+  EventType extends MediaQueryListEvent ? { target: MediaQueryList, id: [type: string, handle: ListenHandle<EventType>] } :
   EventType extends IdleDeadline ? { target: Window & typeof globalThis, id: number } :
   EventType extends KeyboardEvent | MouseEvent | CustomEvent | Event ? { target: Element | Document, id: ListenableActiveEventId<EventType> } :
   { id: any }
 
 type ListenableActiveEventId<EventType> = [
   type: string,
-  exceptAndOnlyListener: ListenCallback<EventType>,
+  exceptAndOnlyHandle: ListenHandle<EventType>,
   optionsOrUseCapture: AddEventListenerOptions | boolean,
 ]
 
@@ -108,38 +108,38 @@ export class Listenable<EventType extends ListenableSupportedType> {
     return this
   }
 
-  listen (listener: ListenCallback<EventType>, options: ListenOptions<EventType> = {} as ListenOptions<EventType>) {
+  listen (handle: ListenHandle<EventType>, options: ListenOptions<EventType> = {} as ListenOptions<EventType>) {
     switch (this._computedImplementation) {
       case 'intersection':
-        this._intersectionListen(listener as ListenCallback<IntersectionObserverEntry>, options as ListenOptions<IntersectionObserverEntry>)
+        this._intersectionListen(handle as ListenHandle<IntersectionObserverEntry>, options as ListenOptions<IntersectionObserverEntry>)
         break
       case 'mutation':
-        this._mutationListen(listener as ListenCallback<MutationRecord>, options as ListenOptions<MutationRecord>)
+        this._mutationListen(handle as ListenHandle<MutationRecord>, options as ListenOptions<MutationRecord>)
         break
       case 'resize':
-        this._resizeListen(listener as ListenCallback<ResizeObserverEntry>, options as ListenOptions<ResizeObserverEntry>)
+        this._resizeListen(handle as ListenHandle<ResizeObserverEntry>, options as ListenOptions<ResizeObserverEntry>)
         break
       case 'mediaquery':
-        this._mediaQueryListen(listener as (event: MediaQueryListEvent) => any)
+        this._mediaQueryListen(handle as (event: MediaQueryListEvent) => any)
         break
       case 'idle':
-        this._idleListen(listener as ListenCallback<IdleDeadline>, options as ListenOptions<IdleDeadline>)
+        this._idleListen(handle as ListenHandle<IdleDeadline>, options as ListenOptions<IdleDeadline>)
         break
       case 'recognizeable':
-        this._recognizeableListen(listener as ListenCallback<RecognizeableSupportedEvent>, options as ListenOptions<RecognizeableSupportedEvent>)
+        this._recognizeableListen(handle as ListenHandle<RecognizeableSupportedEvent>, options as ListenOptions<RecognizeableSupportedEvent>)
         break
       case 'visibilitychange':
-        this._visibilityChangeListen(listener as ListenCallback<Event>, options as ListenOptions<Event>)
+        this._visibilityChangeListen(handle as ListenHandle<Event>, options as ListenOptions<Event>)
         break
       case 'keycombo':
-        this._keycomboListen(listener as ListenCallback<KeyboardEvent>, options as ListenOptions<KeyboardEvent>)
+        this._keycomboListen(handle as ListenHandle<KeyboardEvent>, options as ListenOptions<KeyboardEvent>)
         break
       case 'leftclickcombo':
       case 'rightclickcombo':
-        this._clickcomboListen(listener as ListenCallback<MouseEvent>, options as ListenOptions<MouseEvent>)
+        this._clickcomboListen(handle as ListenHandle<MouseEvent>, options as ListenOptions<MouseEvent>)
         break
       case 'event':
-        this._eventListen(listener as ListenCallback<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
+        this._eventListen(handle as ListenHandle<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
         break
       }
 
@@ -147,84 +147,84 @@ export class Listenable<EventType extends ListenableSupportedType> {
 
     return this
   }
-  _intersectionListen (listener: ListenCallback<IntersectionObserverEntry>, options: ListenOptions<IntersectionObserverEntry>) {
+  _intersectionListen (handle: ListenHandle<IntersectionObserverEntry>, options: ListenOptions<IntersectionObserverEntry>) {
     const { target = document.querySelector('html'), observer } = options,
-          id = new IntersectionObserver(listener, observer)
+          id = new IntersectionObserver(handle, observer)
 
     id.observe(target)
     this.active.add({ target, id } as ListenableActive<EventType>)
   }
-  _mutationListen (listener: ListenCallback<MutationRecord>, options: ListenOptions<MutationRecord>) {
+  _mutationListen (handle: ListenHandle<MutationRecord>, options: ListenOptions<MutationRecord>) {
     const { target = document.querySelector('html'), observe } = options,
-          id = new MutationObserver(listener)
+          id = new MutationObserver(handle)
 
     id.observe(target, observe)
     this.active.add({ target, id } as ListenableActive<EventType>)
   }
-  _resizeListen (listener: ListenCallback<ResizeObserverEntry>, options: ListenOptions<ResizeObserverEntry>) {
+  _resizeListen (handle: ListenHandle<ResizeObserverEntry>, options: ListenOptions<ResizeObserverEntry>) {
     const { target = document.querySelector('html'), observe } = options,
-          id = new ResizeObserver(listener)
+          id = new ResizeObserver(handle)
 
     id.observe(target, observe)
     this.active.add({ target, id } as ListenableActive<EventType>)
   }
-  _mediaQueryListen (listener: ListenCallback<MediaQueryListEvent>) {
+  _mediaQueryListen (handle: ListenHandle<MediaQueryListEvent>) {
     const target = window.matchMedia(this.type)
 
-    target.addEventListener('change', listener)
-    this.active.add({ target, id: ['change', listener] } as ListenableActive<EventType>)
+    target.addEventListener('change', handle)
+    this.active.add({ target, id: ['change', handle] } as ListenableActive<EventType>)
   }
-  _idleListen (listener: ListenCallback<IdleDeadline>, options: ListenOptions<IdleDeadline>) {
+  _idleListen (handle: ListenHandle<IdleDeadline>, options: ListenOptions<IdleDeadline>) {
     const { requestIdleCallback } = options,
-          id = window.requestIdleCallback(listener, requestIdleCallback)
+          id = window.requestIdleCallback(handle, requestIdleCallback)
 
     this.active.add({ target: window, id } as ListenableActive<EventType>)
   }
-  _recognizeableListen (listener: ListenCallback<RecognizeableSupportedEvent>, options: ListenOptions<RecognizeableSupportedEvent>) {
-    const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams<RecognizeableSupportedEvent>(listener, options),
+  _recognizeableListen (handle: ListenHandle<RecognizeableSupportedEvent>, options: ListenOptions<RecognizeableSupportedEvent>) {
+    const { exceptAndOnlyHandle, handleOptions } = toAddEventListenerParams<RecognizeableSupportedEvent>(handle, options),
           eventListeners = this._computedRecognizeableEvents.map(name => {
             return [name, (event: RecognizeableSupportedEvent) => {
               this.recognizeable.recognize(event)
 
               if (this.recognizeable.status === 'recognized') {
-                exceptAndOnlyListener(event)
+                exceptAndOnlyHandle(event)
               }
-            }, ...listenerOptions]
+            }, ...handleOptions]
           })
 
-    this.recognizeable.setListener(exceptAndOnlyListener)
+    this.recognizeable.setListener(exceptAndOnlyHandle)
 
     this._addEventListeners(eventListeners as ListenableActiveEventId<ListenableSupportedEvent>[], options)
   }
-  _visibilityChangeListen (listener: ListenCallback<Event>, options: ListenOptions<Event>) {
+  _visibilityChangeListen (handle: ListenHandle<Event>, options: ListenOptions<Event>) {
     const ensuredOptions = {
       ...options,
       target: document,
     }
     
-    this._eventListen(listener as ListenCallback<ListenableSupportedEvent>, ensuredOptions as ListenOptions<ListenableSupportedEvent>)
+    this._eventListen(handle as ListenHandle<ListenableSupportedEvent>, ensuredOptions as ListenOptions<ListenableSupportedEvent>)
   }
-  _keycomboListen (listener: ListenCallback<KeyboardEvent>, options: ListenOptions<KeyboardEvent>) {
+  _keycomboListen (handle: ListenHandle<KeyboardEvent>, options: ListenOptions<KeyboardEvent>) {
     const combo = toCombo(this.type, options.comboDelimiter).map(name => ({ name, type: comboItemNameToType(name) })),
           guardedListener = (event: KeyboardEvent) => {            
             if (eventMatchesKeycombo({ event, combo })) {
-              listener(event)
+              handle(event)
             }
           }
     
-    this._eventListen(guardedListener as ListenCallback<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
+    this._eventListen(guardedListener as ListenHandle<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
   }
-  _clickcomboListen (listener: ListenCallback<MouseEvent>, options: ListenOptions<MouseEvent>) {
+  _clickcomboListen (handle: ListenHandle<MouseEvent>, options: ListenOptions<MouseEvent>) {
     const combo = toCombo(this.type, options.comboDelimiter),
           guardedListener = (event: MouseEvent) => {
             if (eventMatchesClickcombo({ event, combo })) {
-              listener(event)
+              handle(event)
             }
           }
     
-    this._eventListen(guardedListener as ListenCallback<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
+    this._eventListen(guardedListener as ListenHandle<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
   }
-  _eventListen (listener: ListenCallback<ListenableSupportedEvent>, options: ListenOptions<ListenableSupportedEvent>) {
+  _eventListen (handle: ListenHandle<ListenableSupportedEvent>, options: ListenOptions<ListenableSupportedEvent>) {
     const type = (() => {
       switch (this._computedImplementation) {
         case 'keycombo':
@@ -238,8 +238,8 @@ export class Listenable<EventType extends ListenableSupportedType> {
       }
     })()
 
-    const { exceptAndOnlyListener, listenerOptions } = toAddEventListenerParams<ListenableSupportedEvent>(listener, options),
-          eventListeners: ListenableActiveEventId<ListenableSupportedEvent>[] = [[type, exceptAndOnlyListener, ...listenerOptions]]
+    const { exceptAndOnlyHandle, handleOptions } = toAddEventListenerParams<ListenableSupportedEvent>(handle, options),
+          eventListeners: ListenableActiveEventId<ListenableSupportedEvent>[] = [[type, exceptAndOnlyHandle, ...handleOptions]]
 
     this._addEventListeners(eventListeners, options)
   }
@@ -370,15 +370,15 @@ const implementationREs: { [implementation: string]: RegExp } = {
   rightclickcombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt))\+){0,4}rightclick$/,
 }
 
-export function toAddEventListenerParams<EventType extends ListenableSupportedEvent> (listener: (event: EventType) => any, options: ListenOptions<EventType>) {
+export function toAddEventListenerParams<EventType extends ListenableSupportedEvent> (handle: (event: EventType) => any, options: ListenOptions<EventType>) {
   const { addEventListener, useCapture } = options,
-        exceptAndOnlyListener = createExceptAndOnlyListener<EventType>(listener, options),
-        listenerOptions: [optionsOrUseCapture: AddEventListenerOptions | boolean] = [addEventListener || useCapture]
+        exceptAndOnlyHandle = createExceptAndOnlyHandle<EventType>(handle, options),
+        handleOptions: [optionsOrUseCapture: AddEventListenerOptions | boolean] = [addEventListener || useCapture]
 
-  return { exceptAndOnlyListener, listenerOptions }
+  return { exceptAndOnlyHandle, handleOptions }
 }
 
-export function createExceptAndOnlyListener<EventType extends ListenableSupportedEvent> (listener: (event: EventType) => any, options: ListenOptions<EventType>): (event: EventType) => any {
+export function createExceptAndOnlyHandle<EventType extends ListenableSupportedEvent> (handle: (event: EventType) => any, options: ListenOptions<EventType>): (event: EventType) => any {
   const { except = [], only = [] } = options
   
   return (event: EventType) => {
@@ -386,12 +386,12 @@ export function createExceptAndOnlyListener<EventType extends ListenableSupporte
           [matchesOnly, matchesExcept] = [only, except].map(selectors => selectors.some(selector => (target as Element).matches(selector)))
 
     if (matchesOnly) {
-      listener(event)
+      handle(event)
       return
     }
     
     if (only.length === 0 && !matchesExcept) {
-      listener(event)
+      handle(event)
       return
     }
   }

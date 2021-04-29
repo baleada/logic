@@ -2,7 +2,7 @@ import { configureable } from '@baleada/prepare'
 
 const external = [
         'bezier-easing',
-        'mix-css-color',
+        '@snigo.dev/color',
         'fast-fuzzy',
         '@sindresorhus/slugify',
         'dompurify',
@@ -16,7 +16,7 @@ const external = [
       esm = shared
         .delete({ targets: 'lib/*', verbose: true })
         .esm({ file: 'lib/index.js', target: 'browser' })
-        // .analyze()
+        .analyzer()
         .configure(),
       cjs = shared
         .cjs({ file: 'lib/index.cjs' })

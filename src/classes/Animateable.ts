@@ -1,5 +1,5 @@
 import BezierEasing from 'bezier-easing'
-import mix from 'mix-css-color'
+import { mix } from '@snigo.dev/color'
 import { Listenable } from './Listenable'
 import { isFunction, isUndefined, isNumber, isString, isArray } from '../util'
 import { createUnique } from '../pipes'
@@ -35,7 +35,11 @@ export type AnimateableFrame = {
   timestamp: number
 }
 
-export type AnimateOptions = { interpolate?: {} }
+export type AnimateOptions = {
+  interpolate?: {
+    colorModel?: 'rgb' | 'hsl' | 'lab' | 'lch' | 'xyz',
+  }
+}
 
 type AnimateType = 'play' | 'reverse' | 'seek'
 
@@ -898,7 +902,7 @@ export function toInterpolated (
     next: string | number | any[],
     progress: number
   },
-  options = {}
+  options: AnimateOptions['interpolate'] = {}
 ) {
   if (isUndefined(previous)) {
     return next
@@ -909,7 +913,15 @@ export function toInterpolated (
   }
 
   if (isString(previous) && isString(next)) {
-    return mix(previous, next, (1 - progress) * 100).hexa // No clue why this progress needs to be inverted, but it works
+    return mix(
+      options.colorModel,
+      {
+        start: previous,
+        end: next,
+        alpha: progress,
+      }
+    ).toRgb().toRgbString()
+    // return mix(previous, next, (1 - progress) * 100).hexa // No clue why this progress needs to be inverted, but it works
   }
 
   if (isArray(previous) && isArray(next)) {
