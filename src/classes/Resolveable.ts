@@ -5,12 +5,14 @@ export type ResolveableOptions = {}
 
 export type ResolveableGetPromise<Value> = (...args: any[]) => (Promise<Value> | Promise<Value>[])
 
+export type ResolveableStatus = 'ready' | 'resolving' | 'resolved' | 'errored'
+
 export class Resolveable<Value> {
   constructor (getPromise: ResolveableGetPromise<Value>, options: ResolveableOptions = {}) {
     this.setGetPromise(getPromise)
     this._ready()
   }
-  _computedStatus: 'ready' | 'resolving' | 'resolved' | 'errored'
+  _computedStatus: ResolveableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

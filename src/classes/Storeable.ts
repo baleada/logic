@@ -9,6 +9,8 @@ export type StoreableOptions = {
   statusKeySuffix?: string
 }
 
+export type StoreableStatus = 'ready' | 'constructing' | 'stored' | 'errored' | 'removed'
+
 const defaultOptions: StoreableOptions = {
   type: 'local',
   statusKeySuffix: '_status',
@@ -28,7 +30,7 @@ export class Storeable {
   _constructing () {
     this._computedStatus = 'constructing'
   }
-  _computedStatus: 'ready' | 'constructing' | 'stored' | 'errored' | 'removed'
+  _computedStatus: StoreableStatus
   _ready () {
     this._computedStatus = 'ready'
 

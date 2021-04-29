@@ -3,6 +3,8 @@ import { isFunction } from '../util'
 
 export type FetchableOptions = {}
 
+export type FetchableStatus = 'ready' | 'fetching' | 'fetched' | 'aborted' | 'errored'
+
 export class Fetchable {
   _computedArrayBuffer: Resolveable<ArrayBuffer | undefined>
   _computedBlob: Resolveable<Blob | undefined>
@@ -20,7 +22,7 @@ export class Fetchable {
 
     this._ready()
   }
-  _computedStatus: 'ready' | 'fetching' | 'fetched' | 'aborted' | 'errored'
+  _computedStatus: FetchableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

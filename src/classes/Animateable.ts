@@ -43,6 +43,8 @@ export type AnimateOptions = {
 
 type AnimateType = 'play' | 'reverse' | 'seek'
 
+export type AnimateableStatus = 'ready' | 'playing' | 'played' | 'reversing' | 'reversed' | 'paused' | 'sought' | 'stopped'
+
 const defaultOptions: AnimateableOptions = {
   duration: 0,
   // delay not supported, because it can be handled by delayable
@@ -98,7 +100,7 @@ export class Animateable {
     this._resetProgress()
     this._resetIterations()
   }
-  _computedStatus: 'ready' | 'playing' | 'played' | 'reversing' | 'reversed' | 'paused' | 'sought' | 'stopped'
+  _computedStatus: AnimateableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

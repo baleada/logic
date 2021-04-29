@@ -1,11 +1,13 @@
 export type GrantableOptions = {}
 
+export type GrantableStatus = 'ready' | 'querying' | 'queried' | 'errored'
+
 export class Grantable<DescriptorType extends PermissionDescriptor> {
   constructor (descriptor: DescriptorType, options: GrantableOptions = {}) {
     this.setDescriptor(descriptor)
     this._ready()
   }
-  _computedStatus: 'ready' | 'querying' | 'queried' | 'errored'
+  _computedStatus: GrantableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

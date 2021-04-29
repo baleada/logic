@@ -3,6 +3,8 @@ import { domIsAvailable } from '../util'
 
 export type SanitizeableOptions = Config
 
+export type SanitizeableStatus = 'ready' | 'sanitized'
+
 export class Sanitizeable {
   _domPurifyConfig: Config
   constructor (html: string, options?: Config) {
@@ -11,7 +13,7 @@ export class Sanitizeable {
     this._ready()
   }
   _computedDompurify: DOMPurifyI
-  _computedStatus: 'ready' | 'sanitized'
+  _computedStatus: SanitizeableStatus
   _ready () {
     if (domIsAvailable()) {
       this._computedDompurify = createDOMPurify()

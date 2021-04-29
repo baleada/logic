@@ -3,6 +3,8 @@ import type { FullOptions as SearcherOptions, MatchData as SearcherMatchData } f
 
 export type SearchableOptions<Item> = SearcherOptions<Item>
 
+export type SearchableStatus = 'ready' | 'searched'
+
 export class Searchable<Item extends string | object> {
   _searcherOptions: SearcherOptions<Item>
   _computedResults: SearcherMatchData<Item>[] | Item[]
@@ -13,7 +15,7 @@ export class Searchable<Item extends string | object> {
     this._computedResults = []
     this._ready()
   }
-  _computedStatus: 'ready' | 'searched'
+  _computedStatus: SearchableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

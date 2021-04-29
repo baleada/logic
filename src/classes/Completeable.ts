@@ -7,6 +7,8 @@ export type CompleteableOptions = {
   initialSelection?: { start: number, end: number, direction: 'forward' | 'backward' | 'none' },
 }
 
+export type CompleteableStatus = 'constructing' | 'ready' | 'completing' | 'completed'
+
 const defaultOptions: CompleteableOptions = {
   segment: {
     from: 'start',
@@ -40,7 +42,7 @@ export class Completeable {
   _constructing () {
     this._computedStatus = 'constructing'
   }
-  _computedStatus: 'constructing' | 'ready' | 'completing' | 'completed'
+  _computedStatus: CompleteableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

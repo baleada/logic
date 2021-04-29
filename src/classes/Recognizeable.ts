@@ -8,6 +8,8 @@ export type RecognizeableOptions<EventType> = {
   handlers?: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
 }
 
+export type RecognizeableStatus = 'recognized' | 'recognizing' | 'denied' | 'ready'
+
 type HandlerApiFromConstructor<EventType> = {
   toPolarCoordinates: typeof toPolarCoordinates,
   getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
@@ -71,7 +73,7 @@ export class Recognizeable<EventType extends RecognizeableSupportedEvent> {
   _denied () {
     this._computedStatus = 'denied'
   }
-  _computedStatus: 'recognized' | 'recognizing' | 'denied' | 'ready'
+  _computedStatus: RecognizeableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

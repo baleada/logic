@@ -8,6 +8,8 @@ export type DelayableOptions = {
 
 export type DelayableFunction = (timestamp: number) => any
 
+export type DelayableStatus = 'ready' | 'delaying' | 'delayed' | 'paused' | 'sought' | 'stopped'
+
 const defaultOptions = {
   delay: 0,
   executions: 1,
@@ -30,7 +32,7 @@ export class Delayable {
     this.setFn(fn)
     this._ready()
   }
-  _computedStatus: 'ready' | 'delaying' | 'delayed' | 'paused' | 'sought' | 'stopped'
+  _computedStatus: DelayableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

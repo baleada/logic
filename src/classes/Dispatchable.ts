@@ -2,12 +2,14 @@ import { toEvent, toCombo } from '../util'
 
 export type DispatchableOptions = {}
 
+export type DispatchableStatus = 'ready' | 'dispatched'
+
 export class Dispatchable {
   constructor (type: string, options: DispatchableOptions = {}) {
     this.setType(type)
     this._ready()
   }
-  _computedStatus: 'ready' | 'dispatched'
+  _computedStatus: DispatchableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

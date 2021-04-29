@@ -2,6 +2,8 @@ export type CopyableOptions = {
   clipboard?: { text: string }
 }
 
+export type CopyableStatus = 'ready' | 'copying' | 'copied' | 'errored'
+
 export class Copyable {
   _clipboard: { text: string }
 
@@ -10,7 +12,7 @@ export class Copyable {
     this.setString(string)
     this._ready()
   }
-  _computedStatus: 'ready' | 'copying' | 'copied' | 'errored'
+  _computedStatus: CopyableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

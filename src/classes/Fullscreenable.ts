@@ -2,12 +2,14 @@ export type FullscreenableOptions = {}
 
 export type FullscreenableGetElement<ElementType> = ((...args: any[]) => ElementType)
 
+export type FullscreenableStatus = 'ready' | 'fullscreened' | 'errored' | 'exited'
+
 export class Fullscreenable<ElementType extends Element> {
   constructor (getElement: FullscreenableGetElement<ElementType>, options: FullscreenableOptions = {}) {
     this.setGetElement(getElement)
     this._ready()
   }
-  _computedStatus: 'ready' | 'fullscreened' | 'errored' | 'exited'
+  _computedStatus: FullscreenableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

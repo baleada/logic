@@ -1,5 +1,7 @@
 export type NavigateableOptions = { initialLocation?: number }
 
+export type NavigateableStatus = 'ready' | 'navigated'
+
 const defaultOptions: NavigateableOptions = {
   initialLocation: 0,
 }
@@ -16,7 +18,7 @@ export class Navigateable<Item> {
     this._ready()
   }
   
-  _computedStatus: 'ready' | 'navigated'
+  _computedStatus: NavigateableStatus
   _ready () {
     this._computedStatus = 'ready'
   }

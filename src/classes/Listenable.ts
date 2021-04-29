@@ -62,6 +62,8 @@ type ListenableActiveEventId<EventType> = [
   optionsOrUseCapture: AddEventListenerOptions | boolean,
 ]
 
+export type ListenableStatus = 'ready' | 'listening' | 'stopped'
+
 export class Listenable<EventType extends ListenableSupportedType> {
   _computedRecognizeable: Recognizeable<RecognizeableSupportedEvent>
   _computedRecognizeableEvents: string[]
@@ -78,7 +80,7 @@ export class Listenable<EventType extends ListenableSupportedType> {
     this.setType(type)
     this._ready()
   }
-  _computedStatus: 'ready' | 'listening' | 'stopped'
+  _computedStatus: ListenableStatus
   _ready () {
     this._computedStatus = 'ready'
   }
