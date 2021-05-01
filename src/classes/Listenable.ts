@@ -10,8 +10,8 @@ import {
 } from '../util'
 import type { ListenableModifier, ListenableModifierAlias } from '../util'
 
-export type ListenableSupportedType = IntersectionObserverEntry | MutationRecord | ResizeObserverEntry | MediaQueryListEvent | IdleDeadline | KeyboardEvent | MouseEvent | CustomEvent | Event
-export type ListenableSupportedEvent = KeyboardEvent | MouseEvent | CustomEvent | Event
+export type ListenableSupportedType = IntersectionObserverEntry | MutationRecord | ResizeObserverEntry | MediaQueryListEvent | IdleDeadline | KeyboardEvent | MouseEvent | TouchEvent | PointerEvent | CustomEvent | Event
+export type ListenableSupportedEvent = KeyboardEvent | MouseEvent | TouchEvent | PointerEvent | CustomEvent | Event
 
 export type ListenableOptions<EventType> = 
   EventType extends RecognizeableSupportedEvent ? { recognizeable?: RecognizeableOptions<EventType> } :
@@ -22,7 +22,7 @@ export type ListenHandle<EventType> =
   EventType extends MutationRecord ? (entries: MutationRecord[]) => any :
   EventType extends ResizeObserverEntry ? (entries: ResizeObserverEntry[]) => any :
   EventType extends IdleDeadline ? IdleRequestCallback :
-  EventType extends MediaQueryListEvent | KeyboardEvent | MouseEvent | CustomEvent | Event ? (event: EventType) => any :
+  EventType extends MediaQueryListEvent | ListenableSupportedEvent ? (event: EventType) => any :
   () => void
 
 export type ListenOptions<EventType> = 
@@ -31,8 +31,8 @@ export type ListenOptions<EventType> =
   EventType extends ResizeObserverEntry ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
   EventType extends MediaQueryListEvent ? {} :
   EventType extends KeyboardEvent ? { comboDelimiter?: string, keyDirection?: 'up' | 'down' } & EventListenOptions :
-  EventType extends MouseEvent ? { comboDelimiter?: string } & EventListenOptions :
-  EventType extends CustomEvent | Event ? EventListenOptions :
+  EventType extends MouseEvent | PointerEvent ? { comboDelimiter?: string } & EventListenOptions :
+  EventType extends CustomEvent | Event | TouchEvent ? EventListenOptions :
   EventType extends IdleDeadline ? { requestIdleCallback?: IdleRequestOptions } :
   {}
 
@@ -53,7 +53,7 @@ export type ListenableActive<EventType> =
   EventType extends ResizeObserverEntry ? { target: Element, id: ResizeObserver } :
   EventType extends MediaQueryListEvent ? { target: MediaQueryList, id: [type: string, handle: ListenHandle<EventType>] } :
   EventType extends IdleDeadline ? { target: Window & typeof globalThis, id: number } :
-  EventType extends KeyboardEvent | MouseEvent | CustomEvent | Event ? { target: Element | Document, id: ListenableActiveEventId<EventType> } :
+  EventType extends ListenableSupportedEvent ? { target: Element | Document, id: ListenableActiveEventId<EventType> } :
   { id: any }
 
 type ListenableActiveEventId<EventType> = [

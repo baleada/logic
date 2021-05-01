@@ -1,7 +1,7 @@
 import { isArray, isNumber } from '../util'
 import { createInsert } from '../pipes'
 
-export type RecognizeableSupportedEvent = KeyboardEvent | MouseEvent
+export type RecognizeableSupportedEvent = KeyboardEvent | MouseEvent | TouchEvent | PointerEvent
 
 export type RecognizeableOptions<EventType> = {
   maxSequenceLength?: true | number,
