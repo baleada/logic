@@ -96,19 +96,20 @@ const keysByName: Record<ListenableKeyAlias, ListenableKey> = {
 }
 
 const unique = createUnique<string>()
-export function toCombo (type: string, delimiter: string = '+'): string[] {
+const DELIMITER = '+'
+export function toCombo (type: string): string[] {
   // If the delimiter is used as a character in the type,
   // two empty strings will be produced by the split.
   // createUnique ensures those two are combined into one.
-  return unique(type.split(delimiter))
-    .map(name => (name === '' ? delimiter : name))
+  return unique(type.split(DELIMITER))
+    .map(name => (name === '' ? DELIMITER : name))
 }
 
 export function comboItemNameToType (name: string) {
   return [...predicatesByType.keys()].find(type => predicatesByType.get(type)(name)) ?? 'custom'
 }
 
-type ListenableComboItemType = 'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click'
+export type ListenableComboItemType = 'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click'
 
 const predicatesByType: Map<ListenableComboItemType, (name: string) => boolean> = new Map([
   [

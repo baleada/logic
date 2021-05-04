@@ -22,8 +22,11 @@ export type { FullscreenableGetElement, FullscreenableOptions, FullscreenableSta
 export { Grantable } from './classes/Grantable'
 export type { GrantableOptions, GrantableStatus } from './classes/Grantable'
 
-export { Listenable, eventMatchesKeycombo } from './classes/Listenable'
+export { Listenable } from './classes/Listenable'
 export type { ListenableSupportedType, ListenableSupportedEvent, ListenableOptions, ListenableStatus, ListenableActive, ListenHandle, ListenOptions } from './classes/Listenable'
+export { ensureKeycombo, eventMatchesKeycombo } from './classes/Listenable'
+export type { ListenableKeycomboItem } from './classes/Listenable'
+
 
 export { Navigateable } from './classes/Navigateable'
 export type { NavigateableOptions, NavigateableStatus } from './classes/Navigateable'

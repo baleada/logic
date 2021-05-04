@@ -8,7 +8,11 @@ import {
   comboItemNameToType,
   toModifier,
 } from '../util'
-import type { ListenableModifier, ListenableModifierAlias } from '../util'
+import type {
+  ListenableModifier,
+  ListenableModifierAlias,
+  ListenableComboItemType,
+} from '../util'
 
 export type ListenableSupportedType = IntersectionObserverEntry | MutationRecord | ResizeObserverEntry | MediaQueryListEvent | IdleDeadline | KeyboardEvent | MouseEvent | TouchEvent | PointerEvent | CustomEvent | Event
 export type ListenableSupportedEvent = KeyboardEvent | MouseEvent | TouchEvent | PointerEvent | CustomEvent | Event
@@ -30,9 +34,8 @@ export type ListenOptions<EventType> =
   EventType extends MutationRecord ? { observe?: MutationObserverInit } & ObservationListenOptions :
   EventType extends ResizeObserverEntry ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
   EventType extends MediaQueryListEvent ? {} :
-  EventType extends KeyboardEvent ? { comboDelimiter?: string, keyDirection?: 'up' | 'down' } & EventListenOptions :
-  EventType extends MouseEvent | PointerEvent ? { comboDelimiter?: string } & EventListenOptions :
-  EventType extends CustomEvent | Event | TouchEvent ? EventListenOptions :
+  EventType extends KeyboardEvent ? { keyDirection?: 'up' | 'down' } & EventListenOptions :
+  EventType extends MouseEvent | PointerEvent | CustomEvent | Event | TouchEvent ? EventListenOptions :
   EventType extends IdleDeadline ? { requestIdleCallback?: IdleRequestOptions } :
   {}
 
@@ -207,9 +210,9 @@ export class Listenable<EventType extends ListenableSupportedType> {
     this._eventListen(handle as ListenHandle<ListenableSupportedEvent>, ensuredOptions as ListenOptions<ListenableSupportedEvent>)
   }
   _keycomboListen (handle: ListenHandle<KeyboardEvent>, options: ListenOptions<KeyboardEvent>) {
-    const combo = toCombo(this.type, options.comboDelimiter).map(name => ({ name, type: comboItemNameToType(name) })),
+    const keycombo = ensureKeycombo(this.type),
           guardedListener = (event: KeyboardEvent) => {            
-            if (eventMatchesKeycombo({ event, combo })) {
+            if (eventMatchesKeycombo({ event, keycombo })) {
               handle(event)
             }
           }
@@ -217,9 +220,9 @@ export class Listenable<EventType extends ListenableSupportedType> {
     this._eventListen(guardedListener as ListenHandle<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
   }
   _clickcomboListen (handle: ListenHandle<MouseEvent>, options: ListenOptions<MouseEvent>) {
-    const combo = toCombo(this.type, options.comboDelimiter),
+    const clickcombo = toCombo(this.type),
           guardedListener = (event: MouseEvent) => {
-            if (eventMatchesClickcombo({ event, combo })) {
+            if (eventMatchesClickcombo({ event, clickcombo })) {
               handle(event)
             }
           }
@@ -399,8 +402,17 @@ export function createExceptAndOnlyHandle<EventType extends ListenableSupportedE
   }
 }
 
-export function eventMatchesKeycombo ({ event, combo }: { event: KeyboardEvent, combo: ({ name: string, type: string })[] }): boolean {
-  return combo.every(({ name, type }, index) => {
+export type ListenableKeycomboItem = {
+  name: string,
+  type: ListenableComboItemType | 'custom'
+}
+
+export function ensureKeycombo (type): ListenableKeycomboItem[] {
+  return toCombo(type).map(name => ({ name, type: comboItemNameToType(name) }))
+}
+
+export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEvent, keycombo: ({ name: string, type: string })[] }): boolean {
+  return keycombo.every(({ name, type }, index) => {
     switch (type) {
       case 'singleCharacter':
       case 'other':
@@ -414,7 +426,7 @@ export function eventMatchesKeycombo ({ event, combo }: { event: KeyboardEvent, 
       case 'arrow':
         return predicatesByArrow[name]?.({ event, name }) ?? predicatesByArrow.default({ event, name })
       case 'modifier':
-        if (index === combo.length - 1) {
+        if (index === keycombo.length - 1) {
           return name.startsWith('!')
             ? event.key.toLowerCase() !== toModifier(name.slice(1) as ListenableModifier | ListenableModifierAlias).toLowerCase()
             : event.key.toLowerCase() === toModifier(name as ListenableModifier | ListenableModifierAlias).toLowerCase()
@@ -458,8 +470,8 @@ const predicatesByModifier: Record<ListenableModifier | ListenableModifierAlias,
 
 
 type ListenableClickComboItem = ListenableModifier | ListenableModifierAlias | 'click'
-export function eventMatchesClickcombo ({ event, combo }: { event: MouseEvent, combo: string[] }): boolean {
-  return combo.every(name => (
+export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEvent, clickcombo: string[] }): boolean {
+  return clickcombo.every(name => (
     comboItemNameToType(name) === 'click'
     ||
     (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))
