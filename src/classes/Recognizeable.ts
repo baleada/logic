@@ -3,7 +3,7 @@ import { createInsert } from '../pipes'
 
 export type RecognizeableSupportedEvent = KeyboardEvent | MouseEvent | TouchEvent | PointerEvent
 
-export type RecognizeableOptions<EventType> = {
+export type RecognizeableOptions<EventType extends RecognizeableSupportedEvent, Metadata extends Record<any, any> = Record<any, any>> = {
   maxSequenceLength?: true | number,
   handlers?: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
 }
@@ -29,7 +29,7 @@ type HandlerApiFromRuntime<EventType> = {
 
 export type RecognizeableHandlerApi<EventType> = HandlerApiFromConstructor<EventType> & HandlerApiFromRuntime<EventType>
 
-export class Recognizeable<EventType extends RecognizeableSupportedEvent> {
+export class Recognizeable<EventType extends RecognizeableSupportedEvent, Metadata extends Record<any, any> = Record<any, any>> {
   _maxSequenceLength: number | true
   _handlers: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
   _handlerApi: HandlerApiFromConstructor<EventType>
@@ -62,9 +62,9 @@ export class Recognizeable<EventType extends RecognizeableSupportedEvent> {
     this._ready()
   }
 
-  _computedMetadata: Record<any, any>
+  _computedMetadata: Metadata
   _resetComputedMetadata () {
-    this._computedMetadata = {}
+    this._computedMetadata = {} as Metadata
   }
   
   _recognized () {
@@ -232,6 +232,10 @@ export function set ({ object, path, value }: { object: Record<any, any>, path: 
       get({ object, path: p })[key] = value
     }
   })
+}
+
+export function defineRecognizeableOptions<EventType extends RecognizeableSupportedEvent, Metadata extends Record<any, any> = Record<any, any>> (options: RecognizeableOptions<EventType, Metadata>) {
+  return options
 }
 
 function toPath (keys: (string | number)[]): string {

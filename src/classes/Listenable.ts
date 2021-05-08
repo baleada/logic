@@ -1,4 +1,4 @@
-import { Recognizeable } from './Recognizeable'
+import { Recognizeable, defineRecognizeableOptions } from './Recognizeable'
 import type { RecognizeableSupportedEvent, RecognizeableOptions } from './Recognizeable'
 import {
   isArray,
@@ -17,8 +17,8 @@ import type {
 export type ListenableSupportedType = IntersectionObserverEntry | MutationRecord | ResizeObserverEntry | MediaQueryListEvent | IdleDeadline | KeyboardEvent | MouseEvent | TouchEvent | PointerEvent | CustomEvent | Event
 export type ListenableSupportedEvent = KeyboardEvent | MouseEvent | TouchEvent | PointerEvent | CustomEvent | Event
 
-export type ListenableOptions<EventType> = 
-  EventType extends RecognizeableSupportedEvent ? { recognizeable?: RecognizeableOptions<EventType> } :
+export type ListenableOptions<EventType, RecognizeableMetadata> = 
+  EventType extends RecognizeableSupportedEvent ? { recognizeable?: RecognizeableOptions<EventType, RecognizeableMetadata> } :
   {}
 
 export type ListenHandle<EventType> = 
@@ -67,15 +67,16 @@ type ListenableActiveEventId<EventType> = [
 
 export type ListenableStatus = 'ready' | 'listening' | 'stopped'
 
-export class Listenable<EventType extends ListenableSupportedType> {
+export class Listenable<EventType extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> {
   _computedRecognizeable: Recognizeable<RecognizeableSupportedEvent>
   _computedRecognizeableEvents: string[]
   _computedActive: Set<ListenableActive<EventType>>
-  constructor (type: string, options?: ListenableOptions<EventType>) {
+  constructor (type: string, options?: ListenableOptions<EventType, RecognizeableMetadata>) {
     if (type === 'recognizeable') { // Based on the type param, can assume that EventType is a safe type
-      const recognizeableOptions = (options as ListenableOptions<RecognizeableSupportedEvent>).recognizeable as RecognizeableOptions<RecognizeableSupportedEvent>
-      this._computedRecognizeable = new Recognizeable([], recognizeableOptions)
-      this._computedRecognizeableEvents = Object.keys(recognizeableOptions?.handlers || {})
+      // @ts-ignore
+      this._computedRecognizeable = new Recognizeable([], options.recognizeable)
+      // @ts-ignore
+      this._computedRecognizeableEvents = Object.keys(options.recognizeable?.handlers || {})
     }    
 
     this._computedActive = new Set()
