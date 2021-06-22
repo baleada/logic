@@ -1,14 +1,15 @@
-export type CopyableOptions = {
-  clipboard?: { text: string }
-}
+export type CopyableOptions = {}
+
+// TODO: Listen for window copy events to update status
 
 export type CopyableStatus = 'ready' | 'copying' | 'copied' | 'errored'
 
 export class Copyable {
-  _clipboard: { text: string }
+  _computedIsClipboardText: boolean
 
   constructor (string: string, options: CopyableOptions = {}) {
-    this._clipboard = options.clipboard
+    this._computedIsClipboardText = false
+
     this.setString(string)
     this._ready()
   }
@@ -27,9 +28,7 @@ export class Copyable {
     return this._computedStatus
   }
   get isClipboardText () {
-    return this._clipboard
-      ? this._clipboard.text === this.string
-      : (async () => await navigator.clipboard.readText() === this.string)()
+    return this._computedIsClipboardText
   }
   get response () {
     return this._computedResponse
@@ -52,9 +51,7 @@ export class Copyable {
         try {
           this._computedResponse = await navigator.clipboard.writeText(this.string) as undefined
           
-          if (this._clipboard) {
-            this._clipboard.text = this.string
-          }
+          this._computedIsClipboardText = true
           
           this._copied()
         } catch (error) {
@@ -74,9 +71,7 @@ export class Copyable {
         
         document.body.removeChild(input)
 
-        if (this._clipboard) {
-          this._clipboard.text = this.string
-        }
+        this._computedIsClipboardText = true
 
         this._copied()
         break
@@ -92,5 +87,21 @@ export class Copyable {
   }
   _errored () {
     this._computedStatus = 'errored'
+  }
+
+  _copyAndCutEventHandle: (event: ClipboardEvent) => void
+  handleClipboardTextChanges () {
+    this._copyAndCutEventHandle = async () => {
+      const text = await navigator.clipboard.readText()
+      this._computedIsClipboardText = text === this.string
+    }
+
+    window.addEventListener('copy', this._copyAndCutEventHandle)
+    window.addEventListener('cut', this._copyAndCutEventHandle)
+  }
+
+  stop () {
+    window.removeEventListener('copy', this._copyAndCutEventHandle)
+    window.removeEventListener('cut', this._copyAndCutEventHandle)
   }
 }

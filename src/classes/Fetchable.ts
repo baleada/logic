@@ -5,6 +5,8 @@ export type FetchableOptions = {}
 
 export type FetchableStatus = 'ready' | 'fetching' | 'fetched' | 'aborted' | 'errored'
 
+export type FetchOptions = RequestInit | ((api: FetchOptionsApi) => RequestInit)
+
 export class Fetchable {
   _computedArrayBuffer: Resolveable<ArrayBuffer | undefined>
   _computedBlob: Resolveable<Blob | undefined>
@@ -90,7 +92,7 @@ export class Fetchable {
   }
   
   _computedResponse: Response | Error
-  async fetch (options: RequestInit = {}) {
+  async fetch (options: FetchOptions = {}) {
     this._computedStatus = 'fetching'
 
     try {
@@ -106,23 +108,23 @@ export class Fetchable {
 
     return this
   }
-  async get (options: RequestInit = {}) {
+  async get (options: FetchOptions = {}) {
     await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'get' })
     return this
   }
-  async patch (options: RequestInit = {}) {
+  async patch (options: FetchOptions = {}) {
     await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'patch' })
     return this
   }
-  async post (options: RequestInit = {}) {
+  async post (options: FetchOptions = {}) {
     await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'post' })
     return this
   }
-  async put (options: RequestInit = {}) {
+  async put (options: FetchOptions = {}) {
     await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'put' })
     return this
   }
-  async delete (options: RequestInit = {}) {
+  async delete (options: FetchOptions = {}) {
     await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'delete' })
     return this
   }

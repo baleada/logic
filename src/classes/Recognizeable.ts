@@ -1,47 +1,94 @@
+import * as rfdc from 'rfdc'
 import { isArray, isNumber } from '../util'
 import { createInsert } from '../pipes'
+import { ListenableKeycomboItem, ListenableClickcomboItem, ListenableSupportedEvent, eventMatchesClickcombo, toImplementation, ensureClickcombo, ensureKeycombo, eventMatchesKeycombo } from './Listenable'
 
-export type RecognizeableSupportedEvent = KeyboardEvent | MouseEvent | TouchEvent | PointerEvent
+export type RecognizeableSupportedType = 
+  IntersectionObserverEntry[]
+  | MutationRecord[]
+  | ResizeObserverEntry[]
+  | MediaQueryListEvent
+  | IdleDeadline
+  | ListenableSupportedEvent
 
-export type RecognizeableOptions<EventType extends RecognizeableSupportedEvent, Metadata extends Record<any, any> = Record<any, any>> = {
+export type RecognizeableSequenceItem<ListenableEventType> = 
+  ListenableEventType extends IntersectionObserverEntry ? IntersectionObserverEntry[] :
+  ListenableEventType extends MutationRecord ? MutationRecord[] :
+  ListenableEventType extends ResizeObserverEntry ? ResizeObserverEntry[] :
+  ListenableEventType
+
+export type RecognizeableOptions<SequenceItem extends RecognizeableSupportedType, Metadata> = {
   maxSequenceLength?: true | number,
-  handlers?: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
+  handlersIncludeCombos?: boolean,
+  handlers?: Record<any, (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any>
 }
 
 export type RecognizeableStatus = 'recognized' | 'recognizing' | 'denied' | 'ready'
 
-type HandlerApiFromConstructor<EventType> = {
+export type RecognizeableHandlerApi<SequenceItem extends RecognizeableSupportedType, Metadata> = HandlerApiFromConstructor<SequenceItem, Metadata> & HandlerApiFromRuntime<SequenceItem>
+
+type HandlerApiFromConstructor<SequenceItem extends RecognizeableSupportedType, Metadata> = {
   toPolarCoordinates: typeof toPolarCoordinates,
   getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
-  getMetadata: (param?: { path: string }) => any,
-  setMetadata: (required: { path: string, value: any }) => void,
-  pushMetadata: (required: { path: string, value: any }) => void,
-  insertMetadata: (required: { path: string, value: any, index: number }) => void,
+  getMetadata: () => Metadata,
+  transformMetadata: (transform: (metadata: Metadata) => Metadata) => void,
+  setMetadata: ({ path, value }: { path: string, value: any }) => void,
+  pushMetadata: ({ path, value }: { path: string, value: any }) => void,
+  insertMetadata: ({ path, value }: { path: string, value: any, index: number }) => void,
   recognized: () => void,
   denied: () => void,
-  listener: (event: EventType) => any,
+  effect: (event: SequenceItem) => any,
 }
 
-type HandlerApiFromRuntime<EventType> = {
-  event: EventType,
-  getSequence: () => EventType[]
+type HandlerApiFromRuntime<SequenceItem extends RecognizeableSupportedType> = {
+  event: SequenceItem,
+  getSequence: () => SequenceItem[]
 }
 
-export type RecognizeableHandlerApi<EventType> = HandlerApiFromConstructor<EventType> & HandlerApiFromRuntime<EventType>
+const clone = rfdc.default({ proto: true })
 
-export class Recognizeable<EventType extends RecognizeableSupportedEvent, Metadata extends Record<any, any> = Record<any, any>> {
+export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> {
   _maxSequenceLength: number | true
-  _handlers: Record<any, (api: RecognizeableHandlerApi<EventType>) => any>
-  _handlerApi: HandlerApiFromConstructor<EventType>
+  _handlers: Map<string, (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any>
+  _handlerApi: HandlerApiFromConstructor<SequenceItem, Metadata>
+  _handlerLeftclickcombos: ListenableClickcomboItem[][]
+  _handlerRightclickcombos: ListenableClickcomboItem[][]
+  _handlerKeycombos: ListenableKeycomboItem[][]
 
-  constructor (sequence: EventType[], options: RecognizeableOptions<EventType> = {}) {
-    const defaultOptions: RecognizeableOptions<EventType> = {
+  constructor (sequence: SequenceItem[], options: RecognizeableOptions<SequenceItem, Metadata> = { handlersIncludeCombos: true }) {
+    const defaultOptions: RecognizeableOptions<SequenceItem, Metadata> = {
       maxSequenceLength: true as const,
+      handlersIncludeCombos: true,
       handlers: {},
     }
     
     this._maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
-    this._handlers = options?.handlers || defaultOptions.handlers
+    this._handlers = new Map(Object.entries(options?.handlers || defaultOptions.handlers))
+
+    if (options.handlersIncludeCombos) {
+      this._handlerLeftclickcombos = []
+      this._handlerRightclickcombos = []
+      this._handlerKeycombos = []
+
+      for (const [handlerKey] of this._handlers) {
+        const implementation = toImplementation(handlerKey)
+
+        switch (implementation) {
+          case 'leftclickcombo':
+            this._handlerLeftclickcombos.push(ensureClickcombo(handlerKey))
+            break
+          case 'rightclickcombo':
+            this._handlerRightclickcombos.push(ensureClickcombo(handlerKey))
+            break
+          case 'keycombo':
+            this._handlerKeycombos.push(ensureKeycombo(handlerKey))
+            break
+          default:
+            // do nothing
+            break
+        }
+      }
+    }
 
     this._resetComputedMetadata()
 
@@ -50,13 +97,14 @@ export class Recognizeable<EventType extends RecognizeableSupportedEvent, Metada
     this._handlerApi = {
       toPolarCoordinates,
       getStatus: () => this.status,
-      getMetadata: param => param ? get({ object: this.metadata, ...param }) : this.metadata,
+      getMetadata: () => this._getMetadata(),
+      transformMetadata: required => this._transformMetadata(required),
       setMetadata: required => this._setMetadata(required),
       pushMetadata: required => this._pushMetadata(required),
       insertMetadata: required => this._insertMetadata(required),
       recognized: () => this._recognized(),
       denied: () => this._denied(),
-      listener: event => this.listener?.(event),
+      effect: (event: SequenceItem) => this.effect?.(event),
     }
 
     this._ready()
@@ -78,6 +126,12 @@ export class Recognizeable<EventType extends RecognizeableSupportedEvent, Metada
     this._computedStatus = 'ready'
   }
 
+  _getMetadata () {
+    return clone(this.metadata)
+  }
+  _transformMetadata (transform: (metadata: Metadata) => Metadata) {
+    this._computedMetadata = transform(this._getMetadata())
+  }
   _setMetadata ({ path, value }: { path: string, value: any }) {
     set({ object: this.metadata, path, value })
   }
@@ -109,11 +163,11 @@ export class Recognizeable<EventType extends RecognizeableSupportedEvent, Metada
   set sequence (sequence) {
     this.setSequence(sequence)
   }
-  get listener () {
-    return this._computedListener
+  get effect () {
+    return this._computedEffect
   }
-  set listener (listener) {
-    this.setListener(listener)
+  set effect (effect) {
+    this.setEffect(effect)
   }
   get status () {
     return this._computedStatus
@@ -122,27 +176,27 @@ export class Recognizeable<EventType extends RecognizeableSupportedEvent, Metada
     return this._computedMetadata
   }
 
-  _computedSequence: EventType[]
-  setSequence (sequence: EventType[]) {
+  _computedSequence: SequenceItem[]
+  setSequence (sequence: SequenceItem[]) {
     this._computedSequence = Array.from(sequence)
     return this
   }
-  _computedListener: ((event: EventType) => any)
-  setListener (listener: ((event: EventType) => any)) {
-    this._computedListener = listener
+  _computedEffect: ((sequenceItem: SequenceItem) => any)
+  setEffect (effect: ((sequenceItem: SequenceItem) => any)) {
+    this._computedEffect = effect
     return this
   }
 
-  recognize (event: EventType) {
+  recognize (event: SequenceItem) {
     this._recognizing()
 
-    const { type } = event,
+    const type = this._toType(event),
           excess = isNumber(this._maxSequenceLength)
             ? Math.max(0, this.sequence.length - this._maxSequenceLength)
             : 0,
           newSequence = [ ...this.sequence.slice(excess), event ]
 
-    this._handlers[type]?.({
+    this._handlers.get(type)?.({
       event,
       ...this._handlerApi,
       getSequence: () => newSequence,
@@ -164,7 +218,66 @@ export class Recognizeable<EventType extends RecognizeableSupportedEvent, Metada
   _recognizing () {
     this._computedStatus = 'recognizing'
   }
+  _toType (sequenceItem: SequenceItem) {
+    if (isArray(sequenceItem)) {
+      if (sequenceItem[0] instanceof IntersectionObserverEntry) {
+        return 'intersect'
+      }
+  
+      if (sequenceItem[0] instanceof MutationRecord) {
+        return 'mutate'
+      }
+      
+      if (sequenceItem[0] instanceof ResizeObserverEntry) {
+        return 'resize'
+      }
+    } else {
+      if (sequenceItem instanceof MediaQueryListEvent) {
+        return sequenceItem.media
+      }
+    
+      if ('didTimeout' in sequenceItem) {
+        return 'idle'
+      }
+
+      if (this._handlerLeftclickcombos.length > 0) {
+        if (LEFTCLICKCOMBO_EVENT_TYPES.has((sequenceItem as Event).type)) {
+          for (const clickcombo of this._handlerLeftclickcombos) {
+            if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
+              return clickcombo.join('+')
+            }
+          }
+        }
+      }
+      
+      if (this._handlerRightclickcombos.length > 0) {
+        if (RIGHTCLICKCOMBO_EVENT_TYPES.has((sequenceItem as Event).type)) {
+          for (const clickcombo of this._handlerRightclickcombos) {
+            if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
+              return clickcombo.join('+')
+            }
+          }
+        }
+      }
+      
+      if (this._handlerKeycombos.length > 0) {
+        if (KEYCOMBO_EVENT_TYPE.has((sequenceItem as Event).type)) {
+          for (const keycombo of this._handlerKeycombos) {
+            if (eventMatchesKeycombo({ event: sequenceItem as KeyboardEvent, keycombo })) {
+              return keycombo.join('+')
+            }
+          }
+        }
+      }
+    
+      return (sequenceItem as Event).type
+    }
+  }
 }
+
+const LEFTCLICKCOMBO_EVENT_TYPES = new Set(['click', 'mousedown', 'mouseup', 'dblclick'])
+const RIGHTCLICKCOMBO_EVENT_TYPES = new Set(['contextmenu'])
+const KEYCOMBO_EVENT_TYPE = new Set(['keydown', 'keyup'])
 
 export function toPolarCoordinates (
   { xA, xB, yA, yB }: { xA: number, xB: number, yA: number, yB: number }
@@ -234,8 +347,12 @@ export function set ({ object, path, value }: { object: Record<any, any>, path: 
   })
 }
 
-export function defineRecognizeableOptions<EventType extends RecognizeableSupportedEvent, Metadata extends Record<any, any> = Record<any, any>> (options: RecognizeableOptions<EventType, Metadata>) {
+export function defineRecognizeableOptions<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> (options: RecognizeableOptions<SequenceItem, Metadata>) {
   return options
+}
+
+export function defineRecognizeableHandler<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> (handler: (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any) {
+  return handler
 }
 
 function toPath (keys: (string | number)[]): string {

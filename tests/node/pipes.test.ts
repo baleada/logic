@@ -180,7 +180,7 @@ suite(`createSwap({ indices }) swaps the item at the first index with the item a
 })
 
 suite('createReplace({ item, index }) replaces the item at index with a new item', context => {
-  const value = createReplace({ item: 'baleada' ,index: 2 })(context.array)
+  const value = createReplace({ item: 'baleada', index: 2 })(context.array)
 
   assert.equal(value, ['tortilla', 'frijoles', 'baleada', 'aguacate', 'huevito'])
 })

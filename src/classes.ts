@@ -32,7 +32,7 @@ export { Navigateable } from './classes/Navigateable'
 export type { NavigateableOptions, NavigateableStatus } from './classes/Navigateable'
 
 export { Recognizeable } from './classes/Recognizeable'
-export type { RecognizeableSupportedEvent, RecognizeableOptions, RecognizeableStatus, RecognizeableHandlerApi } from './classes/Recognizeable'
+export type { RecognizeableSupportedType, RecognizeableOptions, RecognizeableStatus, RecognizeableHandlerApi } from './classes/Recognizeable'
 
 export { Resolveable } from './classes/Resolveable'
 export type { ResolveableGetPromise, ResolveableOptions, ResolveableStatus } from './classes/Resolveable'

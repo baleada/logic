@@ -81,7 +81,7 @@ export class Completeable {
       case 'selection':
         return this.selection.start // No arithmetic needed, because the first character of the selection should be included
       case 'divider':
-        return this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, toLastMatch returns -1, and this becomes 0
+        return this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, toPreviousMatch returns -1, and this becomes 0
     }
   }
   _getSegmentEndIndex (): number {
@@ -120,13 +120,13 @@ export class Completeable {
     return this
   }
   _setDividerIndices () {
-    this._computedDividerIndices.before = this._toLastMatch({ re: this._divider, from: this.selection.start })
+    this._computedDividerIndices.before = this._toPreviousMatch({ re: this._divider, from: this.selection.start })
 
     const after = this._toNextMatch({ re: this._divider, from: this.selection.end })
     this._computedDividerIndices.after = after === -1 ? this.string.length + 1 : after
   }
-  _toLastMatch ({ re, from }: { re: RegExp, from: number }): number {
-    return toLastMatch({ string: this.string, re, from })
+  _toPreviousMatch ({ re, from }: { re: RegExp, from: number }): number {
+    return toPreviousMatch({ string: this.string, re, from })
   }
   _toNextMatch ({ re, from }: { re: RegExp, from: number }): number {
     return toNextMatch({ string: this.string, re, from })
@@ -191,7 +191,7 @@ export class Completeable {
   }
 }
 
-export function toLastMatch ({ string, re, from }: { string: string, re: RegExp, from: number }): number {
+export function toPreviousMatch ({ string, re, from }: { string: string, re: RegExp, from: number }): number {
   let indexOf
   if (!re.test(string.slice(0, from)) || from === 0) {
     indexOf = -1
