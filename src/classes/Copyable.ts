@@ -1,3 +1,6 @@
+import { Listenable } from "./Listenable"
+import type { ListenHandle } from './Listenable'
+
 export type CopyableOptions = {}
 
 // TODO: Listen for window copy events to update status
@@ -6,9 +9,20 @@ export type CopyableStatus = 'ready' | 'copying' | 'copied' | 'errored'
 
 export class Copyable {
   _computedIsClipboardText: boolean
+  _copy: Listenable<ClipboardEvent>
+  _cut: Listenable<ClipboardEvent>
+  _copyAndCutHandle: ListenHandle<ClipboardEvent>
 
   constructor (string: string, options: CopyableOptions = {}) {
     this._computedIsClipboardText = false
+
+    this._copy = new Listenable('copy')
+    this._cut = new Listenable('cut')
+
+    this._copyAndCutHandle = async () => {
+      const clipboardText = await navigator.clipboard.readText()
+      this._computedIsClipboardText = clipboardText === this.string
+    }
 
     this.setString(string)
     this._ready()
@@ -89,19 +103,13 @@ export class Copyable {
     this._computedStatus = 'errored'
   }
 
-  _copyAndCutEventHandle: (event: ClipboardEvent) => void
   handleClipboardTextChanges () {
-    this._copyAndCutEventHandle = async () => {
-      const text = await navigator.clipboard.readText()
-      this._computedIsClipboardText = text === this.string
-    }
-
-    window.addEventListener('copy', this._copyAndCutEventHandle)
-    window.addEventListener('cut', this._copyAndCutEventHandle)
+    this._copy.listen(this._copyAndCutHandle)
+    this._cut.listen(this._copyAndCutHandle)
   }
 
   stop () {
-    window.removeEventListener('copy', this._copyAndCutEventHandle)
-    window.removeEventListener('cut', this._copyAndCutEventHandle)
+    this._copy.stop()
+    this._cut.stop()
   }
 }
