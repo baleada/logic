@@ -2,7 +2,7 @@ import BezierEasing from 'bezier-easing'
 import { mix } from '@snigo.dev/color'
 import { Listenable } from './Listenable'
 import { isFunction, isUndefined, isNumber, isString, isArray } from '../util'
-import { createUnique } from '../pipes'
+import { createUnique, createSlice } from '../pipes'
 
 export type AnimateableKeyframe = {
   progress: number,
@@ -923,15 +923,14 @@ export function toInterpolated (
         alpha: progress,
       }
     ).toRgb().toRgbString()
-    // return mix(previous, next, (1 - progress) * 100).hexa // No clue why this progress needs to be inverted, but it works
   }
 
   if (isArray(previous) && isArray(next)) {
-    const sliceToExact = (next.length - previous.length) * progress + previous.length,
+    const exactSliceEnd = (next.length - previous.length) * progress + previous.length,
     nextIsLonger = next.length > previous.length,
-    sliceTo = nextIsLonger ? Math.floor(sliceToExact) : Math.ceil(sliceToExact),
-    shouldBeSliced = nextIsLonger ? next : previous
+    sliceEnd = nextIsLonger ? Math.floor(exactSliceEnd) : Math.ceil(exactSliceEnd),
+    sliceTarget = nextIsLonger ? next : previous
 
-    return shouldBeSliced.slice(0, sliceTo)
+    return createSlice({ from: 0, to: sliceEnd })(sliceTarget)
   }
 }
