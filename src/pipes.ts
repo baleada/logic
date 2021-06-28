@@ -1,3 +1,10 @@
+import {
+  pipe as lazyCollectionsPipe,
+  slice as lazyCollectionsSlice,
+  toArray as lazyCollectionsToArray,
+  findIndex as lazyCollectionsFindIndex,
+  concat as lazyCollectionsConcat,
+} from 'lazy-collections'
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
 
@@ -45,11 +52,10 @@ export type ArrayFunction<Item, Returned> = (array: Item[]) => Returned
 
 export function createDelete<Item> (required: { index: number } | { item: Item }): ArrayFunction<Item, Item[]> {
   return array => {
-    const deleteIndex = 'index' in required ? required.index : array.findIndex(element => element === required?.item),
-          deleted = [
-            ...array.slice(0, deleteIndex),
-            ...array.slice(deleteIndex + 1),
-          ]
+    const deleteIndex = 'index' in required ? required.index : lazyCollectionsFindIndex<Item>(element => element === required?.item)(array) as number,
+          deleted = createConcat(
+            createSlice<Item>({ from: deleteIndex + 1 })(array)
+          )(createSlice<Item>({ from: 0, to: deleteIndex })(array))
   
     return deleted
   }
@@ -58,7 +64,7 @@ export function createDelete<Item> (required: { index: number } | { item: Item }
 export function createInsert<Item> (required: ({ item: Item } | { items: Item[] }) & { index: number }): ArrayFunction<Item, Item[]> {
   return array => {
     const itemsToInsert = 'items' in required ? required.items : [required.item],
-          withItems = array.concat(itemsToInsert)
+          withItems = createConcat(itemsToInsert)(array)
 
     return createReorder<Item>({
       from: { start: array.length, itemCount: itemsToInsert.length },
@@ -157,6 +163,20 @@ export function createUnique<Item> (): ArrayFunction<Item, Item[]> {
   return array => {
     return [...new Set(array)]
   }
+}
+
+export function createSlice<Item> ({ from, to }: { from: number, to?: number }): ArrayFunction<Item, Item[]> {
+  return array => lazyCollectionsPipe(
+    lazyCollectionsSlice(from, to),
+    lazyCollectionsToArray()
+  )(array)
+}
+
+export function createConcat<Item> (...arrays: Item[][]): ArrayFunction<Item, Item[]> {
+  return array => lazyCollectionsPipe(
+    lazyCollectionsConcat(array, ...arrays),
+    lazyCollectionsToArray<Item>()
+  )(array) as Item[]
 }
 
 
