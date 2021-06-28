@@ -1,4 +1,4 @@
-import * as rfdc from 'rfdc'
+import createClone from 'rfdc'
 import { isArray, isNumber } from '../util'
 import { createInsert } from '../pipes'
 import { ListenableKeycomboItem, ListenableClickcomboItem, ListenableSupportedEvent, eventMatchesClickcombo, toImplementation, ensureClickcombo, ensureKeycombo, eventMatchesKeycombo } from './Listenable'
@@ -45,7 +45,7 @@ type HandlerApiFromRuntime<SequenceItem extends RecognizeableSupportedType> = {
   getSequence: () => SequenceItem[]
 }
 
-const clone = rfdc.default({ proto: true })
+const clone = createClone({ proto: true })
 
 export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> {
   _maxSequenceLength: number | true
