@@ -1,6 +1,5 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
@@ -10,7 +9,9 @@ const suite = withPuppeteer(
   }
 )
 
-suite.before(context => (context.string = 'Baleada: a toolkit for building web apps'))
+suite.before(context => {
+  context.string = 'Baleada: a toolkit for building web apps'
+})
 
 suite.before.each(async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000')

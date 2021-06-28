@@ -1,0 +1,104 @@
+import { suite as createSuite } from 'uvu'
+import * as assert from 'uvu/assert'
+import { withPuppeteer } from '@baleada/prepare'
+
+const suite = withPuppeteer(
+  createSuite('Animateable (browser)'),
+)
+
+suite.before.each(context => {
+  context.keyframes = [
+    { progress: 0, data: { example: 0 } },
+    { progress: 1, data: { example: 1 } }
+  ]
+})
+
+suite.before.each(async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000')
+  await page.waitForSelector('body')
+  await page.click('body')
+})
+
+suite('initial playbackRate is 1', async ({ puppeteer: { page }, keyframes }) => {
+  const value = await page.evaluate(keyframes => {
+    // @ts-ignore
+    const instance = new window.Logic.Animateable(keyframes)
+    return instance.playbackRate
+  }, keyframes)
+
+  assert.is(value, 1)
+})
+
+suite('assignment sets the playback rate', async ({ puppeteer: { page }, keyframes }) => {
+  const value = await page.evaluate(keyframes => {
+    // @ts-ignore
+    const instance = new window.Logic.Animateable(keyframes)
+    instance.playbackRate = 2
+    return instance.playbackRate
+  }, keyframes)
+
+  assert.is(value, 2)
+})
+
+suite('setPlaybackRate sets the playback rate', async ({ puppeteer: { page }, keyframes }) => {
+  const value = await page.evaluate(keyframes => {
+    // @ts-ignore
+    const instance = new window.Logic.Animateable(keyframes)
+    return instance.setPlaybackRate(2).playbackRate
+  }, keyframes)
+
+  assert.is(value, 2)
+})
+
+suite('status is "ready" after construction', async ({ puppeteer: { page }, keyframes }) => {
+  const value = await page.evaluate(keyframes => {
+    // @ts-ignore
+    const instance = new window.Logic.Animateable(keyframes)
+    return instance.status
+  }, keyframes)
+
+  assert.is(value, 'ready')
+})
+
+
+/* INFORMAL */
+
+// assign keyframes
+// setKeyframes
+
+// iterations
+// request
+// time
+// progress
+
+// play
+// play -> reverse
+// play -> pause
+// play -> seek
+// play -> restart
+
+// reverse
+// reverse -> play
+// reverse -> pause
+// reverse -> seek
+// reverse -> restart
+
+// seek -> play
+
+// stop
+
+// alternates -> play
+// alternates -> reverse
+// alternates -> play -> seek
+// alternates -> reverse -> seek
+// alternates -> seek
+
+// iterations -> play
+// iterations -> reverse
+// iterations -> alternates -> play
+// iterations -> alternates -> reverse
+// iterations -> seek
+
+// method chaining
+
+suite.run()
