@@ -4,46 +4,64 @@ import {
   toArray as lazyCollectionsToArray,
   findIndex as lazyCollectionsFindIndex,
   concat as lazyCollectionsConcat,
+  filter as lazyCollectionsFilter,
+  map as lazyCollectionsMap,
+  unique as lazyCollectionsUnique,
+  reduce as lazyCollectionsReduce,
 } from 'lazy-collections'
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
 
 // REDUCE
 export function createReduceAsync<Item, Accumulator> (
-  reduce: (accumulator?: Accumulator, item?: Item, index?: number, array?: Item[]) => Promise<Accumulator>,
+  reduce: (accumulator?: Accumulator, item?: Item, index?: number) => Promise<Accumulator>,
   initialValue?: Accumulator
 ): (array: Item[]) => Promise<Accumulator> {
   return async array => {
-    return await array.reduce(async (accumulator, item, index, a) => {
-      const reduced = await accumulator
-      return reduce(reduced, item, index, a)
-    }, Promise.resolve(initialValue))
+    return await lazyCollectionsReduce<Promise<Accumulator>, Item>(
+      async (accumulatorPromise, item, index) => {
+        const accumulator = await accumulatorPromise
+        return reduce(accumulator, item, index)
+      },
+      Promise.resolve(initialValue)
+    )(array)
   }
+}
+
+export function createReduce<Item, Accumulator> (
+  reduce: (accumulator?: Accumulator, item?: Item, index?: number) => Accumulator,
+  initialValue?: Accumulator
+): (array: Item[]) => Accumulator {
+  return array => lazyCollectionsReduce<Accumulator, Item>(reduce, initialValue)(array) as Accumulator
 }
 
 // ARRAY ASYNC
 export type ArrayFunctionAsync<Item, Returned> = (array: Item[]) => Promise<Returned>
 
-export function createForEachAsync<Item> (forEach: (item?: Item, index?: number, array?: Item[]) => any): ArrayFunctionAsync<Item, any> {
+export function createForEachAsync<Item> (forEach: (item?: Item, index?: number) => any): ArrayFunctionAsync<Item, any> {
   return async array => {
-    await createReduceAsync<Item, any>(async (_, item, index, a) => await forEach(item, index, a))(array)
+    await createReduceAsync<Item, any>(async (_, item, index) => await forEach(item, index))(array)
     return array
   }
 }
 
-export function createMapAsync<Item, Mapped> (map: (item?: Item, index?: number, array?: Item[]) => Promise<Mapped>): ArrayFunctionAsync<Item, Mapped[]> {
+export function createMapAsync<Item, Mapped> (map: (item?: Item, index?: number) => Promise<Mapped>): ArrayFunctionAsync<Item, Mapped[]> {
   return async array => {
     return await createReduceAsync<Item, Mapped[]>(
-      async (resolvedMaps, item, index, a) => [...resolvedMaps, await map(item, index, a)],
+      async (resolvedMaps, item, index) => {
+        const mapped = await map(item, index)
+        resolvedMaps.push(mapped)
+        return resolvedMaps
+      },
       []
     )(array)
   }
 }
 
-export function createFilterAsync<Item> (filter: (item?: Item, index?: number, array?: Item[]) => Promise<boolean>): ArrayFunctionAsync<Item, Item[]> {
+export function createFilterAsync<Item> (filter: (item?: Item, index?: number) => Promise<boolean>): ArrayFunctionAsync<Item, Item[]> {
   return async array => {
     const mappedAsync = await createMapAsync<Item, boolean>(filter)(array)
-    return array.filter((_, index) => mappedAsync[index])
+    return createFilter<Item>((_, index) => mappedAsync[index])(array)
   }
 }
 
@@ -52,10 +70,13 @@ export type ArrayFunction<Item, Returned> = (array: Item[]) => Returned
 
 export function createDelete<Item> (required: { index: number } | { item: Item }): ArrayFunction<Item, Item[]> {
   return array => {
-    const deleteIndex = 'index' in required ? required.index : lazyCollectionsFindIndex<Item>(element => element === required?.item)(array) as number,
+    const deleteIndex = 'index' in required 
+            ? required.index
+            : lazyCollectionsFindIndex<Item>(element => element === required?.item)(array) as number,
           deleted = createConcat(
+            createSlice<Item>({ from: 0, to: deleteIndex })(array),
             createSlice<Item>({ from: deleteIndex + 1 })(array)
-          )(createSlice<Item>({ from: 0, to: deleteIndex })(array))
+          )([])
   
     return deleted
   }
@@ -73,7 +94,12 @@ export function createInsert<Item> (required: ({ item: Item } | { items: Item[] 
   }
 }
 
-export function createReorder<Item> ({ from, to }: { from: { start: number, itemCount: number } | number, to: number }): ArrayFunction<Item, Item[]> {
+export function createReorder<Item> (
+  { from, to }: {
+    from: { start: number, itemCount: number } | number,
+    to: number
+  }
+): ArrayFunction<Item, Item[]> {
   return array => {
     const [itemsToMoveStartIndex, itemsToMoveCount] = isObject(from)
             ? [from.start, from.itemCount]
@@ -85,32 +111,32 @@ export function createReorder<Item> ({ from, to }: { from: { start: number, item
       return array
     }
 
-    const itemsToMove = array.slice(itemsToMoveStartIndex, itemsToMoveStartIndex + itemsToMoveCount)
+    const itemsToMove = createSlice<Item>({ from: itemsToMoveStartIndex, to: itemsToMoveStartIndex + itemsToMoveCount })(array)
 
     if (itemsToMoveStartIndex < insertIndex) {
-      const beforeItemsToMove = itemsToMoveStartIndex === 0 ? [] : array.slice(0, itemsToMoveStartIndex),
-            betweenItemsToMoveAndInsertIndex = array.slice(itemsToMoveStartIndex + itemsToMoveCount, insertIndex + 1),
-            afterInsertIndex = array.slice(insertIndex + 1)
+      const beforeItemsToMove = itemsToMoveStartIndex === 0 ? [] : createSlice<Item>({ from: 0, to: itemsToMoveStartIndex })(array),
+            betweenItemsToMoveAndInsertIndex = createSlice<Item>({ from: itemsToMoveStartIndex + itemsToMoveCount, to: insertIndex + 1 })(array),
+            afterInsertIndex = createSlice<Item>({ from: insertIndex + 1 })(array)
   
-      return [
-        ...beforeItemsToMove,
-        ...betweenItemsToMoveAndInsertIndex,
-        ...itemsToMove,
-        ...afterInsertIndex,
-      ]
+      return createConcat<Item>(
+        beforeItemsToMove,
+        betweenItemsToMoveAndInsertIndex,
+        itemsToMove,
+        afterInsertIndex,
+      )([])
     }
     
     if (itemsToMoveStartIndex > insertIndex) {
-      const beforeInsertion = insertIndex === 0 ? [] : array.slice(0, insertIndex),
-            betweenInsertionAndItemsToMove = array.slice(insertIndex, itemsToMoveStartIndex),
-            afterItemsToMove = array.slice(itemsToMoveStartIndex + itemsToMoveCount)
+      const beforeInsertion = insertIndex === 0 ? [] : createSlice<Item>({ from: 0, to: insertIndex })(array),
+            betweenInsertionAndItemsToMove = createSlice<Item>({ from: insertIndex, to: itemsToMoveStartIndex })(array),
+            afterItemsToMove = createSlice<Item>({ from: itemsToMoveStartIndex + itemsToMoveCount })(array)
   
-      return [
-        ...beforeInsertion,
-        ...itemsToMove,
-        ...betweenInsertionAndItemsToMove,
-        ...afterItemsToMove,
-      ]
+      return createConcat<Item>(
+        beforeInsertion,
+        itemsToMove,
+        betweenInsertionAndItemsToMove,
+        afterItemsToMove
+      )([])
     }
 
     return array
@@ -151,30 +177,45 @@ export function createSwap<Item> ({ indices }: { indices: [number, number] }): A
 
 export function createReplace<Item> ({ index, item }: { index: number, item: Item }): ArrayFunction<Item, Item[]> {
   return array => {
-    return [
-      ...array.slice(0, index),
-      item,
-      ...array.slice(index + 1),
-    ]
+    return createConcat<Item>(
+      createSlice<Item>({ from: 0, to: index })(array),
+      [item],
+      createSlice<Item>({ from: index + 1 })(array)
+    )([])
   }
 }
 
 export function createUnique<Item> (): ArrayFunction<Item, Item[]> {
-  return array => {
-    return [...new Set(array)]
-  }
+  return array => lazyCollectionsPipe(
+    lazyCollectionsUnique(),
+    lazyCollectionsToArray()
+  )(array) as Item[]
 }
 
 export function createSlice<Item> ({ from, to }: { from: number, to?: number }): ArrayFunction<Item, Item[]> {
   return array => lazyCollectionsPipe(
     lazyCollectionsSlice(from, to),
     lazyCollectionsToArray()
-  )(array)
+  )(array) as Item[]
+}
+
+export function createFilter<Item> (filter: (item?: Item, index?: number) => boolean): ArrayFunction<Item, Item[]> {
+  return array => lazyCollectionsPipe(
+    lazyCollectionsFilter(filter),
+    lazyCollectionsToArray()
+  )(array) as Item[]
+}
+
+export function createMap<Item, Mapped> (map: (item?: Item, index?: number) => Mapped): ArrayFunction<Item, Mapped[]> {
+  return array => lazyCollectionsPipe(
+    lazyCollectionsMap(map),
+    lazyCollectionsToArray()
+  )(array) as Mapped[]
 }
 
 export function createConcat<Item> (...arrays: Item[][]): ArrayFunction<Item, Item[]> {
   return array => lazyCollectionsPipe(
-    lazyCollectionsConcat(array, ...arrays),
+    lazyCollectionsConcat(...arrays),
     lazyCollectionsToArray<Item>()
   )(array) as Item[]
 }
@@ -213,11 +254,11 @@ export type MapFunction<Key, Value, Returned> = (map: Map<Key, Value>) => Return
 export function createRename<Key, Value> ({ from, to }: { from: Key, to: Key }): MapFunction<Key, Value, Map<Key, Value>> {
   return map => {
     const keys = [...map.keys()],
-          keyToRenameIndex = keys.findIndex(k => k === from),
+          keyToRenameIndex = lazyCollectionsFindIndex(k => k === from)(keys) as number,
           newKeys = createReplace({ index: keyToRenameIndex, item: to })(keys),
           values = [...map.values()]
 
-    return newKeys.reduce((renamed, key, index) => renamed.set(key, values[index]), new Map())
+    return createReduce<Key, Map<Key, Value>>((renamed, key, index) => renamed.set(key, values[index]), new Map())(newKeys)
   }
 }
 
