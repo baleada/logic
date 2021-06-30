@@ -1,12 +1,19 @@
-import { createUnique } from './pipes'
+import { find as lazyCollectionsFind } from 'lazy-collections'
+import {
+  createUnique,
+  createMap,
+  createSlice,
+  createReduce,
+  Pipeable
+} from './pipes'
 
 // DISPATCHABLE
 export function toEvent (
   combo: string[],
   options: { init?: EventInit, keyDirection?: 'up' | 'down' } = {}
 ) {
-  const modifiers = combo.slice(0, combo.length - 1) as (ListenableModifier | ListenableModifierAlias)[],
-        { 0: name } = combo.slice(combo.length - 1),
+  const modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
+        { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo),
         type = comboItemNameToType(name),
         { keyDirection, init } = options
 
@@ -19,7 +26,13 @@ export function toEvent (
         {
           ...init,
           key: toKey(name),
-          ...modifiers.reduce((flags, alias) => ({ ...flags, [toModifierFlag(alias)]: true }), {})
+          ...createReduce<ListenableModifier | ListenableModifierAlias, { [flag in ListenableModifierFlag]?: true }>(
+            (flags, alias) => { 
+              flags[toModifierFlag(alias)] = true
+              return flags
+            },
+            {}
+          )(modifiers)
         }
       )
     case 'click':
@@ -27,7 +40,13 @@ export function toEvent (
         name === 'rightclick' ? 'contextmenu' : name,
         {
           ...init,
-          ...modifiers.reduce((flags, alias) => ({ ...flags, [toModifierFlag(alias)]: true }), {})
+          ...createReduce<ListenableModifier | ListenableModifierAlias, { [flag in ListenableModifierFlag]?: true }>(
+            (flags, alias) => { 
+              flags[toModifierFlag(alias)] = true
+              return flags
+            },
+            {}
+          )(modifiers)
         }
       )
     case 'custom':
@@ -96,51 +115,68 @@ const keysByName: Record<ListenableKeyAlias, ListenableKey> = {
 }
 
 const unique = createUnique<string>()
+const comboMap = createMap<string>(name => name === '' ? DELIMITER : name)
 const DELIMITER = '+'
 export function toCombo (type: string): string[] {
   // If the delimiter is used as a character in the type,
   // two empty strings will be produced by the split.
   // createUnique ensures those two are combined into one.
-  return unique(type.split(DELIMITER))
-    .map(name => (name === '' ? DELIMITER : name))
+  return new Pipeable(type.split(DELIMITER)).pipe(unique, comboMap) as string[]
 }
 
 export function comboItemNameToType (name: string) {
-  return [...predicatesByType.keys()].find(type => predicatesByType.get(type)(name)) ?? 'custom'
+  return lazyCollectionsFind((type: ListenableComboItemType) => predicatesByType.get(type)(name))(listenableComboItemTypes) as ListenableComboItemType ?? 'custom'
 }
 
 export type ListenableComboItemType = 'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click'
 
+const listenableComboItemTypes = new Set<ListenableComboItemType>(['singleCharacter', 'arrow', 'other', 'modifier', 'click'])
+
 const predicatesByType: Map<ListenableComboItemType, (name: string) => boolean> = new Map([
   [
     'singleCharacter',
-    name => typeREs.singleCharacter.test(name)
+    name => typeREs.get('singleCharacter').test(name)
   ],
   [
     'arrow',
-    name => typeREs.arrow.test(name)
+    name => typeREs.get('arrow').test(name)
   ],
   [
     'other',
-    name => typeREs.other.test(name)
+    name => typeREs.get('other').test(name)
   ],
   [
     'modifier',
-    name => typeREs.modifier.test(name)
+    name => typeREs.get('modifier').test(name)
   ],
   [
     'click',
-    name => typeREs.click.test(name)
+    name => typeREs.get('click').test(name)
   ],
 ])
 
-const typeREs: Record<ListenableComboItemType, RegExp> = {
-  singleCharacter: /^!?[a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]$/,
-  arrow: /^!?(arrow|vertical|horizontal|up|down|right|left)$/,
-  other: /^!?(enter|backspace|space|tab|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete)$/,
-  modifier: /^!?(cmd|command|meta|shift|ctrl|control|alt|opt)$/,
-  click: /^(rightclick|click|mousedown|mouseup)$/,
-}
+const typeREs: Map<ListenableComboItemType, RegExp> = new Map([
+  [
+    'singleCharacter',
+    /^!?[a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]$/
+  ],
+  [
+    'arrow',
+    /^!?(arrow|vertical|horizontal|up|down|right|left)$/
+  ],
+  [
+    'other',
+    /^!?(enter|backspace|space|tab|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete)$/
+  ],
+  [
+    'modifier',
+    /^!?(cmd|command|meta|shift|ctrl|control|alt|opt)$/
+  ],
+  [
+    'click',
+    /^(rightclick|click|mousedown|mouseup)$/
+  ],
+])
 
 export type ListenableModifierAlias = 'cmd' | 'command' | 'ctrl' | 'opt' | 'option'
 export type ListenableModifier = 'meta' | 'command' | 'control' | 'alt' | 'shift'
@@ -160,20 +196,20 @@ const modifiersByAlias: Record<ListenableModifierAlias, ListenableModifier> = {
 type ListenableModifierFlag = 'shiftKey' | 'metaKey' | 'ctrlKey' | 'altKey'
 
 export function toModifierFlag (modifierOrAlias: ListenableModifier | ListenableModifierAlias) {
-  return flagsByModifierOrAlias[modifierOrAlias]
+  return flagsByModifierOrAlias.get(modifierOrAlias)
 }
 
-const flagsByModifierOrAlias: Record<ListenableModifier | ListenableModifierAlias, ListenableModifierFlag> = {
-  shift: 'shiftKey',
-  cmd: 'metaKey',
-  command: 'metaKey',
-  meta: 'metaKey',
-  ctrl: 'ctrlKey',
-  control: 'ctrlKey',
-  alt: 'altKey',
-  opt: 'altKey',
-  option: 'altKey',
-}
+const flagsByModifierOrAlias: Map<ListenableModifier | ListenableModifierAlias, ListenableModifierFlag> = new Map([
+  ['shift', 'shiftKey'],
+  ['cmd', 'metaKey'],
+  ['command', 'metaKey'],
+  ['meta', 'metaKey'],
+  ['ctrl', 'ctrlKey'],
+  ['control', 'ctrlKey'],
+  ['alt', 'altKey'],
+  ['opt', 'altKey'],
+  ['option', 'altKey'],
+])
 
 // STOREABLE
 export function domIsAvailable (): boolean {

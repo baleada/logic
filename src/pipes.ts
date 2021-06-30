@@ -209,7 +209,7 @@ export function createFilter<Item> (filter: (item?: Item, index?: number) => boo
   )(array) as Item[]
 }
 
-export function createMap<Item, Mapped> (map: (item?: Item, index?: number) => Mapped): ArrayFunction<Item, Mapped[]> {
+export function createMap<Item, Mapped = Item> (map: (item?: Item, index?: number) => Mapped): ArrayFunction<Item, Mapped[]> {
   return array => lazyCollectionsPipe(
     lazyCollectionsMap(map),
     lazyCollectionsToArray()
