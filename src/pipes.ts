@@ -71,21 +71,20 @@ export type ArrayFunction<Item, Returned> = (array: Item[]) => Returned
 export function createDelete<Item> (required: { index: number } | { item: Item }): ArrayFunction<Item, Item[]> {
   return array => {
     const deleteIndex = 'index' in required 
-            ? required.index
-            : lazyCollectionsFindIndex<Item>(element => element === required?.item)(array) as number,
-          deleted = createConcat(
-            createSlice<Item>({ from: 0, to: deleteIndex })(array),
-            createSlice<Item>({ from: deleteIndex + 1 })(array)
-          )([])
-  
-    return deleted
+      ? required.index
+      : lazyCollectionsFindIndex<Item>(element => element === required?.item)(array) as number
+    
+    return createConcat(
+      createSlice<Item>({ from: 0, to: deleteIndex })(array),
+      createSlice<Item>({ from: deleteIndex + 1 })(array)
+    )([])
   }
 }
 
 export function createInsert<Item> (required: ({ item: Item } | { items: Item[] }) & { index: number }): ArrayFunction<Item, Item[]> {
   return array => {
     const itemsToInsert = 'items' in required ? required.items : [required.item],
-          withItems = createConcat(itemsToInsert)(array)
+          withItems = createConcat(array, itemsToInsert)([])
 
     return createReorder<Item>({
       from: { start: array.length, itemCount: itemsToInsert.length },
@@ -193,10 +192,14 @@ export function createUnique<Item> (): ArrayFunction<Item, Item[]> {
 }
 
 export function createSlice<Item> ({ from, to }: { from: number, to?: number }): ArrayFunction<Item, Item[]> {
-  return array => lazyCollectionsPipe(
-    lazyCollectionsSlice(from, to),
-    lazyCollectionsToArray()
-  )(array) as Item[]
+  return array => {
+    return from === to
+      ? []
+      : lazyCollectionsPipe(
+          lazyCollectionsSlice(from, to - 1),
+          lazyCollectionsToArray()
+        )(array) as Item[]
+  }
 }
 
 export function createFilter<Item> (filter: (item?: Item, index?: number) => boolean): ArrayFunction<Item, Item[]> {
@@ -215,9 +218,9 @@ export function createMap<Item, Mapped> (map: (item?: Item, index?: number) => M
 
 export function createConcat<Item> (...arrays: Item[][]): ArrayFunction<Item, Item[]> {
   return array => lazyCollectionsPipe(
-    lazyCollectionsConcat(...arrays),
+    lazyCollectionsConcat(array, ...arrays),
     lazyCollectionsToArray<Item>()
-  )(array) as Item[]
+  )() as Item[]
 }
 
 
