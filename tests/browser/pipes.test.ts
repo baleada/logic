@@ -302,64 +302,110 @@ suite(`createUnique() removes duplicates`, async ({ puppeteer: { page }, array }
 })
 
 
-// // MAP
-// suite(`createRename({ from, to }) renames "from" name to "to" name', context => {
-//   const value = createRename({ from: 'one', to: 'uno' })(context.map)
+// MAP
+suite(`createRename({ from, to }) renames 'from' name to 'to' name`, async ({ puppeteer: { page }, map }) => {
+  const value = await page.evaluate(mapAsArray => {
+    // @ts-ignore
+    const value = window.Logic.createRename({ from: 'one', to: 'uno' })(new Map(mapAsArray))
 
-//   assert.equal(value, new Map([['uno', 'value'], ['two', 'value']]))
-// })
+    return {
+      isMap: value instanceof Map,
+      array: [...value]
+    }
+  }, [...map])
+
+  assert.ok(value.isMap)
+  assert.equal(new Map(value.array), new Map([['uno', 'value'], ['two', 'value']]))
+})
 
 
-// // STRING
-// suite(`createClip(text) clips text from a string`, context => {
-//   const value = createClip('Baleada: ')(context.string),
-//         expected = 'a toolkit for building web apps'
+// STRING
+suite(`createClip(text) clips text from a string`, async ({ puppeteer: { page }, string }) => {
+  const value = await page.evaluate(string => {
+          // @ts-ignore
+          return window.Logic.createClip('Baleada: ')(string)
+        }, string),
+        expected = 'a toolkit for building web apps'
 
-//   assert.is(value, expected)
-// })
+  assert.is(value, expected)
+})
 
-// suite(`createClip(regularExpression) clips regularExpression from a string`, context => {
-//   const value = createClip(/^Baleada: /)(context.string),
-//         expected = 'a toolkit for building web apps'
+suite(`createClip(regularExpression) clips regularExpression from a string`, async ({ puppeteer: { page }, string }) => {
+  const value = await page.evaluate(string => {
+          // @ts-ignore
+          return window.Logic.createClip(/^Baleada: /)(string)
+        }, string),
+        expected = 'a toolkit for building web apps'
 
-//   assert.is(value, expected)
-// })
+  assert.is(value, expected)
+})
 
-// suite(`createSlug(...) slugs strings`, context => {
-//   assert.is(createSlug()('I ♥ Dogs'), 'i-love-dogs')
-//   assert.is(createSlug()('  Déjà Vu!  '), 'deja-vu')
-//   assert.is(createSlug()('fooBar 123 $#%'), 'foo-bar-123')
-//   assert.is(createSlug()('я люблю единорогов'), 'ya-lyublyu-edinorogov')
-// })
+suite(`createSlug(...) slugs strings`, async ({ puppeteer: { page } }) => {
+  const value1 = await page.evaluate(() => {
+    // @ts-ignore
+    return window.Logic.createSlug()('I ♥ Dogs')
+  })
+  assert.is(value1, 'i-love-dogs')
 
-// suite(`createSlug(...) respects options`, context => {
-//   const value = createSlug({
-//     customReplacements: [
-//       ['@', 'at']
-//     ]
-//   })('Foo@unicorn')
+  const value2 = await page.evaluate(() => {
+    // @ts-ignore
+    return window.Logic.createSlug()('  Déjà Vu!  ')
+  })
+  assert.is(value2, 'deja-vu')
+
+  const value3 = await page.evaluate(() => {
+    // @ts-ignore
+    return window.Logic.createSlug()('fooBar 123 $#%')
+  })
+  assert.is(value3, 'foo-bar-123')
+
+  const value4 = await page.evaluate(() => {
+    // @ts-ignore
+    return window.Logic.createSlug()('я люблю единорогов')
+  })
+  assert.is(value4, 'ya-lyublyu-edinorogov')
+})
+
+suite(`createSlug(...) respects options`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    // @ts-ignore
+    return window.Logic.createSlug({
+      customReplacements: [
+        ['@', 'at']
+      ]
+    })('Foo@unicorn')
+  })
   
-//   assert.is(value, 'fooatunicorn')
-// })
+  assert.is(value, 'fooatunicorn')
+})
 
 
 // // NUMBER
-// suite(`createClamp({ min, max }) handles number between min and max`, context => {
-//   const value = createClamp({ min: 0, max: 100 })(context.number)
+suite(`createClamp({ min, max }) handles number between min and max`, async ({ puppeteer: { page }, number }) => {
+  const value = await page.evaluate(number => {
+    // @ts-ignore
+    return window.Logic.createClamp({ min: 0, max: 100 })(number)
+  }, number)
 
-//   assert.is(value, 42)
-// })
+  assert.is(value, 42)
+})
 
-// suite(`createClamp({ min, max }) handles number below min`, context => {
-//   const value = createClamp({ min: 50, max: 100 })(context.number)
+suite(`createClamp({ min, max }) handles number below min`, async ({ puppeteer: { page }, number }) => {
+  const value = await page.evaluate(number => {
+    // @ts-ignore
+    return window.Logic.createClamp({ min: 50, max: 100 })(number)
+  }, number)
 
-//   assert.is(value, 50)
-// })
+  assert.is(value, 50)
+})
 
-// suite(`createClamp({ min, max }) handles number above max`, context => {
-//   const value = createClamp({ min: 0, max: 36 })(context.number)
+suite(`createClamp({ min, max }) handles number above max`, async ({ puppeteer: { page }, number }) => {
+  const value = await page.evaluate(number => {
+    // @ts-ignore
+    return window.Logic.createClamp({ min: 0, max: 36 })(number)
+  }, number)
 
-//   assert.is(value, 36)
-// })
+  assert.is(value, 36)
+})
 
 suite.run()
