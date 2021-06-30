@@ -6,7 +6,7 @@ const suite = withPuppeteer(
   createSuite('Animateable (browser)'),
 )
 
-suite.before.each(context => {
+suite.before(context => {
   context.keyframes = [
     { progress: 0, data: { example: 0 } },
     { progress: 1, data: { example: 1 } }
@@ -15,8 +15,6 @@ suite.before.each(context => {
 
 suite.before.each(async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000')
-  await page.waitForSelector('body')
-  await page.click('body')
 })
 
 suite('initial playbackRate is 1', async ({ puppeteer: { page }, keyframes }) => {

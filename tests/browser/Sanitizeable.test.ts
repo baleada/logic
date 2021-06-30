@@ -7,12 +7,12 @@ const suite = withPuppeteer(
   createSuite('Sanitizeable (browser)')
 )
 
-suite.before(context => (context.html = '<h1>Baleada: a toolkit for building web apps</h1><iframe src="" />'))
+suite.before(context => {
+  context.html = '<h1>Baleada: a toolkit for building web apps</h1><iframe src="" />'
+})
 
 suite.before.each(async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000')
-  await page.waitForSelector('body')
-  await page.click('body')
 })
 
 suite(`sanitize(...) sanitizes html`, async ({ puppeteer: { page }, html }) => {
