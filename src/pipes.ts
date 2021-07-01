@@ -1,13 +1,13 @@
 import {
-  pipe as lazyCollectionsPipe,
-  slice as lazyCollectionsSlice,
-  toArray as lazyCollectionsToArray,
-  findIndex as lazyCollectionsFindIndex,
-  concat as lazyCollectionsConcat,
-  filter as lazyCollectionsFilter,
-  map as lazyCollectionsMap,
-  unique as lazyCollectionsUnique,
-  reduce as lazyCollectionsReduce,
+  pipe as lazyCollectionPipe,
+  slice as lazyCollectionSlice,
+  toArray as lazyCollectionToArray,
+  findIndex as lazyCollectionFindIndex,
+  concat as lazyCollectionConcat,
+  filter as lazyCollectionFilter,
+  map as lazyCollectionMap,
+  unique as lazyCollectionUnique,
+  reduce as lazyCollectionReduce,
 } from 'lazy-collections'
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
@@ -18,7 +18,7 @@ export function createReduceAsync<Item, Accumulator> (
   initialValue?: Accumulator
 ): (array: Item[]) => Promise<Accumulator> {
   return async array => {
-    return await lazyCollectionsReduce<Promise<Accumulator>, Item>(
+    return await lazyCollectionReduce<Promise<Accumulator>, Item>(
       async (accumulatorPromise, item, index) => {
         const accumulator = await accumulatorPromise
         return reduce(accumulator, item, index)
@@ -32,7 +32,17 @@ export function createReduce<Item, Accumulator> (
   reduce: (accumulator?: Accumulator, item?: Item, index?: number) => Accumulator,
   initialValue?: Accumulator
 ): (array: Item[]) => Accumulator {
-  return array => lazyCollectionsReduce<Accumulator, Item>(reduce, initialValue)(array) as Accumulator
+  return array => lazyCollectionReduce<Accumulator, Item>(reduce, initialValue)(array) as Accumulator
+}
+
+export function createJoin (separator?: string): (array: string[]) => string {
+  return array => createReduce<string, string>(
+    (joined, item, index) => {
+      joined += index === 0 ? item : `${separator || ''}${item}`
+      return joined
+    },
+    ''
+  )(array)
 }
 
 // ARRAY ASYNC
@@ -72,7 +82,7 @@ export function createDelete<Item> (required: { index: number } | { item: Item }
   return array => {
     const deleteIndex = 'index' in required 
       ? required.index
-      : lazyCollectionsFindIndex<Item>(element => element === required?.item)(array) as number
+      : lazyCollectionFindIndex<Item>(element => element === required?.item)(array) as number
     
     return createConcat(
       createSlice<Item>({ from: 0, to: deleteIndex })(array),
@@ -185,9 +195,9 @@ export function createReplace<Item> ({ index, item }: { index: number, item: Ite
 }
 
 export function createUnique<Item> (): ArrayFunction<Item, Item[]> {
-  return array => lazyCollectionsPipe(
-    lazyCollectionsUnique(),
-    lazyCollectionsToArray()
+  return array => lazyCollectionPipe(
+    lazyCollectionUnique(),
+    lazyCollectionToArray()
   )(array) as Item[]
 }
 
@@ -195,31 +205,31 @@ export function createSlice<Item> ({ from, to }: { from: number, to?: number }):
   return array => {
     return from === to
       ? []
-      : lazyCollectionsPipe(
-          lazyCollectionsSlice(from, to - 1),
-          lazyCollectionsToArray()
+      : lazyCollectionPipe(
+          lazyCollectionSlice(from, to - 1),
+          lazyCollectionToArray()
         )(array) as Item[]
   }
 }
 
 export function createFilter<Item> (filter: (item?: Item, index?: number) => boolean): ArrayFunction<Item, Item[]> {
-  return array => lazyCollectionsPipe(
-    lazyCollectionsFilter(filter),
-    lazyCollectionsToArray()
+  return array => lazyCollectionPipe(
+    lazyCollectionFilter(filter),
+    lazyCollectionToArray()
   )(array) as Item[]
 }
 
 export function createMap<Item, Mapped = Item> (map: (item?: Item, index?: number) => Mapped): ArrayFunction<Item, Mapped[]> {
-  return array => lazyCollectionsPipe(
-    lazyCollectionsMap(map),
-    lazyCollectionsToArray()
+  return array => lazyCollectionPipe(
+    lazyCollectionMap(map),
+    lazyCollectionToArray()
   )(array) as Mapped[]
 }
 
 export function createConcat<Item> (...arrays: Item[][]): ArrayFunction<Item, Item[]> {
-  return array => lazyCollectionsPipe(
-    lazyCollectionsConcat(array, ...arrays),
-    lazyCollectionsToArray<Item>()
+  return array => lazyCollectionPipe(
+    lazyCollectionConcat(array, ...arrays),
+    lazyCollectionToArray<Item>()
   )() as Item[]
 }
 
@@ -257,7 +267,7 @@ export type MapFunction<Key, Value, Returned> = (map: Map<Key, Value>) => Return
 export function createRename<Key, Value> ({ from, to }: { from: Key, to: Key }): MapFunction<Key, Value, Map<Key, Value>> {
   return map => {
     const keys = [...map.keys()],
-          keyToRenameIndex = lazyCollectionsFindIndex(k => k === from)(keys) as number,
+          keyToRenameIndex = lazyCollectionFindIndex(k => k === from)(keys) as number,
           newKeys = createReplace({ index: keyToRenameIndex, item: to })(keys),
           values = [...map.values()]
 

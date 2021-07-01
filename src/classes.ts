@@ -1,5 +1,5 @@
 export { Animateable } from './classes/Animateable'
-export type { AnimateableKeyframe, AnimateableOptions, AnimateableStatus, AnimateableFrame, AnimateableFrameHandler, AnimateOptions } from './classes/Animateable'
+export type { AnimateableKeyframe, AnimateableOptions, AnimateableStatus, AnimateFrame, AnimateFrameHandler, AnimateOptions } from './classes/Animateable'
 
 export { Completeable } from './classes/Completeable'
 export type { CompleteableOptions, CompleteableStatus } from './classes/Completeable'

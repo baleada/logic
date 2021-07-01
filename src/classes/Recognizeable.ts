@@ -1,7 +1,19 @@
 import createClone from 'rfdc'
 import { isArray, isNumber } from '../util'
-import { createInsert } from '../pipes'
+import {
+  createInsert,
+  createSlice,
+  createConcat,
+  createMap,
+  createReduce,
+  Pipeable
+} from '../pipes'
 import { ListenableKeycomboItem, ListenableClickcomboItem, ListenableSupportedEvent, eventMatchesClickcombo, toImplementation, ensureClickcombo, ensureKeycombo, eventMatchesKeycombo } from './Listenable'
+import {
+  map as lazyCollectionMap,
+  reduce as lazyCollectionReduce,
+  pipe as lazyCollectionPipe,
+} from 'lazy-collections'
 
 export type RecognizeableSupportedType = 
   IntersectionObserverEntry[]
@@ -194,7 +206,10 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
           excess = isNumber(this._maxSequenceLength)
             ? Math.max(0, this.sequence.length - this._maxSequenceLength)
             : 0,
-          newSequence = [ ...this.sequence.slice(excess), event ]
+          newSequence = createConcat(
+            createSlice<SequenceItem>({ from: excess })(this.sequence),
+            [event]
+          )([])
 
     this._handlers.get(type)?.({
       event,
@@ -241,7 +256,7 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
       }
 
       if (this._handlerLeftclickcombos.length > 0) {
-        if (LEFTCLICKCOMBO_EVENT_TYPES.has((sequenceItem as Event).type)) {
+        if (leftclickcomboEventTypes.has((sequenceItem as Event).type)) {
           for (const clickcombo of this._handlerLeftclickcombos) {
             if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
               return clickcombo.join('+')
@@ -251,7 +266,7 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
       }
       
       if (this._handlerRightclickcombos.length > 0) {
-        if (RIGHTCLICKCOMBO_EVENT_TYPES.has((sequenceItem as Event).type)) {
+        if (rightclickComboEventTypes.has((sequenceItem as Event).type)) {
           for (const clickcombo of this._handlerRightclickcombos) {
             if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
               return clickcombo.join('+')
@@ -261,7 +276,7 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
       }
       
       if (this._handlerKeycombos.length > 0) {
-        if (KEYCOMBO_EVENT_TYPE.has((sequenceItem as Event).type)) {
+        if (keycomboEventTypes.has((sequenceItem as Event).type)) {
           for (const keycombo of this._handlerKeycombos) {
             if (eventMatchesKeycombo({ event: sequenceItem as KeyboardEvent, keycombo })) {
               return keycombo.join('+')
@@ -275,9 +290,9 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
   }
 }
 
-const LEFTCLICKCOMBO_EVENT_TYPES = new Set(['click', 'mousedown', 'mouseup', 'dblclick'])
-const RIGHTCLICKCOMBO_EVENT_TYPES = new Set(['contextmenu'])
-const KEYCOMBO_EVENT_TYPE = new Set(['keydown', 'keyup'])
+const leftclickcomboEventTypes = new Set(['click', 'mousedown', 'mouseup', 'dblclick'])
+const rightclickComboEventTypes = new Set(['contextmenu'])
+const keycomboEventTypes = new Set(['keydown', 'keyup'])
 
 export function toPolarCoordinates (
   { xA, xB, yA, yB }: { xA: number, xB: number, yA: number, yB: number }
@@ -299,22 +314,32 @@ export function toPolarCoordinates (
 }
 
 export function get ({ object, path }: { object: Record<any, any>, path: string }): any {
-  return toKeys(path).reduce((gotten, key) => {
-    if (!Array.isArray(gotten)) {
-      return gotten[key]
-    }
+  const toGotten = createReduce(
+    (gotten, key: string | number) => {
+      if (!Array.isArray(gotten)) {
+        return gotten[key]
+      }
 
-    return key === 'last'
-      ? gotten[gotten.length - 1]
-      : gotten[key]
-  }, object)
+      return key === 'last'
+        ? gotten[gotten.length - 1]
+        : gotten[key]
+    },
+    object
+  )
+  
+  return new Pipeable(path).pipe(
+    toKeys,
+    toGotten
+  )
 }
 
+const keyMap = createMap<string | number>(key => isNaN(Number(key)) ? key : Number(key))
 export function toKeys (path: string): (string | number)[] {
   return path
-    ? path
-      .split('.')
-      .map(key => isNaN(Number(key)) ? key : Number(key))
+    ? new Pipeable(path).pipe(
+        path => path.split('.'),
+        keyMap
+      ) as (string | number)[]
     : []
 }
 
@@ -325,7 +350,7 @@ export function set ({ object, path, value }: { object: Record<any, any>, path: 
       return
     }
 
-    const p = toPath(array.slice(0, index))
+    const p = toPath(createSlice<string | number>({ from: 0, to: index })(array))
 
     if (!p) {
       maybeAssign({
@@ -355,11 +380,11 @@ export function defineRecognizeableHandler<SequenceItem extends RecognizeableSup
   return handler
 }
 
+const pathMap = lazyCollectionMap<string | number, string>(key => typeof key === 'string' ? key : `${key}`),
+      pathReduce = lazyCollectionReduce<string | number, string>((path, key) => `${path}${'.' + key}`, '')
 function toPath (keys: (string | number)[]): string {
-  return keys
-    .map(key => typeof key === 'string' ? key : `${key}`)
-    .reduce((path, key) => `${path}${'.' + key}`, '')
-    .replace(/^\./, '')
+  return lazyCollectionPipe(pathMap, pathReduce)(keys)
+    .replace(/^\./, '') as string
 }
 
 function maybeAssign ({ gotten, key, assign }: { gotten: any, key: string | number, assign: (value: any) => void }): void {

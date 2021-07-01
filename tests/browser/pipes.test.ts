@@ -50,6 +50,22 @@ suite(`reduces`, async ({ puppeteer: { page }, array }) => {
   assert.is(value, expected)
 })
 
+suite(`joins`, async ({ puppeteer: { page }, array }) => {
+  const value1 = await page.evaluate(async array => {
+    // @ts-ignore
+    return window.Logic.createJoin()(array)
+  }, array)
+
+  assert.is(value1, 'tortillafrijolesmantequillaaguacatehuevito')
+  
+  const value2 = await page.evaluate(async array => {
+    // @ts-ignore
+    return window.Logic.createJoin(' ')(array)
+  }, array)
+
+  assert.is(value2, 'tortilla frijoles mantequilla aguacate huevito')
+})
+
 suite(`async filters`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const asyncConditionStub: (item: number) => Promise<boolean> = item => new Promise(function(resolve, reject) {

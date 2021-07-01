@@ -1,10 +1,12 @@
-import { find as lazyCollectionsFind } from 'lazy-collections'
 import {
-  createUnique,
-  createMap,
+  find as lazyCollectionFind,
+  map as lazyCollectionMap,
+  unique as lazyCollectionUnique,
+  pipe as lazyCollectionPipe
+} from 'lazy-collections'
+import {
   createSlice,
   createReduce,
-  Pipeable
 } from './pipes'
 
 // DISPATCHABLE
@@ -114,23 +116,26 @@ const keysByName: Record<ListenableKeyAlias, ListenableKey> = {
   f20: 'F20',
 }
 
-const unique = createUnique<string>()
-const comboMap = createMap<string>(name => name === '' ? DELIMITER : name)
+const unique = lazyCollectionUnique<string>()
+const comboMap = lazyCollectionMap<string, string>(name => name === '' ? DELIMITER : name)
 const DELIMITER = '+'
 export function toCombo (type: string): string[] {
   // If the delimiter is used as a character in the type,
   // two empty strings will be produced by the split.
   // createUnique ensures those two are combined into one.
-  return new Pipeable(type.split(DELIMITER)).pipe(unique, comboMap) as string[]
+  return lazyCollectionPipe(
+    unique,
+    comboMap,
+  )(type.split(DELIMITER)) as string[]
 }
 
 export function comboItemNameToType (name: string) {
-  return lazyCollectionsFind((type: ListenableComboItemType) => predicatesByType.get(type)(name))(listenableComboItemTypes) as ListenableComboItemType ?? 'custom'
+  return lazyCollectionFind((type: ListenableComboItemType) => predicatesByType.get(type)(name))(LISTENABLE_COMBO_ITEM_TYPES) as ListenableComboItemType ?? 'custom'
 }
 
 export type ListenableComboItemType = 'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click'
 
-const listenableComboItemTypes = new Set<ListenableComboItemType>(['singleCharacter', 'arrow', 'other', 'modifier', 'click'])
+const LISTENABLE_COMBO_ITEM_TYPES = new Set<ListenableComboItemType>(['singleCharacter', 'arrow', 'other', 'modifier', 'click'])
 
 const predicatesByType: Map<ListenableComboItemType, (name: string) => boolean> = new Map([
   [
