@@ -1,5 +1,9 @@
+import {
+  some as lazyCollectionSome,
+  every as lazyCollectionEvery,
+} from 'lazy-collections'
 import { Recognizeable } from './Recognizeable'
-import type { RecognizeableSupportedType, RecognizeableSequenceItem, RecognizeableOptions } from './Recognizeable'
+import type { RecognizeableSequenceItem, RecognizeableOptions } from './Recognizeable'
 import {
   isArray,
   isNumber,
@@ -317,7 +321,7 @@ function stop<EventType extends ListenableSupportedType> (stoppable: ListenableA
     stoppable.id.stop()
   }
 
-  if ([IntersectionObserver, MutationObserver, ResizeObserver].some(observer => stoppable.id instanceof observer)) {
+  if (lazyCollectionSome<string>(type => observerAssertionsByType.get(type)(stoppable.id))(['intersect', 'mutate', 'resize'])) {
     const { id } = stoppable as ListenableActive<IntersectionObserverEntry | ResizeObserverEntry | MutationRecord>
     id.disconnect()
     return
@@ -412,7 +416,9 @@ export function createExceptAndOnlyHandle<EventType extends ListenableSupportedE
   
   return (event: EventType) => {
     const { target } = event,
-          [matchesOnly, matchesExcept] = [only, except].map(selectors => selectors.some(selector => (target as Element).matches(selector)))
+          [matchesOnly, matchesExcept] = target instanceof Element
+            ? [only, except].map(selectors => lazyCollectionSome<string>(selector => target.matches(selector))(selectors))
+            : [false, true]
 
     if (matchesOnly) {
       handle(event)
@@ -440,7 +446,7 @@ export function ensureClickcombo (type: string): string[] {
 }
 
 export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEvent, keycombo: ListenableKeycomboItem[] }): boolean {
-  return keycombo.every(({ name, type }, index) => {
+  return lazyCollectionEvery<ListenableKeycomboItem>(({ name, type }, index) => {
     switch (type) {
       case 'singleCharacter':
       case 'other':
@@ -452,7 +458,7 @@ export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEven
           ? event.key.toLowerCase() !== toKey(name).slice(1).toLowerCase()
           : event.key.toLowerCase() === toKey(name).toLowerCase()
       case 'arrow':
-        return predicatesByArrow[name]?.({ event, name }) ?? predicatesByArrow.default({ event, name })
+        return predicatesByArrow.get(name as ListenableArrowAlias)?.({ event, name }) ?? predicatesByArrow.get('default')({ event, name })
       case 'modifier':
         if (index === keycombo.length - 1) {
           return name.startsWith('!')
@@ -464,21 +470,42 @@ export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEven
           ? !isModified({ event, alias: name.slice(1) })
           : isModified({ event, alias: name })
     }
-  })
+  })(keycombo) as boolean
 }
 
 type ListenableArrowAlias = 'arrow' | '!arrow' | 'vertical' | '!vertical' | 'horizontal' | '!horizontal' | 'default'
-const predicatesByArrow: Record<ListenableArrowAlias, (required: { event: KeyboardEvent, name?: string }) => boolean> = {
-  'arrow': ({ event }) => ARROWS.has(event.key.toLowerCase()),
-  '!arrow': ({ event }) => !ARROWS.has(event.key.toLowerCase()),
-  'vertical': ({ event }) => VERTICAL_ARROWS.has(event.key.toLowerCase()),
-  '!vertical': ({ event }) => !VERTICAL_ARROWS.has(event.key.toLowerCase()),
-  'horizontal': ({ event }) => HORIZONTAL_ARROWS.has(event.key.toLowerCase()),
-  '!horizontal': ({ event }) => !HORIZONTAL_ARROWS.has(event.key.toLowerCase()),
-  'default': ({ event, name }) => name.startsWith('!')
-    ? event.key.toLowerCase() !== `arrow${name.toLowerCase()}`
-    : event.key.toLowerCase() === `arrow${name.toLowerCase()}`,
-}
+const predicatesByArrow: Map<ListenableArrowAlias, (required: { event: KeyboardEvent, name?: string }) => boolean> = new Map([
+  [
+    'arrow',
+    ({ event }) => ARROWS.has(event.key.toLowerCase())
+  ],
+  [
+    '!arrow',
+    ({ event }) => !ARROWS.has(event.key.toLowerCase()),
+  ],
+  [
+    'vertical',
+    ({ event }) => VERTICAL_ARROWS.has(event.key.toLowerCase()),
+  ],
+  [
+    '!vertical',
+    ({ event }) => !VERTICAL_ARROWS.has(event.key.toLowerCase()),
+  ],
+  [
+    'horizontal',
+    ({ event }) => HORIZONTAL_ARROWS.has(event.key.toLowerCase()),
+  ],
+  [
+    '!horizontal',
+    ({ event }) => !HORIZONTAL_ARROWS.has(event.key.toLowerCase()),
+  ],
+  [
+    'default',
+    ({ event, name }) => name.startsWith('!')
+      ? event.key.toLowerCase() !== `arrow${name.toLowerCase()}`
+      : event.key.toLowerCase() === `arrow${name.toLowerCase()}`,
+  ]
+])
 
 const ARROWS = new Set(['arrowup', 'arrowright', 'arrowdown', 'arrowleft'])
 const VERTICAL_ARROWS = new Set(['arrowup', 'arrowdown'])
@@ -513,19 +540,8 @@ export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEve
   ))
 }
 
-const l = new Listenable<MouseEvent, Record<'butt', 'fart'>>(
-  'recognizeable',
-  {
-    recognizeable: {
-      handlers: {
-        mousedown: ({ event, transformMetadata }) => {
-          transformMetadata(
-            metadata => ({ butt: metadata.butt })
-          )
-        }
-      }
-    }
-  }
-)
-
-l.listen(event => console.log(event.shiftKey))
+const observerAssertionsByType: Map<string, (observer: unknown) => boolean> = new Map([
+  ['intersect', observer => observer instanceof IntersectionObserver],
+  ['mutate', observer => observer instanceof MutationObserver],
+  ['resize', observer => observer instanceof ResizeObserver],
+])
