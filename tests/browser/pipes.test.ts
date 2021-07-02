@@ -183,6 +183,15 @@ suite(`createConcat(...arrays) concatenates the arrays`, async ({ puppeteer: { p
   assert.equal(value, [...array, ...array, ...array])
 })
 
+suite(`createReverse() reverses the array`, async ({ puppeteer: { page }, array }) => {
+  const value = await page.evaluate(array => {
+    // @ts-ignore
+    return window.Logic.createReverse()(array)
+  }, array)
+
+  assert.equal(value, ['huevito', 'aguacate', 'mantequilla', 'frijoles', 'tortilla'])
+})
+
 suite(`createDelete({ index }) removes the item at index from the array`, async ({ puppeteer: { page }, array }) => {
   const value = await page.evaluate(array => {
     // @ts-ignore

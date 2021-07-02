@@ -10,6 +10,7 @@ import {
   createReduce,
   Pipeable,
   createConcat,
+  createReverse,
 } from '../pipes'
 import {
   filter as lazyCollectionFilter,
@@ -177,10 +178,9 @@ export class Animateable {
     this._computedKeyframes = Array.from(keyframes).sort(({ progress: progressA }, { progress: progressB }) => progressA - progressB)
 
     this._reversedKeyframes = new Pipeable(this.keyframes).pipe(
-      // Reverse without mutating
-      keyframes => Array.from(keyframes).reverse(), 
-      reversedProgressMap
-    )
+      createReverse<AnimateableKeyframe>(),
+      createMap<AnimateableKeyframe>(({ progress, properties }) => ({ progress: 1 - progress, properties }))
+    ) as AnimateableKeyframe[]
 
     this._properties = toProperties(this.keyframes)
     this._easeables = this._getEaseables({ keyframes: this.keyframes, properties: this._properties })
@@ -807,8 +807,6 @@ export class Animateable {
     this._computedStatus = 'stopped'
   }
 }
-
-const reversedProgressMap = createMap(({ progress, properties }) => ({ progress: 1 - progress, properties }))
 
 type Easeable = {
   property: string,

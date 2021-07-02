@@ -1,4 +1,4 @@
-import { createJoin, Pipeable } from "../pipes"
+import { createJoin, createReverse, Pipeable } from "../pipes"
 
 export type CompleteableOptions = {
   segment?: {
@@ -193,7 +193,8 @@ export class Completeable {
   }
 }
 
-const join = createJoin()
+const join = createJoin(),
+      reverse = createReverse<string>()
 export function toPreviousMatch ({ string, re, from }: { string: string, re: RegExp, from: number }): number {
   let indexOf
   if (!re.test(string.slice(0, from)) || from === 0) {
@@ -202,7 +203,7 @@ export function toPreviousMatch ({ string, re, from }: { string: string, re: Reg
     const reversedStringBeforeFrom = new Pipeable(string).pipe(
             (string: string) => string.slice(0, from),
             (sliced: string) => sliced.split(''),
-            (split: string[]) => split.reverse(),
+            reverse,
             join
           ) as string,
           toNextMatchIndex = toNextMatch({ string: reversedStringBeforeFrom, re, from: 0 })

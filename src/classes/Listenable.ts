@@ -531,13 +531,13 @@ const predicatesByModifier: Record<ListenableModifier | ListenableModifierAlias,
 // export type ListenableClickcomboItem = ListenableModifier | ListenableModifierAlias | 'click'
 export type ListenableClickcomboItem = string
 export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEvent, clickcombo: string[] }): boolean {
-  return clickcombo.every(name => (
+  return lazyCollectionEvery<string>(name => (
     comboItemNameToType(name) === 'click'
     ||
     (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))
     ||
     (!name.startsWith('!') && isModified({ alias: name, event }))
-  ))
+  ))(clickcombo) as boolean
 }
 
 const observerAssertionsByType: Map<string, (observer: unknown) => boolean> = new Map([
