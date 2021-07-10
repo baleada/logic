@@ -1,5 +1,5 @@
 import { Animateable } from './Animateable'
-import type { AnimateableFrameHandler } from './Animateable'
+import type { AnimateFrameHandler } from './Animateable'
 
 export type DelayableOptions = {
   delay?: number,
@@ -20,8 +20,8 @@ export class Delayable {
   constructor (fn: DelayableFunction, options: DelayableOptions = {}) {
     this._animateable = new Animateable(
       [
-        { progress: 0, data: { progress: 0 } },
-        { progress: 1, data: { progress: 1 } }
+        { progress: 0, properties: { progress: 0 } },
+        { progress: 1, properties: { progress: 1 } }
       ],
       {
         duration: options?.delay ?? defaultOptions.delay,
@@ -65,13 +65,13 @@ export class Delayable {
 
     return this
   }
-  _frameHandler: AnimateableFrameHandler
+  _frameHandler: AnimateFrameHandler
   _setFrameHandler (fn: DelayableFunction) {
     this._frameHandler = frame => {
-      const { data: { progress }, timestamp } = frame
+      const { properties: { progress }, timestamp } = frame
 
       // Don't call delayable function until progress is 1
-      if (progress === 1) {
+      if (progress.interpolated === 1) {
         fn(timestamp)
         this._delayed()
       } else {
@@ -151,9 +151,11 @@ export class Delayable {
       window.requestAnimationFrame(timestamp => {
         for (let i = 0; i < executions; i++) {
           this._frameHandler({
-            data: { progress: 1 },
-            progress: {
-              progress: { time: 1, animation: 1 },
+            properties: {
+              progress: {
+                progress: { time: 1, animation: 1 },
+                interpolated: 1
+              }
             },
             timestamp,
           })

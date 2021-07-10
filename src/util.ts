@@ -179,7 +179,7 @@ const typeREs: Map<ListenableComboItemType, RegExp> = new Map([
   ],
   [
     'click',
-    /^(rightclick|click|mousedown|mouseup)$/
+    /^(rightclick|click|mousedown|mouseup|contextmenu)$/
   ],
 ])
 

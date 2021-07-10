@@ -7,6 +7,11 @@ export default new configureable.Vite()
   .includeDeps([
     '@baleada/animateable-utils'
   ])
+  .rollup(({ configureable }) => configureable
+    .input(({ toResolved }) => toResolved({
+      main: './tests/stubs/app/index.html',
+    }))
+  )
   .pages({ pagesDir: 'tests/stubs/app/src/pages' })
   .vue()
   .configure()

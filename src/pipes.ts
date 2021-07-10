@@ -8,6 +8,7 @@ import {
   map as lazyCollectionMap,
   unique as lazyCollectionUnique,
   reduce as lazyCollectionReduce,
+  toArray,
 } from 'lazy-collections'
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
@@ -33,16 +34,6 @@ export function createReduce<Item, Accumulator> (
   initialValue?: Accumulator
 ): (array: Item[]) => Accumulator {
   return array => lazyCollectionReduce<Accumulator, Item>(reduce, initialValue)(array) as Accumulator
-}
-
-export function createJoin (separator?: string): (array: string[]) => string {
-  return array => createReduce<string, string>(
-    (joined, item, index) => {
-      joined += index === 0 ? item : `${separator || ''}${item}`
-      return joined
-    },
-    ''
-  )(array)
 }
 
 // ARRAY ASYNC

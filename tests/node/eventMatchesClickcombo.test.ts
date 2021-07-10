@@ -7,66 +7,70 @@ const suite = createSuite('eventMatchesClickcombo (node)')
 suite(`predicates click`, context => {
   assert.ok(eventMatchesClickcombo({
     event: {} as MouseEvent,
-    combo: ['rightclick']
+    clickcombo: ['rightclick']
   }))
   assert.ok(eventMatchesClickcombo({
     event: {} as MouseEvent,
-    combo: ['click']
+    clickcombo: ['click']
   }))
   assert.ok(eventMatchesClickcombo({
     event: {} as MouseEvent,
-    combo: ['mousedown']
+    clickcombo: ['mousedown']
   }))
   assert.ok(eventMatchesClickcombo({
     event: {} as MouseEvent,
-    combo: ['mouseup']
+    clickcombo: ['mouseup']
+  }))
+  assert.ok(eventMatchesClickcombo({
+    event: {} as MouseEvent,
+    clickcombo: ['contextmenu']
   }))
 })
 
 suite(`predicates modifiers as modifiers`, context => {
   assert.ok(eventMatchesClickcombo({
     event: { shiftKey: true } as MouseEvent,
-    combo: ['shift', 'click']
+    clickcombo: ['shift', 'click']
   }))
   assert.ok(eventMatchesClickcombo({
     event: { shiftKey: false } as MouseEvent,
-    combo: ['!shift', 'click']
+    clickcombo: ['!shift', 'click']
   }))
   
   assert.ok(eventMatchesClickcombo({
     event: { metaKey: true } as MouseEvent,
-    combo: ['cmd', 'click']
+    clickcombo: ['cmd', 'click']
   }))
   assert.ok(eventMatchesClickcombo({
     event: { metaKey: false } as MouseEvent,
-    combo: ['!cmd', 'click']
+    clickcombo: ['!cmd', 'click']
   }))
   
   assert.ok(eventMatchesClickcombo({
     event: { ctrlKey: true } as MouseEvent,
-    combo: ['ctrl', 'click']
+    clickcombo: ['ctrl', 'click']
   }))
   assert.ok(eventMatchesClickcombo({
     event: { ctrlKey: false } as MouseEvent,
-    combo: ['!ctrl', 'click']
+    clickcombo: ['!ctrl', 'click']
   }))
   
   assert.ok(eventMatchesClickcombo({
     event: { altKey: true } as MouseEvent,
-    combo: ['alt', 'click']
+    clickcombo: ['alt', 'click']
   }))
   assert.ok(eventMatchesClickcombo({
     event: { altKey: false } as MouseEvent,
-    combo: ['!alt', 'click']
+    clickcombo: ['!alt', 'click']
   }))
   
   assert.ok(eventMatchesClickcombo({
     event: { altKey: true } as MouseEvent,
-    combo: ['opt', 'click']
+    clickcombo: ['opt', 'click']
   }))
   assert.ok(eventMatchesClickcombo({
     event: { altKey: false } as MouseEvent,
-    combo: ['!opt', 'click']
+    clickcombo: ['!opt', 'click']
   }))
 })
 

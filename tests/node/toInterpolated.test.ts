@@ -13,7 +13,7 @@ suite('interpolates numbers', context => {
 
 suite('interpolates strings as colors', context => {
   const value = toInterpolated({ previous: 'white', next: '#000', progress: .5 }),
-        expected = '#808080ff'
+        expected = 'rgb(128 128 128)'
 
   assert.is(value, expected)
 })
