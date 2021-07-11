@@ -1,210 +1,258 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Recognizeable } from '../../src/classes/Recognizeable'
+import { withPuppeteer } from '@baleada/prepare'
+import type { WithLogic } from '../fixtures/types'
 
-const suite = createSuite('Recognizeable (node)')
+type Context = {
+  shouldReload: boolean,
+}
 
-const eventTypeStub = 'example',
-      eventStub = { type: eventTypeStub }
+const suite = withPuppeteer(
+  createSuite<Context>('Recognizeable (browser)'),
+)
 
-suite.before.each(context => {
-  context.setup = (options = {}) => new Recognizeable(
-    [],
-    options
-  )
+suite.before(context => {
+  context.shouldReload = true
 })
 
-/* Basic */
-suite('stores the sequence', context => {
-  const instance = context.setup()
-
-  assert.equal(instance.sequence, [])
+suite.before.each(async ({ shouldReload, puppeteer: { page } }) => {
+  if (shouldReload) await page.goto('http://localhost:3000')
 })
 
-suite('assignment sets the sequence', context => {
-  const instance = context.setup()
-  instance.sequence = [eventStub]
-
-  assert.equal(instance.sequence, [eventStub])
-})
-
-suite('setSequence sets the sequence', context => {
-  const instance = context.setup()
-  instance.setSequence([eventStub])
-
-  assert.equal(instance.sequence, [eventStub])
-})
-
-/* recognize */
-suite('first recognize(event) sets status to recognizing', context => {
-  const instance = context.setup()
-
-  instance.recognize(eventStub)
-
-  assert.is(instance.status, 'recognizing')
-})
-
-suite('recognize(event) calls handler', context => {
-  let handlerWasCalled = false
-
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: () => (handlerWasCalled = true)
-    }
+suite(`stores the sequence`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    return new (window as unknown as WithLogic).Logic.Recognizeable([]).sequence
   })
 
-  instance.recognize(eventStub)
-
-  assert.is(handlerWasCalled, true)
+  assert.equal(value, [])
 })
 
-suite('handler API recognized() sets status', context => {
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: ({ recognized }) => recognized()
-    }
+suite(`assignment sets the sequence`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>([])
+    instance.sequence = [new MouseEvent('click')]
+    return instance.sequence.length
   })
 
-  instance.recognize(eventStub)
-
-  assert.is(instance.status, 'recognized')
+  assert.is(value, 1)
 })
 
-suite('handler API denied() sets status', context => {
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: ({ denied }) => denied()
-    }
+suite(`setSequence sets the sequence`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>([])
+    instance.setSequence([new MouseEvent('click')])
+    return instance.sequence.length
   })
 
-  instance.recognize(eventStub)
-
-  assert.is(instance.status, 'denied')
+  assert.is(value, 1)
 })
 
-suite('handler API getSequence() gets new sequence', context => {
-  let value
-
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: ({ getSequence }) => (value = getSequence())
-    }
+suite(`first recognize(event) sets status to recognizing`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>([])
+    instance.recognize(new MouseEvent('click'))
+    return instance.status
   })
 
-  instance.recognize(eventStub)
-
-  assert.equal(value, [eventStub])
+  assert.is(value, 'recognizing')
 })
 
-suite('handler API getStatus() gets status', context => {
-  let value
-
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: ({ getStatus }) => (value = getStatus())
-    }
-  })
-
-  instance.recognize(eventStub)
-
-  assert.is(value, instance.status)
-})
-
-suite('handler API getMetadata() gets metadata', context => {
-  let value
-
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: ({ getMetadata }) => (value = getMetadata())
-    }
-  })
-
-  instance.recognize(eventStub)
-
-  assert.equal(value, instance.metadata)
-})
-
-suite('handler API getMetadata(param) gets metadata', context => {
-  let value
-
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: ({ getMetadata }) => (value = getMetadata({ path: 'example.last' }))
-    }
-  })
-  
-  // Metadata setting should only happen via setMetadata exposed to a handler,
-  // but that's tested later.
-  instance._computedMetadata = { example: [0, 1, 2] }
-
-  instance.recognize(eventStub)
-
-  assert.equal(value, 2)
-})
-
-suite('handler API setMetadata() sets metadata', context => {
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: ({ setMetadata }) => setMetadata({ path: 'example.path', value: 'baleada' })
-    }
-  })
-
-  instance.recognize(eventStub)
-
-  assert.is('baleada', instance.metadata.example.path)
-})
-
-suite('handler API pushMetadata() pushes metadata', context => {
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: ({ pushMetadata }) => pushMetadata({ path: 'example.path', value: 'baleada' })
-    }
-  })
-
-  instance.recognize(eventStub)
-
-  assert.equal(['baleada'], instance.metadata.example.path)
-})
-
-suite('handler API insertMetadata() inserts metadata', context => {
-  const instance = context.setup({
-    handlers: {
-      [eventTypeStub]: ({ pushMetadata, insertMetadata }) => {
-        pushMetadata({ path: 'example.path', value: 'toolkit' })
-        insertMetadata({ path: 'example.path', value: 'baleada', index: 0 })
+suite(`recognize(event) calls handler`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let handlerWasCalled = false
+    
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': () => (handlerWasCalled = true)
+        }
       }
+    )
+    
+    instance.recognize(new MouseEvent('click'))
+    
+    
+    return handlerWasCalled
+  })
+
+  assert.is(value, true)
+})
+
+suite(`handler API recognized() sets status`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': ({ recognized }) => recognized()
+        }
+      }
+    )
+    
+    instance.recognize(new MouseEvent('click'))
+    
+    
+    return instance.status
+  })
+
+  assert.is(value, 'recognized')
+})
+
+suite(`handler API denied() sets status`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': ({ denied }) => denied()
+        }
+      }
+    )
+    
+    instance.recognize(new MouseEvent('click'))
+    
+    
+    return instance.status
+  })
+
+  assert.is(value, 'denied')
+})
+
+suite(`handler API getSequence() gets the new sequence`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let sequence
+
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': ({ getSequence }) => sequence = getSequence()
+        }
+      }
+    )
+    
+    instance.recognize(new MouseEvent('click'))
+    
+    return {
+      fromInstance: JSON.stringify(instance.sequence),
+      fromApi: JSON.stringify(sequence),
     }
   })
 
-  instance.recognize(eventStub)
+  assert.is(value.fromInstance, value.fromApi)
+})
 
-  assert.equal(['baleada', 'toolkit'], instance.metadata.example.path)
+suite(`handler API getStatus() gets status`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let status
+
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': ({ getStatus }) => status = getStatus()
+        }
+      }
+    )
+    
+    instance.recognize(new MouseEvent('click'))
+    
+    return {
+      fromInstance: instance.status,
+      fromApi: status,
+    }
+  })
+
+  assert.equal(value.fromInstance, value.fromApi)
+})
+
+suite(`handler API getMetadata() gets metadata`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let metadata
+
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': ({ getMetadata }) => metadata = getMetadata()
+        }
+      }
+    )
+    
+    instance.recognize(new MouseEvent('click'))
+    
+    return {
+      fromInstance: JSON.stringify(instance.metadata),
+      fromApi: JSON.stringify(metadata),
+    }
+  })
+
+  assert.is(value.fromInstance, value.fromApi)
+})
+
+suite(`handler API's getMetadata() is a reference to metadata`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let metadata
+
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': ({ getMetadata }) => metadata = getMetadata()
+        }
+      }
+    )
+    
+    instance.recognize(new MouseEvent('click'))
+
+    metadata.stub = 'stub'
+    
+    return {
+      fromInstance: JSON.stringify(instance.metadata),
+      fromApi: JSON.stringify(metadata),
+    }
+  })
+
+  assert.is(value.fromInstance, value.fromApi)
+})
+
+suite(`handler API setMetadata() sets metadata`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': ({ setMetadata }) => setMetadata({ stub: 'stub' })
+        }
+      }
+    )
+    
+    instance.recognize(new MouseEvent('click'))
+    
+    return instance.metadata
+  })
+
+  assert.equal(value, { stub: 'stub' })
 })
 
 /* status */
-suite('status is "ready" after construction', context => {
-  const instance = context.setup()
+suite(`status is 'ready' after construction`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    return new (window as unknown as WithLogic).Logic.Recognizeable([]).status
+  })
 
-  assert.is(instance.status, 'ready')
+  assert.is(value, 'ready')
 })
 
-suite('status is "recognizing" after recognize(...) is called at least once and handlers did not call recognized or denied', context => {
-  const instance = context.setup()
+suite(`status is 'recognizing' after recognize(...) is called at least once and handlers did not call recognized or denied`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    return new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>([])
+      .recognize(new MouseEvent('click'))
+      .status
+  })
 
-  instance.recognize(eventStub)
-
-  assert.is(instance.status, 'recognizing')
-})
-
-/* method chaining */
-suite('can method chain', context => {
-  const instance = context.setup(),
-        chained = instance
-          .setSequence(['Baleada'])
-          .recognize(eventStub)
-          .recognize(eventStub)
-
-  assert.ok(chained instanceof Recognizeable)
+  assert.is(value, 'recognizing')
 })
 
 suite.run()

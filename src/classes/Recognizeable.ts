@@ -1,4 +1,3 @@
-import createClone from 'rfdc'
 import { isArray, isNumber } from '../util'
 import {
   createInsert,
@@ -43,10 +42,7 @@ type HandlerApiFromConstructor<SequenceItem extends RecognizeableSupportedType, 
   toPolarCoordinates: typeof toPolarCoordinates,
   getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
   getMetadata: () => Metadata,
-  transformMetadata: (transform: (metadata: Metadata) => Metadata) => void,
-  setMetadata: ({ path, value }: { path: string, value: any }) => void,
-  pushMetadata: ({ path, value }: { path: string, value: any }) => void,
-  insertMetadata: ({ path, value }: { path: string, value: any, index: number }) => void,
+  setMetadata: (metadata: Metadata) => void,
   recognized: () => void,
   denied: () => void,
   effect: (event: SequenceItem) => any,
@@ -56,8 +52,6 @@ type HandlerApiFromRuntime<SequenceItem extends RecognizeableSupportedType> = {
   event: SequenceItem,
   getSequence: () => SequenceItem[]
 }
-
-const clone = createClone({ proto: true })
 
 export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> {
   _maxSequenceLength: number | true
@@ -109,11 +103,8 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
     this._handlerApi = {
       toPolarCoordinates,
       getStatus: () => this.status,
-      getMetadata: () => this._getMetadata(),
-      transformMetadata: required => this._transformMetadata(required),
-      setMetadata: required => this._setMetadata(required),
-      pushMetadata: required => this._pushMetadata(required),
-      insertMetadata: required => this._insertMetadata(required),
+      getMetadata: () => this.metadata,
+      setMetadata: (metadata: Metadata) => this._computedMetadata = metadata,
       recognized: () => this._recognized(),
       denied: () => this._denied(),
       effect: (event: SequenceItem) => this.effect?.(event),
@@ -136,37 +127,6 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
   _computedStatus: RecognizeableStatus
   _ready () {
     this._computedStatus = 'ready'
-  }
-
-  _getMetadata () {
-    return clone(this.metadata)
-  }
-  _transformMetadata (transform: (metadata: Metadata) => Metadata) {
-    this._computedMetadata = transform(this._getMetadata())
-  }
-  _setMetadata ({ path, value }: { path: string, value: any }) {
-    set({ object: this.metadata, path, value })
-  }
-  _pushMetadata ({ path, value }: { path: string, value: any }) {
-    this._ensureArray({ path })
-    push({ object: this.metadata, path, value })
-  }
-  _insertMetadata ({ path, value, index }: { path: string, value: any, index: number }) {
-    this._ensureArray({ path })
-    insert({ object: this.metadata, path, value, index })
-  }
-  _ensureArray ({ path }: { path: string }) {
-    const currentValue = (() => {
-      try {
-        return get({ object: this.metadata, path })
-      } catch (error) {
-        return undefined
-      }
-    })()
-
-    if (!isArray(currentValue)) {
-      this._setMetadata({ path, value: [] })
-    }
   }
 
   get sequence () {
@@ -396,15 +356,4 @@ function maybeAssign ({ gotten, key, assign }: { gotten: any, key: string | numb
         assign({})
     }
   }
-}
-
-export function push ({ object, path, value }: { object: Record<any, any>, path: string, value: any }): void {  
-  const array = get({ object, path })
-  set({ object, path, value: [...array, value] })
-}
-
-export function insert ({ object, path, value, index }: { object: Record<any, any>, path: string, value: any, index: number }): void {
-  const inserted = createInsert({ item: value, index })(get({ object, path }))
-  
-  set({ object, path, value: inserted })
 }

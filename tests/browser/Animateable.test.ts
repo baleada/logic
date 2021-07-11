@@ -14,8 +14,8 @@ const suite = withPuppeteer(
 
 suite.before(context => {
   context.keyframes = [
-    { progress: 0, data: { example: 0 } },
-    { progress: 1, data: { example: 1 } }
+    { progress: 0, properties: { example: 0 } },
+    { progress: 1, properties: { example: 1 } }
   ]
 })
 
@@ -24,7 +24,7 @@ suite.before.each(async ({ puppeteer: { page } }) => {
 })
 
 suite('initial playbackRate is 1', async ({ puppeteer: { page }, keyframes }) => {
-  const value = await page.evaluate(keyframes => {
+  const value = await page.evaluate((keyframes: AnimateableKeyframe[]) => {
     const instance = new (window as unknown as WithLogic).Logic.Animateable(keyframes)
     return instance.playbackRate
   }, keyframes)
@@ -33,7 +33,7 @@ suite('initial playbackRate is 1', async ({ puppeteer: { page }, keyframes }) =>
 })
 
 suite('assignment sets the playback rate', async ({ puppeteer: { page }, keyframes }) => {
-  const value = await page.evaluate(keyframes => {
+  const value = await page.evaluate((keyframes: AnimateableKeyframe[]) => {
     const instance = new (window as unknown as WithLogic).Logic.Animateable(keyframes)
     instance.playbackRate = 2
     return instance.playbackRate
@@ -43,7 +43,7 @@ suite('assignment sets the playback rate', async ({ puppeteer: { page }, keyfram
 })
 
 suite('setPlaybackRate sets the playback rate', async ({ puppeteer: { page }, keyframes }) => {
-  const value = await page.evaluate(keyframes => {
+  const value = await page.evaluate((keyframes: AnimateableKeyframe[]) => {
     const instance = new (window as unknown as WithLogic).Logic.Animateable(keyframes)
     return instance.setPlaybackRate(2).playbackRate
   }, keyframes)
@@ -52,7 +52,7 @@ suite('setPlaybackRate sets the playback rate', async ({ puppeteer: { page }, ke
 })
 
 suite('status is "ready" after construction', async ({ puppeteer: { page }, keyframes }) => {
-  const value = await page.evaluate(keyframes => {
+  const value = await page.evaluate((keyframes: AnimateableKeyframe[]) => {
     const instance = new (window as unknown as WithLogic).Logic.Animateable(keyframes)
     return instance.status
   }, keyframes)

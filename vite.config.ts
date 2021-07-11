@@ -1,4 +1,5 @@
 import { configureable } from '@baleada/prepare'
+import { resolve } from 'path'
 
 export default new configureable.Vite()
   .alias({
@@ -8,9 +9,10 @@ export default new configureable.Vite()
     '@baleada/animateable-utils'
   ])
   .rollup(({ configureable }) => configureable
-    .input(({ toResolved }) => toResolved({
-      main: './tests/stubs/app/index.html',
-    }))
+    .input({
+      main: resolve(__dirname, 'tests/stubs/app/index.html'),
+    })
+    .configure()
   )
   .pages({ pagesDir: 'tests/stubs/app/src/pages' })
   .vue()
