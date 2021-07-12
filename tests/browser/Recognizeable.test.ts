@@ -8,7 +8,7 @@ type Context = {
 }
 
 const suite = withPuppeteer(
-  createSuite<Context>('Recognizeable (browser)'),
+  createSuite<Context>('Recognizeable (browser)')
 )
 
 suite.before(context => {
@@ -65,7 +65,7 @@ suite(`recognize(event) calls handler`, async ({ puppeteer: { page } }) => {
       [],
       {
         handlers: {
-          'click': () => (handlerWasCalled = true)
+          'click': () => handlerWasCalled = true
         }
       }
     )
@@ -254,5 +254,120 @@ suite(`status is 'recognizing' after recognize(...) is called at least once and 
 
   assert.is(value, 'recognizing')
 })
+
+suite(`correctly routes IntersectionObserverEntry[]`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Recognizeable<IntersectionObserverEntry[]>(
+                  [],
+                  {
+                    handlers: {
+                      intersect: ({ recognized }) => recognized()
+                    }
+                  }
+                ),
+                observer = new IntersectionObserver(entries => {
+                  instance.recognize(entries)
+                })
+                
+          observer.observe(document.body)
+        
+          return new Promise(resolve => {
+            setTimeout(() => resolve(instance.status), 20)
+          })
+        }),
+        expected = 'recognized'
+
+  assert.is(value, expected)
+})
+
+suite(`correctly routes MutationRecord[]`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MutationRecord[]>(
+                  [],
+                  {
+                    handlers: {
+                      mutate: ({ recognized }) => recognized()
+                    }
+                  }
+                ),
+                observer = new MutationObserver(records => {
+                  instance.recognize(records)
+                })
+                
+          observer.observe(document.body, { attributes: true })
+          document.body.classList.add('stub')
+        
+          return new Promise(resolve => {
+            setTimeout(() => resolve(instance.status), 20)
+          })
+        }),
+        expected = 'recognized'
+
+  assert.is(value, expected)
+})
+
+suite(`correctly routes ResizeObserverEntry[]`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Recognizeable<ResizeObserverEntry[]>(
+                  [],
+                  {
+                    handlers: {
+                      resize: ({ recognized }) => recognized()
+                    }
+                  }
+                ),
+                observer = new ResizeObserver(entries => {
+                  instance.recognize(entries)
+                })
+                
+          observer.observe(document.body)
+          const bodyHeight = document.body.getBoundingClientRect().height
+          document.body.style.height = `${bodyHeight + 1}px`
+                
+          return new Promise(resolve => {
+            setTimeout(() => resolve(instance.status), 20)
+          })
+        }),
+        expected = 'recognized'
+
+  assert.is(value, expected)
+})
+
+suite.only(`correctly routes MediaQueryListEvent`, async ({ puppeteer: { page } }) => {
+  await page.evaluate(async () => {
+    (window as unknown as WithLogic).testState = new (window as unknown as WithLogic).Logic.Recognizeable<MediaQueryListEvent>(
+        [],
+        {
+          handlers: {
+            '(min-width: 900px)': ({ recognized }) => recognized()
+          }
+        }
+      )
+  
+    const target = window.matchMedia('(min-width: 900px)')
+
+    target.addEventListener('change', event => (window as unknown as WithLogic).testState.recognize(event))
+  })
+  
+  // Puppeteer viewport defaults to 800x600
+  await page.setViewport({ width: 901, height: 600 })
+
+  const value = await page.evaluate(() => {
+          return new Promise(resolve => {
+            setTimeout(() => resolve((window as unknown as WithLogic).testState.status), 20)
+          })
+        }),
+        expected = 'recognized'
+
+  assert.is(value, expected)
+})
+
+// detects
+// - idle
+// - leftclickcombo
+// - rightclickcombo
+// - keycombo
+// - event
+
 
 suite.run()
