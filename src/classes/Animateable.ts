@@ -1,7 +1,7 @@
 import BezierEasing from 'bezier-easing'
 import { mix } from '@snigo.dev/color'
 import { Listenable } from './Listenable'
-import { isFunction, isUndefined, isNumber, isString, isArray } from '../util'
+import { isFunction, isUndefined, isNumber, isString, isArray } from '../extracted'
 import {
   createUnique,
   createSlice,

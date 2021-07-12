@@ -1,6 +1,5 @@
-import { isArray, isNumber } from '../util'
+import { isArray, isNumber } from '../extracted'
 import {
-  createInsert,
   createSlice,
   createConcat,
   createMap,
@@ -57,9 +56,7 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
   _maxSequenceLength: number | true
   _handlers: Map<string, (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any>
   _handlerApi: HandlerApiFromConstructor<SequenceItem, Metadata>
-  _handlerLeftclickcombos: ListenableClickcomboItem[][]
-  _handlerRightclickcombos: ListenableClickcomboItem[][]
-  _handlerKeycombos: ListenableKeycomboItem[][]
+  _toType: (sequenceItem: SequenceItem) => string
 
   constructor (sequence: SequenceItem[], options: RecognizeableOptions<SequenceItem, Metadata> = { handlersIncludeCombos: true }) {
     const defaultOptions: RecognizeableOptions<SequenceItem, Metadata> = {
@@ -71,30 +68,10 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
     this._maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
     this._handlers = new Map(Object.entries(options?.handlers || defaultOptions.handlers))
 
-    if (options.handlersIncludeCombos) {
-      this._handlerLeftclickcombos = []
-      this._handlerRightclickcombos = []
-      this._handlerKeycombos = []
-
-      for (const [handlerKey] of this._handlers) {
-        const implementation = toImplementation(handlerKey)
-
-        switch (implementation) {
-          case 'leftclickcombo':
-            this._handlerLeftclickcombos.push(ensureClickcombo(handlerKey))
-            break
-          case 'rightclickcombo':
-            this._handlerRightclickcombos.push(ensureClickcombo(handlerKey))
-            break
-          case 'keycombo':
-            this._handlerKeycombos.push(ensureKeycombo(handlerKey))
-            break
-          default:
-            // do nothing
-            break
-        }
-      }
-    }
+    this._toType = createToType({
+      handlersIncludeCombos: options.handlersIncludeCombos,
+      handlers: this._handlers,
+    })
 
     this._resetComputedMetadata()
 
@@ -150,7 +127,7 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
 
   _computedSequence: SequenceItem[]
   setSequence (sequence: SequenceItem[]) {
-    this._computedSequence = Array.from(sequence)
+    this._computedSequence = sequence
     return this
   }
   _computedEffect: ((sequenceItem: SequenceItem) => any)
@@ -170,7 +147,7 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
             createSlice<SequenceItem>({ from: excess })(this.sequence),
             [event]
           )([])
-
+          
     this._handlers.get(type)?.({
       event,
       ...this._handlerApi,
@@ -192,61 +169,6 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
   }
   _recognizing () {
     this._computedStatus = 'recognizing'
-  }
-  _toType (sequenceItem: SequenceItem) {
-    if (isArray(sequenceItem)) {
-      if (sequenceItem[0] instanceof IntersectionObserverEntry) {
-        return 'intersect'
-      }
-  
-      if (sequenceItem[0] instanceof MutationRecord) {
-        return 'mutate'
-      }
-      
-      if (sequenceItem[0] instanceof ResizeObserverEntry) {
-        return 'resize'
-      }
-    } else {
-      if (sequenceItem instanceof MediaQueryListEvent) {
-        return sequenceItem.media
-      }
-    
-      if ('didTimeout' in sequenceItem) {
-        return 'idle'
-      }
-
-      if (this._handlerLeftclickcombos.length > 0) {
-        if (leftclickcomboEventTypes.has((sequenceItem as Event).type)) {
-          for (const clickcombo of this._handlerLeftclickcombos) {
-            if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
-              return clickcombo.join('+')
-            }
-          }
-        }
-      }
-      
-      if (this._handlerRightclickcombos.length > 0) {
-        if (rightclickComboEventTypes.has((sequenceItem as Event).type)) {
-          for (const clickcombo of this._handlerRightclickcombos) {
-            if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
-              return clickcombo.join('+')
-            }
-          }
-        }
-      }
-      
-      if (this._handlerKeycombos.length > 0) {
-        if (keycomboEventTypes.has((sequenceItem as Event).type)) {
-          for (const keycombo of this._handlerKeycombos) {
-            if (eventMatchesKeycombo({ event: sequenceItem as KeyboardEvent, keycombo })) {
-              return keycombo.join('+')
-            }
-          }
-        }
-      }
-    
-      return (sequenceItem as Event).type
-    }
   }
 }
 
@@ -354,6 +276,95 @@ function maybeAssign ({ gotten, key, assign }: { gotten: any, key: string | numb
         assign([])
       case 'string':
         assign({})
+    }
+  }
+}
+
+export function createToType<SequenceItem extends RecognizeableSupportedType, Metadata> ({
+  handlersIncludeCombos,
+  handlers
+}: {
+ handlersIncludeCombos?: RecognizeableOptions<SequenceItem, Metadata>['handlersIncludeCombos'],
+ handlers?: Map<string, (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any>
+}): (sequence: SequenceItem) => string {
+  const handlerLeftclickcombos: ListenableClickcomboItem[][] = [],
+        handlerRightclickcombos: ListenableClickcomboItem[][] = [],
+        handlerKeycombos: ListenableKeycomboItem[][] = []
+
+  if (handlersIncludeCombos) {
+    for (const [handlerKey] of handlers) {
+      const implementation = toImplementation(handlerKey)
+
+      switch (implementation) {
+        case 'leftclickcombo':
+          handlerLeftclickcombos.push(ensureClickcombo(handlerKey))
+          break
+        case 'rightclickcombo':
+          handlerRightclickcombos.push(ensureClickcombo(handlerKey))
+          break
+        case 'keycombo':
+          handlerKeycombos.push(ensureKeycombo(handlerKey))
+          break
+        default:
+          // do nothing
+          break
+      }
+    }
+  }
+
+  return function toType (sequenceItem: SequenceItem) {
+    if (isArray(sequenceItem)) {
+      if (sequenceItem[0] instanceof IntersectionObserverEntry) {
+        return 'intersect'
+      }
+  
+      if (sequenceItem[0] instanceof MutationRecord) {
+        return 'mutate'
+      }
+      
+      if (sequenceItem[0] instanceof ResizeObserverEntry) {
+        return 'resize'
+      }
+    } else {
+      if (sequenceItem instanceof MediaQueryListEvent) {
+        return sequenceItem.media
+      }
+    
+      if ('didTimeout' in sequenceItem) {
+        return 'idle'
+      }
+
+      if (handlerLeftclickcombos?.length > 0) {
+        if (leftclickcomboEventTypes.has((sequenceItem as Event).type)) {
+          for (const clickcombo of handlerLeftclickcombos) {
+            if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
+              return clickcombo.join('+')
+            }
+          }
+        }
+      }
+      
+      if (handlerRightclickcombos?.length > 0) {
+        if (rightclickComboEventTypes.has((sequenceItem as Event).type)) {
+          for (const clickcombo of handlerRightclickcombos) {
+            if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
+              return clickcombo.join('+')
+            }
+          }
+        }
+      }
+      
+      if (handlerKeycombos?.length > 0) {
+        if (keycomboEventTypes.has((sequenceItem as Event).type)) {
+          for (const keycombo of handlerKeycombos) {
+            if (eventMatchesKeycombo({ event: sequenceItem as KeyboardEvent, keycombo })) {
+              return keycombo.join('+')
+            }
+          }
+        }
+      }
+    
+      return (sequenceItem as Event).type
     }
   }
 }

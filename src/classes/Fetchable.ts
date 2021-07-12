@@ -1,5 +1,5 @@
 import { Resolveable } from './Resolveable'
-import { isFunction } from '../util'
+import { isFunction } from '../extracted'
 
 export type FetchableOptions = {}
 

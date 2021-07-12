@@ -1,4 +1,4 @@
-import { toEvent, toCombo } from '../util'
+import { toEvent, toCombo } from '../extracted'
 
 export type DispatchableOptions = {}
 

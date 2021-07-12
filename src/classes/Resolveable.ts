@@ -1,5 +1,5 @@
 import { createMapAsync } from '../pipes'
-import { isArray } from '../util'
+import { isArray } from '../extracted'
 
 export type ResolveableOptions = {}
 

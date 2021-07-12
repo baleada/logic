@@ -11,12 +11,12 @@ import {
   toCombo,
   comboItemNameToType,
   toModifier,
-} from '../util'
+} from '../extracted'
 import type {
   ListenableModifier,
   ListenableModifierAlias,
   ListenableComboItemType,
-} from '../util'
+} from '../extracted'
 
 export type ListenableSupportedType = 
   IntersectionObserverEntry

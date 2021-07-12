@@ -1,5 +1,5 @@
 import createDOMPurify, { DOMPurifyI, Config } from 'dompurify'
-import { domIsAvailable } from '../util'
+import { domIsAvailable } from '../extracted'
 
 export type SanitizeableOptions = Config
 

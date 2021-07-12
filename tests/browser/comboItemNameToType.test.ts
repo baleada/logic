@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { comboItemNameToType } from '../../src/util'
+import { comboItemNameToType } from '../../src/extracted'
 
 const suite = createSuite('comboItemNameToType (node)')
 

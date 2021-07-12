@@ -2,7 +2,7 @@ import {
   isNull,
   isString,
   domIsAvailable,
-} from '../util'
+} from '../extracted'
 
 export type StoreableOptions = {
   type?: 'local' | 'session',

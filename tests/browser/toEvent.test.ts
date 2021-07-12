@@ -14,7 +14,7 @@ suite.before.each(async ({ puppeteer: { page } }) => {
 suite(`transforms single character combos`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-ignore
-          const event = window.Logic_util.toEvent(['a'], { keyDirection: 'down' }),
+          const event = window.Logic_extracted.toEvent(['a'], { keyDirection: 'down' }),
                 { key, type } = event
           
           return { key, type }
@@ -27,7 +27,7 @@ suite(`transforms single character combos`, async ({ puppeteer: { page } }) => {
 suite(`transforms other combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-ignore
-          const event = window.Logic_util.toEvent(['esc'], { keyDirection: 'down' }),
+          const event = window.Logic_extracted.toEvent(['esc'], { keyDirection: 'down' }),
                 { key, type } = event
           
           return { key, type }
@@ -41,7 +41,7 @@ suite(`transforms other combos`, async({ puppeteer: { page } }) => {
 suite(`transforms modifier combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-ignore
-          const event = window.Logic_util.toEvent(['cmd'], { keyDirection: 'up' }),
+          const event = window.Logic_extracted.toEvent(['cmd'], { keyDirection: 'up' }),
                 { key, type } = event
           
           return { key, type }
@@ -55,7 +55,7 @@ suite(`transforms modifier combos`, async({ puppeteer: { page } }) => {
 suite(`transforms click combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-ignore
-          const event = window.Logic_util.toEvent(['click']),
+          const event = window.Logic_extracted.toEvent(['click']),
                 { clientX, clientY } = event
           
           return { clientX, clientY }
@@ -69,7 +69,7 @@ suite(`transforms click combos`, async({ puppeteer: { page } }) => {
 suite(`transforms custom combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-ignore
-          const event = window.Logic_util.toEvent(['stub']),
+          const event = window.Logic_extracted.toEvent(['stub']),
                 { type } = event
           
           return { type }
@@ -83,7 +83,7 @@ suite(`transforms custom combos`, async({ puppeteer: { page } }) => {
 suite(`transforms modified single character combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-ignore
-          const event = window.Logic_util.toEvent(['shift', 'a'], { keyDirection: 'down' }),
+          const event = window.Logic_extracted.toEvent(['shift', 'a'], { keyDirection: 'down' }),
                 { key, type, shiftKey } = event
           
           return { key, type, shiftKey }
@@ -97,7 +97,7 @@ suite(`transforms modified single character combos`, async({ puppeteer: { page }
 suite(`transforms modified other combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-ignore
-          const event = window.Logic_util.toEvent(['shift', 'esc'], { keyDirection: 'down' }),
+          const event = window.Logic_extracted.toEvent(['shift', 'esc'], { keyDirection: 'down' }),
                 { key, type, shiftKey } = event
           
           return { key, type, shiftKey }
@@ -111,7 +111,7 @@ suite(`transforms modified other combos`, async({ puppeteer: { page } }) => {
 suite(`transforms modified modifier combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-ignore
-          const event = window.Logic_util.toEvent(['shift', 'cmd'], { keyDirection: 'up' }),
+          const event = window.Logic_extracted.toEvent(['shift', 'cmd'], { keyDirection: 'up' }),
                 { key, type, shiftKey } = event
           
           return { key, type, shiftKey }
@@ -124,7 +124,7 @@ suite(`transforms modified modifier combos`, async({ puppeteer: { page } }) => {
 suite(`transforms modified click combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-ignore
-          const event = window.Logic_util.toEvent(['shift', 'click']),
+          const event = window.Logic_extracted.toEvent(['shift', 'click']),
                 { clientX, clientY, shiftKey } = event
           
           return { clientX, clientY, shiftKey }
