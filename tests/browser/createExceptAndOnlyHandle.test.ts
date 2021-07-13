@@ -1,16 +1,11 @@
+import { withPuppeteer } from '@baleada/prepare'
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { createExceptAndOnlyHandle } from '../../src/classes/Listenable'
+import { WithLogic } from '../fixtures/types'
 
-type Context = {
-  eventStub: {
-    target: {
-      matches: (selector: string) => boolean,
-    },
-  }
-}
-
-const suite = createSuite<Context>('createExceptAndOnlyHandle (node)')
+const suite = withPuppeteer(
+  createSuite('createExceptAndOnlyHandle (node)')
+)
 
 suite.before(context => {
   context.eventStub = {
@@ -18,44 +13,92 @@ suite.before(context => {
   }
 })
 
-suite(`doesn't guard when except and only are empty`, ({ eventStub }) => {
-  let value = 0
-  createExceptAndOnlyHandle<KeyboardEvent>(
-    () => value++,
-    {}
-  )(eventStub)
+suite(`doesn't guard when except and only are empty`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let value = 0;
+
+    const handle = (window as unknown as WithLogic).Logic_extracted.createExceptAndOnlyHandle<MouseEvent>(
+      () => value++,
+      {}
+    )
+
+    document.body.addEventListener('click', handle)
+
+    const click = new (window as unknown as WithLogic).Logic.Dispatchable<MouseEvent>('click')
+    click.dispatch({ target: document.body })
+
+    document.body.removeEventListener('click', handle)
+
+    return value
+  })
   
   assert.is(value, 1)
 })
 
-suite(`guards against except when only is empty`, ({ eventStub }) => {
-  let value = 0
-  createExceptAndOnlyHandle<KeyboardEvent>(
-    () => value++,
-    { except: ['stub'] }
-  )(eventStub)
+suite(`guards against except when only is empty`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let value = 0;
+
+    const handle = (window as unknown as WithLogic).Logic_extracted.createExceptAndOnlyHandle<MouseEvent>(
+      () => value++,
+      { except: ['body'] }
+    )
+
+    document.body.addEventListener('click', handle)
+
+    const click = new (window as unknown as WithLogic).Logic.Dispatchable<MouseEvent>('click')
+    click.dispatch({ target: document.body })
+
+    document.body.removeEventListener('click', handle)
+
+    return value
+  })
   
   assert.is(value, 0)
 })
 
-suite(`guards against mismatches when only is not empty`, ({ eventStub }) => {
-  let value = 0
-  createExceptAndOnlyHandle<KeyboardEvent>(
-    () => value++,
-    { only: ['example'] }
-  )(eventStub)
-  
-  assert.is(value, 0)
-})
+suite(`overrides except with only`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let value = 0;
 
-suite(`ignores except when only matches`, ({ eventStub }) => {
-  let value = 0
-  createExceptAndOnlyHandle<KeyboardEvent>(
-    () => value++,
-    { only: ['stub'], except: ['stub'] }
-  )(eventStub)
+    const handle = (window as unknown as WithLogic).Logic_extracted.createExceptAndOnlyHandle<MouseEvent>(
+      () => value++,
+      { only: ['body'], except: ['body'] }
+    )
+
+    document.body.addEventListener('click', handle)
+
+    const click = new (window as unknown as WithLogic).Logic.Dispatchable<MouseEvent>('click')
+    click.dispatch({ target: document.body })
+
+    document.body.removeEventListener('click', handle)
+
+    return value
+  })
   
   assert.is(value, 1)
+})
+
+suite(`guards against mismatches with only`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let value = 0;
+
+    const handle = (window as unknown as WithLogic).Logic_extracted.createExceptAndOnlyHandle<MouseEvent>(
+      () => value++,
+      { only: ['.stub'] }
+    )
+
+    document.body.addEventListener('click', handle)
+
+    const click = new (window as unknown as WithLogic).Logic.Dispatchable<MouseEvent>('click')
+    click.dispatch({ target: document.body })
+
+    document.body.removeEventListener('click', handle)
+
+    return value
+  })
+  
+  assert.is(value, 0)
 })
 
 suite.run()
