@@ -12,6 +12,7 @@ import {
   ensureClickcombo,
   fromComboItemNameToType,
   toModifier,
+  createExceptAndOnlyHandle,
 } from '../extracted'
 import type {
   ListenableModifier,
@@ -320,6 +321,7 @@ export class Listenable<EventType extends ListenableSupportedType, Recognizeable
 function stop<EventType extends ListenableSupportedType> (stoppable: ListenableActive<EventType>) {
   if (stoppable.id instanceof Listenable) {
     stoppable.id.stop()
+    return
   }
 
   if (lazyCollectionSome<string>(type => observerAssertionsByType.get(type)(stoppable.id))(['intersect', 'mutate', 'resize'])) {
@@ -340,7 +342,7 @@ function stop<EventType extends ListenableSupportedType> (stoppable: ListenableA
     return
   }
   
-  const { target, id } = stoppable as ListenableActive<KeyboardEvent | MouseEvent | CustomEvent | Event>
+  const { target, id } = stoppable as ListenableActive<ListenableSupportedEvent>
   target.removeEventListener(id[0], id[1], id[2])
 }
 
@@ -410,27 +412,6 @@ export function toAddEventListenerParams<EventType extends ListenableSupportedEv
         handleOptions: [optionsOrUseCapture: AddEventListenerOptions | boolean] = [addEventListener || useCapture]
 
   return { exceptAndOnlyHandle, handleOptions }
-}
-
-export function createExceptAndOnlyHandle<EventType extends ListenableSupportedEvent> (handle: (event: EventType) => any, options: ListenOptions<EventType>): (event: EventType) => any {
-  const { except = [], only = [] } = options
-  
-  return (event: EventType) => {
-    const { target } = event,
-          [matchesOnly, matchesExcept] = target instanceof Element
-            ? [only, except].map(selectors => lazyCollectionSome<string>(selector => target.matches(selector))(selectors))
-            : [false, true]
-
-    if (matchesOnly) {
-      handle(event)
-      return
-    }
-    
-    if (only.length === 0 && !matchesExcept) {
-      handle(event)
-      return
-    }
-  }
 }
 
 export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEvent, keycombo: ListenableKeycomboItem[] }): boolean {
