@@ -2,8 +2,12 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 
+type Context = {
+  string: string,
+}
+
 const suite = withPuppeteer(
-  createSuite('Copyable (browser)'),
+  createSuite<Context>('Copyable (browser)'),
   {
     launch: ({ executablePath: { macOS } }) => ({ headless: false, executablePath: macOS })
   }

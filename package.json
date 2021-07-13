@@ -48,7 +48,7 @@
   "homepage": "https://baleada.netlify.com",
   "devDependencies": {
     "@baleada/animateable-utils": "^0.0.2",
-    "@baleada/prepare": "^0.5.4",
+    "@baleada/prepare": "^0.5.5",
     "@types/node": "^14.14.41",
     "@vue/compiler-sfc": "^3.0.5",
     "esbuild": "^0.9.7",

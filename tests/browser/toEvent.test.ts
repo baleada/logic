@@ -1,15 +1,10 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
   createSuite('toEvent (browser)')
 )
-
-suite.before.each(async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000')
-})
 
 suite(`transforms single character combos`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {

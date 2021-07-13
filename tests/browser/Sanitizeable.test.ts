@@ -1,18 +1,17 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
+type Context = {
+  html: string,
+}
+
 const suite = withPuppeteer(
-  createSuite('Sanitizeable (browser)')
+  createSuite<Context>('Sanitizeable (browser)')
 )
 
 suite.before(context => {
   context.html = '<h1>Baleada: a toolkit for building web apps</h1><iframe src="" />'
-})
-
-suite.before.each(async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000')
 })
 
 suite(`sanitize(...) sanitizes html`, async ({ puppeteer: { page }, html }) => {

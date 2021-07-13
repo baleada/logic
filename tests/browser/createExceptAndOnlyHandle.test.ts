@@ -2,7 +2,15 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { createExceptAndOnlyHandle } from '../../src/classes/Listenable'
 
-const suite = createSuite('createExceptAndOnlyHandle (node)')
+type Context = {
+  eventStub: {
+    target: {
+      matches: (selector: string) => boolean,
+    },
+  }
+}
+
+const suite = createSuite<Context>('createExceptAndOnlyHandle (node)')
 
 suite.before(context => {
   context.eventStub = {

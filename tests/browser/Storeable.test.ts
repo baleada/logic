@@ -1,18 +1,17 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
+type Context = {
+  key: string,
+}
+
 const suite = withPuppeteer(
-  createSuite('Storeable (browser)')
+  createSuite<Context>('Storeable (browser)')
 )
 
 suite.before(context => {
   context.key = 'baleada'
-})
-
-suite.before.each(async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000')
 })
 
 suite(`status is stored in browser when DOM is available`, async ({ puppeteer: { page }, key }) => {

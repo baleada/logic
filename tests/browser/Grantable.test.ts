@@ -1,16 +1,17 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
+type Context = {
+  descriptor: { name: string }
+}
+
 const suite = withPuppeteer(
-  createSuite('Grantable (browser)')
+  createSuite<Context>('Grantable (browser)')
 )
 
-suite.before(context => (context.descriptor = { name: 'geolocation' }))
-
-suite.before.each(async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000')
+suite.before(context => {
+  context.descriptor = { name: 'geolocation' }
 })
 
 suite(`status is 'querying' immediately after query(...)`, async ({ puppeteer: { page }, descriptor }) => {

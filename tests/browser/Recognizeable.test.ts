@@ -3,23 +3,11 @@ import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 import type { WithLogic } from '../fixtures/types'
 
-type Context = {
-  shouldReload: boolean,
-}
-
 const suite = withPuppeteer(
-  createSuite<Context>('Recognizeable (browser)')
+  createSuite('Recognizeable (browser)')
 )
 
-suite.before(context => {
-  context.shouldReload = true
-})
-
-suite.before.each(async ({ shouldReload, puppeteer: { page } }) => {
-  if (shouldReload) await page.goto('http://localhost:3000')
-})
-
-suite(`stores the sequence`, async ({ puppeteer: { page } }) => {
+suite(`stores the sequence`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     return new (window as unknown as WithLogic).Logic.Recognizeable([]).sequence
   })
@@ -27,7 +15,7 @@ suite(`stores the sequence`, async ({ puppeteer: { page } }) => {
   assert.equal(value, [])
 })
 
-suite(`assignment sets the sequence`, async ({ puppeteer: { page } }) => {
+suite(`assignment sets the sequence`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>([])
     instance.sequence = [new MouseEvent('click')]
@@ -37,7 +25,7 @@ suite(`assignment sets the sequence`, async ({ puppeteer: { page } }) => {
   assert.is(value, 1)
 })
 
-suite(`setSequence sets the sequence`, async ({ puppeteer: { page } }) => {
+suite(`setSequence sets the sequence`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>([])
     instance.setSequence([new MouseEvent('click')])
@@ -47,7 +35,7 @@ suite(`setSequence sets the sequence`, async ({ puppeteer: { page } }) => {
   assert.is(value, 1)
 })
 
-suite(`first recognize(sequenceItem) sets status to recognizing`, async ({ puppeteer: { page } }) => {
+suite(`first recognize(sequenceItem) sets status to recognizing`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>([])
     instance.recognize(new MouseEvent('click'))
@@ -57,7 +45,7 @@ suite(`first recognize(sequenceItem) sets status to recognizing`, async ({ puppe
   assert.is(value, 'recognizing')
 })
 
-suite(`recognize(sequenceItem) calls handler`, async ({ puppeteer: { page } }) => {
+suite(`recognize(sequenceItem) calls handler`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let handlerWasCalled = false
     
@@ -79,7 +67,7 @@ suite(`recognize(sequenceItem) calls handler`, async ({ puppeteer: { page } }) =
   assert.is(value, true)
 })
 
-suite(`handler API recognized() sets status`, async ({ puppeteer: { page } }) => {
+suite(`handler API recognized() sets status`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
       [],
@@ -99,7 +87,7 @@ suite(`handler API recognized() sets status`, async ({ puppeteer: { page } }) =>
   assert.is(value, 'recognized')
 })
 
-suite(`handler API denied() sets status`, async ({ puppeteer: { page } }) => {
+suite(`handler API denied() sets status`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
       [],
@@ -119,7 +107,7 @@ suite(`handler API denied() sets status`, async ({ puppeteer: { page } }) => {
   assert.is(value, 'denied')
 })
 
-suite(`handler API getSequence() gets the new sequence`, async ({ puppeteer: { page } }) => {
+suite(`handler API getSequence() gets the new sequence`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let sequence
 
@@ -143,7 +131,7 @@ suite(`handler API getSequence() gets the new sequence`, async ({ puppeteer: { p
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite(`handler API getStatus() gets status`, async ({ puppeteer: { page } }) => {
+suite(`handler API getStatus() gets status`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let status
 
@@ -167,7 +155,7 @@ suite(`handler API getStatus() gets status`, async ({ puppeteer: { page } }) => 
   assert.equal(value.fromInstance, value.fromApi)
 })
 
-suite(`handler API getMetadata() gets metadata`, async ({ puppeteer: { page } }) => {
+suite(`handler API getMetadata() gets metadata`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let metadata
 
@@ -191,7 +179,7 @@ suite(`handler API getMetadata() gets metadata`, async ({ puppeteer: { page } })
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite(`handler API getMetadata() is a reference to metadata`, async ({ puppeteer: { page } }) => {
+suite(`handler API getMetadata() is a reference to metadata`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let metadata
 
@@ -218,7 +206,7 @@ suite(`handler API getMetadata() is a reference to metadata`, async ({ puppeteer
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite(`handler API setMetadata() sets metadata`, async ({ puppeteer: { page } }) => {
+suite(`handler API setMetadata() sets metadata`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
       [],
@@ -237,7 +225,7 @@ suite(`handler API setMetadata() sets metadata`, async ({ puppeteer: { page } })
   assert.equal(value, { stub: 'stub' })
 })
 
-suite(`handler API effect() performs side effect`, async ({ puppeteer: { page } }) => {
+suite(`handler API effect() performs side effect`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let effectStatus = 'not performed'
     const effect = () => effectStatus = 'performed'
@@ -261,7 +249,7 @@ suite(`handler API effect() performs side effect`, async ({ puppeteer: { page } 
   assert.equal(value, 'performed')
 })
 
-suite(`handler API sequenceItem accesses sequenceItem`, async ({ puppeteer: { page } }) => {
+suite(`handler API sequenceItem accesses sequenceItem`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let result
 
@@ -283,7 +271,7 @@ suite(`handler API sequenceItem accesses sequenceItem`, async ({ puppeteer: { pa
 })
 
 /* status */
-suite(`status is 'ready' after construction`, async ({ puppeteer: { page } }) => {
+suite(`status is 'ready' after construction`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     return new (window as unknown as WithLogic).Logic.Recognizeable([]).status
   })
@@ -291,7 +279,7 @@ suite(`status is 'ready' after construction`, async ({ puppeteer: { page } }) =>
   assert.is(value, 'ready')
 })
 
-suite(`status is 'recognizing' after recognize(...) is called at least once and handlers did not call recognized or denied`, async ({ puppeteer: { page } }) => {
+suite(`status is 'recognizing' after recognize(...) is called at least once and handlers did not call recognized or denied`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     return new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>([])
       .recognize(new MouseEvent('click'))
@@ -301,7 +289,7 @@ suite(`status is 'recognizing' after recognize(...) is called at least once and 
   assert.is(value, 'recognizing')
 })
 
-suite(`correctly routes IntersectionObserverEntry[]`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes IntersectionObserverEntry[]`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<IntersectionObserverEntry[]>(
                   [],
@@ -326,7 +314,7 @@ suite(`correctly routes IntersectionObserverEntry[]`, async ({ puppeteer: { page
   assert.is(value, expected)
 })
 
-suite(`correctly routes MutationRecord[]`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes MutationRecord[]`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MutationRecord[]>(
                   [],
@@ -352,7 +340,7 @@ suite(`correctly routes MutationRecord[]`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`correctly routes ResizeObserverEntry[]`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes ResizeObserverEntry[]`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<ResizeObserverEntry[]>(
                   [],
@@ -379,7 +367,7 @@ suite(`correctly routes ResizeObserverEntry[]`, async ({ puppeteer: { page } }) 
   assert.is(value, expected)
 })
 
-suite(`correctly routes MediaQueryListEvent`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes MediaQueryListEvent`, async ({ reloadNext, puppeteer: { page } }) => {
   await page.evaluate(async () => {
     (window as unknown as WithLogic).testState = new (window as unknown as WithLogic).Logic.Recognizeable<MediaQueryListEvent>(
         [],
@@ -408,7 +396,7 @@ suite(`correctly routes MediaQueryListEvent`, async ({ puppeteer: { page } }) =>
   assert.is(value, expected)
 })
 
-suite(`correctly routes IdleDeadline`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes IdleDeadline`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable(
                   [],
@@ -428,7 +416,7 @@ suite(`correctly routes IdleDeadline`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`correctly routes leftclickcombo`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes leftclickcombo`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
                   [],
@@ -449,7 +437,7 @@ suite(`correctly routes leftclickcombo`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`correctly routes rightclickcombo`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes rightclickcombo`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
                   [],
@@ -470,7 +458,7 @@ suite(`correctly routes rightclickcombo`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`correctly routes keycombo`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes keycombo`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<KeyboardEvent>(
                   [],
@@ -491,7 +479,7 @@ suite(`correctly routes keycombo`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`correctly routes events`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes events`, async ({ reloadNext, puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<Event>(
                   [],

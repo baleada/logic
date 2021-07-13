@@ -1,6 +1,5 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-// @ts-ignore
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
@@ -9,10 +8,6 @@ const suite = withPuppeteer(
 
 suite.before(context => {
   context.resource = 'http://httpbin.org/get'
-})
-
-suite.before.each(async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000')
 })
 
 suite(`status is 'fetching' immediately after fetch(...)`, async ({ puppeteer: { page }, resource }) => {

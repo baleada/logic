@@ -19,10 +19,6 @@ suite.before(context => {
   ]
 })
 
-suite.before.each(async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000')
-})
-
 suite('initial playbackRate is 1', async ({ puppeteer: { page }, keyframes }) => {
   const value = await page.evaluate((keyframes: AnimateableKeyframe[]) => {
     const instance = new (window as unknown as WithLogic).Logic.Animateable(keyframes)
