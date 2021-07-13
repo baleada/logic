@@ -47,7 +47,7 @@ suite(`setSequence sets the sequence`, async ({ puppeteer: { page } }) => {
   assert.is(value, 1)
 })
 
-suite(`first recognize(event) sets status to recognizing`, async ({ puppeteer: { page } }) => {
+suite(`first recognize(sequenceItem) sets status to recognizing`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>([])
     instance.recognize(new MouseEvent('click'))
@@ -57,7 +57,7 @@ suite(`first recognize(event) sets status to recognizing`, async ({ puppeteer: {
   assert.is(value, 'recognizing')
 })
 
-suite(`recognize(event) calls handler`, async ({ puppeteer: { page } }) => {
+suite(`recognize(sequenceItem) calls handler`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let handlerWasCalled = false
     
@@ -191,7 +191,7 @@ suite(`handler API getMetadata() gets metadata`, async ({ puppeteer: { page } })
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite(`handler API's getMetadata() is a reference to metadata`, async ({ puppeteer: { page } }) => {
+suite(`handler API getMetadata() is a reference to metadata`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let metadata
 
@@ -206,6 +206,7 @@ suite(`handler API's getMetadata() is a reference to metadata`, async ({ puppete
     
     instance.recognize(new MouseEvent('click'))
 
+    // Mutating the getMetadata return value should affect the instance's metadata
     metadata.stub = 'stub'
     
     return {
@@ -234,6 +235,51 @@ suite(`handler API setMetadata() sets metadata`, async ({ puppeteer: { page } })
   })
 
   assert.equal(value, { stub: 'stub' })
+})
+
+suite(`handler API effect() performs side effect`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let effectStatus = 'not performed'
+    const effect = () => effectStatus = 'performed'
+
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': ({ sequenceItem, effect }) => effect(sequenceItem)
+        }
+      }
+    )
+
+    instance.effect = effect
+    
+    instance.recognize(new MouseEvent('click'))
+    
+    return effectStatus
+  })
+
+  assert.equal(value, 'performed')
+})
+
+suite(`handler API sequenceItem accesses sequenceItem`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    let result
+
+    const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+      [],
+      {
+        handlers: {
+          'click': ({ sequenceItem }) => result = sequenceItem.type
+        }
+      }
+    )
+    
+    instance.recognize(new MouseEvent('click'))
+    
+    return result
+  })
+
+  assert.equal(value, 'click')
 })
 
 /* status */
@@ -333,7 +379,7 @@ suite(`correctly routes ResizeObserverEntry[]`, async ({ puppeteer: { page } }) 
   assert.is(value, expected)
 })
 
-suite.only(`correctly routes MediaQueryListEvent`, async ({ puppeteer: { page } }) => {
+suite(`correctly routes MediaQueryListEvent`, async ({ puppeteer: { page } }) => {
   await page.evaluate(async () => {
     (window as unknown as WithLogic).testState = new (window as unknown as WithLogic).Logic.Recognizeable<MediaQueryListEvent>(
         [],
@@ -362,12 +408,107 @@ suite.only(`correctly routes MediaQueryListEvent`, async ({ puppeteer: { page } 
   assert.is(value, expected)
 })
 
-// detects
-// - idle
-// - leftclickcombo
-// - rightclickcombo
-// - keycombo
-// - event
+suite(`correctly routes IdleDeadline`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Recognizeable(
+                  [],
+                  {
+                    handlers: {
+                      idle: ({ recognized }) => recognized()
+                    }
+                  }
+                )
 
+          instance.recognize({ didTimeout: true })
+                
+          return instance.status
+        }),
+        expected = 'recognized'
+
+  assert.is(value, expected)
+})
+
+suite(`correctly routes leftclickcombo`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+                  [],
+                  {
+                    handlersIncludeCombos: true,
+                    handlers: {
+                      'shift+click': ({ recognized }) => recognized()
+                    }
+                  }
+                )
+
+          instance.recognize(new MouseEvent('click', { shiftKey: true }))
+                
+          return instance.status
+        }),
+        expected = 'recognized'
+
+  assert.is(value, expected)
+})
+
+suite(`correctly routes rightclickcombo`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Recognizeable<MouseEvent>(
+                  [],
+                  {
+                    handlersIncludeCombos: true,
+                    handlers: {
+                      'rightclick': ({ recognized }) => recognized()
+                    }
+                  }
+                )
+
+          instance.recognize(new MouseEvent('contextmenu'))
+                
+          return instance.status
+        }),
+        expected = 'recognized'
+
+  assert.is(value, expected)
+})
+
+suite(`correctly routes keycombo`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Recognizeable<KeyboardEvent>(
+                  [],
+                  {
+                    handlersIncludeCombos: true,
+                    handlers: {
+                      'shift+a': ({ recognized }) => recognized()
+                    }
+                  }
+                )
+
+          instance.recognize(new KeyboardEvent('keydown', { key: 'A', shiftKey: true }))
+                
+          return instance.status
+        }),
+        expected = 'recognized'
+
+  assert.is(value, expected)
+})
+
+suite(`correctly routes events`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Recognizeable<Event>(
+                  [],
+                  {
+                    handlers: {
+                      'custom': ({ recognized }) => recognized()
+                    }
+                  }
+                )
+
+          instance.recognize(new Event('custom'))
+                
+          return instance.status
+        }),
+        expected = 'recognized'
+
+  assert.is(value, expected)
+})
 
 suite.run()

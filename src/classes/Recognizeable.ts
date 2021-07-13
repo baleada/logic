@@ -1,4 +1,19 @@
-import { isArray, isNumber } from '../extracted'
+import {
+  map as lazyCollectionMap,
+  reduce as lazyCollectionReduce,
+  pipe as lazyCollectionPipe,
+  join as lazyCollectionJoin,
+} from 'lazy-collections'
+import {
+  isArray,
+  isNumber,
+  ensureClickcombo,
+  ensureKeycombo
+} from '../extracted'
+import type {
+  ListenableKeycomboItem,
+  ListenableClickcomboItem,
+} from '../extracted'
 import {
   createSlice,
   createConcat,
@@ -6,12 +21,12 @@ import {
   createReduce,
   Pipeable
 } from '../pipes'
-import { ListenableKeycomboItem, ListenableClickcomboItem, ListenableSupportedEvent, eventMatchesClickcombo, toImplementation, ensureClickcombo, ensureKeycombo, eventMatchesKeycombo } from './Listenable'
 import {
-  map as lazyCollectionMap,
-  reduce as lazyCollectionReduce,
-  pipe as lazyCollectionPipe,
-} from 'lazy-collections'
+  ListenableSupportedEvent,
+  eventMatchesClickcombo,
+  toImplementation,
+  eventMatchesKeycombo
+} from './Listenable'
 
 export type RecognizeableSupportedType = 
   IntersectionObserverEntry[]
@@ -44,11 +59,11 @@ type HandlerApiFromConstructor<SequenceItem extends RecognizeableSupportedType, 
   setMetadata: (metadata: Metadata) => void,
   recognized: () => void,
   denied: () => void,
-  effect: (event: SequenceItem) => any,
+  effect: (sequenceItem: SequenceItem) => any,
 }
 
 type HandlerApiFromRuntime<SequenceItem extends RecognizeableSupportedType> = {
-  event: SequenceItem,
+  sequenceItem: SequenceItem,
   getSequence: () => SequenceItem[]
 }
 
@@ -84,7 +99,7 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
       setMetadata: (metadata: Metadata) => this._computedMetadata = metadata,
       recognized: () => this._recognized(),
       denied: () => this._denied(),
-      effect: (event: SequenceItem) => this.effect?.(event),
+      effect: (sequenceItem: SequenceItem) => this.effect?.(sequenceItem),
     }
 
     this._ready()
@@ -136,20 +151,20 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
     return this
   }
 
-  recognize (event: SequenceItem) {
+  recognize (sequenceItem: SequenceItem) {
     this._recognizing()
 
-    const type = this._toType(event),
+    const type = this._toType(sequenceItem),
           excess = isNumber(this._maxSequenceLength)
             ? Math.max(0, this.sequence.length - this._maxSequenceLength)
             : 0,
           newSequence = createConcat(
             createSlice<SequenceItem>({ from: excess })(this.sequence),
-            [event]
+            [sequenceItem]
           )([])
           
     this._handlers.get(type)?.({
-      event,
+      sequenceItem: sequenceItem,
       ...this._handlerApi,
       getSequence: () => newSequence,
     })
@@ -338,7 +353,7 @@ export function createToType<SequenceItem extends RecognizeableSupportedType, Me
         if (leftclickcomboEventTypes.has((sequenceItem as Event).type)) {
           for (const clickcombo of handlerLeftclickcombos) {
             if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
-              return clickcombo.join('+')
+              return toJoinedClickcombo(clickcombo) as string
             }
           }
         }
@@ -348,7 +363,7 @@ export function createToType<SequenceItem extends RecognizeableSupportedType, Me
         if (rightclickComboEventTypes.has((sequenceItem as Event).type)) {
           for (const clickcombo of handlerRightclickcombos) {
             if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
-              return clickcombo.join('+')
+              return toJoinedClickcombo(clickcombo) as string
             }
           }
         }
@@ -358,7 +373,7 @@ export function createToType<SequenceItem extends RecognizeableSupportedType, Me
         if (keycomboEventTypes.has((sequenceItem as Event).type)) {
           for (const keycombo of handlerKeycombos) {
             if (eventMatchesKeycombo({ event: sequenceItem as KeyboardEvent, keycombo })) {
-              return keycombo.join('+')
+              return toJoinedKeycombo(keycombo) as string
             }
           }
         }
@@ -368,3 +383,10 @@ export function createToType<SequenceItem extends RecognizeableSupportedType, Me
     }
   }
 }
+
+const toJoinedClickcombo = lazyCollectionJoin('+'),
+      toJoinedKeycombo = lazyCollectionPipe(
+        lazyCollectionMap<ListenableKeycomboItem, string>(({ name }) => name),
+        lazyCollectionJoin('+'),
+      )
+      

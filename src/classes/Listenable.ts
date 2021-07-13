@@ -8,14 +8,15 @@ import {
   isArray,
   isNumber,
   toKey,
-  toCombo,
+  ensureKeycombo,
+  ensureClickcombo,
   comboItemNameToType,
   toModifier,
 } from '../extracted'
 import type {
   ListenableModifier,
   ListenableModifierAlias,
-  ListenableComboItemType,
+  ListenableKeycomboItem,
 } from '../extracted'
 
 export type ListenableSupportedType = 
@@ -208,14 +209,14 @@ export class Listenable<EventType extends ListenableSupportedType, Recognizeable
 
     this.active.add({ target: window, id } as ListenableActive<EventType>)
   }
-  _recognizeableListen (handle: (event: RecognizeableSequenceItem<EventType>) => void, options: ListenOptions<EventType>) {
+  _recognizeableListen (handle: (sequenceItem: RecognizeableSequenceItem<EventType>) => void, options: ListenOptions<EventType>) {
     this.recognizeable.setEffect(handle)
 
-    const guardedHandle = (event: RecognizeableSequenceItem<EventType>) => {
-      this.recognizeable.recognize(event)
+    const guardedHandle = (sequenceItem: RecognizeableSequenceItem<EventType>) => {
+      this.recognizeable.recognize(sequenceItem)
 
       if (this.recognizeable.status === 'recognized') {
-        handle(event)
+        handle(sequenceItem)
       }
     }
 
@@ -432,19 +433,6 @@ export function createExceptAndOnlyHandle<EventType extends ListenableSupportedE
   }
 }
 
-export type ListenableKeycomboItem = {
-  name: string,
-  type: ListenableComboItemType | 'custom'
-}
-
-export function ensureKeycombo (type: string): ListenableKeycomboItem[] {
-  return toCombo(type).map(name => ({ name, type: comboItemNameToType(name) }))
-}
-
-export function ensureClickcombo (type: string): string[] {
-  return toCombo(type)
-}
-
 export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEvent, keycombo: ListenableKeycomboItem[] }): boolean {
   return lazyCollectionEvery<ListenableKeycomboItem>(({ name, type }, index) => {
     switch (type) {
@@ -528,8 +516,6 @@ const predicatesByModifier: Record<ListenableModifier | ListenableModifierAlias,
 }
 
 
-// export type ListenableClickcomboItem = ListenableModifier | ListenableModifierAlias | 'click'
-export type ListenableClickcomboItem = string
 export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEvent, clickcombo: string[] }): boolean {
   return lazyCollectionEvery<string>(name => (
     comboItemNameToType(name) === 'click'

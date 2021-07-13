@@ -2,11 +2,14 @@ import {
   find as lazyCollectionFind,
   map as lazyCollectionMap,
   unique as lazyCollectionUnique,
-  pipe as lazyCollectionPipe
+  toArray as lazyCollectionToArray,
+  pipe as lazyCollectionPipe,
 } from 'lazy-collections'
 import {
   createSlice,
   createReduce,
+  createMap,
+  Pipeable,
 } from './pipes'
 
 // DISPATCHABLE
@@ -116,8 +119,28 @@ const keysByName: Record<ListenableKeyAlias, ListenableKey> = {
   f20: 'F20',
 }
 
+export type ListenableKeycomboItem = {
+  name: string,
+  type: ListenableComboItemType | 'custom'
+}
+
+const toListenableKeycomboItems = createMap<string, ListenableKeycomboItem>(name => ({ name, type: comboItemNameToType(name) }))
+export function ensureKeycombo (type: string): ListenableKeycomboItem[] {
+  return new Pipeable(type).pipe(
+    toCombo,
+    toListenableKeycomboItems
+  ) as ListenableKeycomboItem[]
+}
+
+// export type ListenableClickcomboItem = ListenableModifier | ListenableModifierAlias | 'click'
+export type ListenableClickcomboItem = string
+
+export function ensureClickcombo (type: string): string[] {
+  return toCombo(type)
+}
+
 const unique = lazyCollectionUnique<string>()
-const comboMap = lazyCollectionMap<string, string>(name => name === '' ? DELIMITER : name)
+const toComboItems = lazyCollectionMap<string, string>(name => name === '' ? DELIMITER : name)
 const DELIMITER = '+'
 export function toCombo (type: string): string[] {
   // If the delimiter is used as a character in the type,
@@ -125,7 +148,8 @@ export function toCombo (type: string): string[] {
   // createUnique ensures those two are combined into one.
   return lazyCollectionPipe(
     unique,
-    comboMap,
+    toComboItems,
+    lazyCollectionToArray(),
   )(type.split(DELIMITER)) as string[]
 }
 
