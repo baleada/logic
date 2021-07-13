@@ -19,7 +19,7 @@ export function toEvent (
 ) {
   const modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
         { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo),
-        type = comboItemNameToType(name),
+        type = fromComboItemNameToType(name),
         { keyDirection, init } = options
 
   switch (type) {
@@ -124,7 +124,7 @@ export type ListenableKeycomboItem = {
   type: ListenableComboItemType | 'custom'
 }
 
-const toListenableKeycomboItems = createMap<string, ListenableKeycomboItem>(name => ({ name, type: comboItemNameToType(name) }))
+const toListenableKeycomboItems = createMap<string, ListenableKeycomboItem>(name => ({ name, type: fromComboItemNameToType(name) }))
 export function ensureKeycombo (type: string): ListenableKeycomboItem[] {
   return new Pipeable(type).pipe(
     toCombo,
@@ -153,7 +153,7 @@ export function toCombo (type: string): string[] {
   )(type.split(DELIMITER)) as string[]
 }
 
-export function comboItemNameToType (name: string) {
+export function fromComboItemNameToType (name: string) {
   return lazyCollectionFind((type: ListenableComboItemType) => predicatesByType.get(type)(name))(LISTENABLE_COMBO_ITEM_TYPES) as ListenableComboItemType ?? 'custom'
 }
 
@@ -199,11 +199,11 @@ const typeREs: Map<ListenableComboItemType, RegExp> = new Map([
   ],
   [
     'modifier',
-    /^!?(cmd|command|meta|shift|ctrl|control|alt|opt)$/
+    /^!?(cmd|command|meta|shift|ctrl|control|alt|opt|option)$/
   ],
   [
     'click',
-    /^(rightclick|click|mousedown|mouseup|contextmenu)$/
+    /^!?(rightclick|contextmenu|click|mousedown|mouseup|dblclick)$/
   ],
 ])
 
@@ -225,20 +225,20 @@ const modifiersByAlias: Record<ListenableModifierAlias, ListenableModifier> = {
 type ListenableModifierFlag = 'shiftKey' | 'metaKey' | 'ctrlKey' | 'altKey'
 
 export function toModifierFlag (modifierOrAlias: ListenableModifier | ListenableModifierAlias) {
-  return flagsByModifierOrAlias.get(modifierOrAlias)
+  return flagsByModifierOrAlias[modifierOrAlias]
 }
 
-const flagsByModifierOrAlias: Map<ListenableModifier | ListenableModifierAlias, ListenableModifierFlag> = new Map([
-  ['shift', 'shiftKey'],
-  ['cmd', 'metaKey'],
-  ['command', 'metaKey'],
-  ['meta', 'metaKey'],
-  ['ctrl', 'ctrlKey'],
-  ['control', 'ctrlKey'],
-  ['alt', 'altKey'],
-  ['opt', 'altKey'],
-  ['option', 'altKey'],
-])
+const flagsByModifierOrAlias: Record<ListenableModifier | ListenableModifierAlias, ListenableModifierFlag> = {
+  shift: 'shiftKey',
+  cmd: 'metaKey',
+  command: 'metaKey',
+  meta: 'metaKey',
+  ctrl: 'ctrlKey',
+  control: 'ctrlKey',
+  alt: 'altKey',
+  opt: 'altKey',
+  option: 'altKey',
+}
 
 // STOREABLE
 export function domIsAvailable (): boolean {

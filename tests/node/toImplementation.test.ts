@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { toImplementation } from '../../src/classes/Listenable'
+import { keys, leftclicks, modifierAliases, modifiers, rightclicks } from '../fixtures/comboMeta'
 
 const suite = createSuite('toImplementation (node)')
 
@@ -60,453 +61,12 @@ suite(`identifies visibilitychange`, context => {
 })
 
 suite(`identifies core keycombo events`, context => {
-  (() => {
-    const value = toImplementation('a'),
+  for (const key of keys) {
+    const value = toImplementation(key),
           expected = 'keycombo'
-
+    
     assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('A'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('0'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation(','),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('<'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('.'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('>'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('/'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('?'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation(';'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation(':'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('\''),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('"'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('['),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('{'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation(']'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('}'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('\\'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('|'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('`'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('~'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('!'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('@'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('#'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('$'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('%'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('^'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('&'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('*'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('('),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation(')'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('-'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('_'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('='),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('+'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('tab'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('space'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('arrow'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('vertical'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('horizontal'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('up'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('right'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('down'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('left'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('enter'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('backspace'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('esc'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('home'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('end'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('pagedown'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('pageup'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('capslock'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('f1'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('f11'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('camera'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('delete'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('cmd'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('command'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('meta'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('shift'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('ctrl'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('control'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('alt'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('option'),
-          expected = 'keycombo'
-
-    assert.is(value, expected)
-  })();
+  }
 })
 
 suite(`identifies delimited keycombos`, context => {
@@ -519,7 +79,7 @@ suite(`identifies delimited keycombos`, context => {
 
   // Naively allows unlimited keycombo length with repeated keys
   (() => {
-    const value = toImplementation('s+u+p+e+r+c+a+l+i+f+r+a+g+i+l+i+s+t+i+c+e+x+p+i+a+l+i+d+o+c+i+o+u+s'),
+    const value = toImplementation('supercalifragilisticexpialidocious'.split('').join('+')),
           expected = 'keycombo'
 
     assert.is(value, expected)
@@ -550,7 +110,7 @@ suite(`identifies negated keys in keycombos`, context => {
   })();
 
   (() => {
-    const value = toImplementation('!s+!u+!p+!e+!r+!c+!a+!l+!i+!f+!r+!a+!g+!i+!l+!i+!s+!t+!i+!c+!e+!x+!p+!i+!a+!l+!i+!d+!o+!c+!i+!o+!u+!s'),
+    const value = toImplementation('!' + 'supercalifragilisticexpialidocious'.split('').join('+!')),
           expected = 'keycombo'
 
     assert.is(value, expected)
@@ -566,93 +126,30 @@ suite(`identifies negated keys in keycombos`, context => {
 })
 
 suite(`identifies core leftclickcombo events`, context => {
-  (() => {
-    const value = toImplementation('click'),
+  for (const leftclick of leftclicks) {
+    const value = toImplementation(leftclick),
           expected = 'leftclickcombo'
-
+    
     assert.is(value, expected)
-  })();
-  
-  (() => {
-    const value = toImplementation('mousedown'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
-  
-  (() => {
-    const value = toImplementation('mouseup'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
-  
-  (() => {
-    const value = toImplementation('dblclick'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
+  }
 })
 
 suite(`identifies up to 4 modifiers as leftclickcombo`, context => {
-  (() => {
-    const value = toImplementation('shift+click'),
+  for (let i = 0; i < modifiers.length; i++) {
+    const value = toImplementation(modifiers.slice(0, i + 1).join('+') + '+click'),
           expected = 'leftclickcombo'
 
     assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('meta+shift+click'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('option+meta+shift+click'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('control+option+shift+click'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
+  }
 })
 
 suite(`identifies negated core leftclickcombo events`, context => {
-  (() => {
-    const value = toImplementation('!click'),
+  for (const leftclick of leftclicks) {
+    const value = toImplementation('!' + leftclick),
           expected = 'leftclickcombo'
-
+    
     assert.is(value, expected)
-  })();
-  
-  (() => {
-    const value = toImplementation('!mousedown'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
-  
-  (() => {
-    const value = toImplementation('!mouseup'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
-  
-  (() => {
-    const value = toImplementation('!dblclick'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
+  }
 })
 
 suite(`identifies negated modifiers as leftclickcombo`, context => {
@@ -663,102 +160,39 @@ suite(`identifies negated modifiers as leftclickcombo`, context => {
 })
 
 suite(`identifies aliased modifiers in leftclickcombo`, context => {
-  (() => {
-    const value = toImplementation('command+click'),
+  for (const alias of modifierAliases) {
+    const value = toImplementation(alias + '+click'),
           expected = 'leftclickcombo'
 
     assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('cmd+click'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('opt+click'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('alt+click'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('ctrl+click'),
-          expected = 'leftclickcombo'
-
-    assert.is(value, expected)
-  })();
+  }
 })
 
 suite(`identifies core rightclickcombo events`, context => {
-  (() => {
-    const value = toImplementation('rightclick'),
+  for (const rightclick of rightclicks) {
+    const value = toImplementation(rightclick),
           expected = 'rightclickcombo'
-
+    
     assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('contextmenu'),
-          expected = 'rightclickcombo'
-
-    assert.is(value, expected)
-  })();
+  }
 })
 
 suite(`identifies up to 4 modifiers as rightclickcombo`, context => {
-  (() => {
-    const value = toImplementation('shift+rightclick'),
+  for (let i = 0; i < modifiers.length; i++) {
+    const value = toImplementation(modifiers.slice(0, i + 1).join('+') + '+rightclick'),
           expected = 'rightclickcombo'
 
     assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('meta+shift+rightclick'),
-          expected = 'rightclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('option+meta+shift+rightclick'),
-          expected = 'rightclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('control+option+shift+rightclick'),
-          expected = 'rightclickcombo'
-
-    assert.is(value, expected)
-  })();
+  }
 })
 
 suite(`identifies negated core rightclickcombo events`, context => {
-  (() => {
-    const value = toImplementation('!rightclick'),
+  for (const rightclick of rightclicks) {
+    const value = toImplementation('!' + rightclick),
           expected = 'rightclickcombo'
-
+    
     assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('!contextmenu'),
-          expected = 'rightclickcombo'
-
-    assert.is(value, expected)
-  })();
+  }
 })
 
 suite(`identifies negated modifiers as rightclickcombo`, context => {
@@ -769,49 +203,19 @@ suite(`identifies negated modifiers as rightclickcombo`, context => {
 })
 
 suite(`identifies aliased modifiers in rightclickcombo`, context => {
-  (() => {
-    const value = toImplementation('command+rightclick'),
+  for (const alias of modifierAliases) {
+    const value = toImplementation(alias + '+rightclick'),
           expected = 'rightclickcombo'
 
     assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('cmd+rightclick'),
-          expected = 'rightclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('opt+rightclick'),
-          expected = 'rightclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('alt+rightclick'),
-          expected = 'rightclickcombo'
-
-    assert.is(value, expected)
-  })();
-
-  (() => {
-    const value = toImplementation('ctrl+rightclick'),
-          expected = 'rightclickcombo'
-
-    assert.is(value, expected)
-  })();
+  }
 })
 
 suite(`identifies everything else as a custom event`, context => {
-  (() => {
-    const value = toImplementation('poop'),
-          expected = 'event'
+  const value = toImplementation('poop'),
+        expected = 'event'
 
-    assert.is(value, expected)
-  })();
+  assert.is(value, expected)
 })
 
 suite.run()

@@ -10,7 +10,7 @@ import {
   toKey,
   ensureKeycombo,
   ensureClickcombo,
-  comboItemNameToType,
+  fromComboItemNameToType,
   toModifier,
 } from '../extracted'
 import type {
@@ -465,27 +465,27 @@ type ListenableArrowAlias = 'arrow' | '!arrow' | 'vertical' | '!vertical' | 'hor
 const predicatesByArrow: Map<ListenableArrowAlias, (required: { event: KeyboardEvent, name?: string }) => boolean> = new Map([
   [
     'arrow',
-    ({ event }) => ARROWS.has(event.key.toLowerCase())
+    ({ event }) => arrows.has(event.key.toLowerCase())
   ],
   [
     '!arrow',
-    ({ event }) => !ARROWS.has(event.key.toLowerCase()),
+    ({ event }) => !arrows.has(event.key.toLowerCase()),
   ],
   [
     'vertical',
-    ({ event }) => VERTICAL_ARROWS.has(event.key.toLowerCase()),
+    ({ event }) => verticalArrows.has(event.key.toLowerCase()),
   ],
   [
     '!vertical',
-    ({ event }) => !VERTICAL_ARROWS.has(event.key.toLowerCase()),
+    ({ event }) => !verticalArrows.has(event.key.toLowerCase()),
   ],
   [
     'horizontal',
-    ({ event }) => HORIZONTAL_ARROWS.has(event.key.toLowerCase()),
+    ({ event }) => horizontalArrows.has(event.key.toLowerCase()),
   ],
   [
     '!horizontal',
-    ({ event }) => !HORIZONTAL_ARROWS.has(event.key.toLowerCase()),
+    ({ event }) => !horizontalArrows.has(event.key.toLowerCase()),
   ],
   [
     'default',
@@ -495,9 +495,9 @@ const predicatesByArrow: Map<ListenableArrowAlias, (required: { event: KeyboardE
   ]
 ])
 
-const ARROWS = new Set(['arrowup', 'arrowright', 'arrowdown', 'arrowleft'])
-const VERTICAL_ARROWS = new Set(['arrowup', 'arrowdown'])
-const HORIZONTAL_ARROWS = new Set(['arrowright', 'arrowleft'])
+const arrows = new Set(['arrowup', 'arrowright', 'arrowdown', 'arrowleft'])
+const verticalArrows = new Set(['arrowup', 'arrowdown'])
+const horizontalArrows = new Set(['arrowright', 'arrowleft'])
 
 export function isModified<EventType extends KeyboardEvent | MouseEvent> ({ event, alias }: { event: EventType, alias: string }) {
   return predicatesByModifier[alias]?.(event)
@@ -518,7 +518,7 @@ const predicatesByModifier: Record<ListenableModifier | ListenableModifierAlias,
 
 export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEvent, clickcombo: string[] }): boolean {
   return lazyCollectionEvery<string>(name => (
-    comboItemNameToType(name) === 'click'
+    fromComboItemNameToType(name) === 'click'
     ||
     (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))
     ||
