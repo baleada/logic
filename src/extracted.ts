@@ -2,6 +2,7 @@ import {
   find as lazyCollectionFind,
   map as lazyCollectionMap,
   unique as lazyCollectionUnique,
+  some as lazyCollectionSome,
   toArray as lazyCollectionToArray,
   pipe as lazyCollectionPipe,
 } from 'lazy-collections'
@@ -11,25 +12,25 @@ import {
   createMap,
   Pipeable,
 } from './pipes'
+import type { ListenableSupportedEvent, ListenOptions } from './classes/Listenable'
 
 // DISPATCHABLE
-export function toEvent (
-  combo: string[],
-  options: { init?: EventInit, keyDirection?: 'up' | 'down' } = {}
-) {
+type ToEventOptions<EventType extends ListenableSupportedEvent> = EventType extends KeyboardEvent 
+  ? { keyDirection?: 'up' | 'down', init?: EventInit }
+  : { init?: EventInit }
+export function toEvent<EventType extends ListenableSupportedEvent> (combo: string[],options: ToEventOptions<EventType> = {}) {
   const modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
         { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo),
-        type = fromComboItemNameToType(name),
-        { keyDirection, init } = options
+        type = fromComboItemNameToType(name)
 
   switch (type) {
     case 'singleCharacter':
     case 'other':
     case 'modifier':
       return new KeyboardEvent(
-        `key${keyDirection}`,
+        'keyDirection' in options ? `key${options.keyDirection}` : 'keydown',
         {
-          ...init,
+          ...(options.init || {}),
           key: toKey(name),
           ...createReduce<ListenableModifier | ListenableModifierAlias, { [flag in ListenableModifierFlag]?: true }>(
             (flags, alias) => { 
@@ -44,7 +45,7 @@ export function toEvent (
       return new MouseEvent(
         name === 'rightclick' ? 'contextmenu' : name,
         {
-          ...init,
+          ...(options.init || {}),
           ...createReduce<ListenableModifier | ListenableModifierAlias, { [flag in ListenableModifierFlag]?: true }>(
             (flags, alias) => { 
               flags[toModifierFlag(alias)] = true
@@ -57,7 +58,7 @@ export function toEvent (
     case 'custom':
       return new Event(
         name,
-        init
+        (options.init || {})
       )
   }
 }
@@ -238,6 +239,27 @@ const flagsByModifierOrAlias: Record<ListenableModifier | ListenableModifierAlia
   alt: 'altKey',
   opt: 'altKey',
   option: 'altKey',
+}
+
+export function createExceptAndOnlyHandle<EventType extends ListenableSupportedEvent> (handle: (event: EventType) => any, options: ListenOptions<EventType>): (event: EventType) => any {
+  const { except = [], only = [] } = options
+  
+  return (event: EventType) => {
+    const { target } = event,
+          [matchesOnly, matchesExcept] = target instanceof Element
+            ? [only, except].map(selectors => lazyCollectionSome<string>(selector => target.matches(selector))(selectors))
+            : [false, true]
+
+    if (matchesOnly) {
+      handle(event)
+      return
+    }
+    
+    if (only.length === 0 && !matchesExcept) {
+      handle(event)
+      return
+    }
+  }
 }
 
 // STOREABLE
