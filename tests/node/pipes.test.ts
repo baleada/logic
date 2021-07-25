@@ -33,7 +33,7 @@ type Context = {
 
 const suite = createSuite<Context>('pipes (node)')
 
-suite.before(context => {
+suite.before(() => {
   context.array = ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito']
   context.number = 42
   context.string = 'Baleada: a toolkit for building web apps'

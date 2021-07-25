@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithLogic } from '../fixtures/types'
 
 type Context = {
   string: string,
@@ -18,15 +19,55 @@ suite.before(context => {
 })
 
 suite.before.each(async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000')
   await page.waitForSelector('body')
   await page.click('body')
 })
 
+suite('stores the string', async ({ puppeteer: { page }, string }) => {
+  const value = await page.evaluate(string => {
+          const instance = new (window as unknown as WithLogic).Logic.Copyable(string)
+          return instance.string
+        }, string),
+        expected = string
+
+  assert.is(value, expected)
+})
+
+suite('assignment sets the string', async ({ puppeteer: { page }, string }) => {
+  const value = await page.evaluate(string => {
+          const instance = new (window as unknown as WithLogic).Logic.Copyable(string)
+          instance.string = 'Baleada'
+          return instance.string
+        }, string),
+        expected = 'Baleada'
+
+  assert.is(value, expected)
+})
+
+suite('setString sets the string', async ({ puppeteer: { page }, string }) => {
+  const value = await page.evaluate(string => {
+          const instance = new (window as unknown as WithLogic).Logic.Copyable(string)
+          instance.setString('Baleada')
+          return instance.string
+        }, string),
+        expected = 'Baleada'
+
+  assert.is(value, expected)
+})
+
+suite('status is "ready" after construction', async ({ puppeteer: { page }, string }) => {
+  const value = await page.evaluate(string => {
+          const instance = new (window as unknown as WithLogic).Logic.Copyable(string)
+          return instance.status
+        }, string),
+        expected = 'ready'
+
+  assert.is(value, expected)
+})
+
 suite(`status is 'copying' immediately after copy(...)`, async ({ puppeteer: { page }, string }) => {
   const value = await page.evaluate(async string => {
-          // @ts-ignore
-          const instance = new window.Logic.Copyable(string)
+          const instance = new (window as unknown as WithLogic).Logic.Copyable(string)
           instance.copy()
           return instance.status
         }, string),
@@ -37,8 +78,7 @@ suite(`status is 'copying' immediately after copy(...)`, async ({ puppeteer: { p
 
 suite(`status is 'copied' after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
   const value = await page.evaluate(async string => {
-          // @ts-ignore
-          const instance = new window.Logic.Copyable(string)
+          const instance = new (window as unknown as WithLogic).Logic.Copyable(string)
           await instance.copy()
           return instance.status
         }, string),
@@ -49,8 +89,7 @@ suite(`status is 'copied' after successful copy(...)`, async ({ puppeteer: { pag
 
 suite(`isClipboardText is true after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
   const value = await page.evaluate(async string => {
-          // @ts-ignore
-          const instance = new window.Logic.Copyable(string)
+          const instance = new (window as unknown as WithLogic).Logic.Copyable(string)
           await instance.copy()
           return await instance.isClipboardText
         }, string),
@@ -62,8 +101,7 @@ suite(`isClipboardText is true after successful copy(...)`, async ({ puppeteer: 
 suite(`copy() updates optional clipboard.text after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
   const value = await page.evaluate(async string => {
           const clipboard = { text: '' },
-                // @ts-ignore
-                instance = new window.Logic.Copyable(string, { clipboard })
+                instance = new (window as unknown as WithLogic).Logic.Copyable(string, { clipboard })
           await instance.copy()
           return instance.isClipboardText
         }, string),
@@ -75,8 +113,7 @@ suite(`copy() updates optional clipboard.text after successful copy(...)`, async
 suite(`copy({ type: 'element' }) updates optional clipboard.text after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
   const value = await page.evaluate(async string => {
           const clipboard = { text: '' },
-                // @ts-ignore
-                instance = new window.Logic.Copyable(string, { clipboard })
+                instance = new (window as unknown as WithLogic).Logic.Copyable(string, { clipboard })
           await instance.copy({ type: 'deprecated' })
           return instance.isClipboardText
         }, string),
@@ -84,5 +121,7 @@ suite(`copy({ type: 'element' }) updates optional clipboard.text after successfu
   
   assert.is(value, expected)
 })
+
+// TODO: Test global copy and cut tracking
 
 suite.run()

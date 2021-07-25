@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithLogic } from '../fixtures/types'
 
 const suite = withPuppeteer(
   createSuite('Fetchable (browser)')
@@ -12,8 +13,7 @@ suite.before(context => {
 
 suite(`status is 'fetching' immediately after fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           instance.fetch() // Can't method chain without await
           return instance.status
         }, resource),
@@ -24,8 +24,7 @@ suite(`status is 'fetching' immediately after fetch(...)`, async ({ puppeteer: {
 
 suite(`status is 'fetched' after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           return (await instance.fetch()).status
         }, resource),
         expected = 'fetched'
@@ -35,8 +34,7 @@ suite(`status is 'fetched' after successful fetch(...)`, async ({ puppeteer: { p
 
 suite(`status is 'fetched' after successful get(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           return (await instance.get()).status
         }, resource),
         expected = 'fetched'
@@ -46,8 +44,7 @@ suite(`status is 'fetched' after successful get(...)`, async ({ puppeteer: { pag
 
 suite.skip(`status is 'fetched' after successful patch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource.replace(/get$/, 'patch'))
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource.replace(/get$/, 'patch'))
           return (await instance.post()).status // TODO: Error: Failed to fetch. Not sure why.
         }, resource),
         expected = 'fetched'
@@ -57,8 +54,7 @@ suite.skip(`status is 'fetched' after successful patch(...)`, async ({ puppeteer
 
 suite(`status is 'fetched' after successful post(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource.replace(/get$/, 'post'))
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource.replace(/get$/, 'post'))
           return (await instance.post()).status
         }, resource),
         expected = 'fetched'
@@ -68,8 +64,7 @@ suite(`status is 'fetched' after successful post(...)`, async ({ puppeteer: { pa
 
 suite(`status is 'fetched' after successful put(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource.replace(/get$/, 'put'))
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource.replace(/get$/, 'put'))
           return (await instance.put()).status
         }, resource),
         expected = 'fetched'
@@ -79,8 +74,7 @@ suite(`status is 'fetched' after successful put(...)`, async ({ puppeteer: { pag
 
 suite(`status is 'fetched' after successful delete(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource.replace(/get$/, 'delete'))
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource.replace(/get$/, 'delete'))
           return (await instance.delete()).status
         }, resource),
         expected = 'fetched'
@@ -90,8 +84,7 @@ suite(`status is 'fetched' after successful delete(...)`, async ({ puppeteer: { 
 
 suite.skip(`status is 'errored' after an unsuccessful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable('stub')
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable('stub')
           // Not sure how to simulate a network failure. Fetch won't technically fail otherwise.
         }, resource),
         expected = 'errored'
@@ -101,8 +94,7 @@ suite.skip(`status is 'errored' after an unsuccessful fetch(...)`, async ({ pupp
 
 suite(`status is 'aborted' after aborting fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           instance.fetch()
           return (await instance.abort()).status
         }, resource),
@@ -113,8 +105,7 @@ suite(`status is 'aborted' after aborting fetch(...)`, async ({ puppeteer: { pag
 
 suite(`response is Response after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           await instance.fetch()
           return instance.response instanceof Response
         }, resource)
@@ -124,8 +115,7 @@ suite(`response is Response after successful fetch(...)`, async ({ puppeteer: { 
 
 suite.skip(`response is Error after errored fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           // Not sure how to simulate network failure
         }, resource)
 
@@ -134,8 +124,7 @@ suite.skip(`response is Error after errored fetch(...)`, async ({ puppeteer: { p
 
 suite(`response is AbortError after aborted fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           instance.fetch()
           return (await instance.abort()).response.name === 'AbortError'
         }, resource)
@@ -145,8 +134,7 @@ suite(`response is AbortError after aborted fetch(...)`, async ({ puppeteer: { p
 
 suite(`arrayBuffer is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           await instance.get()
           const arrayBuffer = await instance.arrayBuffer
           // @ts-ignore
@@ -158,8 +146,7 @@ suite(`arrayBuffer is Resolveable after successful fetch(...)`, async ({ puppete
 
 suite(`blob is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           await instance.get()
           const blob = await instance.blob
           // @ts-ignore
@@ -171,8 +158,7 @@ suite(`blob is Resolveable after successful fetch(...)`, async ({ puppeteer: { p
 
 suite(`formData is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           await instance.get()
           const formData = await instance.formData
           // @ts-ignore
@@ -184,8 +170,7 @@ suite(`formData is Resolveable after successful fetch(...)`, async ({ puppeteer:
 
 suite(`json is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           await instance.get()
           const json = await instance.json
           // @ts-ignore
@@ -197,8 +182,7 @@ suite(`json is Resolveable after successful fetch(...)`, async ({ puppeteer: { p
 
 suite(`text is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           await instance.get()
           const text = await instance.text
           // @ts-ignore
@@ -210,8 +194,7 @@ suite(`text is Resolveable after successful fetch(...)`, async ({ puppeteer: { p
 
 suite(`abortController can be accessed`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
-          // @ts-ignore
-          const instance = new window.Logic.Fetchable(resource)
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           return instance.abortController instanceof AbortController
         }, resource)
 

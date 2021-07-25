@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithLogic } from '../fixtures/types'
 
 type Context = {
   key: string,
@@ -14,10 +15,51 @@ suite.before(context => {
   context.key = 'baleada'
 })
 
+suite('stores the key', async ({ puppeteer: { page }, key }) => {
+  const value = await page.evaluate(key => {
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
+          return instance.key
+        }, key),
+        expected = key
+  
+  assert.is(value, expected)
+})
+
+suite('assignment sets the key', async ({ puppeteer: { page }, key }) => {
+  const value = await page.evaluate(key => {
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
+          instance.key = 'toolkit'
+          return instance.key
+        }, key),
+        expected = 'toolkit'
+  
+  assert.is(value, expected)
+})
+
+suite('setKey sets the key', async ({ puppeteer: { page }, key }) => {
+  const value = await page.evaluate(key => {
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
+          instance.setKey('toolkit')
+          return instance.key
+        }, key),
+        expected = 'toolkit'
+  
+  assert.is(value, expected)
+})
+
+suite('status is "ready" after construction and before DOM is available', async ({ puppeteer: { page }, key }) => {
+  const value = await page.evaluate(key => {
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
+          return instance.status
+        }, key),
+        expected = 'ready'
+  
+  assert.is(value, expected)
+})
+
 suite(`status is stored in browser when DOM is available`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           
           const value = JSON.parse(JSON.stringify(instance.storage))
           
@@ -32,8 +74,7 @@ suite(`status is stored in browser when DOM is available`, async ({ puppeteer: {
 
 suite(`status is 'stored' after successful store(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           instance.store('baleada')
           
           const value = instance.status
@@ -49,8 +90,7 @@ suite(`status is 'stored' after successful store(...)`, async ({ puppeteer: { pa
 
 suite(`status is 'removed' after successful remove(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           instance.store('baleada')
           instance.remove()
           
@@ -76,8 +116,7 @@ suite.skip(`status is 'errored' after unsuccessful store(...)`, async ({ puppete
 
 suite(`status is not stored in browser after successful removeStatus(...)`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           instance.removeStatus()
           
           const value = instance.storage.getItem(`${key}_status`)
@@ -93,8 +132,7 @@ suite(`status is not stored in browser after successful removeStatus(...)`, asyn
 
 suite(`setKey(...) updates browser storage keys when status is 'stored'`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           instance
             .store('baleada')
             .setKey('stub')
@@ -112,8 +150,7 @@ suite(`setKey(...) updates browser storage keys when status is 'stored'`, async 
 
 suite(`setKey(...) updates browser storage keys when status is 'removed'`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           instance
             .store('baleada')
             .remove()
@@ -132,8 +169,7 @@ suite(`setKey(...) updates browser storage keys when status is 'removed'`, async
 
 suite(`store(...) stores item in browser storage`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           instance.store('baleada')
           
           const value = JSON.parse(JSON.stringify(instance.storage))
@@ -149,8 +185,7 @@ suite(`store(...) stores item in browser storage`, async ({ puppeteer: { page },
 
 suite(`string accesses stored item`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           instance.store('baleada')
           
           const value = instance.string 
@@ -166,8 +201,7 @@ suite(`string accesses stored item`, async ({ puppeteer: { page }, key }) => {
 
 suite(`remove(...) removes item from browser storage`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           instance
             .store('baleada')
             .remove()
@@ -185,8 +219,7 @@ suite(`remove(...) removes item from browser storage`, async ({ puppeteer: { pag
 
 suite(`respects statusKeySuffix option`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key, { statusKeySuffix: '_stub' })
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key, { statusKeySuffix: '_stub' })
           
           const value = JSON.parse(JSON.stringify(instance.storage))
           
@@ -201,8 +234,7 @@ suite(`respects statusKeySuffix option`, async ({ puppeteer: { page }, key }) =>
 
 suite(`statusKeySuffix defaults to '_status'`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          // @ts-ignore
-          const instance = new window.Logic.Storeable(key)
+          const instance = new (window as unknown as WithLogic).Logic.Storeable(key)
           
           const value = JSON.parse(JSON.stringify(instance.storage))
           

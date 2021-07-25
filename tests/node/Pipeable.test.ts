@@ -19,7 +19,7 @@ suite(`can pipe`, context => {
 const resolve = () => new Promise(function(resolve, reject) {
         setTimeout(function() {
           resolve('stub')
-        }, 10)
+        }, 0)
       })
 
 suite(`can async pipe`, async context => {

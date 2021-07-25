@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithLogic } from '../fixtures/types'
 
 type Context = {
   descriptor: { name: string }
@@ -16,8 +17,7 @@ suite.before(context => {
 
 suite(`status is 'querying' immediately after query(...)`, async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
-          // @ts-ignore
-          const instance = new window.Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
           instance.query()
           return instance.status
         }, descriptor),
@@ -28,8 +28,7 @@ suite(`status is 'querying' immediately after query(...)`, async ({ puppeteer: {
 
 suite(`status is 'queried' after successful query(...)`, async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
-          // @ts-ignore
-          const instance = new window.Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
           await instance.query()
           return instance.status
         }, descriptor),
@@ -40,8 +39,7 @@ suite(`status is 'queried' after successful query(...)`, async ({ puppeteer: { p
 
 suite(`status is 'errored' after unsuccessful query(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          // @ts-ignore
-          const instance = new window.Logic.Grantable({ name: 'stub' })
+          const instance = new (window as unknown as WithLogic).Logic.Grantable({ name: 'stub' })
           await instance.query()
           return instance.status
         }),
@@ -52,8 +50,7 @@ suite(`status is 'errored' after unsuccessful query(...)`, async ({ puppeteer: {
 
 suite(`permission is stored after successful query(...)`, async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
-          // @ts-ignore
-          const instance = new window.Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
           await instance.query()
           return instance.permission.state
         }, descriptor),
