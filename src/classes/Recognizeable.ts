@@ -210,89 +210,12 @@ export function toPolarCoordinates (
   }
 }
 
-export function get ({ object, path }: { object: Record<any, any>, path: string }): any {
-  const toGotten = createReduce(
-    (gotten, key: string | number) => {
-      if (!Array.isArray(gotten)) {
-        return gotten[key]
-      }
-
-      return key === 'last'
-        ? gotten[gotten.length - 1]
-        : gotten[key]
-    },
-    object
-  )
-  
-  return new Pipeable(path).pipe(
-    toKeys,
-    toGotten
-  )
-}
-
-const keyMap = createMap<string | number>(key => isNaN(Number(key)) ? key : Number(key))
-export function toKeys (path: string): (string | number)[] {
-  return path
-    ? new Pipeable(path).pipe(
-        path => path.split('.'),
-        keyMap
-      ) as (string | number)[]
-    : []
-}
-
-export function set ({ object, path, value }: { object: Record<any, any>, path: string, value: any }): void {
-  toKeys(path).forEach((key, index, array) => {
-    if (array.length === 1) {
-      object[key] = value
-      return
-    }
-
-    const p = toPath(createSlice<string | number>({ from: 0, to: index })(array))
-
-    if (!p) {
-      maybeAssign({
-        gotten: object[key],
-        key,
-        assign: value => (object[key] = value)
-      })
-    } else {
-      maybeAssign({
-        gotten: get({ object, path: p }),
-        key,
-        assign: value => set({ object, path: p, value })
-      })
-    }
-
-    if (index === array.length - 1) {
-      get({ object, path: p })[key] = value
-    }
-  })
-}
-
 export function defineRecognizeableOptions<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> (options: RecognizeableOptions<SequenceItem, Metadata>) {
   return options
 }
 
 export function defineRecognizeableHandler<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> (handler: (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any) {
   return handler
-}
-
-const pathMap = lazyCollectionMap<string | number, string>(key => typeof key === 'string' ? key : `${key}`),
-      pathReduce = lazyCollectionReduce<string | number, string>((path, key) => `${path}${'.' + key}`, '')
-function toPath (keys: (string | number)[]): string {
-  return lazyCollectionPipe(pathMap, pathReduce)(keys)
-    .replace(/^\./, '') as string
-}
-
-function maybeAssign ({ gotten, key, assign }: { gotten: any, key: string | number, assign: (value: any) => void }): void {
-  if (gotten === undefined) {
-    switch (typeof key) {
-      case 'number':
-        assign([])
-      case 'string':
-        assign({})
-    }
-  }
 }
 
 export function createToType<SequenceItem extends RecognizeableSupportedType, Metadata> ({
