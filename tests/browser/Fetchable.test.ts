@@ -11,6 +11,48 @@ suite.before(context => {
   context.resource = 'http://httpbin.org/get'
 })
 
+suite('stores the resource', async ({ puppeteer: { page }, resource }) => {
+  const value = await page.evaluate(resource => {
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
+          return instance.resource
+        }, resource),
+        expected = 'http://httpbin.org/get'
+  
+  assert.is(value, expected)
+})
+
+suite('assignment sets the resource', async ({ puppeteer: { page }, resource }) => {
+  const value = await page.evaluate(resource => {
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
+          instance.resource = 'http://httpbin.org/post'
+          return instance.resource
+        }, resource),
+        expected = 'http://httpbin.org/post'
+
+  assert.is(value, expected)
+})
+
+suite('setResource sets the resource', async ({ puppeteer: { page }, resource }) => {
+  const value = await page.evaluate(resource => {
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
+          instance.setResource('http://httpbin.org/post')
+          return instance.resource
+        }, resource),
+        expected = 'http://httpbin.org/post'
+
+  assert.is(value, expected)
+})
+
+suite('status is "ready" after construction', async ({ puppeteer: { page }, resource }) => {
+  const value = await page.evaluate(resource => {
+          const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
+          return instance.status
+        }, resource),
+        expected = 'ready'
+
+  assert.is(value, expected)
+})
+
 suite(`status is 'fetching' immediately after fetch(...)`, async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
