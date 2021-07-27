@@ -12,6 +12,7 @@ import {
   ensureClickcombo,
   fromComboItemNameToType,
   toModifier,
+  isModified,
   createExceptAndOnlyHandle,
 } from '../extracted'
 import type {
@@ -479,22 +480,6 @@ const predicatesByArrow: Map<ListenableArrowAlias, (required: { event: KeyboardE
 const arrows = new Set(['arrowup', 'arrowright', 'arrowdown', 'arrowleft'])
 const verticalArrows = new Set(['arrowup', 'arrowdown'])
 const horizontalArrows = new Set(['arrowright', 'arrowleft'])
-
-export function isModified<EventType extends KeyboardEvent | MouseEvent> ({ event, alias }: { event: EventType, alias: string }) {
-  return predicatesByModifier[alias]?.(event)
-}
-
-const predicatesByModifier: Record<ListenableModifier | ListenableModifierAlias, Function> = {
-  shift: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.shiftKey,
-  cmd: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.metaKey,
-  command: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.metaKey,
-  meta: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.metaKey,
-  ctrl: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.ctrlKey,
-  control: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.ctrlKey,
-  alt: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.altKey,
-  opt: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.altKey,
-  option: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.altKey,
-}
 
 
 export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEvent, clickcombo: string[] }): boolean {

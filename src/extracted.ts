@@ -262,6 +262,22 @@ export function createExceptAndOnlyHandle<EventType extends ListenableSupportedE
   }
 }
 
+export function isModified<EventType extends KeyboardEvent | MouseEvent> ({ event, alias }: { event: EventType, alias: string }) {
+  return predicatesByModifier[alias]?.(event)
+}
+
+const predicatesByModifier: Record<ListenableModifier | ListenableModifierAlias, Function> = {
+  shift: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.shiftKey,
+  cmd: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.metaKey,
+  command: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.metaKey,
+  meta: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.metaKey,
+  ctrl: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.ctrlKey,
+  control: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.ctrlKey,
+  alt: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.altKey,
+  opt: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.altKey,
+  option: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.altKey,
+}
+
 // STOREABLE
 export function domIsAvailable (): boolean {
   try {
