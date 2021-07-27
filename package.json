@@ -18,6 +18,7 @@
   "scripts": {
     "metadata": "node scripts/metadata.js && tsc --project tsconfig.metadata.json",
     "prepare": "npm run metadata && tsc && rollup --config rollup.config.ts",
+    "test:coverage": "node -r esbuild-register scripts/checkTestCoverage.ts",
     "test:only": "run() { uvu -r esbuild-register tests/$2 $1.test.ts$; }; run",
     "test:node": "npm run test:only . node",
     "test:browser": "npm run test:only . browser",
