@@ -1,6 +1,5 @@
 import {
   map as lazyCollectionMap,
-  reduce as lazyCollectionReduce,
   pipe as lazyCollectionPipe,
   join as lazyCollectionJoin,
 } from 'lazy-collections'
@@ -14,13 +13,7 @@ import type {
   ListenableKeycomboItem,
   ListenableClickcomboItem,
 } from '../extracted'
-import {
-  createSlice,
-  createConcat,
-  createMap,
-  createReduce,
-  Pipeable
-} from '../pipes'
+import { createSlice, createConcat } from '../pipes'
 import {
   ListenableSupportedEvent,
   eventMatchesClickcombo,
@@ -53,7 +46,6 @@ export type RecognizeableStatus = 'recognized' | 'recognizing' | 'denied' | 'rea
 export type RecognizeableHandlerApi<SequenceItem extends RecognizeableSupportedType, Metadata> = HandlerApiFromConstructor<SequenceItem, Metadata> & HandlerApiFromRuntime<SequenceItem>
 
 type HandlerApiFromConstructor<SequenceItem extends RecognizeableSupportedType, Metadata> = {
-  toPolarCoordinates: typeof toPolarCoordinates,
   getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
   getMetadata: () => Metadata,
   setMetadata: (metadata: Metadata) => void,
@@ -93,7 +85,6 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
     this.setSequence(sequence)
 
     this._handlerApi = {
-      toPolarCoordinates,
       getStatus: () => this.status,
       getMetadata: () => this.metadata,
       setMetadata: (metadata: Metadata) => this._computedMetadata = metadata,
@@ -184,29 +175,6 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
   }
   _recognizing () {
     this._computedStatus = 'recognizing'
-  }
-}
-
-const leftclickcomboEventTypes = new Set(['click', 'mousedown', 'mouseup', 'dblclick'])
-const rightclickComboEventTypes = new Set(['contextmenu'])
-const keycomboEventTypes = new Set(['keydown', 'keyup'])
-
-export function toPolarCoordinates (
-  { xA, xB, yA, yB }: { xA: number, xB: number, yA: number, yB: number }
-): {
-  distance: number,
-  angle: { radians: number, degrees: number }
-} {
-  const distance = Math.hypot(xB - xA, yB - yA),
-        angle = Math.atan2((yA - yB), (xB - xA)),
-        radians = angle >= 0
-          ? angle
-          : 2 * Math.PI + angle,
-        degrees = radians * 180 / Math.PI
-
-  return {
-    distance,
-    angle: { radians, degrees }
   }
 }
 
@@ -307,7 +275,10 @@ export function createToType<SequenceItem extends RecognizeableSupportedType, Me
   }
 }
 
-const toJoinedClickcombo = lazyCollectionJoin('+'),
+const leftclickcomboEventTypes = new Set(['click', 'mousedown', 'mouseup', 'dblclick']),
+      rightclickComboEventTypes = new Set(['contextmenu']),
+      keycomboEventTypes = new Set(['keydown', 'keyup']),
+      toJoinedClickcombo = lazyCollectionJoin('+'),
       toJoinedKeycombo = lazyCollectionPipe(
         lazyCollectionMap<ListenableKeycomboItem, string>(({ name }) => name),
         lazyCollectionJoin('+'),
