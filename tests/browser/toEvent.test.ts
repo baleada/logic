@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
-  createSuite('toEvent (browser)')
+  createSuite('toEvent')
 )
 
 suite(`transforms single character combos`, async ({ puppeteer: { page } }) => {

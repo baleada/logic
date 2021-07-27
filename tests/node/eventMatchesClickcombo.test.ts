@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { eventMatchesClickcombo } from '../../src/classes/Listenable'
 
-const suite = createSuite('eventMatchesClickcombo (node)')
+const suite = createSuite('eventMatchesClickcombo')
 
 suite(`predicates click`, context => {
   assert.ok(eventMatchesClickcombo({

@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Pipeable } from '../../src/pipes'
 
-const suite = createSuite('Pipeable (node)')
+const suite = createSuite('Pipeable')
 
 suite(`can pipe`, context => {
   const createPlusOne = () => x => x + 1,

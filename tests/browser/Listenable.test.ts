@@ -4,7 +4,7 @@ import { withPuppeteer } from '@baleada/prepare'
 import type { WithLogic } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('Listenable (browser)')
+  createSuite('Listenable')
 )
 
 suite('stores the type', async ({ puppeteer: { page } }) => {

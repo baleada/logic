@@ -4,7 +4,7 @@ import { withPuppeteer } from '@baleada/prepare'
 import type { WithLogic } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('Recognizeable (browser)')
+  createSuite('Recognizeable')
 )
 
 suite(`stores the sequence`, async ({ puppeteer: { page } }) => {

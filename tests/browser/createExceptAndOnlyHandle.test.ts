@@ -4,7 +4,7 @@ import * as assert from 'uvu/assert'
 import { WithLogic } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('createExceptAndOnlyHandle (node)')
+  createSuite('createExceptAndOnlyHandle')
 )
 
 suite.before(context => {

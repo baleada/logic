@@ -8,7 +8,7 @@ type Context = {
 }
 
 const suite = withPuppeteer(
-  createSuite<Context>('Sanitizeable (browser)')
+  createSuite<Context>('Sanitizeable')
 )
 
 suite.before(context => {

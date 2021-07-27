@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { ensureKeycombo } from '../../src/extracted'
 
-const suite = createSuite('ensureKeycombo (node)')
+const suite = createSuite('ensureKeycombo')
 
 suite(`ensures keycombo`, () => {
   const value = ensureKeycombo('shift+cmd+b'),

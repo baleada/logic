@@ -4,7 +4,7 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithLogic } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('Fetchable (browser)')
+  createSuite('Fetchable')
 )
 
 suite.before(context => {

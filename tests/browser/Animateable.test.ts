@@ -9,7 +9,7 @@ type Context = {
 }
 
 const suite = withPuppeteer(
-  createSuite<Context>('Animateable (browser)'),
+  createSuite<Context>('Animateable'),
 )
 
 suite.before(context => {

@@ -8,7 +8,7 @@ type Context = {
 }
 
 const suite = withPuppeteer(
-  createSuite<Context>('Grantable (browser)')
+  createSuite<Context>('Grantable')
 )
 
 suite.before(context => {

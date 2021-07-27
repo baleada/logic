@@ -8,7 +8,7 @@ type Context = {
 }
 
 const suite = withPuppeteer(
-  createSuite<Context>('Copyable (browser)'),
+  createSuite<Context>('Copyable'),
   {
     launch: ({ executablePath: { macOS } }) => ({ headless: false, executablePath: macOS })
   }

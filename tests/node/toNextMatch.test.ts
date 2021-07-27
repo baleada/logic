@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { toNextMatch } from '../../src/classes/Completeable'
 
-const suite = createSuite('toNextMatch (node)')
+const suite = createSuite('toNextMatch')
 
 suite('computes match index correctly', context => {
   const string = 'Baleada: a toolkit for building web apps',

@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { eventMatchesKeycombo } from '../../src/classes/Listenable'
 
-const suite = createSuite('eventMatchesKeycombo (node)')
+const suite = createSuite('eventMatchesKeycombo')
 
 suite(`predicates single character`, context => {
   const event = { key: 'B' } as KeyboardEvent

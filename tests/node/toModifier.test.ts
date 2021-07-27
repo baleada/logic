@@ -4,7 +4,7 @@ import { toModifier } from '../../src/extracted'
 import type { ListenableModifier } from '../../src/extracted'
 import { modifierAliases, modifiers } from '../fixtures/comboMeta'
 
-const suite = createSuite('toModifier (node)')
+const suite = createSuite('toModifier')
 
 suite(`correctly aliases modifiers`, context => {
   for (const modifier of modifiers) {

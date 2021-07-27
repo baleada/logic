@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { toAddEventListenerParams } from '../../src/classes/Listenable'
 
-const suite = createSuite('toAddEventListenerParams (node)')
+const suite = createSuite('toAddEventListenerParams')
 
 suite(`listener options prefers addEventListener options object`, context => {
   const { handleOptions: { 0: value } } = toAddEventListenerParams(

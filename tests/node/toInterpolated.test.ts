@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { toInterpolated } from '../../src/classes/Animateable'
 
-const suite = createSuite('toInterpolated (node)')
+const suite = createSuite('toInterpolated')
 
 suite('interpolates numbers', context => {
   const value = toInterpolated({ previous: 0, next: 100, progress: .42 }),

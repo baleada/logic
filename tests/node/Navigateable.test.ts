@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Navigateable } from '../../src/classes/Navigateable'
 
-const suite = createSuite('Navigateable (node)')
+const suite = createSuite('Navigateable')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Navigateable(

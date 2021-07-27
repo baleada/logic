@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { fromComboItemNameToType } from '../../src/extracted'
 import { arrows, clicks, modifierAliases, modifiers, others, singleCharacters } from '../fixtures/comboMeta'
 
-const suite = createSuite('fromComboItemNameToType (node)')
+const suite = createSuite('fromComboItemNameToType')
 
 suite(`identifies singleCharacter`, () => {
   for (const singleCharacter of singleCharacters) {

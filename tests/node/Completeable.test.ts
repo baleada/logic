@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { Completeable } from '../../src/classes/Completeable'
 
-const suite = createSuite('Completeable (node)')
+const suite = createSuite('Completeable')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Completeable(

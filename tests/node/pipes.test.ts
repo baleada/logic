@@ -31,7 +31,7 @@ type Context = {
   map: Map<string, string>
 }
 
-const suite = createSuite<Context>('pipes (node)')
+const suite = createSuite<Context>('pipes')
 
 suite.before(() => {
   context.array = ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito']

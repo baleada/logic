@@ -4,7 +4,7 @@ import { toModifierFlag } from '../../src/extracted'
 import type { ListenableModifier } from '../../src/extracted'
 import { modifierAliases, modifiers } from '../fixtures/comboMeta'
 
-const suite = createSuite('toModifierFlag (node)')
+const suite = createSuite('toModifierFlag')
 
 suite(`gets modifier flag`, context => {
   (() => {

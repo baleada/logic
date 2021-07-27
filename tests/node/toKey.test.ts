@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { toKey } from '../../src/extracted'
 
-const suite = createSuite('toKey (node)')
+const suite = createSuite('toKey')
 
 suite(`transforms aliases to keys`, context => {
   (() => {

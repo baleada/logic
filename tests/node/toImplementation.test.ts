@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { toImplementation } from '../../src/classes/Listenable'
 import { keys, leftclicks, modifierAliases, modifiers, rightclicks } from '../fixtures/comboMeta'
 
-const suite = createSuite('toImplementation (node)')
+const suite = createSuite('toImplementation')
 
 suite(`identifies recognizeable`, context => {
   const value = toImplementation('recognizeable'),
