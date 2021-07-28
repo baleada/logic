@@ -497,3 +497,182 @@ const observerAssertionsByType: Record<string, (observer: unknown) => boolean> =
   mutate: observer => observer instanceof MutationObserver,
   resize: observer => observer instanceof ResizeObserver,
 }
+
+class Listenable2<Type extends Listenable2SupportedType> {
+  type: string
+  constructor (type: Type) {
+    this.type = type
+  }
+
+  listen (handle: (event: ListenHandleParamsByListenableType<Type>) => void) {
+    
+  }
+}
+
+type Listenable2SupportedType = 'recognizeable'
+  | 'intersect'
+  | 'mutate'
+  | 'resize'
+  | 'idle'
+  | 'visibilitychange'
+  | `(${string})`
+  | `${string}+${ListenableLeftClick | ListenableRightClick}`
+  | `${string}+${ListenableKey}`
+  | keyof HTMLElementEventMap
+  | keyof DocumentEventMap
+  | string
+
+type ListenHandleParamsByListenableType<Type extends Listenable2SupportedType> = 
+  Type extends 'intersect' ? IntersectionObserverEntry[] :
+  Type extends 'mutate' ? MutationRecord[] :
+  Type extends 'resize' ? ResizeObserverEntry[] :
+  Type extends 'idle' ? IdleDeadline :
+  Type extends 'visibilitychange' ? Event :
+  Type extends `(${string})` ? MediaQueryListEvent :
+  Type extends `${string}+${ListenableLeftClick | ListenableRightClick}` ? MouseEvent :
+  Type extends `${string}+${ListenableKey}` ? KeyboardEvent :
+  Type extends keyof HTMLElementEventMap ? HTMLElementEventMap[Type] :
+  Type extends keyof DocumentEventMap ? DocumentEventMap[Type] :
+  never
+
+type ListenableLeftClick = 'click' | 'mousedown' | 'mouseup' | 'dblclick'
+type ListenableRightClick = 'rightclick' | 'contextmenu'
+type ListenableKey = ListenableSingleCharacter | ListenableArrow |  ListenableOther | ListenableModifier | ListenableModifierAlias
+
+type ListenableSingleCharacter = 'a'
+  | 'b'
+  | 'c'
+  | 'd'
+  | 'e'
+  | 'f'
+  | 'g'
+  | 'h'
+  | 'i'
+  | 'j'
+  | 'k'
+  | 'l'
+  | 'm'
+  | 'n'
+  | 'o'
+  | 'p'
+  | 'q'
+  | 'r'
+  | 's'
+  | 't'
+  | 'u'
+  | 'v'
+  | 'w'
+  | 'x'
+  | 'y'
+  | 'z'
+  | 'A'
+  | 'B'
+  | 'C'
+  | 'D'
+  | 'E'
+  | 'F'
+  | 'G'
+  | 'H'
+  | 'I'
+  | 'J'
+  | 'K'
+  | 'L'
+  | 'M'
+  | 'N'
+  | 'O'
+  | 'P'
+  | 'Q'
+  | 'R'
+  | 'S'
+  | 'T'
+  | 'U'
+  | 'V'
+  | 'W'
+  | 'X'
+  | 'Y'
+  | 'Z'
+  | '0'
+  | '1'
+  | '2'
+  | '3'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | ','
+  | '<'
+  | '.'
+  | '>'
+  | '/'
+  | '?'
+  | ';'
+  | ':'
+  | "'"
+  | '"'
+  | '['
+  | '{'
+  | ']'
+  | '}'
+  | '\\'
+  | '|'
+  | '`'
+  | '~'
+  | '!'
+  | '@'
+  | '#'
+  | '$'
+  | '%'
+  | '^'
+  | '&'
+  | '*'
+  | '('
+  | ')'
+  | '-'
+  | '_'
+  | '='
+  | '+'
+
+type ListenableArrow = 'arrow'
+  | 'vertical'
+  | 'horizontal'
+  | 'up'
+  | 'right'
+  | 'down'
+  | 'left'
+    
+type ListenableOther = 'tab'
+  | 'space'
+  | 'enter'
+  | 'backspace'
+  | 'esc'
+  | 'home'
+  | 'end'
+  | 'pagedown'
+  | 'pageup'
+  | 'capslock'
+  | 'f1'
+  | 'f2'
+  | 'f3'
+  | 'f4'
+  | 'f5'
+  | 'f6'
+  | 'f7'
+  | 'f8'
+  | 'f9'
+  | 'f10'
+  | 'f11'
+  | 'f12'
+  | 'f13'
+  | 'f14'
+  | 'f15'
+  | 'f16'
+  | 'f17'
+  | 'f18'
+  | 'f19'
+  | 'f20'
+  | 'camera'
+  | 'delete'
+
+new Listenable2('recognizeable').listen((event) => console.log(event.media))

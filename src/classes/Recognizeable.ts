@@ -186,7 +186,7 @@ export function defineRecognizeableHandler<SequenceItem extends RecognizeableSup
   return handler
 }
 
-export function createToType<SequenceItem extends RecognizeableSupportedType, Metadata> ({
+function createToType<SequenceItem extends RecognizeableSupportedType, Metadata> ({
   handlersIncludeCombos,
   handlers
 }: {
