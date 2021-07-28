@@ -325,7 +325,7 @@ function stop<EventType extends ListenableSupportedType> (stoppable: ListenableA
     return
   }
 
-  if (lazyCollectionSome<string>(type => observerAssertionsByType.get(type)(stoppable.id))(['intersect', 'mutate', 'resize'])) {
+  if (lazyCollectionSome<string>(type => observerAssertionsByType[type](stoppable.id))(['intersect', 'mutate', 'resize'])) {
     const { id } = stoppable as ListenableActive<IntersectionObserverEntry | ResizeObserverEntry | MutationRecord>
     id.disconnect()
     return
@@ -492,8 +492,8 @@ export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEve
   ))(clickcombo) as boolean
 }
 
-const observerAssertionsByType: Map<string, (observer: unknown) => boolean> = new Map([
-  ['intersect', observer => observer instanceof IntersectionObserver],
-  ['mutate', observer => observer instanceof MutationObserver],
-  ['resize', observer => observer instanceof ResizeObserver],
-])
+const observerAssertionsByType: Record<string, (observer: unknown) => boolean> = {
+  intersect: observer => observer instanceof IntersectionObserver,
+  mutate: observer => observer instanceof MutationObserver,
+  resize: observer => observer instanceof ResizeObserver,
+}
