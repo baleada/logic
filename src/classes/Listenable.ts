@@ -10,6 +10,7 @@ import {
   toKey,
   ensureKeycombo,
   ensureClickcombo,
+  ensurePointercombo,
   fromComboItemNameToType,
   toModifier,
   isModified,
@@ -21,50 +22,212 @@ import type {
   ListenableKeycomboItem,
 } from '../extracted'
 
-export type ListenableSupportedType = 
-  IntersectionObserverEntry
-  | MutationRecord
-  | ResizeObserverEntry
-  | MediaQueryListEvent
-  | IdleDeadline
-  | ListenableSupportedEvent
+export type ListenableSupportedType = 'recognizeable'
+  | 'intersect'
+  | 'mutate'
+  | 'resize'
+  | 'idle'
+  | ListenableMediaQuery
+  | ListenableClickcombo
+  | ListenablePointercombo
+  | ListenableKeycombo
+  // | ListenableKey
+  | keyof Omit<HTMLElementEventMap, 'resize'>
+  | keyof Omit<DocumentEventMap, 'resize'>
 
-export type ListenableSupportedEvent = 
-  KeyboardEvent
-  | MouseEvent
-  | TouchEvent
-  | PointerEvent
-  | ClipboardEvent
-  | CustomEvent
-  | Event
+type ListenableMediaQuery = `(${string})`
 
-export type ListenableOptions<EventType extends ListenableSupportedType, RecognizeableMetadata> = {
-  recognizeable?: RecognizeableOptions<RecognizeableSequenceItem<EventType>, RecognizeableMetadata>
+type ListenableClickcombo = `${string}+${ListenableLeftClick | ListenableRightClick}`
+type ListenableLeftClick = 'click' | 'mousedown' | 'mouseup' | 'dblclick'
+type ListenableRightClick = 'rightclick' | 'contextmenu'
+
+type ListenablePointercombo =  `${string}+${ListenablePointer}`
+type ListenablePointer =  'pointerdown' | 'pointerup' | 'pointermove' | 'pointerover' | 'pointerout' | 'pointerenter' | 'pointerleave' | 'pointercancel' | 'gotpointercapture' | 'lostpointercapture'
+
+// Would love to incorporate the more specific types, but it slows down type checking way too much
+export type ListenableKeycombo = `${string}+${string}`
+// type ListenableKey = ListenableSingleCharacter | ListenableArrow |  ListenableOther | ListenableModifier | ListenableModifierAlias
+// type ListenableSingleCharacter = 'a'
+//   | 'b'
+//   | 'c'
+//   | 'd'
+//   | 'e'
+//   | 'f'
+//   | 'g'
+//   | 'h'
+//   | 'i'
+//   | 'j'
+//   | 'k'
+//   | 'l'
+//   | 'm'
+//   | 'n'
+//   | 'o'
+//   | 'p'
+//   | 'q'
+//   | 'r'
+//   | 's'
+//   | 't'
+//   | 'u'
+//   | 'v'
+//   | 'w'
+//   | 'x'
+//   | 'y'
+//   | 'z'
+//   | 'A'
+//   | 'B'
+//   | 'C'
+//   | 'D'
+//   | 'E'
+//   | 'F'
+//   | 'G'
+//   | 'H'
+//   | 'I'
+//   | 'J'
+//   | 'K'
+//   | 'L'
+//   | 'M'
+//   | 'N'
+//   | 'O'
+//   | 'P'
+//   | 'Q'
+//   | 'R'
+//   | 'S'
+//   | 'T'
+//   | 'U'
+//   | 'V'
+//   | 'W'
+//   | 'X'
+//   | 'Y'
+//   | 'Z'
+//   | '0'
+//   | '1'
+//   | '2'
+//   | '3'
+//   | '4'
+//   | '5'
+//   | '6'
+//   | '7'
+//   | '8'
+//   | '9'
+//   | ','
+//   | '<'
+//   | '.'
+//   | '>'
+//   | '/'
+//   | '?'
+//   | ';'
+//   | ':'
+//   | "'"
+//   | '"'
+//   | '['
+//   | '{'
+//   | ']'
+//   | '}'
+//   | '\\'
+//   | '|'
+//   | '`'
+//   | '~'
+//   | '!'
+//   | '@'
+//   | '#'
+//   | '$'
+//   | '%'
+//   | '^'
+//   | '&'
+//   | '*'
+//   | '('
+//   | ')'
+//   | '-'
+//   | '_'
+//   | '='
+//   | '+'
+// type ListenableArrow = 'arrow'
+//   | 'vertical'
+//   | 'horizontal'
+//   | 'up'
+//   | 'right'
+//   | 'down'
+//   | 'left'
+// type ListenableOther = 'tab'
+//   | 'space'
+//   | 'enter'
+//   | 'backspace'
+//   | 'esc'
+//   | 'home'
+//   | 'end'
+//   | 'pagedown'
+//   | 'pageup'
+//   | 'capslock'
+//   | 'f1'
+//   | 'f2'
+//   | 'f3'
+//   | 'f4'
+//   | 'f5'
+//   | 'f6'
+//   | 'f7'
+//   | 'f8'
+//   | 'f9'
+//   | 'f10'
+//   | 'f11'
+//   | 'f12'
+//   | 'f13'
+//   | 'f14'
+//   | 'f15'
+//   | 'f16'
+//   | 'f17'
+//   | 'f18'
+//   | 'f19'
+//   | 'f20'
+//   | 'camera'
+//   | 'delete'
+export type ListenableSupportedEventType = ListenableClickcombo
+  | ListenablePointercombo
+  | ListenableKeycombo
+  | keyof Omit<HTMLElementEventMap, 'resize'>
+  | keyof Omit<DocumentEventMap, 'resize'>
+
+export type ListenableOptions<Type extends ListenableSupportedType, RecognizeableMetadata> = {
+  recognizeable?: RecognizeableOptions<RecognizeableSequenceItem<Type>, RecognizeableMetadata>
 }
 
-export type ListenHandle<EventType extends ListenableSupportedType> = 
-  EventType extends IntersectionObserverEntry ? (entries: IntersectionObserverEntry[]) => any :
-  EventType extends MutationRecord ? (entries: MutationRecord[]) => any :
-  EventType extends ResizeObserverEntry ? (entries: ResizeObserverEntry[]) => any :
-  EventType extends IdleDeadline ? IdleRequestCallback :
-  EventType extends MediaQueryListEvent | ListenableSupportedEvent ? (event: EventType) => any :
-  () => void
+export type ListenHandle<Type extends ListenableSupportedType> = 
+  Type extends 'intersect' ? (entries: ListenHandleParam<Type>) => any :
+  Type extends 'mutate' ? (records: ListenHandleParam<Type>) => any :
+  Type extends 'resize' ? (entries: ListenHandleParam<Type>) => any :
+  Type extends 'idle' ? (deadline: ListenHandleParam<Type>) => any :
+  Type extends ListenableMediaQuery ? (event: ListenHandleParam<Type>) => any :
+  Type extends ListenableClickcombo ? (event: ListenHandleParam<Type>) => any :
+  Type extends ListenablePointercombo ? (event: ListenHandleParam<Type>) => any :
+  Type extends ListenableKeycombo ? (event: ListenHandleParam<Type>) => any :
+  Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? (event: ListenHandleParam<Type>) => any :
+  Type extends keyof Omit<DocumentEventMap, 'resize'> ? (event: ListenHandleParam<Type>) => any :
+  never
 
-export type ListenHandleParam<EventType extends ListenableSupportedType> = 
-  EventType extends IntersectionObserverEntry ? IntersectionObserverEntry[] :
-  EventType extends MutationRecord ? MutationRecord[] :
-  EventType extends ResizeObserverEntry ? ResizeObserverEntry[] :
-  EventType
+export type ListenHandleParam<Type extends ListenableSupportedType> = 
+  Type extends 'intersect' ? IntersectionObserverEntry[] :
+  Type extends 'mutate' ? MutationRecord[] :
+  Type extends 'resize' ? ResizeObserverEntry[] :
+  Type extends 'idle' ? IdleDeadline :
+  Type extends ListenableMediaQuery ? MediaQueryListEvent :
+  Type extends ListenableClickcombo ? MouseEvent :
+  Type extends ListenablePointercombo ? PointerEvent :
+  Type extends ListenableKeycombo ? KeyboardEvent :
+  Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? HTMLElementEventMap[Type] :
+  Type extends keyof Omit<DocumentEventMap, 'resize'> ? DocumentEventMap[Type] :
+  never
 
-export type ListenOptions<EventType extends ListenableSupportedType> = 
-  EventType extends IntersectionObserverEntry ? { observer?: IntersectionObserverInit } & ObservationListenOptions :
-  EventType extends MutationRecord ? { observe?: MutationObserverInit } & ObservationListenOptions :
-  EventType extends ResizeObserverEntry ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
-  EventType extends MediaQueryListEvent ? {} :
-  EventType extends KeyboardEvent ? { keyDirection?: 'up' | 'down' } & EventListenOptions :
-  EventType extends MouseEvent | PointerEvent | ClipboardEvent | CustomEvent | Event | TouchEvent ? EventListenOptions :
-  EventType extends IdleDeadline ? { requestIdleCallback?: IdleRequestOptions } :
-  {}
+export type ListenOptions<Type extends ListenableSupportedType> = 
+  Type extends 'intersect' ? { observer?: IntersectionObserverInit } & ObservationListenOptions :
+  Type extends 'mutate' ? { observe?: MutationObserverInit } & ObservationListenOptions :
+  Type extends 'resize' ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
+  Type extends 'idle' ? { requestIdleCallback?: IdleRequestOptions } :
+  Type extends ListenableMediaQuery ? {} :
+  Type extends ListenableClickcombo ? EventListenOptions :
+  Type extends ListenablePointercombo ? EventListenOptions :
+  Type extends ListenableKeycombo ? { keyDirection?: 'up' | 'down' } & EventListenOptions :
+  Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? EventListenOptions :
+  Type extends keyof Omit<DocumentEventMap, 'resize'> ? EventListenOptions :
+  never
 
 type ObservationListenOptions = { target?: Element }
 
@@ -77,40 +240,40 @@ type EventListenOptions = {
   only?: string[],
 }
 
-export type ListenableActive<EventType extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
-  EventType extends IntersectionObserverEntry ? { target: Element, id: IntersectionObserver } :
-  EventType extends MutationRecord ? { target: Element, id: MutationObserver } :
-  EventType extends ResizeObserverEntry ? { target: Element, id: ResizeObserver } :
-  EventType extends MediaQueryListEvent ? { target: MediaQueryList, id: [type: string, handle: ListenHandle<EventType>] } :
-  EventType extends IdleDeadline ? { target: Window & typeof globalThis, id: number } :
-  EventType extends ListenableSupportedEvent ? { target: Element | Document, id: ListenableActiveEventId<EventType> } :
-  { id: Listenable<EventType, RecognizeableMetadata> }
+export type ListenableActive<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
+  Type extends 'intersect' ? { target: Element, id: IntersectionObserver } :
+  Type extends 'mutate' ? { target: Element, id: MutationObserver } :
+  Type extends 'resize' ? { target: Element, id: ResizeObserver } :
+  Type extends 'idle' ? { target: Window & typeof globalThis, id: number } :
+  Type extends ListenableMediaQuery ? { target: MediaQueryList, id: [type: string, handle: ListenHandle<Type>] } :
+  Type extends ListenableSupportedEventType ? { target: Element | Document, id: ListenableActiveEventId<Type> } :
+  { id: Listenable<Type, RecognizeableMetadata> }
 
-type ListenableActiveEventId<EventType extends ListenableSupportedEvent> = [
+type ListenableActiveEventId<Type extends ListenableSupportedEventType> = [
   type: string,
-  exceptAndOnlyHandle: ListenHandle<EventType>,
+  exceptAndOnlyHandle: ListenHandle<Type>,
   optionsOrUseCapture: AddEventListenerOptions | boolean,
 ]
 
 export type ListenableStatus = 'ready' | 'listening' | 'stopped'
 
-export class Listenable<EventType extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> {
-  _computedRecognizeable: Recognizeable<RecognizeableSequenceItem<EventType>>
+export class Listenable<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> {
+  _computedRecognizeable: Recognizeable<RecognizeableSequenceItem<Type>>
   _recognizeableHandlerKeys: string[]
-  _computedActive: Set<ListenableActive<EventType>>
-  constructor (type: string, options?: ListenableOptions<EventType, RecognizeableMetadata>) {
+  _computedActive: Set<ListenableActive<Type>>
+  constructor (type: string, options?: ListenableOptions<Type, RecognizeableMetadata>) {
     if (type === 'recognizeable') {
-      this._computedRecognizeable = new Recognizeable<RecognizeableSequenceItem<EventType>>([], options.recognizeable)
+      this._computedRecognizeable = new Recognizeable<RecognizeableSequenceItem<Type>>([], options.recognizeable)
       this._recognizeableHandlerKeys = Object.keys(options?.recognizeable?.handlers || {})
     }    
 
     this._computedActive = new Set()
 
     this.setType(type)
-    this._ready()
+    this.ready()
   }
   _computedStatus: ListenableStatus
-  _ready () {
+  private ready () {
     this._computedStatus = 'ready'
   }
 
@@ -139,82 +302,86 @@ export class Listenable<EventType extends ListenableSupportedType, Recognizeable
     return this
   }
 
-  listen (handle: ListenHandle<EventType>, options: ListenOptions<EventType> = {} as ListenOptions<EventType>) {
+  listen (handle: ListenHandle<Type>, options: ListenOptions<Type> = {} as ListenOptions<Type>) {
+    // These type assertions are confident because toImplementation is thoroughly tested.
     switch (this._implementation) {
       case 'intersection':
-        this._intersectionListen(handle as ListenHandle<IntersectionObserverEntry>, options as ListenOptions<IntersectionObserverEntry>)
+        this.intersectionListen(handle as unknown as ListenHandle<'intersect'>, options as ListenOptions<'intersect'>)
         break
       case 'mutation':
-        this._mutationListen(handle as ListenHandle<MutationRecord>, options as ListenOptions<MutationRecord>)
+        this.mutationListen(handle as unknown as ListenHandle<'mutate'>, options as ListenOptions<'mutate'>)
         break
       case 'resize':
-        this._resizeListen(handle as ListenHandle<ResizeObserverEntry>, options as ListenOptions<ResizeObserverEntry>)
+        this.resizeListen(handle as unknown as ListenHandle<'resize'>, options as ListenOptions<'resize'>)
         break
       case 'mediaquery':
-        this._mediaQueryListen(handle as (event: MediaQueryListEvent) => any)
+        this.mediaQueryListen(handle as ListenHandle<'(_)'>)
         break
       case 'idle':
-        this._idleListen(handle as ListenHandle<IdleDeadline>, options as ListenOptions<IdleDeadline>)
+        this.idleListen(handle as unknown as ListenHandle<'idle'>, options as ListenOptions<'idle'>)
         break
       case 'recognizeable':
-        this._recognizeableListen(handle as (event: RecognizeableSequenceItem<EventType>) => void, options as ListenOptions<EventType>)
+        this.recognizeableListen(handle as (event: RecognizeableSequenceItem<Type>) => void, options as ListenOptions<Type>)
         break
-      case 'visibilitychange':
-        this._visibilityChangeListen(handle as ListenHandle<Event>, options as ListenOptions<Event>)
+      case 'documentevent':
+        this.documentEventListen(handle as ListenHandle<'visibilitychange'>, options as ListenOptions<'visibilitychange'>)
         break
       case 'keycombo':
-        this._keycomboListen(handle as ListenHandle<KeyboardEvent>, options as ListenOptions<KeyboardEvent>)
+        this.keycomboListen(handle as ListenHandle<'cmd+b'>, options as ListenOptions<'cmd+b'>)
         break
       case 'leftclickcombo':
       case 'rightclickcombo':
-        this._clickcomboListen(handle as ListenHandle<MouseEvent>, options as ListenOptions<MouseEvent>)
+        this.clickcomboListen(handle as ListenHandle<'cmd+click'>, options as ListenOptions<'cmd+click'>)
+        break
+      case 'pointercombo':
+        this.pointercomboListen(handle as ListenHandle<'cmd+click'>, options as ListenOptions<'cmd+click'>)
         break
       case 'event':
-        this._eventListen(handle as ListenHandle<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
+        this.eventListen(handle as ListenHandle<ListenableSupportedEventType>, options as ListenOptions<ListenableSupportedEventType>)
         break
     }
 
-    this._listening()
+    this.listening()
 
     return this
   }
-  _intersectionListen (handle: ListenHandle<IntersectionObserverEntry>, options: ListenOptions<IntersectionObserverEntry>) {
+  private intersectionListen (handle: ListenHandle<'intersect'>, options: ListenOptions<'intersect'>) {
     const { target = document.querySelector('html'), observer } = options,
           id = new IntersectionObserver(handle, observer)
 
     id.observe(target)
-    this.active.add({ target, id } as ListenableActive<EventType>)
+    this.active.add({ target, id } as ListenableActive<Type>)
   }
-  _mutationListen (handle: ListenHandle<MutationRecord>, options: ListenOptions<MutationRecord>) {
+  private mutationListen (handle: ListenHandle<'mutate'>, options: ListenOptions<'mutate'>) {
     const { target = document.querySelector('html'), observe } = options,
           id = new MutationObserver(handle)
 
     id.observe(target, observe)
-    this.active.add({ target, id } as ListenableActive<EventType>)
+    this.active.add({ target, id } as ListenableActive<Type>)
   }
-  _resizeListen (handle: ListenHandle<ResizeObserverEntry>, options: ListenOptions<ResizeObserverEntry>) {
+  private resizeListen (handle: ListenHandle<'resize'>, options: ListenOptions<'resize'>) {
     const { target = document.querySelector('html'), observe } = options,
           id = new ResizeObserver(handle)
 
     id.observe(target, observe)
-    this.active.add({ target, id } as ListenableActive<EventType>)
+    this.active.add({ target, id } as ListenableActive<Type>)
   }
-  _mediaQueryListen (handle: ListenHandle<MediaQueryListEvent>) {
+  private mediaQueryListen (handle: ListenHandle<'(_)'>) {
     const target = window.matchMedia(this.type)
 
     target.addEventListener('change', handle)
-    this.active.add({ target, id: ['change', handle] } as ListenableActive<EventType>)
+    this.active.add({ target, id: ['change', handle] } as ListenableActive<Type>)
   }
-  _idleListen (handle: ListenHandle<IdleDeadline>, options: ListenOptions<IdleDeadline>) {
+  private idleListen (handle: ListenHandle<'idle'>, options: ListenOptions<'idle'>) {
     const { requestIdleCallback } = options,
           id = window.requestIdleCallback(handle, requestIdleCallback)
 
-    this.active.add({ target: window, id } as ListenableActive<EventType>)
+    this.active.add({ target: window, id } as ListenableActive<Type>)
   }
-  _recognizeableListen (handle: (sequenceItem: RecognizeableSequenceItem<EventType>) => void, options: ListenOptions<EventType>) {
+  private recognizeableListen (handle: (sequenceItem: RecognizeableSequenceItem<Type>) => void, options: ListenOptions<Type>) {
     this.recognizeable.setEffect(handle)
 
-    const guardedHandle = (sequenceItem: RecognizeableSequenceItem<EventType>) => {
+    const guardedHandle = (sequenceItem: RecognizeableSequenceItem<Type>) => {
       this.recognizeable.recognize(sequenceItem)
 
       if (this.recognizeable.status === 'recognized') {
@@ -224,29 +391,30 @@ export class Listenable<EventType extends ListenableSupportedType, Recognizeable
 
     for (const handlerKey of this._recognizeableHandlerKeys) {
       const listenable = new Listenable(handlerKey)
-      listenable.listen(guardedHandle as ListenHandle<EventType>, options)
-      this.active.add({ id: listenable } as ListenableActive<EventType>)
+      listenable.listen(guardedHandle as ListenHandle<Type>, options)
+      this.active.add({ id: listenable } as ListenableActive<Type>)
     }
   }
-  _visibilityChangeListen (handle: ListenHandle<Event>, options: ListenOptions<Event>) {
+  private documentEventListen (handle: ListenHandle<'visibilitychange'>, options: ListenOptions<'visibilitychange'>) {
+    // Override the target option with document
     const ensuredOptions = {
       ...options,
       target: document,
     }
     
-    this._eventListen(handle as ListenHandle<ListenableSupportedEvent>, ensuredOptions as ListenOptions<ListenableSupportedEvent>)
+    this.eventListen(handle, ensuredOptions)
   }
-  _keycomboListen (handle: ListenHandle<KeyboardEvent>, options: ListenOptions<KeyboardEvent>) {
-    const keycombo = ensureKeycombo(this.type),
-          guardedHandle = (event: KeyboardEvent) => {            
-            if (eventMatchesKeycombo({ event, keycombo })) {
+  private pointercomboListen (handle: ListenHandle<'cmd+pointerdown'>, options: ListenOptions<'cmd+pointerdown'>) {
+    const pointercombo = ensurePointercombo(this.type),
+          guardedHandle = (event: PointerEvent) => {
+            if (eventMatchesPointercombo({ event, pointercombo })) {
               handle(event)
             }
           }
     
-    this._eventListen(guardedHandle as ListenHandle<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
+    this.eventListen(guardedHandle, options)
   }
-  _clickcomboListen (handle: ListenHandle<MouseEvent>, options: ListenOptions<MouseEvent>) {
+  private clickcomboListen (handle: ListenHandle<'cmd+click'>, options: ListenOptions<'cmd+click'>) {
     const clickcombo = ensureClickcombo(this.type),
           guardedHandle = (event: MouseEvent) => {
             if (eventMatchesClickcombo({ event, clickcombo })) {
@@ -254,14 +422,24 @@ export class Listenable<EventType extends ListenableSupportedType, Recognizeable
             }
           }
     
-    this._eventListen(guardedHandle as ListenHandle<ListenableSupportedEvent>, options as ListenOptions<ListenableSupportedEvent>)
+    this.eventListen(guardedHandle, options)
   }
-  _eventListen (handle: ListenHandle<ListenableSupportedEvent>, options: ListenOptions<ListenableSupportedEvent>) {
+  private keycomboListen (handle: ListenHandle<'cmd+b'>, options: ListenOptions<'cmd+b'>) {
+    const keycombo = ensureKeycombo(this.type),
+          guardedHandle = (event: KeyboardEvent) => {            
+            if (eventMatchesKeycombo({ event, keycombo })) {
+              handle(event)
+            }
+          }
+    
+    this.eventListen(guardedHandle, options)
+  }
+  private eventListen<EventType extends ListenableSupportedEventType> (handle: ListenHandle<EventType>, options: ListenOptions<EventType>) {
     const type = (() => {
       switch (this._implementation) {
         case 'keycombo':
-          return `key${(options as ListenOptions<KeyboardEvent>).keyDirection || 'down'}`
-        case 'leftclickcombo': // click | mousedown | mouseup | dblclick
+          return `key${(options as ListenOptions<'cmd+b'>).keyDirection || 'down'}`
+        case 'leftclickcombo':
           return this.type.match(/(\w+)$/)[1]
         case 'rightclickcombo':
           return 'contextmenu'
@@ -270,20 +448,20 @@ export class Listenable<EventType extends ListenableSupportedType, Recognizeable
       }
     })()
 
-    const { exceptAndOnlyHandle, handleOptions } = toAddEventListenerParams<ListenableSupportedEvent>(handle, options),
-          eventListeners: ListenableActiveEventId<ListenableSupportedEvent>[] = [[type, exceptAndOnlyHandle, ...handleOptions]]
+    const { exceptAndOnlyHandle, handleOptions } = toAddEventListenerParams(handle, options),
+          eventListeners: ListenableActiveEventId<EventType>[] = [[type, exceptAndOnlyHandle, ...handleOptions]]
 
-    this._addEventListeners(eventListeners, options)
+    this.addEventListeners(eventListeners, options)
   }
-  _addEventListeners (eventListeners: ListenableActiveEventId<ListenableSupportedEvent>[], options: ListenOptions<ListenableSupportedEvent>) {
+  private addEventListeners<EventType extends ListenableSupportedEventType> (eventListeners: ListenableActiveEventId<EventType>[], options: ListenOptions<EventType>) {
     const { target = document } = options
 
     eventListeners.forEach(eventListener => {
-      target.addEventListener(...eventListener)
-      this.active.add({ target, id: eventListener } as ListenableActive<EventType>)
+      target.addEventListener(eventListener[0], eventListener[1], eventListener[2])
+      this.active.add({ target, id: eventListener })
     })
   }
-  _listening () {
+  private listening () {
     this._computedStatus = 'listening'
   }
 
@@ -297,16 +475,16 @@ export class Listenable<EventType extends ListenableSupportedType, Recognizeable
         // and shouldn't use web APIs during construction.
         break
       default:
-        const stoppables = [...this.active].filter(active => !target || active.target === target), // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
+        const stoppables: ListenableActive<Type>[] = [...this.active].filter(active => !target || ('target' in active ? active.target === target : false)), // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
               shouldUpdateStatus = stoppables.length === this.active.size
-
-        stoppables.forEach(stoppable => {
-          stop<EventType>(stoppable)
+        
+        for (const stoppable of stoppables) {
+          stop(stoppable)
           this.active.delete(stoppable)
-        })
+        }
         
         if (shouldUpdateStatus) {
-          this._stopped()
+          this.stopped()
         }
 
         break
@@ -314,36 +492,36 @@ export class Listenable<EventType extends ListenableSupportedType, Recognizeable
 
     return this
   }
-  _stopped () {
+  private stopped () {
     this._computedStatus = 'stopped'
   }
 }
 
-function stop<EventType extends ListenableSupportedType> (stoppable: ListenableActive<EventType>) {
+function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive<Type>) {
   if (stoppable.id instanceof Listenable) {
     stoppable.id.stop()
     return
   }
 
   if (lazyCollectionSome<string>(type => observerAssertionsByType[type](stoppable.id))(['intersect', 'mutate', 'resize'])) {
-    const { id } = stoppable as ListenableActive<IntersectionObserverEntry | ResizeObserverEntry | MutationRecord>
+    const { id } = stoppable as ListenableActive<'intersect' | 'mutate' | 'resize'>
     id.disconnect()
     return
   }
 
   if (isArray(stoppable.id)) {
-    const { target, id } = stoppable as ListenableActive<MediaQueryListEvent>
+    const { target, id } = stoppable as ListenableActive<'(_)'>
     target.removeEventListener(id[0], id[1])
     return
   }
   
   if (isNumber(stoppable.id)) {
-    const { target, id } = stoppable as ListenableActive<IdleDeadline>
+    const { target, id } = stoppable as ListenableActive<'idle'>
     target.cancelIdleCallback(id)
     return
   }
   
-  const { target, id } = stoppable as ListenableActive<ListenableSupportedEvent>
+  const { target, id } = stoppable as ListenableActive<ListenableSupportedEventType>
   target.removeEventListener(id[0], id[1], id[2])
 }
 
@@ -351,7 +529,7 @@ export function toImplementation (type: string) {
   return [...predicatesByImplementation.keys()].find(implementation => predicatesByImplementation.get(implementation)(type))
 }
 
-type ListenableImplementation = 'recognizeable' | 'intersection' | 'mutation' | 'resize' | 'mediaquery' | 'idle' | 'visibilitychange' | 'keycombo' | 'leftclickcombo' | 'rightclickcombo' | 'event'
+type ListenableImplementation = 'recognizeable' | 'intersection' | 'mutation' | 'resize' | 'mediaquery' | 'idle' | 'documentevent' | 'keycombo' | 'leftclickcombo' | 'rightclickcombo' | 'pointercombo' | 'event'
 
 const predicatesByImplementation = new Map<ListenableImplementation, ((type: string) => boolean)>([
   [
@@ -379,8 +557,8 @@ const predicatesByImplementation = new Map<ListenableImplementation, ((type: str
     type => type === 'idle'
   ],
   [
-    'visibilitychange',
-    type => type === 'visibilitychange'
+    'documentevent',
+    type => documentEvents.has(type)
   ],
   [
     'keycombo',
@@ -395,9 +573,22 @@ const predicatesByImplementation = new Map<ListenableImplementation, ((type: str
     type => implementationREs.rightclickcombo.test(type)
   ],
   [
+    'pointercombo',
+    type => implementationREs.pointercombo.test(type)
+  ],
+  [
     'event',
     () => true
   ]
+])
+
+const documentEvents = new Set([
+  'fullscreenchange',
+  'fullscreenerror',
+  'pointerlockchange',
+  'pointerlockerror',
+  'readystatechange',
+  'visibilitychange',
 ])
 
 const implementationREs: { [implementation: string]: RegExp } = {
@@ -405,11 +596,12 @@ const implementationREs: { [implementation: string]: RegExp } = {
   keycombo: /^((!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|space|arrow|vertical|horizontal|up|right|down|left|enter|backspace|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete|cmd|command|meta|shift|ctrl|control|alt|opt|option))\+)*(!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|space|arrow|vertical|horizontal|up|right|down|left|enter|backspace|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete|cmd|command|meta|shift|ctrl|control|alt|opt|option))$/,
   leftclickcombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt|option))\+){0,4}!?(click|mousedown|mouseup|dblclick)$/,
   rightclickcombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt|option))\+){0,4}!?(rightclick|contextmenu)$/,
+  pointercombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt|option))\+){0,4}!?(pointerdown|pointerup|pointermove|pointerover|pointerout|pointerenter|pointerleave|pointercancel|gotpointercapture|lostpointercapture)$/,
 }
 
-export function toAddEventListenerParams<EventType extends ListenableSupportedEvent> (handle: (event: EventType) => any, options: ListenOptions<EventType>) {
+export function toAddEventListenerParams<Type extends ListenableSupportedEventType> (handle: ListenHandle<Type>, options: ListenOptions<Type>) {
   const { addEventListener, useCapture } = options,
-        exceptAndOnlyHandle = createExceptAndOnlyHandle<EventType>(handle, options),
+        exceptAndOnlyHandle = createExceptAndOnlyHandle(handle, options),
         handleOptions: [optionsOrUseCapture: AddEventListenerOptions | boolean] = [addEventListener || useCapture]
 
   return { exceptAndOnlyHandle, handleOptions }
@@ -492,187 +684,18 @@ export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEve
   ))(clickcombo) as boolean
 }
 
+export function eventMatchesPointercombo ({ event, pointercombo }: { event: PointerEvent, pointercombo: string[] }): boolean {
+  return lazyCollectionEvery<string>(name => (
+    fromComboItemNameToType(name) === 'pointer'
+    ||
+    (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))
+    ||
+    (!name.startsWith('!') && isModified({ alias: name, event }))
+  ))(pointercombo) as boolean
+}
+
 const observerAssertionsByType: Record<string, (observer: unknown) => boolean> = {
   intersect: observer => observer instanceof IntersectionObserver,
   mutate: observer => observer instanceof MutationObserver,
   resize: observer => observer instanceof ResizeObserver,
 }
-
-class Listenable2<Type extends Listenable2SupportedType> {
-  type: string
-  constructor (type: Type) {
-    this.type = type
-  }
-
-  listen (handle: (event: ListenHandleParamsByListenableType<Type>) => void) {
-    
-  }
-}
-
-type Listenable2SupportedType = 'recognizeable'
-  | 'intersect'
-  | 'mutate'
-  | 'resize'
-  | 'idle'
-  | 'visibilitychange'
-  | `(${string})`
-  | `${string}+${ListenableLeftClick | ListenableRightClick}`
-  | `${string}+${ListenableKey}`
-  | keyof HTMLElementEventMap
-  | keyof DocumentEventMap
-  | string
-
-type ListenHandleParamsByListenableType<Type extends Listenable2SupportedType> = 
-  Type extends 'intersect' ? IntersectionObserverEntry[] :
-  Type extends 'mutate' ? MutationRecord[] :
-  Type extends 'resize' ? ResizeObserverEntry[] :
-  Type extends 'idle' ? IdleDeadline :
-  Type extends 'visibilitychange' ? Event :
-  Type extends `(${string})` ? MediaQueryListEvent :
-  Type extends `${string}+${ListenableLeftClick | ListenableRightClick}` ? MouseEvent :
-  Type extends `${string}+${ListenableKey}` ? KeyboardEvent :
-  Type extends keyof HTMLElementEventMap ? HTMLElementEventMap[Type] :
-  Type extends keyof DocumentEventMap ? DocumentEventMap[Type] :
-  never
-
-type ListenableLeftClick = 'click' | 'mousedown' | 'mouseup' | 'dblclick'
-type ListenableRightClick = 'rightclick' | 'contextmenu'
-type ListenableKey = ListenableSingleCharacter | ListenableArrow |  ListenableOther | ListenableModifier | ListenableModifierAlias
-
-type ListenableSingleCharacter = 'a'
-  | 'b'
-  | 'c'
-  | 'd'
-  | 'e'
-  | 'f'
-  | 'g'
-  | 'h'
-  | 'i'
-  | 'j'
-  | 'k'
-  | 'l'
-  | 'm'
-  | 'n'
-  | 'o'
-  | 'p'
-  | 'q'
-  | 'r'
-  | 's'
-  | 't'
-  | 'u'
-  | 'v'
-  | 'w'
-  | 'x'
-  | 'y'
-  | 'z'
-  | 'A'
-  | 'B'
-  | 'C'
-  | 'D'
-  | 'E'
-  | 'F'
-  | 'G'
-  | 'H'
-  | 'I'
-  | 'J'
-  | 'K'
-  | 'L'
-  | 'M'
-  | 'N'
-  | 'O'
-  | 'P'
-  | 'Q'
-  | 'R'
-  | 'S'
-  | 'T'
-  | 'U'
-  | 'V'
-  | 'W'
-  | 'X'
-  | 'Y'
-  | 'Z'
-  | '0'
-  | '1'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '9'
-  | ','
-  | '<'
-  | '.'
-  | '>'
-  | '/'
-  | '?'
-  | ';'
-  | ':'
-  | "'"
-  | '"'
-  | '['
-  | '{'
-  | ']'
-  | '}'
-  | '\\'
-  | '|'
-  | '`'
-  | '~'
-  | '!'
-  | '@'
-  | '#'
-  | '$'
-  | '%'
-  | '^'
-  | '&'
-  | '*'
-  | '('
-  | ')'
-  | '-'
-  | '_'
-  | '='
-  | '+'
-
-type ListenableArrow = 'arrow'
-  | 'vertical'
-  | 'horizontal'
-  | 'up'
-  | 'right'
-  | 'down'
-  | 'left'
-    
-type ListenableOther = 'tab'
-  | 'space'
-  | 'enter'
-  | 'backspace'
-  | 'esc'
-  | 'home'
-  | 'end'
-  | 'pagedown'
-  | 'pageup'
-  | 'capslock'
-  | 'f1'
-  | 'f2'
-  | 'f3'
-  | 'f4'
-  | 'f5'
-  | 'f6'
-  | 'f7'
-  | 'f8'
-  | 'f9'
-  | 'f10'
-  | 'f11'
-  | 'f12'
-  | 'f13'
-  | 'f14'
-  | 'f15'
-  | 'f16'
-  | 'f17'
-  | 'f18'
-  | 'f19'
-  | 'f20'
-  | 'camera'
-  | 'delete'
-
-new Listenable2('recognizeable').listen((event) => console.log(event.media))

@@ -14,6 +14,19 @@ export const rightclicks = [
 
 export const clicks = leftclicks.concat(rightclicks)
 
+export const pointers = [
+  'pointerdown',
+  'pointerup',
+  'pointermove',
+  'pointerover',
+  'pointerout',
+  'pointerenter',
+  'pointerleave',
+  'pointercancel',
+  'gotpointercapture',
+  'lostpointercapture',
+]
+
 export const singleCharacters = [
   'a',
   'b',

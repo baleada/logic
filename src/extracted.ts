@@ -12,13 +12,13 @@ import {
   createMap,
   Pipeable,
 } from './pipes'
-import type { ListenableSupportedEvent, ListenOptions } from './classes/Listenable'
+import type { ListenableKeycombo, ListenableSupportedEventType, ListenHandle, ListenHandleParam, ListenOptions } from './classes/Listenable'
 
 // DISPATCHABLE
-type ToEventOptions<EventType extends ListenableSupportedEvent> = EventType extends KeyboardEvent 
+type ToEventOptions<Type extends ListenableSupportedEventType> = Type extends ListenableKeycombo
   ? { keyDirection?: 'up' | 'down', init?: EventInit }
   : { init?: EventInit }
-export function toEvent<EventType extends ListenableSupportedEvent> (combo: string[],options: ToEventOptions<EventType> = {}) {
+export function toEvent<Type extends ListenableSupportedEventType> (combo: string[], options: ToEventOptions<Type> = {}) {
   const modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
         { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo),
         type = fromComboItemNameToType(name)
@@ -140,6 +140,10 @@ export function ensureClickcombo (type: string): string[] {
   return toCombo(type)
 }
 
+export function ensurePointercombo (type: string): string[] {
+  return toCombo(type)
+}
+
 const unique = lazyCollectionUnique<string>()
 const toComboItems = lazyCollectionMap<string, string>(name => name === '' ? DELIMITER : name)
 const DELIMITER = '+'
@@ -155,12 +159,12 @@ export function toCombo (type: string): string[] {
 }
 
 export function fromComboItemNameToType (name: string) {
-  return lazyCollectionFind((type: ListenableComboItemType) => predicatesByType.get(type)(name))(LISTENABLE_COMBO_ITEM_TYPES) as ListenableComboItemType ?? 'custom'
+  return lazyCollectionFind((type: ListenableComboItemType) => predicatesByType.get(type)(name))(listenableComboItemTypes) as ListenableComboItemType ?? 'custom'
 }
 
-export type ListenableComboItemType = 'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click'
+export type ListenableComboItemType = 'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click' | 'pointer'
 
-const LISTENABLE_COMBO_ITEM_TYPES = new Set<ListenableComboItemType>(['singleCharacter', 'arrow', 'other', 'modifier', 'click'])
+const listenableComboItemTypes = new Set<ListenableComboItemType>(['singleCharacter', 'arrow', 'other', 'modifier', 'click', 'pointer'])
 
 const predicatesByType: Map<ListenableComboItemType, (name: string) => boolean> = new Map([
   [
@@ -182,6 +186,10 @@ const predicatesByType: Map<ListenableComboItemType, (name: string) => boolean> 
   [
     'click',
     name => typeREs.get('click').test(name)
+  ],
+  [
+    'pointer',
+    name => typeREs.get('pointer').test(name)
   ],
 ])
 
@@ -205,6 +213,10 @@ const typeREs: Map<ListenableComboItemType, RegExp> = new Map([
   [
     'click',
     /^!?(rightclick|contextmenu|click|mousedown|mouseup|dblclick)$/
+  ],
+  [
+    'pointer',
+    /^!?(pointerdown|pointerup|pointermove|pointerover|pointerout|pointerenter|pointerleave|pointercancel|gotpointercapture|lostpointercapture)$/
   ],
 ])
 
@@ -241,25 +253,27 @@ const flagsByModifierOrAlias: Record<ListenableModifier | ListenableModifierAlia
   option: 'altKey',
 }
 
-export function createExceptAndOnlyHandle<EventType extends ListenableSupportedEvent> (handle: (event: EventType) => any, options: ListenOptions<EventType>): (event: EventType) => any {
+export function createExceptAndOnlyHandle<Type extends ListenableSupportedEventType> (handle: ListenHandle<Type>, options: ListenOptions<Type>): ListenHandle<Type> {
   const { except = [], only = [] } = options
   
-  return (event: EventType) => {
+  return ((event: ListenHandleParam<Type>) => {
     const { target } = event,
           [matchesOnly, matchesExcept] = target instanceof Element
-            ? [only, except].map(selectors => lazyCollectionSome<string>(selector => target.matches(selector))(selectors))
+            ? [only, except].map(selectors => lazyCollectionSome<string>(selector => target.matches(selector))(selectors) as boolean)
             : [false, true]
 
     if (matchesOnly) {
+      // @ts-ignore
       handle(event)
       return
     }
     
     if (only.length === 0 && !matchesExcept) {
+      // @ts-ignore
       handle(event)
       return
     }
-  }
+  }) as ListenHandle<Type>
 }
 
 export function isModified<EventType extends KeyboardEvent | MouseEvent> ({ event, alias }: { event: EventType, alias: string }) {

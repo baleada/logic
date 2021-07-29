@@ -1,11 +1,11 @@
 import { toEvent, toCombo } from '../extracted'
-import type { ListenableSupportedEvent } from './Listenable'
+import type { ListenableKeycombo, ListenableSupportedEventType } from './Listenable'
 
 export type DispatchableOptions = {}
 
 export type DispatchableStatus = 'ready' | 'dispatched'
 
-export type DispatchOptions<EventType extends ListenableSupportedEvent> = EventType extends KeyboardEvent 
+export type DispatchOptions<EventType extends ListenableSupportedEventType> = EventType extends ListenableKeycombo 
   ? { keyDirection?: 'up' | 'down' } & EventDispatchOptions
   : EventDispatchOptions
 
@@ -14,8 +14,8 @@ type EventDispatchOptions = {
   target?: Window & typeof globalThis | Document | Element
 }
 
-export class Dispatchable<EventType extends ListenableSupportedEvent> {
-  constructor (type: string, options: DispatchableOptions = {}) {
+export class Dispatchable<Type extends ListenableSupportedEventType> {
+  constructor (type: Type, options: DispatchableOptions = {}) {
     this.setType(type)
     this._ready()
   }
@@ -44,7 +44,7 @@ export class Dispatchable<EventType extends ListenableSupportedEvent> {
   }
 
   _computedCancelled: boolean
-  dispatch (options: DispatchOptions<EventType> = {}) {
+  dispatch (options: DispatchOptions<Type> = {}) {
     const { target = window, ...rest } = options,
           event = toEvent(toCombo(this.type), rest)
 
