@@ -15,65 +15,59 @@ import type {
 } from '../extracted'
 import { createSlice, createConcat } from '../pipes'
 import {
-  ListenableSupportedEvent,
+  ListenableSupportedEventType,
   eventMatchesClickcombo,
   toImplementation,
-  eventMatchesKeycombo
+  eventMatchesKeycombo,
+  ListenableSupportedType,
+  ListenHandleParam,
+  ListenHandle
 } from './Listenable'
 
-export type RecognizeableSupportedType = 
-  IntersectionObserverEntry[]
-  | MutationRecord[]
-  | ResizeObserverEntry[]
-  | MediaQueryListEvent
-  | IdleDeadline
-  | ListenableSupportedEvent
-
-export type RecognizeableSequenceItem<ListenableEventType> = 
-  ListenableEventType extends IntersectionObserverEntry ? IntersectionObserverEntry[] :
-  ListenableEventType extends MutationRecord ? MutationRecord[] :
-  ListenableEventType extends ResizeObserverEntry ? ResizeObserverEntry[] :
-  ListenableEventType
-
-export type RecognizeableOptions<SequenceItem extends RecognizeableSupportedType, Metadata> = {
+export type RecognizeableOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
   maxSequenceLength?: true | number,
   handlersIncludeCombos?: boolean,
-  handlers?: Record<any, (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any>
+  handlers?: { [type in Type]?: (api: RecognizeableHandlerApi<Type, Metadata>) => any }
+    | [type: Type, handler: (api: RecognizeableHandlerApi<Type, Metadata>) => any][]
 }
 
 export type RecognizeableStatus = 'recognized' | 'recognizing' | 'denied' | 'ready'
 
-export type RecognizeableHandlerApi<SequenceItem extends RecognizeableSupportedType, Metadata> = HandlerApiFromConstructor<SequenceItem, Metadata> & HandlerApiFromRuntime<SequenceItem>
+export type RecognizeableHandlerApi<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = HandlerApiFromConstructor<Type, Metadata> & HandlerApiFromRuntime<Type>
 
-type HandlerApiFromConstructor<SequenceItem extends RecognizeableSupportedType, Metadata> = {
+type HandlerApiFromConstructor<Type extends ListenableSupportedType, Metadata> = {
   getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
   getMetadata: () => Metadata,
   setMetadata: (metadata: Metadata) => void,
   recognized: () => void,
   denied: () => void,
-  effect: (sequenceItem: SequenceItem) => any,
+  effect: (sequenceItem: ListenHandleParam<Type>) => any,
 }
 
-type HandlerApiFromRuntime<SequenceItem extends RecognizeableSupportedType> = {
-  sequenceItem: SequenceItem,
-  getSequence: () => SequenceItem[]
+type HandlerApiFromRuntime<Type extends ListenableSupportedType> = {
+  sequenceItem: ListenHandleParam<Type>,
+  getSequence: () => ListenHandleParam<Type>[]
 }
 
-export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> {
+export class Recognizeable<Type extends ListenableSupportedType, Metadata extends Record<any, any>> {
   _maxSequenceLength: number | true
-  _handlers: Map<string, (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any>
-  _handlerApi: HandlerApiFromConstructor<SequenceItem, Metadata>
-  _toType: (sequenceItem: SequenceItem) => string
+  _handlers: Map<string, (api: RecognizeableHandlerApi<Type, Metadata>) => any>
+  _handlerApi: HandlerApiFromConstructor<Type, Metadata>
+  _toType: (sequenceItem: ListenHandleParam<Type>) => string
 
-  constructor (sequence: SequenceItem[], options: RecognizeableOptions<SequenceItem, Metadata> = { handlersIncludeCombos: true }) {
-    const defaultOptions: RecognizeableOptions<SequenceItem, Metadata> = {
+  constructor (sequence: ListenHandleParam<Type>[], options: RecognizeableOptions<Type, Metadata> = { handlersIncludeCombos: true }) {
+    const defaultOptions: RecognizeableOptions<Type, Metadata> = {
       maxSequenceLength: true as const,
       handlersIncludeCombos: true,
       handlers: {},
     }
     
     this._maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
-    this._handlers = new Map(Object.entries(options?.handlers || defaultOptions.handlers))
+    this._handlers = new Map(
+      isArray(options?.handlers) 
+        ? options.handlers
+        : Object.entries(options?.handlers || defaultOptions.handlers)
+    )
 
     this._toType = createToType({
       handlersIncludeCombos: options.handlersIncludeCombos,
@@ -90,7 +84,7 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
       setMetadata: (metadata: Metadata) => this._computedMetadata = metadata,
       recognized: () => this._recognized(),
       denied: () => this._denied(),
-      effect: (sequenceItem: SequenceItem) => this.effect?.(sequenceItem),
+      effect: (sequenceItem: ListenHandleParam<Type>) => this.effect?.(sequenceItem),
     }
 
     this._ready()
@@ -131,18 +125,18 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
     return this._computedMetadata
   }
 
-  _computedSequence: SequenceItem[]
-  setSequence (sequence: SequenceItem[]) {
+  _computedSequence: ListenHandleParam<Type>[]
+  setSequence (sequence: ListenHandleParam<Type>[]) {
     this._computedSequence = sequence
     return this
   }
-  _computedEffect: ((sequenceItem: SequenceItem) => any)
-  setEffect (effect: ((sequenceItem: SequenceItem) => any)) {
+  _computedEffect: ((sequenceItem: ListenHandleParam<Type>) => any)
+  setEffect (effect: ((sequenceItem: ListenHandleParam<Type>) => any)) {
     this._computedEffect = effect
     return this
   }
 
-  recognize (sequenceItem: SequenceItem) {
+  recognize (sequenceItem: ListenHandleParam<Type>) {
     this._recognizing()
 
     const type = this._toType(sequenceItem),
@@ -150,7 +144,7 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
             ? Math.max(0, this.sequence.length - this._maxSequenceLength)
             : 0,
           newSequence = createConcat(
-            createSlice<SequenceItem>({ from: excess })(this.sequence),
+            createSlice<ListenHandleParam<Type>>({ from: excess })(this.sequence),
             [sequenceItem]
           )([])
           
@@ -178,21 +172,17 @@ export class Recognizeable<SequenceItem extends RecognizeableSupportedType, Meta
   }
 }
 
-export function defineRecognizeableOptions<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> (options: RecognizeableOptions<SequenceItem, Metadata>) {
-  return options
+export function defineRecognizeableHandler<Type extends ListenableSupportedType, Metadata extends Record<any, any>, HandlerType extends Type> (type: HandlerType, handler: (api: RecognizeableHandlerApi<HandlerType, Metadata>)  => any): [Type, (api: RecognizeableHandlerApi<HandlerType, Metadata>) => any]  {
+  return [type, handler]
 }
 
-export function defineRecognizeableHandler<SequenceItem extends RecognizeableSupportedType, Metadata extends Record<any, any> = Record<any, any>> (handler: (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any) {
-  return handler
-}
-
-function createToType<SequenceItem extends RecognizeableSupportedType, Metadata> ({
+function createToType<Type extends ListenableSupportedType, Metadata> ({
   handlersIncludeCombos,
   handlers
 }: {
- handlersIncludeCombos?: RecognizeableOptions<SequenceItem, Metadata>['handlersIncludeCombos'],
- handlers?: Map<string, (api: RecognizeableHandlerApi<SequenceItem, Metadata>) => any>
-}): (sequence: SequenceItem) => string {
+ handlersIncludeCombos?: RecognizeableOptions<Type, Metadata>['handlersIncludeCombos'],
+ handlers?: Map<string, (api: RecognizeableHandlerApi<Type, Metadata>) => any>
+}): (sequence: ListenHandleParam<Type>) => string {
   const handlerLeftclickcombos: ListenableClickcomboItem[][] = [],
         handlerRightclickcombos: ListenableClickcomboItem[][] = [],
         handlerKeycombos: ListenableKeycomboItem[][] = []
@@ -218,7 +208,7 @@ function createToType<SequenceItem extends RecognizeableSupportedType, Metadata>
     }
   }
 
-  return function toType (sequenceItem: SequenceItem) {
+  return function toType (sequenceItem: ListenHandleParam<Type>) {
     if (isArray(sequenceItem)) {
       if (sequenceItem[0] instanceof IntersectionObserverEntry) {
         return 'intersect'
@@ -283,4 +273,3 @@ const leftclickcomboEventTypes = new Set(['click', 'mousedown', 'mouseup', 'dblc
         lazyCollectionMap<ListenableKeycomboItem, string>(({ name }) => name),
         lazyCollectionJoin('+'),
       )
-      

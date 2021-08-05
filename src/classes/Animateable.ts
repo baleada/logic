@@ -84,7 +84,7 @@ export class Animateable {
   _pauseCache: { status?: 'playing' | 'reversing', timeProgress?: number }
   _seekCache: { timeProgress?: number }
   _alternateCache: { status: 'ready' | 'playing' | 'reversing' }
-  _visibilitychange: Listenable<Event>
+  _visibilitychange: Listenable<'visibilitychange'>
   _getEaseables: GetEaseables
   _getReversedEaseables: GetEaseables
   constructor (keyframes: AnimateableKeyframe[], options: AnimateableOptions = {}) {

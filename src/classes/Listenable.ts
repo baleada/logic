@@ -3,7 +3,7 @@ import {
   every as lazyCollectionEvery,
 } from 'lazy-collections'
 import { Recognizeable } from './Recognizeable'
-import type { RecognizeableSequenceItem, RecognizeableOptions } from './Recognizeable'
+import type { RecognizeableOptions } from './Recognizeable'
 import {
   isArray,
   isNumber,
@@ -29,6 +29,8 @@ export type ListenableSupportedType = 'recognizeable'
   | 'idle'
   | ListenableMediaQuery
   | ListenableClickcombo
+  | ListenableLeftClick
+  | ListenableRightClick
   | ListenablePointercombo
   | ListenableKeycombo
   // | ListenableKey
@@ -187,7 +189,7 @@ export type ListenableSupportedEventType = ListenableClickcombo
   | keyof Omit<DocumentEventMap, 'resize'>
 
 export type ListenableOptions<Type extends ListenableSupportedType, RecognizeableMetadata> = {
-  recognizeable?: RecognizeableOptions<RecognizeableSequenceItem<Type>, RecognizeableMetadata>
+  recognizeable?: RecognizeableOptions<Type, RecognizeableMetadata>
 }
 
 export type ListenHandle<Type extends ListenableSupportedType> = 
@@ -210,6 +212,8 @@ export type ListenHandleParam<Type extends ListenableSupportedType> =
   Type extends 'idle' ? IdleDeadline :
   Type extends ListenableMediaQuery ? MediaQueryListEvent :
   Type extends ListenableClickcombo ? MouseEvent :
+  Type extends ListenableLeftClick ? MouseEvent :
+  Type extends ListenableRightClick ? MouseEvent :
   Type extends ListenablePointercombo ? PointerEvent :
   Type extends ListenableKeycombo ? KeyboardEvent :
   Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? HTMLElementEventMap[Type] :
@@ -258,13 +262,15 @@ type ListenableActiveEventId<Type extends ListenableSupportedEventType> = [
 export type ListenableStatus = 'ready' | 'listening' | 'stopped'
 
 export class Listenable<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> {
-  _computedRecognizeable: Recognizeable<RecognizeableSequenceItem<Type>>
-  _recognizeableHandlerKeys: string[]
+  _computedRecognizeable: Recognizeable<Type, RecognizeableMetadata>
+  _recognizeableHandlerKeys: Type[]
   _computedActive: Set<ListenableActive<Type>>
-  constructor (type: string, options?: ListenableOptions<Type, RecognizeableMetadata>) {
+  constructor (type: Type, options?: ListenableOptions<Type, RecognizeableMetadata>) {
     if (type === 'recognizeable') {
-      this._computedRecognizeable = new Recognizeable<RecognizeableSequenceItem<Type>>([], options.recognizeable)
-      this._recognizeableHandlerKeys = Object.keys(options?.recognizeable?.handlers || {})
+      this._computedRecognizeable = new Recognizeable<Type, RecognizeableMetadata>([], options.recognizeable)
+      this._recognizeableHandlerKeys = isArray(options?.recognizeable?.handlers)
+        ? options.recognizeable.handlers.map(([key]) => key)
+        : Object.keys(options?.recognizeable?.handlers || {})
     }    
 
     this._computedActive = new Set()
@@ -321,7 +327,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
         this.idleListen(handle as unknown as ListenHandle<'idle'>, options as ListenOptions<'idle'>)
         break
       case 'recognizeable':
-        this.recognizeableListen(handle as (event: RecognizeableSequenceItem<Type>) => void, options as ListenOptions<Type>)
+        this.recognizeableListen(handle as ListenHandle<Type>, options as ListenOptions<Type>)
         break
       case 'documentevent':
         this.documentEventListen(handle as ListenHandle<'visibilitychange'>, options as ListenOptions<'visibilitychange'>)
@@ -378,10 +384,10 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
 
     this.active.add({ target: window, id } as ListenableActive<Type>)
   }
-  private recognizeableListen (handle: (sequenceItem: RecognizeableSequenceItem<Type>) => void, options: ListenOptions<Type>) {
+  private recognizeableListen (handle: (sequenceItem: ListenHandleParam<Type>) => any, options: ListenOptions<Type>) {
     this.recognizeable.setEffect(handle)
 
-    const guardedHandle = (sequenceItem: RecognizeableSequenceItem<Type>) => {
+    const guardedHandle = (sequenceItem: ListenHandleParam<Type>) => {
       this.recognizeable.recognize(sequenceItem)
 
       if (this.recognizeable.status === 'recognized') {

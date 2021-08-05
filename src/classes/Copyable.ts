@@ -9,9 +9,9 @@ export type CopyableStatus = 'ready' | 'copying' | 'copied' | 'errored'
 
 export class Copyable {
   _computedIsClipboardText: boolean
-  _copy: Listenable<ClipboardEvent>
-  _cut: Listenable<ClipboardEvent>
-  _copyAndCutHandle: ListenHandle<ClipboardEvent>
+  _copy: Listenable<'copy'>
+  _cut: Listenable<'cut'>
+  _copyAndCutHandle: ListenHandle<'copy' | 'cut'>
 
   constructor (string: string, options: CopyableOptions = {}) {
     this._computedIsClipboardText = false
