@@ -2,7 +2,7 @@ import {
   some as lazyCollectionSome,
   every as lazyCollectionEvery,
 } from 'lazy-collections'
-import { Recognizeable } from './Recognizeable'
+import { Recognizeable, RecognizeableHandlerApi } from './Recognizeable'
 import type { RecognizeableOptions } from './Recognizeable'
 import {
   isArray,
@@ -21,6 +21,7 @@ import type {
   ListenableModifierAlias,
   ListenableKeycomboItem,
 } from '../extracted'
+import { createMap } from '../pipes'
 
 export type ListenableSupportedType = 'recognizeable'
   | 'intersect'
@@ -264,13 +265,13 @@ export type ListenableStatus = 'ready' | 'listening' | 'stopped'
 export class Listenable<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> {
   _computedRecognizeable: Recognizeable<Type, RecognizeableMetadata>
   _recognizeableHandlerKeys: Type[]
-  _computedActive: Set<ListenableActive<Type>>
+  _computedActive: Set<ListenableActive<Type, RecognizeableMetadata>>
   constructor (type: Type, options?: ListenableOptions<Type, RecognizeableMetadata>) {
     if (type === 'recognizeable') {
       this._computedRecognizeable = new Recognizeable<Type, RecognizeableMetadata>([], options.recognizeable)
       this._recognizeableHandlerKeys = isArray(options?.recognizeable?.handlers)
-        ? options.recognizeable.handlers.map(([key]) => key)
-        : Object.keys(options?.recognizeable?.handlers || {})
+        ? createMap<[Type, (api: RecognizeableHandlerApi<Type, RecognizeableMetadata>) => any], Type>(([key]) => key)(options.recognizeable.handlers)
+        : Object.keys(options?.recognizeable?.handlers || {}) as Type[]
     }    
 
     this._computedActive = new Set()
@@ -464,6 +465,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
 
     eventListeners.forEach(eventListener => {
       target.addEventListener(eventListener[0], eventListener[1], eventListener[2])
+      // @ts-ignore
       this.active.add({ target, id: eventListener })
     })
   }
