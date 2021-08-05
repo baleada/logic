@@ -1,4 +1,4 @@
-export type GrantableOptions = {}
+export type GrantableOptions = Record<string, never>
 
 export type GrantableStatus = 'ready' | 'querying' | 'queried' | 'errored'
 

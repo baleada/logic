@@ -1,4 +1,4 @@
-export type FullscreenableOptions = {}
+export type FullscreenableOptions = Record<string, never>
 
 export type FullscreenableGetElement<ElementType> = ((...args: any[]) => ElementType)
 

@@ -1,7 +1,7 @@
 import { toEvent, toCombo } from '../extracted'
 import type { ListenableKeycombo, ListenableSupportedEventType } from './Listenable'
 
-export type DispatchableOptions = {}
+export type DispatchableOptions = Record<string, never>
 
 export type DispatchableStatus = 'ready' | 'dispatched'
 

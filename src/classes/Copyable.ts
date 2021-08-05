@@ -1,7 +1,7 @@
 import { Listenable } from "./Listenable"
 import type { ListenHandle } from './Listenable'
 
-export type CopyableOptions = {}
+export type CopyableOptions = Record<string, never>
 
 // TODO: Listen for window copy events to update status
 

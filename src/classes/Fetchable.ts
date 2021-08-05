@@ -1,7 +1,7 @@
 import { Resolveable } from './Resolveable'
 import { isFunction } from '../extracted'
 
-export type FetchableOptions = {}
+export type FetchableOptions = Record<string, never>
 
 export type FetchableStatus = 'ready' | 'fetching' | 'fetched' | 'aborted' | 'errored'
 
