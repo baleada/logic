@@ -33,7 +33,7 @@ type Context = {
 
 const suite = createSuite<Context>('pipes')
 
-suite.before(() => {
+suite.before(context => {
   context.array = ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito']
   context.number = 42
   context.string = 'Baleada: a toolkit for building web apps'
@@ -379,7 +379,7 @@ suite(`createSlug(...) respects options`, () => {
 })
 
 
-// // NUMBER
+// NUMBER
 suite(`createClamp({ min, max }) handles number between min and max`, ({ number }) => {
   const value = (number => {
     return createClamp({ min: 0, max: 100 })(number)
