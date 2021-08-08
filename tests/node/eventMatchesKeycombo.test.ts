@@ -1,106 +1,158 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { eventMatchesKeycombo } from '../../src/classes/Listenable'
+import { toKey } from '../../src/extracted'
+import { singleCharacters, arrows, others, modifiers, modifierAliases } from '../fixtures/comboMeta'
 
 const suite = createSuite('eventMatchesKeycombo')
 
-suite(`predicates single character`, context => {
-  const event = { key: 'B' } as KeyboardEvent
+suite(`predicates single characters`, () => {
+  for (const singleCharacter of singleCharacters) {
+    assert.ok(
+      eventMatchesKeycombo({
+        event: { key: singleCharacter } as KeyboardEvent,
+        keycombo: [{ name: singleCharacter, type: 'singleCharacter' }],
+      })
+    )
 
-  assert.ok(eventMatchesKeycombo({
-    event,
-    keycombo: [{ name: 'b', type: 'singleCharacter' }]
-  }))
-  
-  assert.ok(eventMatchesKeycombo({
-    event,
-    keycombo: [{ name: '!a', type: 'singleCharacter' }]
-  }))
-
-  assert.not.ok(eventMatchesKeycombo({
-    event,
-    keycombo: [{ name: 'a', type: 'singleCharacter' }]
-  }))
-
-  assert.ok(eventMatchesKeycombo({
-    event: { key: '!' } as KeyboardEvent,
-    keycombo: [{ name: '!', type: 'singleCharacter' }]
-  }))
+    assert.not.ok(
+      eventMatchesKeycombo({
+        event: { key: 'Enter' } as KeyboardEvent,
+        keycombo: [{ name: singleCharacter, type: 'singleCharacter' }],
+      })
+    )
+    
+    assert.ok(
+      eventMatchesKeycombo({
+        event: { key: 'Enter' } as KeyboardEvent,
+        keycombo: [{ name: '!' + singleCharacter, type: 'singleCharacter' }],
+      })
+    )
+    
+    assert.not.ok(
+      eventMatchesKeycombo({
+        event: { key: singleCharacter } as KeyboardEvent,
+        keycombo: [{ name: '!' + singleCharacter, type: 'singleCharacter' }],
+      })
+    )
+  }
 })
 
-suite(`predicates other keys`, context => {
-  // Enter
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'Enter' } as KeyboardEvent,
-    keycombo: [{ name: 'enter', type: 'other' }],
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!enter', type: 'other' }],
-  }))
-  assert.not.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: 'enter', type: 'other' }],
-  }))
-  
-  // Backspace
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'Backspace' } as KeyboardEvent,
-    keycombo: [{ name: 'backspace', type: 'other' }],
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!backspace', type: 'other' }],
-  }))
-  assert.not.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: 'backspace', type: 'other' }],
-  }))
-  
-  // Tab
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'Tab' } as KeyboardEvent,
-    keycombo: [{ name: 'tab', type: 'other' }],
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!tab', type: 'other' }],
-  }))
-  assert.not.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: 'tab', type: 'other' }],
-  }))
-  
-  // Space
-  assert.ok(eventMatchesKeycombo({
-    event: { key: ' ' } as KeyboardEvent,
-    keycombo: [{ name: 'space', type: 'other' }],
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!space', type: 'other' }],
-  }))
-  assert.not.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: 'space', type: 'other' }],
-  }))
-  
-  // Escape
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'Escape' } as KeyboardEvent,
-    keycombo: [{ name: 'esc', type: 'other' }],
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!esc', type: 'other' }],
-  }))
-  assert.not.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: 'esc', type: 'other' }],
-  }))
+suite(`predicates others`, () => {
+  for (const other of others) {
+    assert.ok(
+      eventMatchesKeycombo({
+        event: { key: toKey(other) } as KeyboardEvent,
+        keycombo: [{ name: other, type: 'other' }],
+      })
+    )
+
+    assert.not.ok(
+      eventMatchesKeycombo({
+        event: { key: 'B' } as KeyboardEvent,
+        keycombo: [{ name: other, type: 'other' }],
+      })
+    )
+    
+    assert.ok(
+      eventMatchesKeycombo({
+        event: { key: 'B' } as KeyboardEvent,
+        keycombo: [{ name: '!' + other, type: 'other' }],
+      })
+    )
+    
+    assert.not.ok(
+      eventMatchesKeycombo({
+        event: { key: toKey(other) } as KeyboardEvent,
+        keycombo: [{ name: '!' + other, type: 'other' }],
+      })
+    )
+  }
 })
 
-suite(`predicates arrows`, context => {
+suite(`predicates modifiers as keys`, () => {
+  const modifiersAndAliases = (modifiers as string[]).concat(modifierAliases)
+
+  for (const modifier of modifiersAndAliases) {
+    assert.ok(
+      eventMatchesKeycombo({
+        event: { key: toKey(modifier) } as KeyboardEvent,
+        keycombo: [{ name: modifier, type: 'modifier' }],
+      })
+    )
+
+    assert.not.ok(
+      eventMatchesKeycombo({
+        event: { key: 'B' } as KeyboardEvent,
+        keycombo: [{ name: modifier, type: 'modifier' }],
+      })
+    )
+    
+    assert.ok(
+      eventMatchesKeycombo({
+        event: { key: 'B' } as KeyboardEvent,
+        keycombo: [{ name: '!' + modifier, type: 'modifier' }],
+      })
+    )
+    
+    assert.not.ok(
+      eventMatchesKeycombo({
+        event: { key: toKey(modifier) } as KeyboardEvent,
+        keycombo: [{ name: '!' + modifier, type: 'modifier' }],
+      })
+    )
+  }
+})
+
+suite(`predicates modifiers`, () => {
+  const modifiersAndAliases = (modifiers as string[]).concat(modifierAliases),
+        event = {
+          altKey: false,
+          metaKey: false,
+          shiftKey: false,
+          ctrlKey: false,
+          key: 'B',
+        } as KeyboardEvent,
+        modifiedEvent = {
+          altKey: true,
+          metaKey: true,
+          shiftKey: true,
+          ctrlKey: true,
+          key: 'B',
+        } as KeyboardEvent
+
+  for (const modifier of modifiersAndAliases) {
+    assert.ok(
+      eventMatchesKeycombo({
+        event: modifiedEvent,
+        keycombo: [{ name: modifier, type: 'modifier' }, { name: 'B', type: 'singleCharacter' }],
+      })
+    )
+
+    assert.not.ok(
+      eventMatchesKeycombo({
+        event,
+        keycombo: [{ name: modifier, type: 'modifier' }, { name: 'B', type: 'singleCharacter' }],
+      })
+    )
+    
+    assert.ok(
+      eventMatchesKeycombo({
+        event,
+        keycombo: [{ name: '!' + modifier, type: 'modifier' }, { name: 'B', type: 'singleCharacter' }],
+      })
+    )
+    
+    assert.not.ok(
+      eventMatchesKeycombo({
+        event: modifiedEvent,
+        keycombo: [{ name: '!' + modifier, type: 'modifier' }, { name: 'B', type: 'singleCharacter' }],
+      })
+    )
+  }
+})
+
+suite(`predicates arrows`, () => {
   // arrow
   assert.ok(eventMatchesKeycombo({
     event: { key: 'ArrowUp' } as KeyboardEvent,
@@ -158,7 +210,6 @@ suite(`predicates arrows`, context => {
     event: { key: 'ArrowDown' } as KeyboardEvent,
     keycombo: [{ name: '!horizontal', type: 'arrow' }]
   }))
-  
   
   // up
   assert.ok(eventMatchesKeycombo({
@@ -230,100 +281,6 @@ suite(`predicates arrows`, context => {
   assert.ok(eventMatchesKeycombo({
     event: { key: 'ArrowLeft' } as KeyboardEvent,
     keycombo: [{ name: 'left', type: 'arrow' }]
-  }))
-})
-
-suite(`predicates modifiers as keys`, context => {
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'Shift' } as KeyboardEvent,
-    keycombo: [{ name: 'shift', type: 'modifier' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!shift', type: 'modifier' }]
-  }))
-  
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'Meta' } as KeyboardEvent,
-    keycombo: [{ name: 'cmd', type: 'modifier' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!cmd', type: 'modifier' }]
-  }))
-  
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'Control' } as KeyboardEvent,
-    keycombo: [{ name: 'ctrl', type: 'modifier' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!ctrl', type: 'modifier' }]
-  }))
-  
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'Alt' } as KeyboardEvent,
-    keycombo: [{ name: 'alt', type: 'modifier' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!alt', type: 'modifier' }]
-  }))
-  
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'Alt' } as KeyboardEvent,
-    keycombo: [{ name: 'opt', type: 'modifier' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A' } as KeyboardEvent,
-    keycombo: [{ name: '!opt', type: 'modifier' }]
-  }))
-})
-
-suite(`predicates modifiers as modifiers`, context => {
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', shiftKey: true } as KeyboardEvent,
-    keycombo: [{ name: 'shift', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', shiftKey: false } as KeyboardEvent,
-    keycombo: [{ name: '!shift', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
-  }))
-  
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', metaKey: true } as KeyboardEvent,
-    keycombo: [{ name: 'cmd', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', metaKey: false } as KeyboardEvent,
-    keycombo: [{ name: '!cmd', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
-  }))
-  
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', ctrlKey: true } as KeyboardEvent,
-    keycombo: [{ name: 'ctrl', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', ctrlKey: false } as KeyboardEvent,
-    keycombo: [{ name: '!ctrl', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
-  }))
-  
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', altKey: true } as KeyboardEvent,
-    keycombo: [{ name: 'alt', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', altKey: false } as KeyboardEvent,
-    keycombo: [{ name: '!alt', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
-  }))
-  
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', altKey: true } as KeyboardEvent,
-    keycombo: [{ name: 'opt', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
-  }))
-  assert.ok(eventMatchesKeycombo({
-    event: { key: 'A', altKey: false } as KeyboardEvent,
-    keycombo: [{ name: '!opt', type: 'modifier' }, { name: 'a', type: 'singleCharacter' }]
   }))
 })
 

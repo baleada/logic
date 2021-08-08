@@ -293,7 +293,14 @@ suite(`listen(...) handles right click combos`, async ({ puppeteer: { reloadNext
 
 suite(`listen(...) handles recognizeable`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('recognizeable', { recognizeable: { handlers: { 'keydown': () => {}, 'mousedown': () => {} } } })
+          const instance = new (window as unknown as WithLogic).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable', {
+            recognizeable: {
+              handlers: [
+                (window as unknown as WithLogic).Logic_classes.defineRecognizeableHandler('keydown', () => {}),
+                (window as unknown as WithLogic).Logic_classes.defineRecognizeableHandler('mousedown', () => {}),
+              ]
+            }
+          })
           instance.listen(() => {})
           return instance.active.size === 2
         }),
@@ -306,7 +313,14 @@ suite(`listen(...) handles recognizeable`, async ({ puppeteer: { reloadNext, pag
 
 suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('recognizeable', { recognizeable: { handlers: { 'keydown': () => {}, 'mousedown': () => {} } } })
+          const instance = new (window as unknown as WithLogic).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
+            recognizeable: {
+              handlers: [
+                (window as unknown as WithLogic).Logic_classes.defineRecognizeableHandler('keydown', () => {}),
+                (window as unknown as WithLogic).Logic_classes.defineRecognizeableHandler('mousedown', () => {}),
+              ]
+            }
+          })
           instance.listen(() => {})
           return instance.recognizeable instanceof (window as unknown as WithLogic).Logic.Recognizeable
         }),
@@ -462,7 +476,15 @@ suite(`stop(...) handles right click combos`, async ({ puppeteer: { page } }) =>
 
 suite(`stop(...) handles recognizeable`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('recognizeable', { recognizeable: { handlers: { 'keydown': () => {}, 'mousedown': () => {} } } })
+          const instance = new (window as unknown as WithLogic).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable', {
+            recognizeable: {
+              handlers: [
+                (window as unknown as WithLogic).Logic_classes.defineRecognizeableHandler('keydown', () => {}),
+                (window as unknown as WithLogic).Logic_classes.defineRecognizeableHandler('mousedown', () => {}),
+              ]
+            }
+
+          })
           instance.listen(() => {})
           instance.stop()
           return instance.active.size

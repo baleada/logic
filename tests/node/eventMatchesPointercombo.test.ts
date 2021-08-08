@@ -1,16 +1,16 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { eventMatchesClickcombo } from '../../src/classes/Listenable'
-import { clicks, modifiers, modifierAliases } from '../fixtures/comboMeta'
+import { modifierAliases, modifiers, pointers } from '../fixtures/comboMeta'
+import { eventMatchesPointercombo } from '../../src/classes/Listenable'
 
-const suite = createSuite('eventMatchesClickcombo')
+const suite = createSuite('eventMatchesPointercombo')
 
-suite(`predicates clicks`, () => {
-  for (const click of clicks) {
+suite(`predicates pointers`, () => {
+  for (const pointer of pointers) {
     assert.ok(
-      eventMatchesClickcombo({
-        event: {} as MouseEvent,
-        clickcombo: [click]
+      eventMatchesPointercombo({
+        event: {} as PointerEvent,
+        pointercombo: [pointer]
       })
     )
   }
@@ -19,50 +19,50 @@ suite(`predicates clicks`, () => {
 suite(`predicates modifiers as modifiers`, () => {
   for (const modifier of (modifiers as string[]).concat(modifierAliases)) {
     assert.ok(
-      eventMatchesClickcombo({
+      eventMatchesPointercombo({
         event: {
           altKey: true,
           metaKey: true,
           shiftKey: true,
           ctrlKey: true,
-        } as MouseEvent,
-        clickcombo: [modifier, 'click']
+        } as PointerEvent,
+        pointercombo: [modifier, 'pointerdown']
       })
     )
 
     assert.not.ok(
-      eventMatchesClickcombo({
+      eventMatchesPointercombo({
         event: {
           altKey: false,
           metaKey: false,
           shiftKey: false,
           ctrlKey: false,
-        } as MouseEvent,
-        clickcombo: [modifier, 'click']
+        } as PointerEvent,
+        pointercombo: [modifier, 'pointerdown']
       })
     )
-
+    
     assert.ok(
-      eventMatchesClickcombo({
+      eventMatchesPointercombo({
         event: {
           altKey: false,
           metaKey: false,
           shiftKey: false,
           ctrlKey: false,
-        } as MouseEvent,
-        clickcombo: ['!' + modifier, 'click']
+        } as PointerEvent,
+        pointercombo: ['!' + modifier, 'pointerdown']
       })
     )
 
     assert.not.ok(
-      eventMatchesClickcombo({
+      eventMatchesPointercombo({
         event: {
           altKey: true,
           metaKey: true,
           shiftKey: true,
           ctrlKey: true,
-        } as MouseEvent,
-        clickcombo: ['!' + modifier, 'click']
+        } as PointerEvent,
+        pointercombo: ['!' + modifier, 'pointerdown']
       })
     )
   }

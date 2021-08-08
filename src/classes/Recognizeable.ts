@@ -15,13 +15,11 @@ import type {
 } from '../extracted'
 import { createSlice, createConcat } from '../pipes'
 import {
-  ListenableSupportedEventType,
   eventMatchesClickcombo,
   toImplementation,
   eventMatchesKeycombo,
   ListenableSupportedType,
   ListenHandleParam,
-  ListenHandle
 } from './Listenable'
 
 export type RecognizeableOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {

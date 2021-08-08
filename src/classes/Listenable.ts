@@ -189,9 +189,9 @@ export type ListenableSupportedEventType = ListenableClickcombo
   | keyof Omit<HTMLElementEventMap, 'resize'>
   | keyof Omit<DocumentEventMap, 'resize'>
 
-export type ListenableOptions<Type extends ListenableSupportedType, RecognizeableMetadata> = {
-  recognizeable?: RecognizeableOptions<Type, RecognizeableMetadata>
-}
+export type ListenableOptions<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
+  Type extends 'recognizeable' ? { recognizeable?: RecognizeableOptions<Type, RecognizeableMetadata> }
+  : Record<string, never>
 
 export type ListenHandle<Type extends ListenableSupportedType> = 
   Type extends 'intersect' ? (entries: ListenHandleParam<Type>) => any :
@@ -625,7 +625,7 @@ export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEven
         }
 
         return name.startsWith('!')
-          ? event.key.toLowerCase() !== toKey(name).slice(1).toLowerCase()
+          ? event.key.toLowerCase() !== toKey(name.slice(1)).toLowerCase()
           : event.key.toLowerCase() === toKey(name).toLowerCase()
       case 'arrow':
         return predicatesByArrow.get(name as ListenableArrowAlias)?.({ event, name }) ?? predicatesByArrow.get('default')({ event, name })
