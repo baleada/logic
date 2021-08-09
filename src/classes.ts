@@ -1,5 +1,5 @@
 export { Animateable } from './classes/Animateable'
-export type { AnimateableKeyframe, AnimateableOptions, AnimateableStatus, AnimateFrame, AnimateFrameHandler, AnimateOptions } from './classes/Animateable'
+export type { AnimateableKeyframe, AnimateableOptions, AnimateableStatus, AnimateFrame, AnimateFrameHandle, AnimateOptions } from './classes/Animateable'
 
 export { Completeable } from './classes/Completeable'
 export type { CompleteableOptions, CompleteableStatus } from './classes/Completeable'
@@ -33,7 +33,7 @@ export { Navigateable } from './classes/Navigateable'
 export type { NavigateableOptions, NavigateableStatus } from './classes/Navigateable'
 
 export { Recognizeable } from './classes/Recognizeable'
-export type { RecognizeableOptions, RecognizeableStatus, RecognizeableHandlerApi } from './classes/Recognizeable'
+export type { RecognizeableOptions, RecognizeableStatus, RecognizeableHandleApi } from './classes/Recognizeable'
 
 export { Resolveable } from './classes/Resolveable'
 export type { ResolveableGetPromise, ResolveableOptions, ResolveableStatus } from './classes/Resolveable'
