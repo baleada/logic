@@ -38,7 +38,7 @@ type AnimateableTiming = [number, number, number, number]
 
 type AnimateableControlPoints = [{ x: number, y: number }, { x: number, y: number }]
 
-export type AnimateFrameHandler = (frame?: AnimateFrame) => any
+export type AnimateFrameHandle = (frame?: AnimateFrame) => any
 
 export type AnimateFrame = {
   properties: {
@@ -79,8 +79,8 @@ export class Animateable {
   _reversedControlPoints: AnimateableControlPoints
   _toAnimationProgress: BezierEasing.EasingFunction
   _reversedToAnimationProgress: BezierEasing.EasingFunction
-  _playCache: { handle?: AnimateFrameHandler, options?: AnimateOptions }
-  _reverseCache: { handle?: AnimateFrameHandler, options?: AnimateOptions }
+  _playCache: { handle?: AnimateFrameHandle, options?: AnimateOptions }
+  _reverseCache: { handle?: AnimateFrameHandle, options?: AnimateOptions }
   _pauseCache: { status?: 'playing' | 'reversing', timeProgress?: number }
   _seekCache: { timeProgress?: number }
   _alternateCache: { status: 'ready' | 'playing' | 'reversing' }
@@ -209,7 +209,7 @@ export class Animateable {
     return this
   }
 
-  play (handle: AnimateFrameHandler, options?: AnimateOptions) { // Play from current time progress
+  play (handle: AnimateFrameHandle, options?: AnimateOptions) { // Play from current time progress
     this._playCache = {
       handle,
       options,
@@ -281,7 +281,7 @@ export class Animateable {
     this._computedStatus = 'played'
   }
 
-  reverse (handle: AnimateFrameHandler, options?: AnimateOptions) { // Reverse from current time progress
+  reverse (handle: AnimateFrameHandle, options?: AnimateOptions) { // Reverse from current time progress
     this._reverseCache = {
       handle,
       options,
@@ -502,7 +502,7 @@ export class Animateable {
       lazyCollectionToArray()
     )(easeables)
   }
-  _recurse (type: AnimateType, timeRemaining: number, handle: AnimateFrameHandler, options?: AnimateOptions) {
+  _recurse (type: AnimateType, timeRemaining: number, handle: AnimateFrameHandle, options?: AnimateOptions) {
     switch (type) {
       case 'play':
         if (timeRemaining <= 0) {
@@ -638,14 +638,14 @@ export class Animateable {
     window.cancelAnimationFrame(this.request)
   }
 
-  seek (timeProgress: number, options: { handle?: AnimateFrameHandler } & AnimateOptions = {}) { // Store time progress. Continue playing or reversing if applicable.
+  seek (timeProgress: number, options: { handle?: AnimateFrameHandle } & AnimateOptions = {}) { // Store time progress. Continue playing or reversing if applicable.
     const iterations = Math.floor(timeProgress),
           naiveIterationProgress = timeProgress - iterations,
           { handle: naiveHandle } = options
 
     this._computedIterations = iterations
 
-    let ensuredTimeProgress: number, handle: AnimateFrameHandler
+    let ensuredTimeProgress: number, handle: AnimateFrameHandle
 
     if (this._alternates) {
       if (naiveIterationProgress <= .5) {

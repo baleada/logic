@@ -1,5 +1,5 @@
 import { Animateable } from './Animateable'
-import type { AnimateFrameHandler } from './Animateable'
+import type { AnimateFrameHandle } from './Animateable'
 
 export type DelayableOptions = {
   delay?: number,
@@ -61,13 +61,13 @@ export class Delayable {
     this.stop()
 
     this._computedFn = fn
-    this._setFrameHandler(fn)
+    this._setFrameHandle(fn)
 
     return this
   }
-  _frameHandler: AnimateFrameHandler
-  _setFrameHandler (fn: DelayableFunction) {
-    this._frameHandler = frame => {
+  _frameHandle: AnimateFrameHandle
+  _setFrameHandle (fn: DelayableFunction) {
+    this._frameHandle = frame => {
       const { properties: { progress }, timestamp } = frame
 
       // Don't call delayable function until progress is 1
@@ -101,13 +101,13 @@ export class Delayable {
       break
     case 'sought':
       this.seek(0)
-      this._animateable.play(frame => this._frameHandler(frame))
+      this._animateable.play(frame => this._frameHandle(frame))
       break
     case 'ready':
     case 'paused':
     case 'delayed':
     case 'stopped':
-      this._animateable.play(frame => this._frameHandler(frame))
+      this._animateable.play(frame => this._frameHandle(frame))
     }
 
     return this
@@ -131,7 +131,7 @@ export class Delayable {
     switch (this.status) {
     case 'paused':
     case 'sought':
-      this._animateable.play(frame => this._frameHandler(frame))
+      this._animateable.play(frame => this._frameHandle(frame))
       break
     case 'ready':
     case 'delaying':
@@ -150,7 +150,7 @@ export class Delayable {
     if (executions > 0) {
       window.requestAnimationFrame(timestamp => {
         for (let i = 0; i < executions; i++) {
-          this._frameHandler({
+          this._frameHandle({
             properties: {
               progress: {
                 progress: { time: 1, animation: 1 },
@@ -163,7 +163,7 @@ export class Delayable {
       })
     }
 
-    this._animateable.seek(timeProgress, { handle: frame => this._frameHandler(frame) })
+    this._animateable.seek(timeProgress, { handle: frame => this._frameHandle(frame) })
     this._sought()
 
     return this

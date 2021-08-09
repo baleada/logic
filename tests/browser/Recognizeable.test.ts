@@ -52,9 +52,9 @@ suite(`recognize(sequenceItem) calls handle`, async ({ puppeteer: { page } }) =>
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click' | 'keydown', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', () => handleWasCalled = true),
-          defineHandler('keydown', () => handleWasCalled = true)
+        handles: defineHandle => [
+          defineHandle('click', () => handleWasCalled = true),
+          defineHandle('keydown', () => handleWasCalled = true)
         ]
       }
     )
@@ -72,8 +72,8 @@ suite(`handle API recognized() sets status`, async ({ puppeteer: { page } }) => 
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', ({ recognized }) => recognized())
+        handles: defineHandle => [
+          defineHandle('click', ({ recognized }) => recognized())
         ]
       }
     )
@@ -92,8 +92,8 @@ suite(`handle API denied() sets status`, async ({ puppeteer: { page } }) => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', ({ denied }) => denied())
+        handles: defineHandle => [
+          defineHandle('click', ({ denied }) => denied())
         ]
       }
     )
@@ -114,8 +114,8 @@ suite(`handle API getSequence() gets the new sequence`, async ({ puppeteer: { pa
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', ({ getSequence }) => sequence = getSequence())
+        handles: defineHandle => [
+          defineHandle('click', ({ getSequence }) => sequence = getSequence())
         ]
       }
     )
@@ -138,8 +138,8 @@ suite(`handle API getStatus() gets status`, async ({ puppeteer: { page } }) => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', ({ getStatus }) => status = getStatus())
+        handles: defineHandle => [
+          defineHandle('click', ({ getStatus }) => status = getStatus())
         ]
       }
     )
@@ -162,8 +162,8 @@ suite(`handle API getMetadata() gets metadata`, async ({ puppeteer: { page } }) 
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', ({ getMetadata }) => metadata = getMetadata())
+        handles: defineHandle => [
+          defineHandle('click', ({ getMetadata }) => metadata = getMetadata())
         ]
       }
     )
@@ -186,8 +186,8 @@ suite(`handle API getMetadata() is a reference to metadata`, async ({ puppeteer:
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', ({ getMetadata }) => metadata = getMetadata())
+        handles: defineHandle => [
+          defineHandle('click', ({ getMetadata }) => metadata = getMetadata())
         ]
       }
     )
@@ -211,8 +211,8 @@ suite(`handle API setMetadata() sets metadata`, async ({ puppeteer: { page } }) 
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', ({ setMetadata }) => setMetadata({ stub: 'stub' }))
+        handles: defineHandle => [
+          defineHandle('click', ({ setMetadata }) => setMetadata({ stub: 'stub' }))
         ]
       }
     )
@@ -233,8 +233,8 @@ suite(`handle API effect() performs side effect`, async ({ puppeteer: { page } }
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', ({ sequenceItem, effect }) => effect(sequenceItem))
+        handles: defineHandle => [
+          defineHandle('click', ({ sequenceItem, effect }) => effect(sequenceItem))
         ]
       }
     )
@@ -256,8 +256,8 @@ suite(`handle API sequenceItem accesses sequenceItem`, async ({ puppeteer: { pag
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandler => [
-          defineHandler('click', ({ sequenceItem }) => result = sequenceItem.type)
+        handles: defineHandle => [
+          defineHandle('click', ({ sequenceItem }) => result = sequenceItem.type)
         ]
       }
     )
@@ -294,8 +294,8 @@ suite(`correctly routes IntersectionObserverEntry[]`, async ({ puppeteer: { page
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'intersect', any>(
                   [],
                   {
-                    handles: defineHandler => [
-                      defineHandler('intersect', ({ recognized }) => recognized())
+                    handles: defineHandle => [
+                      defineHandle('intersect', ({ recognized }) => recognized())
                     ]
                   }
                 ),
@@ -319,8 +319,8 @@ suite(`correctly routes MutationRecord[]`, async ({ puppeteer: { page } }) => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'mutate', any>(
                   [],
                   {
-                    handles: defineHandler => [
-                      defineHandler('mutate', ({ recognized }) => recognized())
+                    handles: defineHandle => [
+                      defineHandle('mutate', ({ recognized }) => recognized())
                     ]
                   }
                 ),
@@ -345,8 +345,8 @@ suite(`correctly routes ResizeObserverEntry[]`, async ({ puppeteer: { page } }) 
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'resize', any>(
                   [],
                   {
-                    handles: defineHandler => [
-                      defineHandler('resize', ({ recognized }) => recognized())
+                    handles: defineHandle => [
+                      defineHandle('resize', ({ recognized }) => recognized())
                     ]
                   }
                 ),
@@ -372,8 +372,8 @@ suite(`correctly routes MediaQueryListEvent`, async ({ puppeteer: { page } }) =>
     (window as unknown as WithLogic).testState = new (window as unknown as WithLogic).Logic.Recognizeable<'(min-width: 900px)', any>(
         [],
         {
-          handles: defineHandler => [
-            defineHandler('(min-width: 900px)', ({ recognized }) => recognized())
+          handles: defineHandle => [
+            defineHandle('(min-width: 900px)', ({ recognized }) => recognized())
           ]
         }
       )
@@ -401,8 +401,8 @@ suite(`correctly routes IdleDeadline`, async ({ puppeteer: { page } }) => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'idle', any>(
                   [],
                   {
-                    handles: defineHandler => [
-                      defineHandler('idle', ({ recognized }) => recognized())
+                    handles: defineHandle => [
+                      defineHandle('idle', ({ recognized }) => recognized())
                     ]
                   }
                 )
@@ -422,8 +422,8 @@ suite(`correctly routes leftclickcombo`, async ({ puppeteer: { page } }) => {
                   [],
                   {
                     handlesIncludeCombos: true,
-                    handles: defineHandler => [
-                      defineHandler('shift+click', ({ recognized }) => recognized())
+                    handles: defineHandle => [
+                      defineHandle('shift+click', ({ recognized }) => recognized())
                     ]
                   }
                 )
@@ -443,8 +443,8 @@ suite(`correctly routes rightclickcombo`, async ({ puppeteer: { page } }) => {
                   [],
                   {
                     handlesIncludeCombos: true,
-                    handles: defineHandler => [
-                      defineHandler('rightclick', ({ recognized }) => recognized())
+                    handles: defineHandle => [
+                      defineHandle('rightclick', ({ recognized }) => recognized())
                     ]
                   }
                 )
@@ -464,8 +464,8 @@ suite(`correctly routes keycombo`, async ({ puppeteer: { page } }) => {
                   [],
                   {
                     handlesIncludeCombos: true,
-                    handles: defineHandler => [
-                      defineHandler('shift+a', ({ recognized }) => recognized())
+                    handles: defineHandle => [
+                      defineHandle('shift+a', ({ recognized }) => recognized())
                     ]
                   }
                 )
@@ -484,8 +484,8 @@ suite(`correctly routes events`, async ({ puppeteer: { page } }) => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'visibilitychange', any>(
                   [],
                   {
-                    handles: defineHandler => [
-                      defineHandler('visibilitychange', ({ recognized }) => recognized())
+                    handles: defineHandle => [
+                      defineHandle('visibilitychange', ({ recognized }) => recognized())
                     ]
                   }
                 )
