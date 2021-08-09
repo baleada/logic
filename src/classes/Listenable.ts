@@ -2,8 +2,8 @@ import {
   some as lazyCollectionSome,
   every as lazyCollectionEvery,
 } from 'lazy-collections'
-import { Recognizeable, RecognizeableHandlerApi } from './Recognizeable'
-import type { RecognizeableOptions } from './Recognizeable'
+import { Recognizeable, createDefineHandle } from './Recognizeable'
+import type { RecognizeableOptions, RecognizeableHandleApi } from './Recognizeable'
 import {
   isArray,
   isNumber,
@@ -15,13 +15,14 @@ import {
   toModifier,
   isModified,
   createExceptAndOnlyHandle,
+  isFunction,
 } from '../extracted'
 import type {
   ListenableModifier,
   ListenableModifierAlias,
   ListenableKeycomboItem,
 } from '../extracted'
-import { createMap } from '../pipes'
+import { createMap, createReduce } from '../pipes'
 
 export type ListenableSupportedType = 'recognizeable'
   | 'intersect'
@@ -189,9 +190,7 @@ export type ListenableSupportedEventType = ListenableClickcombo
   | keyof Omit<HTMLElementEventMap, 'resize'>
   | keyof Omit<DocumentEventMap, 'resize'>
 
-export type ListenableOptions<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
-  Type extends 'recognizeable' ? { recognizeable?: RecognizeableOptions<Type, RecognizeableMetadata> }
-  : Record<string, never>
+export type ListenableOptions<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = { recognizeable?: RecognizeableOptions<Type, RecognizeableMetadata> }
 
 export type ListenHandle<Type extends ListenableSupportedType> = 
   Type extends 'intersect' ? (entries: ListenHandleParam<Type>) => any :
@@ -264,14 +263,26 @@ export type ListenableStatus = 'ready' | 'listening' | 'stopped'
 
 export class Listenable<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> {
   _computedRecognizeable: Recognizeable<Type, RecognizeableMetadata>
-  _recognizeableHandlerKeys: Type[]
+  _recognizeableHandlesKeys: Type[]
   _computedActive: Set<ListenableActive<Type, RecognizeableMetadata>>
   constructor (type: Type, options?: ListenableOptions<Type, RecognizeableMetadata>) {
     if (type === 'recognizeable') {
-      this._computedRecognizeable = new Recognizeable<Type, RecognizeableMetadata>([], options.recognizeable)
-      this._recognizeableHandlerKeys = isArray(options?.recognizeable?.handlers)
-        ? createMap<[Type, (api: RecognizeableHandlerApi<Type, RecognizeableMetadata>) => any], Type>(([key]) => key)(options.recognizeable.handlers)
-        : Object.keys(options?.recognizeable?.handlers || {}) as Type[]
+      // Recognizeable options are ensured as an object here because `handles` keys need to be extracted and stored in the Listenable instance
+      const recognizeableOptions = {
+        ...(options?.recognizeable || {}),
+        handles: isFunction(options?.recognizeable?.handles)
+          ? createReduce<
+              [type: Type, handle: (api: RecognizeableHandleApi<Type, RecognizeableMetadata>) => any],
+              { [type in Type]?: (api: RecognizeableHandleApi<Type, RecognizeableMetadata>) => any }
+            >((handles, [type, handle]) => {
+              handles[type] = handle
+              return handles
+            }, {})(options.recognizeable.handles(createDefineHandle<Type, RecognizeableMetadata>()))
+          : options?.recognizeable?.handles || {} as { [type in Type]?: (api: RecognizeableHandleApi<Type, RecognizeableMetadata>) => any }
+      }
+
+      this._computedRecognizeable = new Recognizeable<Type, RecognizeableMetadata>([], recognizeableOptions)
+      this._recognizeableHandlesKeys = Object.keys(recognizeableOptions.handles) as Type[]
     }    
 
     this._computedActive = new Set()
@@ -396,8 +407,9 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
       }
     }
 
-    for (const handlerKey of this._recognizeableHandlerKeys) {
-      const listenable = new Listenable(handlerKey)
+    for (const type of this._recognizeableHandlesKeys) {
+      console.log(type)
+      const listenable = new Listenable(type)
       listenable.listen(guardedHandle as ListenHandle<Type>, options)
       this.active.add({ id: listenable } as ListenableActive<Type>)
     }

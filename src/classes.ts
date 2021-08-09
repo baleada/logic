@@ -32,7 +32,7 @@ export type { ListenableKeycomboItem } from './extracted'
 export { Navigateable } from './classes/Navigateable'
 export type { NavigateableOptions, NavigateableStatus } from './classes/Navigateable'
 
-export { Recognizeable, defineRecognizeableHandler } from './classes/Recognizeable'
+export { Recognizeable } from './classes/Recognizeable'
 export type { RecognizeableOptions, RecognizeableStatus, RecognizeableHandlerApi } from './classes/Recognizeable'
 
 export { Resolveable } from './classes/Resolveable'

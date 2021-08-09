@@ -45,7 +45,7 @@ function checkTestCoverage () {
         .concat(nodeTests, browserTests)
         .map(test => test.replace('.test.ts', '')),
       missingTests = allExports
-        .filter(exprt => !allTests.includes(exprt) && !except.has(exprt) && !exprt.startsWith('define'))
+        .filter(exprt => !allTests.includes(exprt) && !except.has(exprt) && !exprt.startsWith('define') && !exprt.startsWith('createDefine'))
         .concat(pipes.filter(pipe => !(new RegExp(pipe)).test(pipeTests) && !except.has(pipe)))
 
   console.log({ desired: allExports.length, written: nodeTests.concat(browserTests).length, missing: missingTests })

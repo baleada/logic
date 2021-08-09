@@ -7,7 +7,8 @@ import {
   isArray,
   isNumber,
   ensureClickcombo,
-  ensureKeycombo
+  ensureKeycombo,
+  isFunction
 } from '../extracted'
 import type {
   ListenableKeycomboItem,
@@ -24,16 +25,20 @@ import {
 
 export type RecognizeableOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
   maxSequenceLength?: true | number,
-  handlersIncludeCombos?: boolean,
-  handlers?: { [type in Type]?: (api: RecognizeableHandlerApi<Type, Metadata>) => any }
-    | [type: Type, handler: (api: RecognizeableHandlerApi<Type, Metadata>) => any][]
+  handlesIncludeCombos?: boolean,
+  handles?: { [type in Type]?: (api: RecognizeableHandleApi<Type, Metadata>) => any }
+    | ((defineHandle: DefineHandle<Type, Metadata>) => [type: Type, handle: (api: RecognizeableHandleApi<Type, Metadata>) => any][])
 }
+
+type DefineHandle<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = 
+  <HandleType extends Type>(type: HandleType, handle: (api: RecognizeableHandleApi<HandleType, Metadata>) => any) 
+    => [type: Type, handle: (api: RecognizeableHandleApi<Type, Metadata>) => any]
 
 export type RecognizeableStatus = 'recognized' | 'recognizing' | 'denied' | 'ready'
 
-export type RecognizeableHandlerApi<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = HandlerApiFromConstructor<Type, Metadata> & HandlerApiFromRuntime<Type>
+export type RecognizeableHandleApi<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = HandleApiFromConstructor<Type, Metadata> & HandleApiFromRuntime<Type>
 
-type HandlerApiFromConstructor<Type extends ListenableSupportedType, Metadata> = {
+type HandleApiFromConstructor<Type extends ListenableSupportedType, Metadata> = {
   getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
   getMetadata: () => Metadata,
   setMetadata: (metadata: Metadata) => void,
@@ -42,41 +47,41 @@ type HandlerApiFromConstructor<Type extends ListenableSupportedType, Metadata> =
   effect: (sequenceItem: ListenHandleParam<Type>) => any,
 }
 
-type HandlerApiFromRuntime<Type extends ListenableSupportedType> = {
+type HandleApiFromRuntime<Type extends ListenableSupportedType> = {
   sequenceItem: ListenHandleParam<Type>,
   getSequence: () => ListenHandleParam<Type>[]
 }
 
 export class Recognizeable<Type extends ListenableSupportedType, Metadata extends Record<any, any>> {
   _maxSequenceLength: number | true
-  _handlers: Map<string, (api: RecognizeableHandlerApi<Type, Metadata>) => any>
-  _handlerApi: HandlerApiFromConstructor<Type, Metadata>
+  _handles: Map<string, (api: RecognizeableHandleApi<Type, Metadata>) => any>
+  _handleApi: HandleApiFromConstructor<Type, Metadata>
   _toType: (sequenceItem: ListenHandleParam<Type>) => string
 
-  constructor (sequence: ListenHandleParam<Type>[], options: RecognizeableOptions<Type, Metadata> = { handlersIncludeCombos: true }) {
+  constructor (sequence: ListenHandleParam<Type>[], options: RecognizeableOptions<Type, Metadata> = { handlesIncludeCombos: true }) {
     const defaultOptions: RecognizeableOptions<Type, Metadata> = {
       maxSequenceLength: true as const,
-      handlersIncludeCombos: true,
-      handlers: {},
+      handlesIncludeCombos: true,
+      handles: {},
     }
     
     this._maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
-    this._handlers = new Map(
-      isArray(options?.handlers) 
-        ? options.handlers
-        : Object.entries(options?.handlers || defaultOptions.handlers)
+    this._handles = new Map(
+      isFunction(options?.handles) 
+        ? options.handles(createDefineHandle<Type, Metadata>())
+        : Object.entries(options?.handles || defaultOptions.handles)
     )
 
     this._toType = createToType({
-      handlersIncludeCombos: options.handlersIncludeCombos,
-      handlers: this._handlers,
+      handlesIncludeCombos: options.handlesIncludeCombos,
+      handles: this._handles,
     })
 
     this._resetComputedMetadata()
 
     this.setSequence(sequence)
 
-    this._handlerApi = {
+    this._handleApi = {
       getStatus: () => this.status,
       getMetadata: () => this.metadata,
       setMetadata: (metadata: Metadata) => this._computedMetadata = metadata,
@@ -146,9 +151,9 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
             [sequenceItem]
           )([])
           
-    this._handlers.get(type)?.({
+    this._handles.get(type)?.({
       sequenceItem: sequenceItem,
-      ...this._handlerApi,
+      ...this._handleApi,
       getSequence: () => newSequence,
     })
       
@@ -170,34 +175,36 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
   }
 }
 
-export function defineRecognizeableHandler<Type extends ListenableSupportedType, Metadata extends Record<any, any>, HandlerType extends Type> (type: HandlerType, handler: (api: RecognizeableHandlerApi<HandlerType, Metadata>)  => any): [Type, (api: RecognizeableHandlerApi<HandlerType, Metadata>) => any]  {
-  return [type, handler]
+export function createDefineHandle<Type extends ListenableSupportedType, Metadata extends Record<any, any>> (): DefineHandle<Type, Metadata> {
+  return <HandleType extends Type>(type: HandleType, handle: (api: RecognizeableHandleApi<HandleType, Metadata>) => any) => {
+    return [type, handle]
+  }
 }
 
 function createToType<Type extends ListenableSupportedType, Metadata> ({
-  handlersIncludeCombos,
-  handlers
+  handlesIncludeCombos,
+  handles
 }: {
- handlersIncludeCombos?: RecognizeableOptions<Type, Metadata>['handlersIncludeCombos'],
- handlers?: Map<string, (api: RecognizeableHandlerApi<Type, Metadata>) => any>
+ handlesIncludeCombos?: RecognizeableOptions<Type, Metadata>['handlesIncludeCombos'],
+ handles?: Map<string, (api: RecognizeableHandleApi<Type, Metadata>) => any>
 }): (sequence: ListenHandleParam<Type>) => string {
-  const handlerLeftclickcombos: ListenableClickcomboItem[][] = [],
-        handlerRightclickcombos: ListenableClickcomboItem[][] = [],
-        handlerKeycombos: ListenableKeycomboItem[][] = []
+  const handleLeftclickcombos: ListenableClickcomboItem[][] = [],
+        handleRightclickcombos: ListenableClickcomboItem[][] = [],
+        handleKeycombos: ListenableKeycomboItem[][] = []
 
-  if (handlersIncludeCombos) {
-    for (const [handlerKey] of handlers) {
-      const implementation = toImplementation(handlerKey)
+  if (handlesIncludeCombos) {
+    for (const [handleKey] of handles) {
+      const implementation = toImplementation(handleKey)
 
       switch (implementation) {
         case 'leftclickcombo':
-          handlerLeftclickcombos.push(ensureClickcombo(handlerKey))
+          handleLeftclickcombos.push(ensureClickcombo(handleKey))
           break
         case 'rightclickcombo':
-          handlerRightclickcombos.push(ensureClickcombo(handlerKey))
+          handleRightclickcombos.push(ensureClickcombo(handleKey))
           break
         case 'keycombo':
-          handlerKeycombos.push(ensureKeycombo(handlerKey))
+          handleKeycombos.push(ensureKeycombo(handleKey))
           break
         default:
           // do nothing
@@ -228,9 +235,9 @@ function createToType<Type extends ListenableSupportedType, Metadata> ({
         return 'idle'
       }
 
-      if (handlerLeftclickcombos?.length > 0) {
+      if (handleLeftclickcombos?.length > 0) {
         if (leftclickcomboEventTypes.has((sequenceItem as Event).type)) {
-          for (const clickcombo of handlerLeftclickcombos) {
+          for (const clickcombo of handleLeftclickcombos) {
             if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
               return toJoinedClickcombo(clickcombo) as string
             }
@@ -238,9 +245,9 @@ function createToType<Type extends ListenableSupportedType, Metadata> ({
         }
       }
       
-      if (handlerRightclickcombos?.length > 0) {
+      if (handleRightclickcombos?.length > 0) {
         if (rightclickComboEventTypes.has((sequenceItem as Event).type)) {
-          for (const clickcombo of handlerRightclickcombos) {
+          for (const clickcombo of handleRightclickcombos) {
             if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
               return toJoinedClickcombo(clickcombo) as string
             }
@@ -248,9 +255,9 @@ function createToType<Type extends ListenableSupportedType, Metadata> ({
         }
       }
       
-      if (handlerKeycombos?.length > 0) {
+      if (handleKeycombos?.length > 0) {
         if (keycomboEventTypes.has((sequenceItem as Event).type)) {
-          for (const keycombo of handlerKeycombos) {
+          for (const keycombo of handleKeycombos) {
             if (eventMatchesKeycombo({ event: sequenceItem as KeyboardEvent, keycombo })) {
               return toJoinedKeycombo(keycombo) as string
             }
