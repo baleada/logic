@@ -284,7 +284,7 @@ export class Pipeable {
   constructor (private state: any) {}
 
   pipe (...fns: ((...args: any[]) => any)[]) {
-    return fns.reduce((piped, fn, index) => fn(piped, index), this.state)
+    return createReduce<(...args: any[]) => any, any>((piped, fn, index) => fn(piped, index), this.state)(fns)
   }
 
   async pipeAsync (...fns: ((...args: any[]) => Promise<any>)[]): Promise<any> {

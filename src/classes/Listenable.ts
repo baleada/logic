@@ -1,6 +1,7 @@
 import {
   some as lazyCollectionSome,
   every as lazyCollectionEvery,
+  find as lazyCollectionFind,
 } from 'lazy-collections'
 import { Recognizeable, createDefineHandle } from './Recognizeable'
 import type { RecognizeableOptions, RecognizeableHandleApi } from './Recognizeable'
@@ -546,7 +547,7 @@ function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive
 }
 
 export function toImplementation (type: string) {
-  return [...predicatesByImplementation.keys()].find(implementation => predicatesByImplementation.get(implementation)(type))
+  return lazyCollectionFind<ListenableImplementation>(implementation => predicatesByImplementation.get(implementation)(type))(predicatesByImplementation.keys()) as ListenableImplementation
 }
 
 type ListenableImplementation = 'recognizeable' | 'intersection' | 'mutation' | 'resize' | 'mediaquery' | 'idle' | 'documentevent' | 'keycombo' | 'leftclickcombo' | 'rightclickcombo' | 'pointercombo' | 'event'

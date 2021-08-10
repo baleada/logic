@@ -259,7 +259,7 @@ export function createExceptAndOnlyHandle<Type extends ListenableSupportedEventT
   return ((event: ListenHandleParam<Type>) => {
     const { target } = event,
           [matchesOnly, matchesExcept] = target instanceof Element
-            ? [only, except].map(selectors => lazyCollectionSome<string>(selector => target.matches(selector))(selectors) as boolean)
+            ? createMap<string[], boolean>(selectors => lazyCollectionSome<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
             : [false, true]
 
     if (matchesOnly) {
