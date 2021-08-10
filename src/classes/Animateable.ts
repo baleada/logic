@@ -1,9 +1,14 @@
 import BezierEasing from 'bezier-easing'
 import { mix } from '@snigo.dev/color'
+import {
+  filter as lazyCollectionFilter,
+  pipe as lazyCollectionPipe,
+  reduce as lazyCollectionReduce,
+  toArray as lazyCollectionToArray,
+} from 'lazy-collections'
 import { Listenable } from './Listenable'
 import { isFunction, isUndefined, isNumber, isString, isArray } from '../extracted'
 import {
-  createUnique,
   createSlice,
   createMap,
   createFilter,
@@ -12,12 +17,6 @@ import {
   createConcat,
   createReverse,
 } from '../pipes'
-import {
-  filter as lazyCollectionFilter,
-  pipe as lazyCollectionPipe,
-  reduce as lazyCollectionReduce,
-  toArray as lazyCollectionToArray
-} from 'lazy-collections'
 
 export type AnimateableKeyframe = {
   progress: number,
@@ -808,7 +807,7 @@ export class Animateable {
   }
 }
 
-type Easeable = {
+export type Easeable = {
   property: string,
   value: { previous: string | number | any[], next: string | number | any[] },
   progress: { start: number, end: number },
@@ -816,7 +815,7 @@ type Easeable = {
   toAnimationProgress: BezierEasing.EasingFunction
 }
 
-type GetEaseables = (required: { properties: string[], keyframes: AnimateableKeyframe[] }) => Easeable[]
+type GetEaseables = ({ properties, keyframes }: { properties: string[], keyframes: AnimateableKeyframe[] }) => Easeable[]
 
 type FromKeyframeToControlPoints = (
   { keyframe, index, propertyKeyframes }: {
@@ -877,7 +876,17 @@ export function createGetEaseables (fromKeyframeToControlPoints: FromKeyframeToC
 }
 
 export function toProperties (keyframes: AnimateableKeyframe[]): string[] {
-  return createUnique<string>()(keyframes.map(({ properties }) => Object.keys(properties)).flat())
+  const properties = new Set<string>()
+
+  for (const keyframe of keyframes) {
+    for (const property in keyframe.properties) {
+      if (!properties.has(property)) {
+        properties.add(property)
+      }
+    }
+  }
+  
+  return [...properties]
 }
 
 export function fromTimingToControlPoints(timing: AnimateableTiming): AnimateableControlPoints {
