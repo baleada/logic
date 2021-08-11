@@ -9,8 +9,8 @@ export class Fullscreenable<ElementType extends Element> {
     this.setGetElement(getElement)
     this.ready()
   }
-  computedStatus: FullscreenableStatus
-  ready () {
+  private computedStatus: FullscreenableStatus
+  private ready () {
     this.computedStatus = 'ready'
   }
 
@@ -30,7 +30,7 @@ export class Fullscreenable<ElementType extends Element> {
     return this.computedError
   }
 
-  computedGetElement: ((...args: any[]) => ElementType)
+  private computedGetElement: ((...args: any[]) => ElementType)
   setGetElement (getElement: ((...args: any[]) => ElementType)) {
     this.computedGetElement = () => getElement()
     return this
@@ -41,7 +41,7 @@ export class Fullscreenable<ElementType extends Element> {
     return this
   }
   
-  computedError: Error
+  private computedError: Error
   async fullscreen (options: FullscreenOptions = {}) {
     try {
       await this.element.requestFullscreen(options)
@@ -53,10 +53,10 @@ export class Fullscreenable<ElementType extends Element> {
 
     return this
   }
-  fullscreened () {
+  private fullscreened () {
     this.computedStatus = 'fullscreened'
   }
-  errored () {
+  private errored () {
     this.computedStatus = 'errored'
   }
 
@@ -71,7 +71,7 @@ export class Fullscreenable<ElementType extends Element> {
 
     return this
   }
-  exited () {
+  private exited () {
     this.computedStatus = 'exited'
   }
 }

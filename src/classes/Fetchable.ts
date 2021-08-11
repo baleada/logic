@@ -49,6 +49,9 @@ export class Fetchable {
   get response () { 
     return this.computedResponse
   }
+  get error () { 
+    return this.computedError
+  }
   get arrayBuffer () {
     return this.getUsedBody(this.computedArrayBuffer)
   }
@@ -91,7 +94,8 @@ export class Fetchable {
     return this
   }
   
-  private computedResponse: Response | Error
+  private computedResponse: Response
+  private computedError: Error
   async fetch (options: FetchOptions = {}) {
     this.computedStatus = 'fetching'
 
@@ -99,7 +103,7 @@ export class Fetchable {
       this.computedResponse = await fetch(this.resource, { signal: this.abortController.signal, ...ensureOptions(options) })
       this.computedStatus = 'fetched'
     } catch (error) {
-      this.computedResponse = error as Error
+      this.computedError = error as Error
 
       this.computedStatus = error.name === 'AbortError'
         ? 'aborted'

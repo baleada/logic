@@ -26,8 +26,8 @@ export class Resolveable<Value> {
   get status () {
     return this.computedStatus
   }
-  get response () { 
-    return this.computedResponse
+  get value () { 
+    return this.computedValue
   }
 
   private computedGetPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[])
@@ -38,19 +38,19 @@ export class Resolveable<Value> {
   }
   
 
-  private computedResponse: Value | Value[] | Error
+  private computedValue: Value | Value[] | Error
   async resolve (...args: any[]) {
     this.resolving()
     try {
       const promises = this.getPromise(...args)
 
-      this.computedResponse = isArray(promises)
+      this.computedValue = isArray(promises)
         ? await createMapAsync<Promise<Value>, Value>(async promise => await promise)(promises)
         : await promises
 
       this.resolved()    
     } catch (error) {
-      this.computedResponse = error as Error
+      this.computedValue = error as Error
       this.errored()    
     }
     

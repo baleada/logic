@@ -47,6 +47,9 @@ export class Copyable {
   get response () {
     return this.computedResponse
   }
+  get error () {
+    return this.computedError
+  }
   
   private computedString: string
   setString (string: string) {
@@ -55,6 +58,7 @@ export class Copyable {
   }
   
   private computedResponse: undefined
+  private computedError: undefined
   async copy (options: { type: 'clipboard' | 'deprecated' } = { type: 'clipboard' }) {    
     this.copying()
     
@@ -69,7 +73,7 @@ export class Copyable {
           
           this.copied()
         } catch (error) {
-          this.computedResponse = error
+          this.computedError = error as Error
           this.errored()
         }
         
