@@ -7,32 +7,32 @@ export type FullscreenableStatus = 'ready' | 'fullscreened' | 'errored' | 'exite
 export class Fullscreenable<ElementType extends Element> {
   constructor (getElement: FullscreenableGetElement<ElementType>, options: FullscreenableOptions = {}) {
     this.setGetElement(getElement)
-    this._ready()
+    this.ready()
   }
-  _computedStatus: FullscreenableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  computedStatus: FullscreenableStatus
+  ready () {
+    this.computedStatus = 'ready'
   }
 
   get getElement () {
-    return this._computedGetElement
+    return this.computedGetElement
   }
   set getElement (getElement) {
     this.setGetElement(getElement)
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   get element () {
     return this.getElement()
   }
   get error () {
-    return this._computedError
+    return this.computedError
   }
 
-  _computedGetElement: ((...args: any[]) => ElementType)
+  computedGetElement: ((...args: any[]) => ElementType)
   setGetElement (getElement: ((...args: any[]) => ElementType)) {
-    this._computedGetElement = () => getElement()
+    this.computedGetElement = () => getElement()
     return this
   }
 
@@ -41,37 +41,37 @@ export class Fullscreenable<ElementType extends Element> {
     return this
   }
   
-  _computedError: Error
+  computedError: Error
   async fullscreen (options: FullscreenOptions = {}) {
     try {
       await this.element.requestFullscreen(options)
-      this._fullscreened()
+      this.fullscreened()
     } catch (error) {
-      this._computedError = error as Error
-      this._errored()
+      this.computedError = error as Error
+      this.errored()
     }
 
     return this
   }
-  _fullscreened () {
-    this._computedStatus = 'fullscreened'
+  fullscreened () {
+    this.computedStatus = 'fullscreened'
   }
-  _errored () {
-    this._computedStatus = 'errored'
+  errored () {
+    this.computedStatus = 'errored'
   }
 
   async exit () {
     try {
       await document.exitFullscreen()
-      this._exited()
+      this.exited()
     } catch (error) {
-      this._computedError = error
-      this._errored()
+      this.computedError = error
+      this.errored()
     }
 
     return this
   }
-  _exited () {
-    this._computedStatus = 'exited'
+  exited () {
+    this.computedStatus = 'exited'
   }
 }

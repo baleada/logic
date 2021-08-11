@@ -263,9 +263,9 @@ type ListenableActiveEventId<Type extends ListenableSupportedEventType> = [
 export type ListenableStatus = 'ready' | 'listening' | 'stopped'
 
 export class Listenable<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> {
-  _computedRecognizeable: Recognizeable<Type, RecognizeableMetadata>
-  _recognizeableEffectsKeys: Type[]
-  _computedActive: Set<ListenableActive<Type, RecognizeableMetadata>>
+  private computedRecognizeable: Recognizeable<Type, RecognizeableMetadata>
+  private recognizeableEffectsKeys: Type[]
+  private computedActive: Set<ListenableActive<Type, RecognizeableMetadata>>
   constructor (type: Type, options?: ListenableOptions<Type, RecognizeableMetadata>) {
     if (type === 'recognizeable') {
       // Recognizeable options are ensured as an object here because `effects` keys need to be extracted and stored in the Listenable instance
@@ -282,48 +282,48 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
           : options?.recognizeable?.effects || {} as { [type in Type]?: (api: RecognizeableEffectApi<Type, RecognizeableMetadata>) => any }
       }
 
-      this._computedRecognizeable = new Recognizeable<Type, RecognizeableMetadata>([], recognizeableOptions)
-      this._recognizeableEffectsKeys = Object.keys(recognizeableOptions.effects) as Type[]
+      this.computedRecognizeable = new Recognizeable<Type, RecognizeableMetadata>([], recognizeableOptions)
+      this.recognizeableEffectsKeys = Object.keys(recognizeableOptions.effects) as Type[]
     }    
 
-    this._computedActive = new Set()
+    this.computedActive = new Set()
 
     this.setType(type)
     this.ready()
   }
-  _computedStatus: ListenableStatus
+  private computedStatus: ListenableStatus
   private ready () {
-    this._computedStatus = 'ready'
+    this.computedStatus = 'ready'
   }
 
   get type () {
-    return this._computedType
+    return this.computedType
   }
   set type (type) {
     this.setType(type)
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   get active () {
-    return this._computedActive
+    return this.computedActive
   }
   get recognizeable () {
-    return this._computedRecognizeable
+    return this.computedRecognizeable
   }
 
-  _computedType: string
-  _implementation: ListenableImplementation
+  private computedType: string
+  private implementation: ListenableImplementation
   setType (type: string) {
     this.stop()
-    this._computedType = type
-    this._implementation = toImplementation(type)
+    this.computedType = type
+    this.implementation = toImplementation(type)
     return this
   }
 
   listen (effect: ListenEffect<Type>, options: ListenOptions<Type> = {} as ListenOptions<Type>) {
     // These type assertions are confident because toImplementation is thoroughly tested.
-    switch (this._implementation) {
+    switch (this.implementation) {
       case 'intersection':
         this.intersectionListen(effect as unknown as ListenEffect<'intersect'>, options as ListenOptions<'intersect'>)
         break
@@ -406,7 +406,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
       }
     }
 
-    for (const type of this._recognizeableEffectsKeys) {
+    for (const type of this.recognizeableEffectsKeys) {
       console.log(type)
       const listenable = new Listenable(type)
       listenable.listen(guardedEffect as ListenEffect<Type>, options)
@@ -454,7 +454,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
   }
   private eventListen<EventType extends ListenableSupportedEventType> (effect: ListenEffect<EventType>, options: ListenOptions<EventType>) {
     const type = (() => {
-      switch (this._implementation) {
+      switch (this.implementation) {
         case 'keycombo':
           return `key${(options as ListenOptions<'cmd+b'>).keyDirection || 'down'}`
         case 'leftclickcombo':
@@ -481,7 +481,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     })
   }
   private listening () {
-    this._computedStatus = 'listening'
+    this.computedStatus = 'listening'
   }
 
   stop (options: { target?: Element } = {}) {
@@ -512,7 +512,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     return this
   }
   private stopped () {
-    this._computedStatus = 'stopped'
+    this.computedStatus = 'stopped'
   }
 }
 

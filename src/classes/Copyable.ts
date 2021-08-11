@@ -8,69 +8,69 @@ export type CopyableOptions = Record<string, never>
 export type CopyableStatus = 'ready' | 'copying' | 'copied' | 'errored'
 
 export class Copyable {
-  _computedIsClipboardText: boolean
-  _copy: Listenable<'copy'>
-  _cut: Listenable<'cut'>
-  _copyAndCutEffect: ListenEffect<'copy' | 'cut'>
+  private computedIsClipboardText: boolean
+  private copyListenable: Listenable<'copy'>
+  private cutListenable: Listenable<'cut'>
+  private copyAndCutEffect: ListenEffect<'copy' | 'cut'>
 
   constructor (string: string, options: CopyableOptions = {}) {
-    this._computedIsClipboardText = false
+    this.computedIsClipboardText = false
 
-    this._copy = new Listenable('copy')
-    this._cut = new Listenable('cut')
+    this.copyListenable = new Listenable('copy')
+    this.cutListenable = new Listenable('cut')
 
-    this._copyAndCutEffect = async () => {
+    this.copyAndCutEffect = async () => {
       const clipboardText = await navigator.clipboard.readText()
-      this._computedIsClipboardText = clipboardText === this.string
+      this.computedIsClipboardText = clipboardText === this.string
     }
 
     this.setString(string)
-    this._ready()
+    this.ready()
   }
-  _computedStatus: CopyableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: CopyableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
   
   get string () {
-    return this._computedString
+    return this.computedString
   }
   set string (string) {
     this.setString(string)
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   get isClipboardText () {
-    return this._computedIsClipboardText
+    return this.computedIsClipboardText
   }
   get response () {
-    return this._computedResponse
+    return this.computedResponse
   }
   
-  _computedString: string
+  private computedString: string
   setString (string: string) {
-    this._computedString = string
+    this.computedString = string
     return this
   }
   
-  _computedResponse: undefined
+  private computedResponse: undefined
   async copy (options: { type: 'clipboard' | 'deprecated' } = { type: 'clipboard' }) {    
-    this._copying()
+    this.copying()
     
     const { type } = options
 
     switch (type) {
       case 'clipboard':
         try {
-          this._computedResponse = await navigator.clipboard.writeText(this.string) as undefined
+          this.computedResponse = await navigator.clipboard.writeText(this.string) as undefined
           
-          this._computedIsClipboardText = true
+          this.computedIsClipboardText = true
           
-          this._copied()
+          this.copied()
         } catch (error) {
-          this._computedResponse = error
-          this._errored()
+          this.computedResponse = error
+          this.errored()
         }
         
         break
@@ -85,31 +85,31 @@ export class Copyable {
         
         document.body.removeChild(input)
 
-        this._computedIsClipboardText = true
+        this.computedIsClipboardText = true
 
-        this._copied()
+        this.copied()
         break
     }
     
     return this
   }
-  _copying () {
-    this._computedStatus = 'copying'
+  private copying () {
+    this.computedStatus = 'copying'
   }
-  _copied () {
-    this._computedStatus = 'copied'
+  private copied () {
+    this.computedStatus = 'copied'
   }
-  _errored () {
-    this._computedStatus = 'errored'
+  private errored () {
+    this.computedStatus = 'errored'
   }
 
   effectClipboardTextChanges () {
-    this._copy.listen(this._copyAndCutEffect)
-    this._cut.listen(this._copyAndCutEffect)
+    this.copyListenable.listen(this.copyAndCutEffect)
+    this.cutListenable.listen(this.copyAndCutEffect)
   }
 
   stop () {
-    this._copy.stop()
-    this._cut.stop()
+    this.copyListenable.stop()
+    this.cutListenable.stop()
   }
 }

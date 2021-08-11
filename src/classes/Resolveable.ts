@@ -10,59 +10,59 @@ export type ResolveableStatus = 'ready' | 'resolving' | 'resolved' | 'errored'
 export class Resolveable<Value> {
   constructor (getPromise: ResolveableGetPromise<Value>, options: ResolveableOptions = {}) {
     this.setGetPromise(getPromise)
-    this._ready()
+    this.ready()
   }
-  _computedStatus: ResolveableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: ResolveableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
 
   get getPromise () {
-    return this._computedGetPromise
+    return this.computedGetPromise
   }
   set getPromise (getPromise) {
     this.setGetPromise(getPromise)
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   get response () { 
-    return this._computedResponse
+    return this.computedResponse
   }
 
-  _computedGetPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[])
+  private computedGetPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[])
   setGetPromise (getPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[])) {
-    this._computedGetPromise = getPromise
+    this.computedGetPromise = getPromise
 
     return this
   }
   
 
-  _computedResponse: Value | Value[] | Error
+  private computedResponse: Value | Value[] | Error
   async resolve (...args: any[]) {
-    this._resolving()
+    this.resolving()
     try {
       const promises = this.getPromise(...args)
 
-      this._computedResponse = isArray(promises)
+      this.computedResponse = isArray(promises)
         ? await createMapAsync<Promise<Value>, Value>(async promise => await promise)(promises)
         : await promises
 
-      this._resolved()    
+      this.resolved()    
     } catch (error) {
-      this._computedResponse = error as Error
-      this._errored()    
+      this.computedResponse = error as Error
+      this.errored()    
     }
     
     return this
   }
-  _resolving () {
-    this._computedStatus = 'resolving'
+  private resolving () {
+    this.computedStatus = 'resolving'
   }
-  _resolved () {
-    this._computedStatus = 'resolved'
+  private resolved () {
+    this.computedStatus = 'resolved'
   }
-  _errored () {
-    this._computedStatus = 'errored'
+  private errored () {
+    this.computedStatus = 'errored'
   }
 }

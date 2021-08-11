@@ -27,58 +27,58 @@ const defaultCompleteOptions: CompleteOptions = {
 }
 
 export class Completeable {
-  _segmentFrom: 'start' | 'selection' | 'divider'
-  _segmentTo: 'end' |'selection' |'divider'
-  _divider: RegExp
-  _computedDividerIndices: { before: number, after: number }
+  private segmentFrom: 'start' | 'selection' | 'divider'
+  private segmentTo: 'end' |'selection' |'divider'
+  private divider: RegExp
+  private computedDividerIndices: { before: number, after: number }
 
   constructor (string: string, options: CompleteableOptions = {}) {
-    this._constructing()
-    this._segmentFrom = options?.segment?.from || defaultOptions.segment.from
-    this._segmentTo = options?.segment?.to || defaultOptions.segment.to
-    this._divider = options?.divider || defaultOptions.divider
+    this.constructing()
+    this.segmentFrom = options?.segment?.from || defaultOptions.segment.from
+    this.segmentTo = options?.segment?.to || defaultOptions.segment.to
+    this.divider = options?.divider || defaultOptions.divider
 
-    this._computedDividerIndices = { before: 0, after: 0 }
+    this.computedDividerIndices = { before: 0, after: 0 }
 
     this.setString(string)
     this.setSelection(options?.initialSelection || { start: string.length, end: string.length, direction: 'none' })
-    this._ready()
+    this.ready()
   }
-  _constructing () {
-    this._computedStatus = 'constructing'
+  private constructing () {
+    this.computedStatus = 'constructing'
   }
-  _computedStatus: CompleteableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: CompleteableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
 
   get string () {
-    return this._computedString
+    return this.computedString
   }
   set string (string) {
     this.setString(string)
   }
   get selection () {
-    return this._computedSelection
+    return this.computedSelection
   }
   set selection (selection) {
     this.setSelection(selection)
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   get segment () {
     return this.string.slice(
-      this._getSegmentStartIndex(),
-      this._getSegmentEndIndex()
+      this.getSegmentStartIndex(),
+      this.getSegmentEndIndex()
     )
   }
   get dividerIndices () {
-    return this._computedDividerIndices
+    return this.computedDividerIndices
   }
   
-  _getSegmentStartIndex (): number {
-    switch (this._segmentFrom) {
+  private getSegmentStartIndex (): number {
+    switch (this.segmentFrom) {
       case 'start':
         return 0
       case 'selection':
@@ -87,8 +87,8 @@ export class Completeable {
         return this.dividerIndices.before + 1 // Segment starts at the character after the divider. If no divider is found, toPreviousMatch returns -1, and this becomes 0
     }
   }
-  _getSegmentEndIndex (): number {
-    switch (this._segmentTo) {
+  private getSegmentEndIndex (): number {
+    switch (this.segmentTo) {
       case 'end':
         return this.string.length
       case 'selection':
@@ -98,16 +98,16 @@ export class Completeable {
     }
   }
 
-  _computedString: string
+  private computedString: string
   setString (string: string) {
-    this._computedString = string
+    this.computedString = string
 
     switch (this.status) {
       case 'constructing':
         // do nothing. Can't set divider indices before selection has been set.
         break
       default:
-        this._setDividerIndices()
+        this.setDividerIndices()
         break
     }
     
@@ -115,32 +115,32 @@ export class Completeable {
   }
 
   // TODO: Support array of selections for multi cursor editing
-  _computedSelection: { start: number, end: number, direction: 'forward' | 'backward' | 'none' }
+  private computedSelection: { start: number, end: number, direction: 'forward' | 'backward' | 'none' }
   setSelection (selection: { start: number, end: number, direction: 'forward' | 'backward' | 'none' }) {
-    this._computedSelection = selection
-    this._setDividerIndices()
+    this.computedSelection = selection
+    this.setDividerIndices()
 
     return this
   }
-  _setDividerIndices () {
-    this._computedDividerIndices.before = this._toPreviousMatch({ re: this._divider, from: this.selection.start })
+  private setDividerIndices () {
+    this.computedDividerIndices.before = this.toPreviousMatch({ re: this.divider, from: this.selection.start })
 
-    const after = this._toNextMatch({ re: this._divider, from: this.selection.end })
-    this._computedDividerIndices.after = after === -1 ? this.string.length + 1 : after
+    const after = this.toNextMatch({ re: this.divider, from: this.selection.end })
+    this.computedDividerIndices.after = after === -1 ? this.string.length + 1 : after
   }
-  _toPreviousMatch ({ re, from }: { re: RegExp, from: number }): number {
+  private toPreviousMatch ({ re, from }: { re: RegExp, from: number }): number {
     return toPreviousMatch({ string: this.string, re, from })
   }
-  _toNextMatch ({ re, from }: { re: RegExp, from: number }): number {
+  private toNextMatch ({ re, from }: { re: RegExp, from: number }): number {
     return toNextMatch({ string: this.string, re, from })
   }
 
   complete (completion: string, options: { select?: 'completion' | 'completionEnd' } = {}) {
-    this._completing()
+    this.completing()
 
     const { select } = { ...defaultCompleteOptions, ...options },
-          textBefore = this._getTextBefore(),
-          textAfter = this._getTextAfter(),
+          textBefore = this.getTextBefore(),
+          textAfter = this.getTextAfter(),
           completedString = textBefore + completion + textAfter,
           completedSelection = (() => {
             switch (select) {
@@ -162,12 +162,12 @@ export class Completeable {
     this.setString(completedString)
     this.setSelection(completedSelection)
 
-    this._completed()
+    this.completed()
 
     return this
   }
-  _getTextBefore () {
-    switch (this._segmentFrom) {
+  private getTextBefore () {
+    switch (this.segmentFrom) {
       case 'start':
         return ''
       case 'selection':
@@ -176,8 +176,8 @@ export class Completeable {
         return this.string.slice(0, this.dividerIndices.before + 1) // Add 1 to make sure the divider is included
     }
   }
-  _getTextAfter () {
-    switch (this._segmentTo) {
+  private getTextAfter () {
+    switch (this.segmentTo) {
       case 'end':
         return ''
       case 'selection':
@@ -186,11 +186,11 @@ export class Completeable {
         return this.string.slice(this.dividerIndices.after)
     }
   }
-  _completing () {
-    this._computedStatus = 'completing'
+  private completing () {
+    this.computedStatus = 'completing'
   }
-  _completed () {
-    this._computedStatus = 'completed'
+  private completed () {
+    this.computedStatus = 'completed'
   }
 }
 

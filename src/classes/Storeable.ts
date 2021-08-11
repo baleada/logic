@@ -17,48 +17,48 @@ const defaultOptions: StoreableOptions = {
 }
 
 export class Storeable {
-  _type: 'local' | 'session'
-  _statusKeySuffix: string
+  private type: 'local' | 'session'
+  private statusKeySuffix: string
   constructor (key: string, options: StoreableOptions = {}) {
-    this._constructing()
-    this._type = options.type ?? defaultOptions.type
-    this._statusKeySuffix = options.statusKeySuffix ?? defaultOptions.statusKeySuffix
+    this.constructing()
+    this.type = options.type ?? defaultOptions.type
+    this.statusKeySuffix = options.statusKeySuffix ?? defaultOptions.statusKeySuffix
 
     this.setKey(key)
-    this._ready()
+    this.ready()
   }
-  _constructing () {
-    this._computedStatus = 'constructing'
+  private constructing () {
+    this.computedStatus = 'constructing'
   }
-  _computedStatus: StoreableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: StoreableStatus
+  private ready () {
+    this.computedStatus = 'ready'
 
     if (domIsAvailable()) {
-      if (isNull(this.storage.getItem(this._computedStatusKey))) {
-        this._storeStatus()
+      if (isNull(this.storage.getItem(this.computedStatusKey))) {
+        this.storeStatus()
       }
     }
   }
 
   get key () {
-    return this._computedKey
+    return this.computedKey
   }
   set key (key) {
     this.setKey(key)
   }
   get status () {
     if (domIsAvailable()) {
-      const storedStatus = this.storage.getItem(this._computedStatusKey)
-      if (this._computedStatus !== storedStatus && isString(storedStatus)) {
-        this._computedStatus = (storedStatus as 'ready' | 'constructing' | 'stored' | 'errored' | 'removed')
+      const storedStatus = this.storage.getItem(this.computedStatusKey)
+      if (this.computedStatus !== storedStatus && isString(storedStatus)) {
+        this.computedStatus = (storedStatus as 'ready' | 'constructing' | 'stored' | 'errored' | 'removed')
       }
     }
 
-    return this._computedStatus
+    return this.computedStatus
   }
   get storage () {
-    switch (this._type) {
+    switch (this.type) {
     case 'local':
       return localStorage
     case 'session':
@@ -69,76 +69,76 @@ export class Storeable {
     return this.storage.getItem(this.key)
   }
   get error () {
-    return this._computedError
+    return this.computedError
   }
 
-  _computedKey: string
-  _computedStatusKey: string
+  private computedKey: string
+  private computedStatusKey: string
   setKey (key: string) {
     let string
     switch (this.status) {
     case 'constructing':
     case 'ready':
-      this._computedKey = key
-      this._computedStatusKey = `${key}${this._statusKeySuffix}`
+      this.computedKey = key
+      this.computedStatusKey = `${key}${this.statusKeySuffix}`
       break
     case 'stored':
       string = this.string
       this.remove()
       this.removeStatus()
-      this._computedKey = key
-      this._computedStatusKey = `${key}${this._statusKeySuffix}`
+      this.computedKey = key
+      this.computedStatusKey = `${key}${this.statusKeySuffix}`
       this.store(string)
       break
     case 'removed':
       this.removeStatus()
-      this._computedKey = key
-      this._computedStatusKey = `${key}${this._statusKeySuffix}`
-      this._removed()
+      this.computedKey = key
+      this.computedStatusKey = `${key}${this.statusKeySuffix}`
+      this.removed()
       break
     }
 
     return this
   }
 
-  _computedString: string
-  _computedError: Error
+  private computedString: string
+  private computedError: Error
   store (string: string) {
     try {
       this.storage.setItem(this.key, string)
-      this._computedString = string // This assignment allows reactivity tools to detect data change
-      this._stored()
+      this.computedString = string // This assignment allows reactivity tools to detect data change
+      this.stored()
     } catch (error) {
-      this._computedError = error as Error
-      this._errored()
+      this.computedError = error as Error
+      this.errored()
     }
     
     return this
   }
-  _stored () {
-    this._computedStatus = 'stored'
-    this._storeStatus()
+  private stored () {
+    this.computedStatus = 'stored'
+    this.storeStatus()
   }
-  _errored () {
-    this._computedStatus = 'errored'
-    this._storeStatus()
+  private errored () {
+    this.computedStatus = 'errored'
+    this.storeStatus()
   }
-  _storeStatus () {
-    this.storage.setItem(this._computedStatusKey, this._computedStatus)
+  private storeStatus () {
+    this.storage.setItem(this.computedStatusKey, this.computedStatus)
   }
 
   remove () {
     this.storage.removeItem(this.key)
-    this._removed()
+    this.removed()
     return this
   }
-  _removed () {
-    this._computedStatus = 'removed'
-    this._storeStatus()
+  private removed () {
+    this.computedStatus = 'removed'
+    this.storeStatus()
   }
 
   removeStatus () {
-    this.storage.removeItem(this._computedStatusKey)
+    this.storage.removeItem(this.computedStatusKey)
     return this
   }
 }

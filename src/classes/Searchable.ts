@@ -6,53 +6,53 @@ export type SearchableOptions<Item> = SearcherOptions<Item>
 export type SearchableStatus = 'ready' | 'searched'
 
 export class Searchable<Item extends string | object> {
-  _searcherOptions: SearcherOptions<Item>
-  _computedResults: SearcherMatchData<Item>[] | Item[]
+  private searcherOptions: SearcherOptions<Item>
+  private computedResults: SearcherMatchData<Item>[] | Item[]
   constructor (candidates: Item[], options: SearcherOptions<Item> = {}) {
-    this._searcherOptions = options
+    this.searcherOptions = options
 
     this.setCandidates(candidates)
-    this._computedResults = []
-    this._ready()
+    this.computedResults = []
+    this.ready()
   }
-  _computedStatus: SearchableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: SearchableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
 
-  _computedCandidates: Item[]
+  private computedCandidates: Item[]
   get candidates () {
-    return this._computedCandidates
+    return this.computedCandidates
   }
   set candidates (candidates) {
     this.setCandidates(candidates)
   }
   get results () {
-    return this._computedResults
+    return this.computedResults
   }
   get searcher () {
-    return this._computedSearcher
+    return this.computedSearcher
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
 
-  _computedSearcher: Searcher<Item, SearcherOptions<Item>>
+  private computedSearcher: Searcher<Item, SearcherOptions<Item>>
   setCandidates (candidates: Item[]) {
-    this._computedCandidates = Array.from(candidates)
-    this._computedSearcher = new Searcher(candidates, this._searcherOptions)
+    this.computedCandidates = Array.from(candidates)
+    this.computedSearcher = new Searcher(candidates, this.searcherOptions)
 
     return this
   }
 
   search (query: string, options: SearcherOptions<Item>) {
-    this._computedResults = this.searcher.search<SearcherOptions<Item>>(query, options)
+    this.computedResults = this.searcher.search<SearcherOptions<Item>>(query, options)
 
-    this._searched()
+    this.searched()
 
     return this
   }
-  _searched () {
-    this._computedStatus = 'searched'
+  private searched () {
+    this.computedStatus = 'searched'
   }
 }

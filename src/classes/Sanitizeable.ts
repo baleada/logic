@@ -6,54 +6,54 @@ export type SanitizeableOptions = Config
 export type SanitizeableStatus = 'ready' | 'sanitized'
 
 export class Sanitizeable {
-  _domPurifyConfig: Config
+  private domPurifyConfig: Config
   constructor (html: string, options?: Config) {
-    this._computedHtml = html
-    this._domPurifyConfig = options
-    this._ready()
+    this.computedHtml = html
+    this.domPurifyConfig = options
+    this.ready()
   }
-  _computedDompurify: DOMPurifyI
-  _computedStatus: SanitizeableStatus
-  _ready () {
+  private computedDompurify: DOMPurifyI
+  private computedStatus: SanitizeableStatus
+  private ready () {
     if (domIsAvailable()) {
-      this._computedDompurify = createDOMPurify()
-      this._computedDompurify.setConfig(this._domPurifyConfig)
+      this.computedDompurify = createDOMPurify()
+      this.computedDompurify.setConfig(this.domPurifyConfig)
     }
 
-    this._computedStatus = 'ready'
+    this.computedStatus = 'ready'
   }
 
   get html () {
-    return this._computedHtml
+    return this.computedHtml
   }
   set html (html) {
     this.setHtml(html)
   }
   get dompurify () {
-    if (!this._computedDompurify && domIsAvailable()) {
-      this._computedDompurify = createDOMPurify()
-      this._computedDompurify.setConfig(this._domPurifyConfig)
+    if (!this.computedDompurify && domIsAvailable()) {
+      this.computedDompurify = createDOMPurify()
+      this.computedDompurify.setConfig(this.domPurifyConfig)
     }
 
-    return this._computedDompurify
+    return this.computedDompurify
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
 
-  _computedHtml: string
+  private computedHtml: string
   setHtml (html: string) {
-    this._computedHtml = html
+    this.computedHtml = html
     return this
   }
 
   sanitize () {
     this.setHtml(this.dompurify.sanitize(this.html))
-    this._sanitized()
+    this.sanitized()
     return this
   }
-  _sanitized () {
-    this._computedStatus = 'sanitized'
+  private sanitized () {
+    this.computedStatus = 'sanitized'
   }
 }
 

@@ -52,10 +52,10 @@ export type RecognizeOptions<Type extends ListenableSupportedType, Metadata exte
 }
 
 export class Recognizeable<Type extends ListenableSupportedType, Metadata extends Record<any, any>> {
-  _maxSequenceLength: number | true
-  _effects: Map<string, (api: RecognizeableEffectApi<Type, Metadata>) => any>
-  _effectApi: RecognizeableEffectApi<Type, Metadata>
-  _toType: (sequenceItem: ListenEffectParam<Type>) => string
+  private maxSequenceLength: number | true
+  private effects: Map<string, (api: RecognizeableEffectApi<Type, Metadata>) => any>
+  private effectApi: RecognizeableEffectApi<Type, Metadata>
+  private toType: (sequenceItem: ListenEffectParam<Type>) => string
 
   constructor (sequence: ListenEffectParam<Type>[], options: RecognizeableOptions<Type, Metadata> = { effectsIncludeCombos: true }) {
     const defaultOptions: RecognizeableOptions<Type, Metadata> = {
@@ -64,92 +64,92 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
       effects: {},
     }
     
-    this._maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
-    this._effects = new Map(
+    this.maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
+    this.effects = new Map(
       isFunction(options?.effects) 
         ? options.effects(createDefineEffect<Type, Metadata>())
         : Object.entries(options?.effects || defaultOptions.effects)
     )
 
-    this._toType = createToType({
+    this.toType = createToType({
       effectsIncludeCombos: options.effectsIncludeCombos,
-      effects: this._effects,
+      effects: this.effects,
     })
 
-    this._resetComputedMetadata()
+    this.resetComputedMetadata()
 
     this.setSequence(sequence)
 
     // The full effect API isn't available until runtime.
     // This object is asserted as the full API. Full API access is verified by tests.
     // 
-    this._effectApi = {
+    this.effectApi = {
       getStatus: () => this.status,
       getMetadata: () => this.metadata,
-      setMetadata: (metadata: Metadata) => this._computedMetadata = metadata,
-      recognized: () => this._recognized(),
-      denied: () => this._denied(),
+      setMetadata: (metadata: Metadata) => this.computedMetadata = metadata,
+      recognized: () => this.recognized(),
+      denied: () => this.denied(),
     } as unknown as RecognizeableEffectApi<Type, Metadata>
 
-    this._ready()
+    this.ready()
   }
 
-  _computedMetadata: Metadata
-  _resetComputedMetadata () {
-    this._computedMetadata = {} as Metadata
+  private computedMetadata: Metadata
+  private resetComputedMetadata () {
+    this.computedMetadata = {} as Metadata
   }
   
-  _recognized () {
-    this._computedStatus = 'recognized'
+  private recognized () {
+    this.computedStatus = 'recognized'
   }
-  _denied () {
-    this._computedStatus = 'denied'
+  private denied () {
+    this.computedStatus = 'denied'
   }
-  _computedStatus: RecognizeableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: RecognizeableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
 
   get sequence () {
-    return this._computedSequence
+    return this.computedSequence
   }
   set sequence (sequence) {
     this.setSequence(sequence)
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   get metadata () {
-    return this._computedMetadata
+    return this.computedMetadata
   }
 
-  _computedSequence: ListenEffectParam<Type>[]
+  private computedSequence: ListenEffectParam<Type>[]
   setSequence (sequence: ListenEffectParam<Type>[]) {
-    this._computedSequence = sequence
+    this.computedSequence = sequence
     return this
   }
 
   recognize (sequenceItem: ListenEffectParam<Type>, { onRecognized }: RecognizeOptions<Type, Metadata> = {}) {
-    this._recognizing()
+    this.recognizing()
 
-    const type = this._toType(sequenceItem),
-          excess = isNumber(this._maxSequenceLength)
-            ? Math.max(0, this.sequence.length - this._maxSequenceLength)
+    const type = this.toType(sequenceItem),
+          excess = isNumber(this.maxSequenceLength)
+            ? Math.max(0, this.sequence.length - this.maxSequenceLength)
             : 0,
           newSequence = createConcat(
             createSlice<ListenEffectParam<Type>>({ from: excess })(this.sequence),
             [sequenceItem]
           )([])
     
-    this._effectApi.sequenceItem = sequenceItem
-    this._effectApi.getSequence = () => newSequence
-    this._effectApi.onRecognized = onRecognized || (() => {})
+    this.effectApi.sequenceItem = sequenceItem
+    this.effectApi.getSequence = () => newSequence
+    this.effectApi.onRecognized = onRecognized || (() => {})
     
-    this._effects.get(type)?.(this._effectApi)
+    this.effects.get(type)?.(this.effectApi)
       
     switch (this.status) {
       case 'denied':
-        this._resetComputedMetadata()
+        this.resetComputedMetadata()
         this.setSequence([])
         break
       case 'recognizing':
@@ -160,8 +160,8 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
 
     return this
   }
-  _recognizing () {
-    this._computedStatus = 'recognizing'
+  private recognizing () {
+    this.computedStatus = 'recognizing'
   }
 }
 

@@ -17,43 +17,43 @@ type EventDispatchOptions = {
 export class Dispatchable<Type extends ListenableSupportedEventType> {
   constructor (type: Type, options: DispatchableOptions = {}) {
     this.setType(type)
-    this._ready()
+    this.ready()
   }
-  _computedStatus: DispatchableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: DispatchableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
 
   get type () {
-    return this._computedType
+    return this.computedType
   }
   set type (type) {
     this.setType(type)
   }
   get cancelled () {
-    return this._computedCancelled
+    return this.computedCancelled
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
 
-  _computedType: string
+  private computedType: string
   setType (type) {
-    this._computedType = type
+    this.computedType = type
     return this
   }
 
-  _computedCancelled: boolean
+  private computedCancelled: boolean
   dispatch (options: DispatchOptions<Type> = {}) {
     const { target = window, ...rest } = options,
           event = toEvent(toCombo(this.type), rest)
 
-    this._computedCancelled = !target.dispatchEvent(event)
-    this._dispatched()
+    this.computedCancelled = !target.dispatchEvent(event)
+    this.dispatched()
 
     return this
   }
-  _dispatched () {
-    this._computedStatus = 'dispatched'
+  private dispatched () {
+    this.computedStatus = 'dispatched'
   }
 }

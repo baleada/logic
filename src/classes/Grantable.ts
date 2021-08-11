@@ -5,53 +5,53 @@ export type GrantableStatus = 'ready' | 'querying' | 'queried' | 'errored'
 export class Grantable<DescriptorType extends PermissionDescriptor> {
   constructor (descriptor: DescriptorType, options: GrantableOptions = {}) {
     this.setDescriptor(descriptor)
-    this._ready()
+    this.ready()
   }
-  _computedStatus: GrantableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: GrantableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
   
   get descriptor () {
-    return this._computedDescriptor
+    return this.computedDescriptor
   }
   set descriptor (descriptor) {
     this.setDescriptor(descriptor)
   }
   get permission () {
-    return this._computedPermission
+    return this.computedPermission
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   
-  _computedDescriptor: DescriptorType
+  private computedDescriptor: DescriptorType
   setDescriptor (descriptor: DescriptorType) {
-    this._computedDescriptor = descriptor
+    this.computedDescriptor = descriptor
     return this
   }
 
-  _computedPermission: PermissionStatus | Error
+  private computedPermission: PermissionStatus | Error
   async query () {
-    this._querying()
+    this.querying()
 
     try {
-      this._computedPermission = await navigator.permissions.query(this.descriptor)
-      this._queried()
+      this.computedPermission = await navigator.permissions.query(this.descriptor)
+      this.queried()
     } catch (error) {
-      this._computedPermission = error as Error
-      this._errored()
+      this.computedPermission = error as Error
+      this.errored()
     }
 
     return this
   }  
-  _querying () {
-    this._computedStatus = 'querying'
+  private querying () {
+    this.computedStatus = 'querying'
   }
-  _queried () {
-    this._computedStatus = 'queried'
+  private queried () {
+    this.computedStatus = 'queried'
   }
-  _errored () {
-    this._computedStatus = 'errored'
+  private errored () {
+    this.computedStatus = 'errored'
   }
 }

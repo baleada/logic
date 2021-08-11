@@ -15,37 +15,37 @@ export class Navigateable<Item> {
   constructor (array: Item[], options: NavigateableOptions = {}) {
     this.setArray(array)
     this.navigate(options?.initialLocation ?? defaultOptions.initialLocation)
-    this._ready()
+    this.ready()
   }
   
-  _computedStatus: NavigateableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: NavigateableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
 
-  _computedArray: Item[]
+  private computedArray: Item[]
   get array () {
-    return this._computedArray
+    return this.computedArray
   }
   set array (value) {
     this.setArray(value)
   }
-  _computedLocation: number
+  private computedLocation: number
   get location () {
-    return this._computedLocation
+    return this.computedLocation
   }
   set location (location) {
     this.setLocation(location)
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   get item () {
     return this.array[this.location]
   }
 
   setArray (array: Item[]) {
-    this._computedArray = array
+    this.computedArray = array
     return this
   }
 
@@ -62,14 +62,14 @@ export class Navigateable<Item> {
         ? this.array.length - 1
         : location
       
-    this._computedLocation = ensuredLocation
+    this.computedLocation = ensuredLocation
 
-    this._navigated()
+    this.navigated()
 
     return this
   }
-  _navigated () {
-    this._computedStatus = 'navigated'
+  private navigated () {
+    this.computedStatus = 'navigated'
   }
 
   next (options: { distance?: number, loops?: boolean } = {}) {

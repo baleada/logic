@@ -8,64 +8,64 @@ export type FetchableStatus = 'ready' | 'fetching' | 'fetched' | 'aborted' | 'er
 export type FetchOptions = RequestInit | ((api: FetchOptionsApi) => RequestInit)
 
 export class Fetchable {
-  _computedArrayBuffer: Resolveable<ArrayBuffer | undefined>
-  _computedBlob: Resolveable<Blob | undefined>
-  _computedFormData: Resolveable<FormData | undefined>
-  _computedJson: Resolveable<any | undefined>
-  _computedText: Resolveable<string | undefined>
+  private computedArrayBuffer: Resolveable<ArrayBuffer | undefined>
+  private computedBlob: Resolveable<Blob | undefined>
+  private computedFormData: Resolveable<FormData | undefined>
+  private computedJson: Resolveable<any | undefined>
+  private computedText: Resolveable<string | undefined>
   constructor (resource: string, options: FetchableOptions = {}) {
     this.setResource(resource)
 
-    this._computedArrayBuffer = new Resolveable(async () => 'arrayBuffer' in this.response ? await this.response.arrayBuffer() : await undefined)
-    this._computedBlob =        new Resolveable(async () => 'blob'        in this.response ? await this.response.blob()        : await undefined)
-    this._computedFormData =    new Resolveable(async () => 'formData'    in this.response ? await this.response.formData()    : await undefined)
-    this._computedJson =        new Resolveable(async () => 'json'        in this.response ? await this.response.json()        : await undefined)
-    this._computedText =        new Resolveable(async () => 'text'        in this.response ? await this.response.text()        : await undefined)
+    this.computedArrayBuffer = new Resolveable(async () => 'arrayBuffer' in this.response ? await this.response.arrayBuffer() : await undefined)
+    this.computedBlob =        new Resolveable(async () => 'blob'        in this.response ? await this.response.blob()        : await undefined)
+    this.computedFormData =    new Resolveable(async () => 'formData'    in this.response ? await this.response.formData()    : await undefined)
+    this.computedJson =        new Resolveable(async () => 'json'        in this.response ? await this.response.json()        : await undefined)
+    this.computedText =        new Resolveable(async () => 'text'        in this.response ? await this.response.text()        : await undefined)
 
-    this._ready()
+    this.ready()
   }
-  _computedStatus: FetchableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: FetchableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
 
   get resource () {
-    return this._computedResource
+    return this.computedResource
   }
   set resource (resource) {
     this.setResource(resource)
   }
-  _computedAbortController: AbortController
+  private computedAbortController: AbortController
   get abortController () {
-    if (!this._computedAbortController) {
-      this._computedAbortController = new AbortController()
+    if (!this.computedAbortController) {
+      this.computedAbortController = new AbortController()
     }
 
-    return this._computedAbortController
+    return this.computedAbortController
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   get response () { 
-    return this._computedResponse
+    return this.computedResponse
   }
   get arrayBuffer () {
-    return this._getUsedBody(this._computedArrayBuffer)
+    return this.getUsedBody(this.computedArrayBuffer)
   }
   get blob () {
-    return this._getUsedBody(this._computedBlob)
+    return this.getUsedBody(this.computedBlob)
   }
   get formData () {
-    return this._getUsedBody(this._computedFormData)
+    return this.getUsedBody(this.computedFormData)
   }
   get json () {
-    return this._getUsedBody(this._computedJson)
+    return this.getUsedBody(this.computedJson)
   }
   get text () {
-    return this._getUsedBody(this._computedText)
+    return this.getUsedBody(this.computedText)
   }
 
-  _getUsedBody<Value> (resolveable: Resolveable<Value>) {
+  private getUsedBody<Value> (resolveable: Resolveable<Value>) {
     const bodyUsed = 'bodyUsed' in this.response ? this.response.bodyUsed : false
     
     if (!bodyUsed) {
@@ -85,23 +85,23 @@ export class Fetchable {
     }
   }
 
-  _computedResource: string
+  private computedResource: string
   setResource (resource: string) {
-    this._computedResource = resource
+    this.computedResource = resource
     return this
   }
   
-  _computedResponse: Response | Error
+  private computedResponse: Response | Error
   async fetch (options: FetchOptions = {}) {
-    this._computedStatus = 'fetching'
+    this.computedStatus = 'fetching'
 
     try {
-      this._computedResponse = await fetch(this.resource, { signal: this.abortController.signal, ...ensureOptions(options) })
-      this._computedStatus = 'fetched'
+      this.computedResponse = await fetch(this.resource, { signal: this.abortController.signal, ...ensureOptions(options) })
+      this.computedStatus = 'fetched'
     } catch (error) {
-      this._computedResponse = error as Error
+      this.computedResponse = error as Error
 
-      this._computedStatus = error.name === 'AbortError'
+      this.computedStatus = error.name === 'AbortError'
         ? 'aborted'
         : 'errored'
     }
