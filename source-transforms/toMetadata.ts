@@ -1,9 +1,7 @@
-const fs = require('fs')
-const { readFileSync, readdirSync } = fs
-const path = require('path')
-const { parse } = path
+import { readFileSync, readdirSync } from 'fs'
+import { parse } from 'path'
 
-function toMetadata () {
+export function toMetadata () {
   const classes = readdirSync('src/classes').filter(file => parse(file).ext === '.ts').map(file => parse(file).name),
         pipes = [...new Set(readFileSync('src/pipes.ts', 'utf8').match(/create\w+/g))],
         classMetadata = toClassMetadata(classes),
@@ -11,14 +9,15 @@ function toMetadata () {
           classes: classMetadata,
           pipes,
         },
-        code = `
+        code = `\
 export type Metadatum = {
   name: string,
   needsCleanup: boolean,
-  generic: string,
-  optionsGeneric: string,
+  generics: string[],
+  optionsGenerics: string[],
   state: string,
   stateType: string,
+  typeExports: string[],
 }
 
 export const metadata: { classes: Metadatum[], pipes: string[] } = ${JSON.stringify(metadata, null, 2)}`
@@ -44,10 +43,11 @@ function toClassMetadata (classes) {
       return {
         name,
         needsCleanup: toNeedsCleanup(contents),
-        generic: toGeneric(contents),
-        optionsGeneric: toOptionsGeneric(contents),
+        generics: toGenerics(contents),
+        optionsGenerics: toOptionsGenerics(contents),
         state: toState(contents),
         stateType: toStateType(contents),
+        typeExports: toTypeExports(name)
       }
     })
 }
@@ -58,14 +58,26 @@ function toNeedsCleanup (contents) {
 }
 
 
-const genericRE = /export class \w+<(.*?)>/
-function toGeneric (contents) {
-  return contents.match(genericRE)?.[1] || ''
+const genericRE = /export class \w+<(.*?)> {/,
+      recordCommaRE = /<(.*?), (.*?)>/g,
+      recordCommaReplacement = '2PtwMFnK', // nanoid
+      recordCommaReplacementRE = new RegExp(recordCommaReplacement, 'g'),
+      recordCommaReplacer = (match, key, value) => `<${key}${recordCommaReplacement}${value}>`
+function toGenerics (contents) {
+  return (contents.match(genericRE)?.[1] || '')
+    .replace(recordCommaRE, recordCommaReplacer)
+    .split(', ')
+    .filter(generic => generic)
+    .map(generic => generic.replace(recordCommaReplacementRE, ', '))
 }
 
 const optionsGenericRE = /constructor.*?options\??: \w+Options<(.*?)>/
-function toOptionsGeneric (contents) {
-  return contents.match(optionsGenericRE)?.[1] || ''
+function toOptionsGenerics (contents) {
+  return (contents.match(optionsGenericRE)?.[1] || '')
+    .replace(recordCommaRE, recordCommaReplacement)
+    .split(', ')
+    .filter(generic => generic)
+    .map(generic => generic.replace(recordCommaReplacementRE, ', '))
 }
 
 const stateAndStateTypeRE = /constructor \((.*?),/
@@ -77,6 +89,10 @@ function toStateType (contents) {
   return contents.match(stateAndStateTypeRE)?.[1]?.split(': ')?.[1]
 }
 
-module.exports = {
-  toMetadata
+
+function toTypeExports (name: string): string[] {
+  const classesIndex = readFileSync('src/classes.ts', 'utf8'),
+        typeExportsRE = new RegExp(`export type \{ (.*?) \} from '\.\/classes\/${name}'`)
+
+  return classesIndex.match(typeExportsRE)[1].split(', ')
 }
