@@ -23,7 +23,7 @@ import type {
   ListenableModifierAlias,
   ListenableKeycomboItem,
 } from '../extracted'
-import { createMap, createReduce } from '../pipes'
+import { createReduce } from '../pipes'
 
 export type ListenableSupportedType = 'recognizeable'
   | 'intersect'
