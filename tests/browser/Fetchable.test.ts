@@ -168,7 +168,7 @@ suite(`response is AbortError after aborted fetch(...)`, async ({ puppeteer: { p
   const value = await page.evaluate(async resource => {
           const instance = new (window as unknown as WithLogic).Logic.Fetchable(resource)
           instance.fetch()
-          return (await instance.abort()).response.name === 'AbortError'
+          return (await instance.abort()).error.name === 'AbortError'
         }, resource)
 
   assert.ok(value)

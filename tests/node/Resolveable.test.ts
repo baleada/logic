@@ -4,11 +4,11 @@ import { Resolveable } from '../../src/classes/Resolveable'
 
 const suite = createSuite('Resolveable')
 
-const responseStub = 'stub',
+const valueStub = 'stub',
       errorMessageStub = 'error',
       withSuccessStub = () => new Promise(function(resolve, reject) {
         setTimeout(function() {
-          resolve(responseStub)
+          resolve(valueStub)
         }, 10)
       }),
       withErrorStub = () => new Promise(function(resolve, reject) {
@@ -71,32 +71,32 @@ suite(`status is 'errored' after resolving`, async context => {
   assert.is(instance.status, 'errored')
 })
 
-suite(`stores the response`, async context => {
+suite(`stores the value`, async context => {
   const instance = context.setup()
   await instance.resolve()
 
-  assert.is(instance.response, responseStub)
+  assert.is(instance.value, valueStub)
 })
 
 suite(`stores the error`, async context => {
   const instance = new Resolveable(() => withErrorStub())
   await instance.resolve()
 
-  assert.equal(instance.response instanceof Error ? instance.response.message : '', errorMessageStub)
+  assert.equal(instance.value instanceof Error ? instance.value.message : '', errorMessageStub)
 })
 
-suite(`stores the response from promise arrays`, async context => {
+suite(`stores the value from promise arrays`, async context => {
   const instance = new Resolveable(() => (new Array(5)).fill(withSuccessStub()))
   await instance.resolve()
 
-  assert.equal(instance.response, (new Array(5)).fill(responseStub))
+  assert.equal(instance.value, (new Array(5)).fill(valueStub))
 })
 
 suite(`stores the error from promise arrays`, async context => {
   const instance = new Resolveable(() => [...(new Array(4)).fill(withSuccessStub()), withErrorStub()])
   await instance.resolve()
 
-  assert.equal(instance.response instanceof Error ? instance.response.message : '', errorMessageStub)
+  assert.equal(instance.value instanceof Error ? instance.value.message : '', errorMessageStub)
 })
 
 suite.run()
