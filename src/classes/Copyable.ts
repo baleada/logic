@@ -58,7 +58,7 @@ export class Copyable {
   }
   
   private computedResponse: undefined
-  private computedError: undefined
+  private computedError: Error
   async copy (options: { type: 'clipboard' | 'deprecated' } = { type: 'clipboard' }) {    
     this.copying()
     
