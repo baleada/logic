@@ -6,7 +6,7 @@ export type DelayableOptions = {
   executions?: number | true,
 }
 
-export type DelayableFunction = (timestamp: number) => any
+export type DelayableEffect = (timestamp: number) => any
 
 export type DelayableStatus = 'ready' | 'delaying' | 'delayed' | 'paused' | 'sought' | 'stopped'
 
@@ -16,9 +16,9 @@ const defaultOptions = {
 }
 
 export class Delayable {
-  _animateable: Animateable
-  constructor (fn: DelayableFunction, options: DelayableOptions = {}) {
-    this._animateable = new Animateable(
+  private animateable: Animateable
+  constructor (effect: DelayableEffect, options: DelayableOptions = {}) {
+    this.animateable = new Animateable(
       [
         { progress: 0, properties: { progress: 0 } },
         { progress: 1, properties: { progress: 1 } }
@@ -29,51 +29,51 @@ export class Delayable {
       }
     )
 
-    this.setFn(fn)
-    this._ready()
+    this.setEffect(effect)
+    this.ready()
   }
-  _computedStatus: DelayableStatus
-  _ready () {
-    this._computedStatus = 'ready'
+  private computedStatus: DelayableStatus
+  private ready () {
+    this.computedStatus = 'ready'
   }
 
-  get fn () {
-    return this._computedFn
+  get effect () {
+    return this.computedEffect
   }
-  set fn (fn) {
-    this.setFn(fn)
+  set effect (effect) {
+    this.setEffect(effect)
   }
   get status () {
-    return this._computedStatus
+    return this.computedStatus
   }
   get executions () {
-    return this._animateable.iterations
+    return this.animateable.iterations
   }
   get time () {
-    return this._animateable.time
+    return this.animateable.time
   }
   get progress () {
-    return this._animateable.progress.time
+    return this.animateable.progress.time
   }
 
-  _computedFn: DelayableFunction
-  setFn (fn: DelayableFunction) {
+  private computedEffect: DelayableEffect
+  setEffect (effect: DelayableEffect) {
     this.stop()
 
-    this._computedFn = fn
-    this._setFrameEffect(fn)
+    this.computedEffect = effect
+    this.setFrameEffect(effect)
 
     return this
   }
-  _frameEffect: AnimateFrameEffect
-  _setFrameEffect (fn: DelayableFunction) {
-    this._frameEffect = frame => {
+  private frameEffect: AnimateFrameEffect
+  private setFrameEffect (effect: DelayableEffect) {
+    this.frameEffect = frame => {
       const { properties: { progress }, timestamp } = frame
 
       // Don't call delayable function until progress is 1
       if (progress.interpolated === 1) {
-        fn(timestamp)
-        this._delayed()
+        effect(timestamp)
+        this.delayed()
       } else {
         switch (this.status) {
         case 'ready':
@@ -81,33 +81,33 @@ export class Delayable {
         case 'sought':
         case 'delayed':
         case 'stopped':
-          this._delaying()
+          this.delaying()
           break
         }
       }
     }
   }
-  _delaying () {
-    this._computedStatus = 'delaying'
+  private delaying () {
+    this.computedStatus = 'delaying'
   }
-  _delayed () {
-    this._computedStatus = 'delayed'
+  private delayed () {
+    this.computedStatus = 'delayed'
   }
 
   delay () {
     switch (this.status) {
     case 'delaying':
-      this._animateable.restart()
+      this.animateable.restart()
       break
     case 'sought':
       this.seek(0)
-      this._animateable.play(frame => this._frameEffect(frame))
+      this.animateable.play(frame => this.frameEffect(frame))
       break
     case 'ready':
     case 'paused':
     case 'delayed':
     case 'stopped':
-      this._animateable.play(frame => this._frameEffect(frame))
+      this.animateable.play(frame => this.frameEffect(frame))
     }
 
     return this
@@ -116,22 +116,22 @@ export class Delayable {
   pause () {
     switch (this.status) {
     case 'delaying':
-      this._animateable.pause()
-      this._paused()
+      this.animateable.pause()
+      this.paused()
       break
     }
     
     return this
   }
-  _paused () {
-    this._computedStatus = 'paused'
+  private paused () {
+    this.computedStatus = 'paused'
   }
 
   resume () {
     switch (this.status) {
     case 'paused':
     case 'sought':
-      this._animateable.play(frame => this._frameEffect(frame))
+      this.animateable.play(frame => this.frameEffect(frame))
       break
     case 'ready':
     case 'delaying':
@@ -150,7 +150,7 @@ export class Delayable {
     if (executions > 0) {
       window.requestAnimationFrame(timestamp => {
         for (let i = 0; i < executions; i++) {
-          this._frameEffect({
+          this.frameEffect({
             properties: {
               progress: {
                 progress: { time: 1, animation: 1 },
@@ -163,22 +163,22 @@ export class Delayable {
       })
     }
 
-    this._animateable.seek(timeProgress, { effect: frame => this._frameEffect(frame) })
-    this._sought()
+    this.animateable.seek(timeProgress, { effect: frame => this.frameEffect(frame) })
+    this.sought()
 
     return this
   }
-  _sought () {
-    this._computedStatus = 'sought'
+  private sought () {
+    this.computedStatus = 'sought'
   }
   
   stop () {
-    this._animateable.stop()
-    this._stopped()
+    this.animateable.stop()
+    this.stopped()
 
     return this
   }
-  _stopped () {
-    this._computedStatus = 'stopped'
+  private stopped () {
+    this.computedStatus = 'stopped'
   }
 }

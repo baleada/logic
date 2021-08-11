@@ -16,11 +16,11 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
+import { ref, defineComponent } from 'vue'
 import { Animateable } from '../../../../../../src/classes'
 import { easingsNetInOutBack } from '@baleada/animateable-utils'
 
-export default {
+export default defineComponent({
   setup () {
     const keyframes = [
           // Translate
@@ -105,5 +105,5 @@ export default {
       stub
     }
   }
-}
+})
 </script>
