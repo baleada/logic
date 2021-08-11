@@ -9,17 +9,17 @@ const suite = withPuppeteer(
 
 suite('stores the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('stub')
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
           return instance.type
         }),
-        expected = 'stub'
+        expected = 'keydown'
 
   assert.is(value, expected)
 })
 
 suite('assignment sets the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('stub')
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
           instance.type = 'cmd+b'
           return instance.type
         }),
@@ -30,7 +30,7 @@ suite('assignment sets the type', async ({ puppeteer: { page } }) => {
 
 suite('setType sets the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('stub')
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
           instance.setType('cmd+b')
           return instance.type
         }),
@@ -41,7 +41,7 @@ suite('setType sets the type', async ({ puppeteer: { page } }) => {
 
 suite('status is "ready" after construction', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('stub')
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
           return instance.status
         }),
         expected = 'ready'
@@ -51,7 +51,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page } }) =>
 
 suite(`status is 'dispatched' after successful dispatch(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('stub')
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
           instance.dispatch()
           return instance.status
         }),
@@ -60,41 +60,9 @@ suite(`status is 'dispatched' after successful dispatch(...)`, async ({ puppetee
   assert.is(value, expected)
 })
 
-suite(`dispatch(...) target defaults to window`, async ({ puppeteer: { page } }) => {
+suite(`dispatch(...) target defaults to window`, async ({ puppeteer: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('stub')
-          window.addEventListener('stub', event => result = event.type)
-
-          let result
-          instance.dispatch()
-
-          return result
-        }),
-        expected = 'stub'
-
-  assert.is(value, expected)
-})
-
-suite(`dispatch(...) can customize target`, async ({ puppeteer: { page } }) => {
-  const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('stub'),
-                el = document.createElement('span')
-
-          el.addEventListener('stub', () => result = true)
-
-          let result
-          instance.dispatch({ target: el })
-
-          return result
-        }),
-        expected = true
-
-  assert.is(value, expected)
-})
-
-suite(`dispatch(...) handles keyboard events, defaulting to keydown`, async ({ puppeteer: { page } }) => {
-  const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('b')
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
           window.addEventListener('keydown', event => result = event.type)
 
           let result
@@ -105,11 +73,49 @@ suite(`dispatch(...) handles keyboard events, defaulting to keydown`, async ({ p
         expected = 'keydown'
 
   assert.is(value, expected)
+
+  reloadNext()
 })
 
-suite(`dispatch(...) can optionally use keyup`, async ({ puppeteer: { page } }) => {
+suite(`dispatch(...) can customize target`, async ({ puppeteer: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('b')
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown'),
+                el = document.createElement('span')
+
+          el.addEventListener('keydown', () => result = true)
+
+          let result
+          instance.dispatch({ target: el })
+
+          return result
+        }),
+        expected = true
+
+  assert.is(value, expected)
+
+  reloadNext()
+})
+
+suite(`dispatch(...) handles keyboard events, defaulting to keydown`, async ({ puppeteer: { page, reloadNext } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('b' as '+b')
+          window.addEventListener('keydown', event => result = event.type)
+
+          let result
+          instance.dispatch()
+
+          return result
+        }),
+        expected = 'keydown'
+
+  assert.is(value, expected)
+
+  reloadNext()
+})
+
+suite(`dispatch(...) can optionally use keyup`, async ({ puppeteer: { page, reloadNext } }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('b' as '+b')
           window.addEventListener('keyup', event => result = event.type)
 
           let result
@@ -120,12 +126,14 @@ suite(`dispatch(...) can optionally use keyup`, async ({ puppeteer: { page } }) 
         expected = 'keyup'
 
   assert.is(value, expected)
+
+  reloadNext()
 })
 
-suite(`dispatch(...) can optionally init event`, async ({ puppeteer: { page } }) => {
+suite(`dispatch(...) can optionally init event`, async ({ puppeteer: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('stub')
-          window.addEventListener('stub', event => result = event.bubbles)
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
+          window.addEventListener('keydown', event => result = event.bubbles)
 
           let result
           instance.dispatch({ init: { bubbles: true } })
@@ -135,11 +143,13 @@ suite(`dispatch(...) can optionally init event`, async ({ puppeteer: { page } })
         expected = true
 
   assert.is(value, expected)
+
+  reloadNext()
 })
 
 suite(`dispatch(...) updates cancelled`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('stub'),
+          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown'),
                 before = instance.cancelled
 
           instance.dispatch()

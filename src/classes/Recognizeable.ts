@@ -20,75 +20,76 @@ import {
   toImplementation,
   eventMatchesKeycombo,
   ListenableSupportedType,
-  ListenHandleParam,
+  ListenEffectParam,
 } from './Listenable'
 
 export type RecognizeableOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
   maxSequenceLength?: true | number,
-  handlesIncludeCombos?: boolean,
-  handles?: { [type in Type]?: (api: RecognizeableHandleApi<Type, Metadata>) => any }
-    | ((defineHandle: DefineHandle<Type, Metadata>) => [type: Type, handle: (api: RecognizeableHandleApi<Type, Metadata>) => any][])
+  effectsIncludeCombos?: boolean,
+  effects?: { [type in Type]?: (api: RecognizeableEffectApi<Type, Metadata>) => any }
+    | ((defineEffect: DefineEffect<Type, Metadata>) => [type: Type, effect: (api: RecognizeableEffectApi<Type, Metadata>) => any][])
 }
 
-type DefineHandle<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = 
-  <HandleType extends Type>(type: HandleType, handle: (api: RecognizeableHandleApi<HandleType, Metadata>) => any) 
-    => [type: Type, handle: (api: RecognizeableHandleApi<Type, Metadata>) => any]
+type DefineEffect<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = 
+  <EffectType extends Type>(type: EffectType, effect: (api: RecognizeableEffectApi<EffectType, Metadata>) => any) 
+    => [type: Type, effect: (api: RecognizeableEffectApi<Type, Metadata>) => any]
 
 export type RecognizeableStatus = 'recognized' | 'recognizing' | 'denied' | 'ready'
 
-export type RecognizeableHandleApi<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = HandleApiFromConstructor<Type, Metadata> & HandleApiFromRuntime<Type>
-
-type HandleApiFromConstructor<Type extends ListenableSupportedType, Metadata> = {
+export type RecognizeableEffectApi<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
   getStatus: () => 'recognized' | 'recognizing' | 'denied' | 'ready',
   getMetadata: () => Metadata,
   setMetadata: (metadata: Metadata) => void,
   recognized: () => void,
   denied: () => void,
-  effect: (sequenceItem: ListenHandleParam<Type>) => any,
+  sequenceItem: ListenEffectParam<Type>,
+  getSequence: () => ListenEffectParam<Type>[],
+  onRecognized: (sequenceItem: ListenEffectParam<Type>) => any,
 }
 
-type HandleApiFromRuntime<Type extends ListenableSupportedType> = {
-  sequenceItem: ListenHandleParam<Type>,
-  getSequence: () => ListenHandleParam<Type>[]
+export type RecognizeOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
+  onRecognized?: (sequenceItem: ListenEffectParam<Type>) => any,
 }
 
 export class Recognizeable<Type extends ListenableSupportedType, Metadata extends Record<any, any>> {
   _maxSequenceLength: number | true
-  _handles: Map<string, (api: RecognizeableHandleApi<Type, Metadata>) => any>
-  _handleApi: HandleApiFromConstructor<Type, Metadata>
-  _toType: (sequenceItem: ListenHandleParam<Type>) => string
+  _effects: Map<string, (api: RecognizeableEffectApi<Type, Metadata>) => any>
+  _effectApi: RecognizeableEffectApi<Type, Metadata>
+  _toType: (sequenceItem: ListenEffectParam<Type>) => string
 
-  constructor (sequence: ListenHandleParam<Type>[], options: RecognizeableOptions<Type, Metadata> = { handlesIncludeCombos: true }) {
+  constructor (sequence: ListenEffectParam<Type>[], options: RecognizeableOptions<Type, Metadata> = { effectsIncludeCombos: true }) {
     const defaultOptions: RecognizeableOptions<Type, Metadata> = {
       maxSequenceLength: true as const,
-      handlesIncludeCombos: true,
-      handles: {},
+      effectsIncludeCombos: true,
+      effects: {},
     }
     
     this._maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
-    this._handles = new Map(
-      isFunction(options?.handles) 
-        ? options.handles(createDefineHandle<Type, Metadata>())
-        : Object.entries(options?.handles || defaultOptions.handles)
+    this._effects = new Map(
+      isFunction(options?.effects) 
+        ? options.effects(createDefineEffect<Type, Metadata>())
+        : Object.entries(options?.effects || defaultOptions.effects)
     )
 
     this._toType = createToType({
-      handlesIncludeCombos: options.handlesIncludeCombos,
-      handles: this._handles,
+      effectsIncludeCombos: options.effectsIncludeCombos,
+      effects: this._effects,
     })
 
     this._resetComputedMetadata()
 
     this.setSequence(sequence)
 
-    this._handleApi = {
+    // The full effect API isn't available until runtime.
+    // This object is asserted as the full API. Full API access is verified by tests.
+    // 
+    this._effectApi = {
       getStatus: () => this.status,
       getMetadata: () => this.metadata,
       setMetadata: (metadata: Metadata) => this._computedMetadata = metadata,
       recognized: () => this._recognized(),
       denied: () => this._denied(),
-      effect: (sequenceItem: ListenHandleParam<Type>) => this.effect?.(sequenceItem),
-    }
+    } as unknown as RecognizeableEffectApi<Type, Metadata>
 
     this._ready()
   }
@@ -115,12 +116,6 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
   set sequence (sequence) {
     this.setSequence(sequence)
   }
-  get effect () {
-    return this._computedEffect
-  }
-  set effect (effect) {
-    this.setEffect(effect)
-  }
   get status () {
     return this._computedStatus
   }
@@ -128,18 +123,13 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     return this._computedMetadata
   }
 
-  _computedSequence: ListenHandleParam<Type>[]
-  setSequence (sequence: ListenHandleParam<Type>[]) {
+  _computedSequence: ListenEffectParam<Type>[]
+  setSequence (sequence: ListenEffectParam<Type>[]) {
     this._computedSequence = sequence
     return this
   }
-  _computedEffect: ((sequenceItem: ListenHandleParam<Type>) => any)
-  setEffect (effect: ((sequenceItem: ListenHandleParam<Type>) => any)) {
-    this._computedEffect = effect
-    return this
-  }
 
-  recognize (sequenceItem: ListenHandleParam<Type>) {
+  recognize (sequenceItem: ListenEffectParam<Type>, { onRecognized }: RecognizeOptions<Type, Metadata> = {}) {
     this._recognizing()
 
     const type = this._toType(sequenceItem),
@@ -147,15 +137,15 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
             ? Math.max(0, this.sequence.length - this._maxSequenceLength)
             : 0,
           newSequence = createConcat(
-            createSlice<ListenHandleParam<Type>>({ from: excess })(this.sequence),
+            createSlice<ListenEffectParam<Type>>({ from: excess })(this.sequence),
             [sequenceItem]
           )([])
-          
-    this._handles.get(type)?.({
-      sequenceItem: sequenceItem,
-      ...this._handleApi,
-      getSequence: () => newSequence,
-    })
+    
+    this._effectApi.sequenceItem = sequenceItem
+    this._effectApi.getSequence = () => newSequence
+    this._effectApi.onRecognized = onRecognized || (() => {})
+    
+    this._effects.get(type)?.(this._effectApi)
       
     switch (this.status) {
       case 'denied':
@@ -175,36 +165,36 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
   }
 }
 
-export function createDefineHandle<Type extends ListenableSupportedType, Metadata extends Record<any, any>> (): DefineHandle<Type, Metadata> {
-  return <HandleType extends Type>(type: HandleType, handle: (api: RecognizeableHandleApi<HandleType, Metadata>) => any) => {
-    return [type, handle]
+export function createDefineEffect<Type extends ListenableSupportedType, Metadata extends Record<any, any>> (): DefineEffect<Type, Metadata> {
+  return <EffectType extends Type>(type: EffectType, effect: (api: RecognizeableEffectApi<EffectType, Metadata>) => any) => {
+    return [type, effect]
   }
 }
 
 function createToType<Type extends ListenableSupportedType, Metadata> ({
-  handlesIncludeCombos,
-  handles
+  effectsIncludeCombos,
+  effects
 }: {
- handlesIncludeCombos?: RecognizeableOptions<Type, Metadata>['handlesIncludeCombos'],
- handles?: Map<string, (api: RecognizeableHandleApi<Type, Metadata>) => any>
-}): (sequence: ListenHandleParam<Type>) => string {
-  const handleLeftclickcombos: ListenableClickcomboItem[][] = [],
-        handleRightclickcombos: ListenableClickcomboItem[][] = [],
-        handleKeycombos: ListenableKeycomboItem[][] = []
+ effectsIncludeCombos?: RecognizeableOptions<Type, Metadata>['effectsIncludeCombos'],
+ effects?: Map<string, (api: RecognizeableEffectApi<Type, Metadata>) => any>
+}): (sequence: ListenEffectParam<Type>) => string {
+  const effectLeftclickcombos: ListenableClickcomboItem[][] = [],
+        effectRightclickcombos: ListenableClickcomboItem[][] = [],
+        effectKeycombos: ListenableKeycomboItem[][] = []
 
-  if (handlesIncludeCombos) {
-    for (const [handleKey] of handles) {
-      const implementation = toImplementation(handleKey)
+  if (effectsIncludeCombos) {
+    for (const [effectKey] of effects) {
+      const implementation = toImplementation(effectKey)
 
       switch (implementation) {
         case 'leftclickcombo':
-          handleLeftclickcombos.push(ensureClickcombo(handleKey))
+          effectLeftclickcombos.push(ensureClickcombo(effectKey))
           break
         case 'rightclickcombo':
-          handleRightclickcombos.push(ensureClickcombo(handleKey))
+          effectRightclickcombos.push(ensureClickcombo(effectKey))
           break
         case 'keycombo':
-          handleKeycombos.push(ensureKeycombo(handleKey))
+          effectKeycombos.push(ensureKeycombo(effectKey))
           break
         default:
           // do nothing
@@ -213,7 +203,7 @@ function createToType<Type extends ListenableSupportedType, Metadata> ({
     }
   }
 
-  return function toType (sequenceItem: ListenHandleParam<Type>) {
+  return function toType (sequenceItem: ListenEffectParam<Type>) {
     if (isArray(sequenceItem)) {
       if (sequenceItem[0] instanceof IntersectionObserverEntry) {
         return 'intersect'
@@ -235,9 +225,9 @@ function createToType<Type extends ListenableSupportedType, Metadata> ({
         return 'idle'
       }
 
-      if (handleLeftclickcombos?.length > 0) {
+      if (effectLeftclickcombos?.length > 0) {
         if (leftclickcomboEventTypes.has((sequenceItem as Event).type)) {
-          for (const clickcombo of handleLeftclickcombos) {
+          for (const clickcombo of effectLeftclickcombos) {
             if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
               return toJoinedClickcombo(clickcombo) as string
             }
@@ -245,9 +235,9 @@ function createToType<Type extends ListenableSupportedType, Metadata> ({
         }
       }
       
-      if (handleRightclickcombos?.length > 0) {
+      if (effectRightclickcombos?.length > 0) {
         if (rightclickComboEventTypes.has((sequenceItem as Event).type)) {
-          for (const clickcombo of handleRightclickcombos) {
+          for (const clickcombo of effectRightclickcombos) {
             if (eventMatchesClickcombo({ event: sequenceItem as MouseEvent, clickcombo })) {
               return toJoinedClickcombo(clickcombo) as string
             }
@@ -255,9 +245,9 @@ function createToType<Type extends ListenableSupportedType, Metadata> ({
         }
       }
       
-      if (handleKeycombos?.length > 0) {
+      if (effectKeycombos?.length > 0) {
         if (keycomboEventTypes.has((sequenceItem as Event).type)) {
-          for (const keycombo of handleKeycombos) {
+          for (const keycombo of effectKeycombos) {
             if (eventMatchesKeycombo({ event: sequenceItem as KeyboardEvent, keycombo })) {
               return toJoinedKeycombo(keycombo) as string
             }

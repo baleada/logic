@@ -12,7 +12,7 @@ import {
   createMap,
   Pipeable,
 } from './pipes'
-import type { ListenableKeycombo, ListenableSupportedEventType, ListenHandle, ListenHandleParam, ListenOptions } from './classes/Listenable'
+import type { ListenableKeycombo, ListenableSupportedEventType, ListenEffect, ListenEffectParam, ListenOptions } from './classes/Listenable'
 
 // DISPATCHABLE
 type ToEventOptions<Type extends ListenableSupportedEventType> = Type extends ListenableKeycombo
@@ -253,10 +253,10 @@ const flagsByModifierOrAlias: Record<ListenableModifier | ListenableModifierAlia
   option: 'altKey',
 }
 
-export function createExceptAndOnlyHandle<Type extends ListenableSupportedEventType> (handle: ListenHandle<Type>, options: ListenOptions<Type>): ListenHandle<Type> {
+export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventType> (effect: ListenEffect<Type>, options: ListenOptions<Type>): ListenEffect<Type> {
   const { except = [], only = [] } = options
   
-  return ((event: ListenHandleParam<Type>) => {
+  return ((event: ListenEffectParam<Type>) => {
     const { target } = event,
           [matchesOnly, matchesExcept] = target instanceof Element
             ? createMap<string[], boolean>(selectors => lazyCollectionSome<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
@@ -264,16 +264,16 @@ export function createExceptAndOnlyHandle<Type extends ListenableSupportedEventT
 
     if (matchesOnly) {
       // @ts-ignore
-      handle(event)
+      effect(event)
       return
     }
     
     if (only.length === 0 && !matchesExcept) {
       // @ts-ignore
-      handle(event)
+      effect(event)
       return
     }
-  }) as ListenHandle<Type>
+  }) as ListenEffect<Type>
 }
 
 export function isModified<EventType extends KeyboardEvent | MouseEvent> ({ event, alias }: { event: EventType, alias: string }) {

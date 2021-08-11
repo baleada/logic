@@ -94,7 +94,7 @@ export class Completeable {
       case 'selection':
         return this.selection.end // No arithmetic needed, because the browser sets selection end as the first character not highlighted in the selection
       case 'divider':
-        return this.dividerIndices.after // No arithmetic needed, because segment ends before the divider index, so the divider index should be the second arg for slice. -1 edge case is handled by setDividerIndices
+        return this.dividerIndices.after // No arithmetic needed, because segment ends before the divider index, so the divider index should be the second arg for slice. -1 edge case is effectd by setDividerIndices
     }
   }
 

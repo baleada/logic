@@ -45,35 +45,35 @@ suite(`first recognize(sequenceItem) sets status to recognizing`, async ({ puppe
   assert.is(value, 'recognizing')
 })
 
-suite(`recognize(sequenceItem) calls handle`, async ({ puppeteer: { page } }) => {
+suite(`recognize(sequenceItem) calls effect`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-    let handleWasCalled = false
+    let effectWasCalled = false
     
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click' | 'keydown', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', () => handleWasCalled = true),
-          defineHandle('keydown', () => handleWasCalled = true)
+        effects: defineEffect => [
+          defineEffect('click', () => effectWasCalled = true),
+          defineEffect('keydown', () => effectWasCalled = true)
         ]
       }
     )
     
     instance.recognize(new MouseEvent('click'))
     
-    return handleWasCalled
+    return effectWasCalled
   })
 
   assert.is(value, true)
 })
 
-suite(`handle API recognized() sets status`, async ({ puppeteer: { page } }) => {
+suite(`effect API recognized() sets status`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', ({ recognized }) => recognized())
+        effects: defineEffect => [
+          defineEffect('click', ({ recognized }) => recognized())
         ]
       }
     )
@@ -87,13 +87,13 @@ suite(`handle API recognized() sets status`, async ({ puppeteer: { page } }) => 
   assert.is(value, 'recognized')
 })
 
-suite(`handle API denied() sets status`, async ({ puppeteer: { page } }) => {
+suite(`effect API denied() sets status`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', ({ denied }) => denied())
+        effects: defineEffect => [
+          defineEffect('click', ({ denied }) => denied())
         ]
       }
     )
@@ -107,15 +107,15 @@ suite(`handle API denied() sets status`, async ({ puppeteer: { page } }) => {
   assert.is(value, 'denied')
 })
 
-suite(`handle API getSequence() gets the new sequence`, async ({ puppeteer: { page } }) => {
+suite(`effect API getSequence() gets the new sequence`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let sequence
 
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', ({ getSequence }) => sequence = getSequence())
+        effects: defineEffect => [
+          defineEffect('click', ({ getSequence }) => sequence = getSequence())
         ]
       }
     )
@@ -131,15 +131,15 @@ suite(`handle API getSequence() gets the new sequence`, async ({ puppeteer: { pa
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite(`handle API getStatus() gets status`, async ({ puppeteer: { page } }) => {
+suite(`effect API getStatus() gets status`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let status
 
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', ({ getStatus }) => status = getStatus())
+        effects: defineEffect => [
+          defineEffect('click', ({ getStatus }) => status = getStatus())
         ]
       }
     )
@@ -155,15 +155,15 @@ suite(`handle API getStatus() gets status`, async ({ puppeteer: { page } }) => {
   assert.equal(value.fromInstance, value.fromApi)
 })
 
-suite(`handle API getMetadata() gets metadata`, async ({ puppeteer: { page } }) => {
+suite(`effect API getMetadata() gets metadata`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let metadata
 
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', ({ getMetadata }) => metadata = getMetadata())
+        effects: defineEffect => [
+          defineEffect('click', ({ getMetadata }) => metadata = getMetadata())
         ]
       }
     )
@@ -179,15 +179,15 @@ suite(`handle API getMetadata() gets metadata`, async ({ puppeteer: { page } }) 
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite(`handle API getMetadata() is a reference to metadata`, async ({ puppeteer: { page } }) => {
+suite(`effect API getMetadata() is a reference to metadata`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let metadata
 
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', ({ getMetadata }) => metadata = getMetadata())
+        effects: defineEffect => [
+          defineEffect('click', ({ getMetadata }) => metadata = getMetadata())
         ]
       }
     )
@@ -206,13 +206,13 @@ suite(`handle API getMetadata() is a reference to metadata`, async ({ puppeteer:
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite(`handle API setMetadata() sets metadata`, async ({ puppeteer: { page } }) => {
+suite(`effect API setMetadata() sets metadata`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', ({ setMetadata }) => setMetadata({ stub: 'stub' }))
+        effects: defineEffect => [
+          defineEffect('click', ({ setMetadata }) => setMetadata({ stub: 'stub' }))
         ]
       }
     )
@@ -225,39 +225,37 @@ suite(`handle API setMetadata() sets metadata`, async ({ puppeteer: { page } }) 
   assert.equal(value, { stub: 'stub' })
 })
 
-suite(`handle API effect() performs side effect`, async ({ puppeteer: { page } }) => {
+suite(`effect API onRecognized() performs side effect`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-    let effectStatus = 'not performed'
-    const effect = () => effectStatus = 'performed'
+    let onRecognizedStatus = 'not performed'
+    const onRecognized = () => onRecognizedStatus = 'performed'
 
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', ({ sequenceItem, effect }) => effect(sequenceItem))
+        effects: defineEffect => [
+          defineEffect('click', ({ sequenceItem, onRecognized: o }) => o(sequenceItem))
         ]
       }
     )
-
-    instance.effect = effect
     
-    instance.recognize(new MouseEvent('click'))
+    instance.recognize(new MouseEvent('click'), { onRecognized })
     
-    return effectStatus
+    return onRecognizedStatus
   })
 
   assert.equal(value, 'performed')
 })
 
-suite(`handle API sequenceItem accesses sequenceItem`, async ({ puppeteer: { page } }) => {
+suite(`effect API sequenceItem accesses sequenceItem`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let result
 
     const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>(
       [],
       {
-        handles: defineHandle => [
-          defineHandle('click', ({ sequenceItem }) => result = sequenceItem.type)
+        effects: defineEffect => [
+          defineEffect('click', ({ sequenceItem }) => result = sequenceItem.type)
         ]
       }
     )
@@ -279,7 +277,7 @@ suite(`status is 'ready' after construction`, async ({ puppeteer: { page } }) =>
   assert.is(value, 'ready')
 })
 
-suite(`status is 'recognizing' after recognize(...) is called at least once and handles did not call recognized or denied`, async ({ puppeteer: { page } }) => {
+suite(`status is 'recognizing' after recognize(...) is called at least once and effects did not call recognized or denied`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     return new (window as unknown as WithLogic).Logic.Recognizeable<'click', any>([])
       .recognize(new MouseEvent('click'))
@@ -294,8 +292,8 @@ suite(`correctly routes IntersectionObserverEntry[]`, async ({ puppeteer: { page
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'intersect', any>(
                   [],
                   {
-                    handles: defineHandle => [
-                      defineHandle('intersect', ({ recognized }) => recognized())
+                    effects: defineEffect => [
+                      defineEffect('intersect', ({ recognized }) => recognized())
                     ]
                   }
                 ),
@@ -319,8 +317,8 @@ suite(`correctly routes MutationRecord[]`, async ({ puppeteer: { page } }) => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'mutate', any>(
                   [],
                   {
-                    handles: defineHandle => [
-                      defineHandle('mutate', ({ recognized }) => recognized())
+                    effects: defineEffect => [
+                      defineEffect('mutate', ({ recognized }) => recognized())
                     ]
                   }
                 ),
@@ -345,8 +343,8 @@ suite(`correctly routes ResizeObserverEntry[]`, async ({ puppeteer: { page } }) 
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'resize', any>(
                   [],
                   {
-                    handles: defineHandle => [
-                      defineHandle('resize', ({ recognized }) => recognized())
+                    effects: defineEffect => [
+                      defineEffect('resize', ({ recognized }) => recognized())
                     ]
                   }
                 ),
@@ -372,8 +370,8 @@ suite(`correctly routes MediaQueryListEvent`, async ({ puppeteer: { page } }) =>
     (window as unknown as WithLogic).testState = new (window as unknown as WithLogic).Logic.Recognizeable<'(min-width: 900px)', any>(
         [],
         {
-          handles: defineHandle => [
-            defineHandle('(min-width: 900px)', ({ recognized }) => recognized())
+          effects: defineEffect => [
+            defineEffect('(min-width: 900px)', ({ recognized }) => recognized())
           ]
         }
       )
@@ -401,8 +399,8 @@ suite(`correctly routes IdleDeadline`, async ({ puppeteer: { page } }) => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'idle', any>(
                   [],
                   {
-                    handles: defineHandle => [
-                      defineHandle('idle', ({ recognized }) => recognized())
+                    effects: defineEffect => [
+                      defineEffect('idle', ({ recognized }) => recognized())
                     ]
                   }
                 )
@@ -421,9 +419,9 @@ suite(`correctly routes leftclickcombo`, async ({ puppeteer: { page } }) => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'shift+click', any>(
                   [],
                   {
-                    handlesIncludeCombos: true,
-                    handles: defineHandle => [
-                      defineHandle('shift+click', ({ recognized }) => recognized())
+                    effectsIncludeCombos: true,
+                    effects: defineEffect => [
+                      defineEffect('shift+click', ({ recognized }) => recognized())
                     ]
                   }
                 )
@@ -442,9 +440,9 @@ suite(`correctly routes rightclickcombo`, async ({ puppeteer: { page } }) => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'rightclick', any>(
                   [],
                   {
-                    handlesIncludeCombos: true,
-                    handles: defineHandle => [
-                      defineHandle('rightclick', ({ recognized }) => recognized())
+                    effectsIncludeCombos: true,
+                    effects: defineEffect => [
+                      defineEffect('rightclick', ({ recognized }) => recognized())
                     ]
                   }
                 )
@@ -463,9 +461,9 @@ suite(`correctly routes keycombo`, async ({ puppeteer: { page } }) => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'shift+a', any>(
                   [],
                   {
-                    handlesIncludeCombos: true,
-                    handles: defineHandle => [
-                      defineHandle('shift+a', ({ recognized }) => recognized())
+                    effectsIncludeCombos: true,
+                    effects: defineEffect => [
+                      defineEffect('shift+a', ({ recognized }) => recognized())
                     ]
                   }
                 )
@@ -484,8 +482,8 @@ suite(`correctly routes events`, async ({ puppeteer: { page } }) => {
           const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'visibilitychange', any>(
                   [],
                   {
-                    handles: defineHandle => [
-                      defineHandle('visibilitychange', ({ recognized }) => recognized())
+                    effects: defineEffect => [
+                      defineEffect('visibilitychange', ({ recognized }) => recognized())
                     ]
                   }
                 )
@@ -497,6 +495,37 @@ suite(`correctly routes events`, async ({ puppeteer: { page } }) => {
         expected = 'recognized'
 
   assert.is(value, expected)
+})
+
+suite(`includes all desired keys in effect API`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          let keys
+
+          const instance = new (window as unknown as WithLogic).Logic.Recognizeable<'visibilitychange', any>(
+                  [],
+                  {
+                    effects: defineEffect => [
+                      defineEffect('visibilitychange', api => keys = Object.keys(api))
+                    ]
+                  }
+                )
+
+          instance.recognize(new Event('visibilitychange'))
+                
+          return keys
+        }),
+        expected = [
+          'getStatus',
+          'getMetadata',
+          'setMetadata',
+          'recognized',
+          'denied',
+          'sequenceItem',
+          'getSequence',
+          'onRecognized',
+        ]
+
+  assert.equal(value, expected)
 })
 
 suite.run()

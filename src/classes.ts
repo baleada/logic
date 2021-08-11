@@ -1,5 +1,5 @@
 export { Animateable } from './classes/Animateable'
-export type { AnimateableKeyframe, AnimateableOptions, AnimateableStatus, AnimateFrame, AnimateFrameHandle, AnimateOptions } from './classes/Animateable'
+export type { AnimateableKeyframe, AnimateableOptions, AnimateableStatus, AnimateFrame, AnimateFrameEffect, AnimateOptions } from './classes/Animateable'
 
 export { Completeable } from './classes/Completeable'
 export type { CompleteableOptions, CompleteableStatus } from './classes/Completeable'
@@ -23,7 +23,7 @@ export { Grantable } from './classes/Grantable'
 export type { GrantableOptions, GrantableStatus } from './classes/Grantable'
 
 export { Listenable } from './classes/Listenable'
-export type { ListenableSupportedType, ListenableOptions, ListenableStatus, ListenableActive, ListenHandle, ListenOptions } from './classes/Listenable'
+export type { ListenableSupportedType, ListenableOptions, ListenableStatus, ListenableActive, ListenEffect, ListenOptions } from './classes/Listenable'
 export { eventMatchesKeycombo } from './classes/Listenable'
 export { ensureKeycombo } from './extracted'
 export type { ListenableKeycomboItem } from './extracted'
@@ -33,7 +33,7 @@ export { Navigateable } from './classes/Navigateable'
 export type { NavigateableOptions, NavigateableStatus } from './classes/Navigateable'
 
 export { Recognizeable } from './classes/Recognizeable'
-export type { RecognizeableOptions, RecognizeableStatus, RecognizeableHandleApi } from './classes/Recognizeable'
+export type { RecognizeableOptions, RecognizeableStatus, RecognizeableEffectApi } from './classes/Recognizeable'
 
 export { Resolveable } from './classes/Resolveable'
 export type { ResolveableGetPromise, ResolveableOptions, ResolveableStatus } from './classes/Resolveable'

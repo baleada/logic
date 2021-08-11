@@ -37,7 +37,7 @@ type AnimateableTiming = [number, number, number, number]
 
 type AnimateableControlPoints = [{ x: number, y: number }, { x: number, y: number }]
 
-export type AnimateFrameHandle = (frame?: AnimateFrame) => any
+export type AnimateFrameEffect = (frame?: AnimateFrame) => any
 
 export type AnimateFrame = {
   properties: {
@@ -61,7 +61,7 @@ export type AnimateableStatus = 'ready' | 'playing' | 'played' | 'reversing' | '
 
 const defaultOptions: AnimateableOptions = {
   duration: 0,
-  // delay not supported, because it can be handled by delayable
+  // delay not supported, because it can be effectd by delayable
   timing: [
     0, 0,
     1, 1,
@@ -78,8 +78,8 @@ export class Animateable {
   _reversedControlPoints: AnimateableControlPoints
   _toAnimationProgress: BezierEasing.EasingFunction
   _reversedToAnimationProgress: BezierEasing.EasingFunction
-  _playCache: { handle?: AnimateFrameHandle, options?: AnimateOptions }
-  _reverseCache: { handle?: AnimateFrameHandle, options?: AnimateOptions }
+  _playCache: { effect?: AnimateFrameEffect, options?: AnimateOptions }
+  _reverseCache: { effect?: AnimateFrameEffect, options?: AnimateOptions }
   _pauseCache: { status?: 'playing' | 'reversing', timeProgress?: number }
   _seekCache: { timeProgress?: number }
   _alternateCache: { status: 'ready' | 'playing' | 'reversing' }
@@ -208,9 +208,9 @@ export class Animateable {
     return this
   }
 
-  play (handle: AnimateFrameHandle, options?: AnimateOptions) { // Play from current time progress
+  play (effect: AnimateFrameEffect, options?: AnimateOptions) { // Play from current time progress
     this._playCache = {
-      handle,
+      effect,
       options,
     }
 
@@ -234,7 +234,7 @@ export class Animateable {
       case 'played':
       case 'reversed':
       case 'sought':
-        this._createAnimate('play')(handle, options)
+        this._createAnimate('play')(effect, options)
         break
       case 'paused':
         if (this._alternates) {
@@ -242,10 +242,10 @@ export class Animateable {
             case 'playing':
               switch (this._pauseCache.status) {
                 case 'playing':
-                  this._createAnimate('play')(handle, options)
+                  this._createAnimate('play')(effect, options)
                   break
                 case 'reversing':
-                  this._createAnimate('reverse')(handle, options)
+                  this._createAnimate('reverse')(effect, options)
                   break
                 }
               break
@@ -253,21 +253,21 @@ export class Animateable {
               this._alternateCache.status = 'playing'
               switch (this._pauseCache.status) {
                 case 'playing':
-                  this._createAnimate('play')(handle, options)
+                  this._createAnimate('play')(effect, options)
                   break
                 case 'reversing':
-                  this._createAnimate('play')(handle, options)
+                  this._createAnimate('play')(effect, options)
                   break
               }
               break
           }
         } else {
-          this._createAnimate('play')(handle, options)
+          this._createAnimate('play')(effect, options)
         }
         break
       case 'reversing':
         this.pause()
-        this._createAnimate('play')(handle, options)
+        this._createAnimate('play')(effect, options)
         break
     }
     
@@ -280,9 +280,9 @@ export class Animateable {
     this._computedStatus = 'played'
   }
 
-  reverse (handle: AnimateFrameHandle, options?: AnimateOptions) { // Reverse from current time progress
+  reverse (effect: AnimateFrameEffect, options?: AnimateOptions) { // Reverse from current time progress
     this._reverseCache = {
-      handle,
+      effect,
       options,
     }
 
@@ -306,7 +306,7 @@ export class Animateable {
       case 'played':
       case 'reversed':
       case 'sought':
-        this._createAnimate('reverse')(handle, options)
+        this._createAnimate('reverse')(effect, options)
         break
       case 'paused':
         if (this._alternates) {
@@ -315,31 +315,31 @@ export class Animateable {
               this._alternateCache.status = 'reversing'
               switch (this._pauseCache.status) {
                 case 'playing':
-                  this._createAnimate('reverse')(handle, options)
+                  this._createAnimate('reverse')(effect, options)
                   break
                 case 'reversing':
-                  this._createAnimate('reverse')(handle, options)
+                  this._createAnimate('reverse')(effect, options)
                   break
               }
               break
             case 'reversing':
               switch (this._pauseCache.status) {
                 case 'playing':
-                  this._createAnimate('play')(handle, options)
+                  this._createAnimate('play')(effect, options)
                   break
                 case 'reversing':
-                  this._createAnimate('reverse')(handle, options)
+                  this._createAnimate('reverse')(effect, options)
                   break
               }
               break
           }
         } else {
-          this._createAnimate('play')(handle, options)
+          this._createAnimate('play')(effect, options)
         }
         break
       case 'playing':
         this.pause()
-        this._createAnimate('reverse')(handle, options)
+        this._createAnimate('reverse')(effect, options)
         break
     }
     
@@ -371,8 +371,8 @@ export class Animateable {
   }
 
   _computedRequest: number
-  _createAnimate (type: AnimateType): (handle: (frame?: AnimateFrame) => any, options?: AnimateOptions) => this {
-    return (handle, options = {}) => {
+  _createAnimate (type: AnimateType): (effect: (frame?: AnimateFrame) => any, options?: AnimateOptions) => this {
+    return (effect, options = {}) => {
       const { interpolate: interpolateOptions } = options
 
       this._computedRequest = window.requestAnimationFrame(timestamp => {
@@ -394,9 +394,9 @@ export class Animateable {
           animation: animationProgress,
         }
 
-        handle(this._getFrame(type, timeProgress, interpolateOptions, timestamp))
+        effect(this._getFrame(type, timeProgress, interpolateOptions, timestamp))
 
-        this._recurse(type, timeRemaining, handle, options)
+        this._recurse(type, timeRemaining, effect, options)
       })
 
       return this
@@ -501,7 +501,7 @@ export class Animateable {
       lazyCollectionToArray()
     )(easeables)
   }
-  _recurse (type: AnimateType, timeRemaining: number, handle: AnimateFrameHandle, options?: AnimateOptions) {
+  _recurse (type: AnimateType, timeRemaining: number, effect: AnimateFrameEffect, options?: AnimateOptions) {
     switch (type) {
       case 'play':
         if (timeRemaining <= 0) {
@@ -511,13 +511,13 @@ export class Animateable {
           if (this._alternates) {
             switch (this._alternateCache.status) {
               case 'playing':
-                this._createAnimate('reverse')(handle, options)
+                this._createAnimate('reverse')(effect, options)
                 break
               case 'reversing':
                 this._computedIterations += 1
 
                 if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
-                  this._createAnimate('reverse')(handle, options)
+                  this._createAnimate('reverse')(effect, options)
                 } else {
                   this._alternateCache.status = 'ready'
                 }
@@ -527,11 +527,11 @@ export class Animateable {
             this._computedIterations += 1
 
             if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
-              this._createAnimate('play')(handle, options)
+              this._createAnimate('play')(effect, options)
             }
           }
         } else {
-          this._createAnimate('play')(handle, options)
+          this._createAnimate('play')(effect, options)
         }
         break
       case 'reverse':
@@ -545,25 +545,25 @@ export class Animateable {
                 this._computedIterations += 1
 
                 if (this.iterations < this._iterationLimit || this._iterationLimit === true) {
-                  this._createAnimate('play')(handle, options)
+                  this._createAnimate('play')(effect, options)
                 } else {
                   this._alternateCache.status = 'ready'
                 }
 
                 break
               case 'reversing':
-                this._createAnimate('play')(handle, options)
+                this._createAnimate('play')(effect, options)
                 break
             }
           } else {
             this._computedIterations += 1
 
             if (this.iterations < this._iterationLimit) {
-              this._createAnimate('reverse')(handle, options)
+              this._createAnimate('reverse')(effect, options)
             }
           }
         } else {
-          this._createAnimate('reverse')(handle, options)
+          this._createAnimate('reverse')(effect, options)
         }
         break
       case 'seek':
@@ -637,14 +637,14 @@ export class Animateable {
     window.cancelAnimationFrame(this.request)
   }
 
-  seek (timeProgress: number, options: { handle?: AnimateFrameHandle } & AnimateOptions = {}) { // Store time progress. Continue playing or reversing if applicable.
+  seek (timeProgress: number, options: { effect?: AnimateFrameEffect } & AnimateOptions = {}) { // Store time progress. Continue playing or reversing if applicable.
     const iterations = Math.floor(timeProgress),
           naiveIterationProgress = timeProgress - iterations,
-          { handle: naiveHandle } = options
+          { effect: naiveEffect } = options
 
     this._computedIterations = iterations
 
-    let ensuredTimeProgress: number, handle: AnimateFrameHandle
+    let ensuredTimeProgress: number, effect: AnimateFrameEffect
 
     if (this._alternates) {
       if (naiveIterationProgress <= .5) {
@@ -656,8 +656,8 @@ export class Animateable {
             this._seekCache = { timeProgress: ensuredTimeProgress }
             this._sought()
 
-            handle = isFunction(naiveHandle) ? naiveHandle : this._playCache.handle
-            this.play(handle, this._playCache.options)
+            effect = isFunction(naiveEffect) ? naiveEffect : this._playCache.effect
+            this.play(effect, this._playCache.options)
 
             break
           case 'reversing':
@@ -665,16 +665,16 @@ export class Animateable {
             this._seekCache = { timeProgress: ensuredTimeProgress }
             this._sought()
 
-            handle = isFunction(naiveHandle) ? naiveHandle : this._reverseCache.handle
-            this.reverse(handle, this._reverseCache.options)
+            effect = isFunction(naiveEffect) ? naiveEffect : this._reverseCache.effect
+            this.reverse(effect, this._reverseCache.options)
 
             break
           default:
             this._seekCache = { timeProgress: ensuredTimeProgress }
             this._sought()
 
-            handle = naiveHandle
-            this._createAnimate('seek')(handle, options)
+            effect = naiveEffect
+            this._createAnimate('seek')(effect, options)
 
             break
         }
@@ -686,8 +686,8 @@ export class Animateable {
             this._seekCache = { timeProgress: ensuredTimeProgress }
             this._sought()
 
-            handle = isFunction(naiveHandle) ? naiveHandle : this._reverseCache.handle
-            this.reverse(handle, this._reverseCache.options)
+            effect = isFunction(naiveEffect) ? naiveEffect : this._reverseCache.effect
+            this.reverse(effect, this._reverseCache.options)
 
             break
           case 'reversing':
@@ -695,18 +695,18 @@ export class Animateable {
             this._seekCache = { timeProgress: ensuredTimeProgress }
             this._sought()
 
-            handle = isFunction(naiveHandle) ? naiveHandle : this._playCache.handle
-            this.play(handle, this._playCache.options)
+            effect = isFunction(naiveEffect) ? naiveEffect : this._playCache.effect
+            this.play(effect, this._playCache.options)
 
             break
           default:
             this._seekCache = { timeProgress: ensuredTimeProgress }
             this._sought()
 
-            handle = naiveHandle
+            effect = naiveEffect
 
-            if (handle) {
-              this._createAnimate('seek')(handle, options)
+            if (effect) {
+              this._createAnimate('seek')(effect, options)
             }
 
             break
@@ -721,8 +721,8 @@ export class Animateable {
           this._seekCache = { timeProgress: ensuredTimeProgress }
           this._sought()
 
-          handle = isFunction(naiveHandle) ? naiveHandle : this._playCache.handle
-          this.play(handle, this._playCache.options)
+          effect = isFunction(naiveEffect) ? naiveEffect : this._playCache.effect
+          this.play(effect, this._playCache.options)
 
           break
         case 'reversing':
@@ -730,18 +730,18 @@ export class Animateable {
           this._seekCache = { timeProgress: ensuredTimeProgress }
           this._sought()
 
-          handle = isFunction(naiveHandle) ? naiveHandle : this._reverseCache.handle
-          this.reverse(handle, this._reverseCache.options)
+          effect = isFunction(naiveEffect) ? naiveEffect : this._reverseCache.effect
+          this.reverse(effect, this._reverseCache.options)
 
           break
         default:
           this._seekCache = { timeProgress: ensuredTimeProgress }
           this._sought()
 
-          handle = naiveHandle
+          effect = naiveEffect
 
-          if (handle) {
-            this._createAnimate('seek')(handle, options)
+          if (effect) {
+            this._createAnimate('seek')(effect, options)
           }
 
           break
@@ -758,14 +758,14 @@ export class Animateable {
     switch (this.status) {
       case 'played': // TODO: Pretty sure this could cause problems for alternating animations
         this.seek(0)
-        this.play(this._playCache.handle, this._playCache.options)
+        this.play(this._playCache.effect, this._playCache.options)
         break
       case 'playing':
         this.seek(0)
         break
       case 'reversed': // TODO: Pretty sure this could cause problems for alternating animations
         this.seek(0)
-        this.reverse(this._reverseCache.handle, this._reverseCache.options)
+        this.reverse(this._reverseCache.effect, this._reverseCache.options)
         break
       case 'reversing':
         this.seek(0)
@@ -774,11 +774,11 @@ export class Animateable {
         switch (this._pauseCache.status) {
           case 'playing':
             this.seek(0)
-            this.play(this._playCache.handle, this._playCache.options)
+            this.play(this._playCache.effect, this._playCache.options)
             break
           case 'reversing':
             this.seek(0)
-            this.reverse(this._reverseCache.handle, this._reverseCache.options)
+            this.reverse(this._reverseCache.effect, this._reverseCache.options)
             break
         }
     }

@@ -295,9 +295,9 @@ suite(`listen(...) handles recognizeable`, async ({ puppeteer: { reloadNext, pag
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
-              handles: defineHandle => [
-                defineHandle('keydown', () => {}),
-                defineHandle('mousedown', () => {}),
+              effects: defineEffect => [
+                defineEffect('keydown', () => {}),
+                defineEffect('mousedown', () => {}),
               ]
             }
           })
@@ -315,9 +315,9 @@ suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
-              handles: defineHandle => [
-                defineHandle('keydown', () => {}),
-                defineHandle('mousedown', () => {}),
+              effects: defineEffect => [
+                defineEffect('keydown', () => {}),
+                defineEffect('mousedown', () => {}),
               ],
             }
           })
@@ -478,9 +478,9 @@ suite(`stop(...) handles recognizeable`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithLogic).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
-              handles: defineHandle => [
-                defineHandle('keydown', () => {}),
-                defineHandle('mousedown', () => {}),
+              effects: defineEffect => [
+                defineEffect('keydown', () => {}),
+                defineEffect('mousedown', () => {}),
               ]
             }
 

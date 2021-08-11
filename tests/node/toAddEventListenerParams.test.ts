@@ -5,7 +5,7 @@ import { toAddEventListenerParams } from '../../src/classes/Listenable'
 const suite = createSuite('toAddEventListenerParams')
 
 suite(`listener options prefers addEventListener options object`, context => {
-  const { handleOptions: { 0: value } } = toAddEventListenerParams(
+  const { effectOptions: { 0: value } } = toAddEventListenerParams(
           () => {},
           { addEventListener: {}, useCapture: true }
         ),
@@ -15,7 +15,7 @@ suite(`listener options prefers addEventListener options object`, context => {
 })
 
 suite(`listener options includes useCapture when addEventListener is falsy`, context => {
-  const { handleOptions: { 0: value } } = toAddEventListenerParams(
+  const { effectOptions: { 0: value } } = toAddEventListenerParams(
           () => {},
           { useCapture: true }
         ),
@@ -27,7 +27,7 @@ suite(`listener options includes useCapture when addEventListener is falsy`, con
 // Decided not to support wantsUntrusted for now, due to type safety issues.
 // Will support again if I find an addEventListener type definition with wantsUntrusted support. 
 // suite.skip(`listener options includes wantsUntrusted`, context => {
-//   const { handleOptions: { 1: value } } = toAddEventListenerParams(
+//   const { effectOptions: { 1: value } } = toAddEventListenerParams(
 //           () => {},
 //           { wantsUntrusted: true }
 //         ),

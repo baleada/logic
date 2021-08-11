@@ -66,17 +66,17 @@ export default {
 
     const stub = ref(null)
 
-    function frameHandle (frame) {
+    function frameEffect (frame) {
       const { data: { translate, backgroundColor, textContent } } = frame
       stub.value.style.transform = `translateX(${translate}%`
       stub.value.style.backgroundColor = backgroundColor
       // stub.value.textContent = textContent.join('')
     }
     function play () {
-      instance.play(frameHandle)
+      instance.play(frameEffect)
     }
     function reverse () {
-      instance.reverse(frameHandle)
+      instance.reverse(frameEffect)
     }
     function setPlaybackRate () {
       instance.setPlaybackRate(4)
@@ -91,7 +91,7 @@ export default {
       instance.stop()
     }
     function seek () {
-      instance.seek(1.25, { handle: frameHandle })
+      instance.seek(1.25, { effect: frameEffect })
     }
 
     return {

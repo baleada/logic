@@ -1,5 +1,5 @@
 import { Listenable } from "./Listenable"
-import type { ListenHandle } from './Listenable'
+import type { ListenEffect } from './Listenable'
 
 export type CopyableOptions = Record<string, never>
 
@@ -11,7 +11,7 @@ export class Copyable {
   _computedIsClipboardText: boolean
   _copy: Listenable<'copy'>
   _cut: Listenable<'cut'>
-  _copyAndCutHandle: ListenHandle<'copy' | 'cut'>
+  _copyAndCutEffect: ListenEffect<'copy' | 'cut'>
 
   constructor (string: string, options: CopyableOptions = {}) {
     this._computedIsClipboardText = false
@@ -19,7 +19,7 @@ export class Copyable {
     this._copy = new Listenable('copy')
     this._cut = new Listenable('cut')
 
-    this._copyAndCutHandle = async () => {
+    this._copyAndCutEffect = async () => {
       const clipboardText = await navigator.clipboard.readText()
       this._computedIsClipboardText = clipboardText === this.string
     }
@@ -103,9 +103,9 @@ export class Copyable {
     this._computedStatus = 'errored'
   }
 
-  handleClipboardTextChanges () {
-    this._copy.listen(this._copyAndCutHandle)
-    this._cut.listen(this._copyAndCutHandle)
+  effectClipboardTextChanges () {
+    this._copy.listen(this._copyAndCutEffect)
+    this._cut.listen(this._copyAndCutEffect)
   }
 
   stop () {
