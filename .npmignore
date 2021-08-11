@@ -6,6 +6,4 @@
 !lib/**/*.js
 !lib/**/*.ts
 !lib/**/*.cjs
-!metadata/**/*.js
 !metadata/**/*.ts
-!metadata/**/*.cjs
