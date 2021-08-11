@@ -15,7 +15,7 @@
   />
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
 import { Animateable } from '../../../../../../src/classes'
 import { easingsNetInOutBack } from '@baleada/animateable-utils'
@@ -26,21 +26,21 @@ export default {
           // Translate
           { 
             progress: 0.75,
-            data: {
+            properties: {
               translate: 0,
             },
             // timing: easingsNetInOutBack,
           },
           { 
             progress: 1,
-            data: {
+            properties: {
               translate: 150,
             },
           },
           // Background color and textContent
           { 
             progress: 0,
-            data: {
+            properties: {
               backgroundColor: 'red',
               textContent: [],
             },
@@ -48,7 +48,7 @@ export default {
           },
           { 
             progress: .5,
-            data: {
+            properties: {
               backgroundColor: 'blue',
               textContent: 'baleada'.split(''),
             },
@@ -67,9 +67,9 @@ export default {
     const stub = ref(null)
 
     function frameEffect (frame) {
-      const { data: { translate, backgroundColor, textContent } } = frame
-      stub.value.style.transform = `translateX(${translate}%`
-      stub.value.style.backgroundColor = backgroundColor
+      const { properties: { translate, backgroundColor, textContent } } = frame
+      stub.value.style.transform = `translateX(${translate.interpolated}%`
+      stub.value.style.backgroundColor = backgroundColor.interpolated
       // stub.value.textContent = textContent.join('')
     }
     function play () {

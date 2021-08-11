@@ -4,7 +4,6 @@ import {
   filter as lazyCollectionFilter,
   pipe as lazyCollectionPipe,
   reduce as lazyCollectionReduce,
-  toArray as lazyCollectionToArray,
 } from 'lazy-collections'
 import { Listenable } from './Listenable'
 import { isFunction, isUndefined, isNumber, isString, isArray } from '../extracted'
@@ -253,7 +252,7 @@ export class Animateable {
               this._alternateCache.status = 'playing'
               switch (this._pauseCache.status) {
                 case 'playing':
-                  this._createAnimate('play')(effect, options)
+                  this._createAnimate('reverse')(effect, options)
                   break
                 case 'reversing':
                   this._createAnimate('play')(effect, options)
@@ -334,7 +333,7 @@ export class Animateable {
               break
           }
         } else {
-          this._createAnimate('play')(effect, options)
+          this._createAnimate('reverse')(effect, options)
         }
         break
       case 'playing':
@@ -498,7 +497,6 @@ export class Animateable {
         },
         { properties: {}, timestamp }
       ),
-      lazyCollectionToArray()
     )(easeables)
   }
   _recurse (type: AnimateType, timeRemaining: number, effect: AnimateFrameEffect, options?: AnimateOptions) {
