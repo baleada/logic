@@ -9,14 +9,10 @@
     ".": {
       "require": "./lib/index.cjs",
       "import": "./lib/index.js"
-    },
-    "./metadata": {
-      "import": "./metadata/index.ts"
     }
   },
   "scripts": {
-    "metadata": "node -r esbuild-register scripts/metadata.ts",
-    "prepare": "npm run metadata && tsc && rollup --config rollup.config.ts",
+    "prepare": "tsc && rollup --config rollup.config.ts",
     "test:coverage": "node -r esbuild-register scripts/testCoverage.ts",
     "test:only": "run() { uvu -r esbuild-register tests/$2 $1.test.ts$; }; run",
     "test:node": "npm run test:only . node",
