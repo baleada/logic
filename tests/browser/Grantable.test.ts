@@ -1,7 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
-import { WithLogic } from '../fixtures/types'
+import { WithGlobals } from '../fixtures/types'
 
 type Context = {
   descriptor: { name: string }
@@ -17,7 +17,7 @@ suite.before(context => {
 
 suite('stores the descriptor', async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(descriptor => {
-          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithGlobals).Logic.Grantable(descriptor)
           return instance.descriptor
         }, descriptor),
         expected = { name: 'geolocation' }
@@ -27,7 +27,7 @@ suite('stores the descriptor', async ({ puppeteer: { page }, descriptor }) => {
 
 suite('assignment sets the descriptor', async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(descriptor => {
-          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithGlobals).Logic.Grantable(descriptor)
           instance.descriptor = { name: 'clipboard-write' }
           return instance.descriptor
         }, descriptor),
@@ -38,7 +38,7 @@ suite('assignment sets the descriptor', async ({ puppeteer: { page }, descriptor
 
 suite('setDescriptor sets the descriptor', async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(descriptor => {
-          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithGlobals).Logic.Grantable(descriptor)
           instance.setDescriptor({ name: 'clipboard-write' })
           return instance.descriptor
         }, descriptor),
@@ -49,7 +49,7 @@ suite('setDescriptor sets the descriptor', async ({ puppeteer: { page }, descrip
 
 suite('status is "ready" after construction', async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(descriptor => {
-          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithGlobals).Logic.Grantable(descriptor)
           return instance.status
         }, descriptor),
         expected = 'ready'
@@ -59,7 +59,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page }, desc
 
 suite(`status is 'querying' immediately after query(...)`, async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
-          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithGlobals).Logic.Grantable(descriptor)
           instance.query()
           return instance.status
         }, descriptor),
@@ -70,7 +70,7 @@ suite(`status is 'querying' immediately after query(...)`, async ({ puppeteer: {
 
 suite(`status is 'queried' after successful query(...)`, async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
-          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithGlobals).Logic.Grantable(descriptor)
           await instance.query()
           return instance.status
         }, descriptor),
@@ -81,7 +81,7 @@ suite(`status is 'queried' after successful query(...)`, async ({ puppeteer: { p
 
 suite(`status is 'errored' after unsuccessful query(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Grantable({ name: 'stub' })
+          const instance = new (window as unknown as WithGlobals).Logic.Grantable({ name: 'stub' })
           await instance.query()
           return instance.status
         }),
@@ -92,7 +92,7 @@ suite(`status is 'errored' after unsuccessful query(...)`, async ({ puppeteer: {
 
 suite(`permission is stored after successful query(...)`, async ({ puppeteer: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
-          const instance = new (window as unknown as WithLogic).Logic.Grantable(descriptor)
+          const instance = new (window as unknown as WithGlobals).Logic.Grantable(descriptor)
           await instance.query()
           return instance.permission.state
         }, descriptor),

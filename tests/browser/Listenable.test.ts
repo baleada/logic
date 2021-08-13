@@ -1,7 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
-import type { WithLogic } from '../fixtures/types'
+import type { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
   createSuite('Listenable')
@@ -9,7 +9,7 @@ const suite = withPuppeteer(
 
 suite('stores the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           return instance.type
         }),
         expected = 'click'
@@ -19,7 +19,7 @@ suite('stores the type', async ({ puppeteer: { page } }) => {
 
 suite('assignment sets the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           instance.type = 'keydown'
           return instance.type
         }),
@@ -30,7 +30,7 @@ suite('assignment sets the type', async ({ puppeteer: { page } }) => {
 
 suite('setType sets the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           instance.setType('keydown')
           return instance.type
         }),
@@ -41,7 +41,7 @@ suite('setType sets the type', async ({ puppeteer: { page } }) => {
 
 suite('active is empty after construction', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           return instance.active.size
         }),
         expected = 0
@@ -51,7 +51,7 @@ suite('active is empty after construction', async ({ puppeteer: { page } }) => {
 
 suite('status is "ready" after construction', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           return instance.status
         }),
         expected = 'ready'
@@ -61,7 +61,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page } }) =>
 
 suite(`status is 'listening' after successful listen(...)`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           instance.listen(() => {})
           return instance.status
         }),
@@ -74,7 +74,7 @@ suite(`status is 'listening' after successful listen(...)`, async ({ puppeteer: 
 
 suite(`status is 'stopped' after successful stop(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           instance.listen(() => {})
           instance.stop()
           return instance.status
@@ -86,7 +86,7 @@ suite(`status is 'stopped' after successful stop(...)`, async ({ puppeteer: { pa
 
 suite(`listen(...) adds event to active`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           instance.listen(() => {})
           return instance.active.size
         }),
@@ -99,7 +99,7 @@ suite(`listen(...) adds event to active`, async ({ puppeteer: { reloadNext, page
 
 suite(`stop(...) removes event from active`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           instance.listen(() => {})
           instance.stop()
           return instance.active.size
@@ -112,7 +112,7 @@ suite(`stop(...) removes event from active`, async ({ puppeteer: { page } }) => 
 suite(`listen(...) handles intersect`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('intersect')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('intersect')
           
           instance.listen(() => value = true, { target: document.body })
         
@@ -130,7 +130,7 @@ suite(`listen(...) handles intersect`, async ({ puppeteer: { reloadNext, page } 
 suite(`listen(...) handles mutate`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('mutate')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('mutate')
           
           instance.listen(() => value = true, { target: document.body, observe: { attributes: true } })
           document.body.classList.add('stub')
@@ -149,7 +149,7 @@ suite(`listen(...) handles mutate`, async ({ puppeteer: { reloadNext, page } }) 
 suite(`listen(...) handles resize`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('resize')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('resize')
           
           instance.listen(() => value = true, { target: document.body })
           const bodyHeight = document.body.getBoundingClientRect().height
@@ -168,10 +168,10 @@ suite(`listen(...) handles resize`, async ({ puppeteer: { reloadNext, page } }) 
 
 suite(`listen(...) handles media queries`, async ({ puppeteer: { reloadNext, page } }) => {
   await page.evaluate(async () => {
-    (window as unknown as WithLogic).testState = {
+    (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithLogic).Logic.Listenable('(min-width: 900px)')
-        .listen(() => (window as unknown as WithLogic).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('(min-width: 900px)')
+        .listen(() => (window as unknown as WithGlobals).testState.value = true)
     }
   })
   
@@ -181,7 +181,7 @@ suite(`listen(...) handles media queries`, async ({ puppeteer: { reloadNext, pag
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
-            setTimeout(() => resolve((window as unknown as WithLogic).testState.value), 20)
+            setTimeout(() => resolve((window as unknown as WithGlobals).testState.value), 20)
           })
         }),
         expected = true
@@ -193,7 +193,7 @@ suite(`listen(...) handles media queries`, async ({ puppeteer: { reloadNext, pag
 
 suite(`listen(...) handles idle`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('idle')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('idle')
           instance.listen(() => {})
           // Not sure how to smartly trigger idle event
           return typeof instance.active.values().next().value.id === 'number'
@@ -207,7 +207,7 @@ suite(`listen(...) handles idle`, async ({ puppeteer: { reloadNext, page } }) =>
 
 suite(`listen(...) handles visibility change`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('visibilitychange')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('visibilitychange')
           instance.listen(() => {})
           // Not sure how to smartly trigger visibilitychange event
           return instance.active.size === 1
@@ -221,10 +221,10 @@ suite(`listen(...) handles visibility change`, async ({ puppeteer: { reloadNext,
 
 suite(`listen(...) handles keycombos`, async ({ puppeteer: { reloadNext, page } }) => {
   await page.evaluate(async () => {
-    (window as unknown as WithLogic).testState = {
+    (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithLogic).Logic.Listenable('cmd+b')
-        .listen(() => (window as unknown as WithLogic).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+b')
+        .listen(() => (window as unknown as WithGlobals).testState.value = true)
     }
   })
 
@@ -233,7 +233,7 @@ suite(`listen(...) handles keycombos`, async ({ puppeteer: { reloadNext, page } 
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
-            setTimeout(() => resolve((window as unknown as WithLogic).testState.value), 20)
+            setTimeout(() => resolve((window as unknown as WithGlobals).testState.value), 20)
           })
         }),
         expected = true
@@ -245,10 +245,10 @@ suite(`listen(...) handles keycombos`, async ({ puppeteer: { reloadNext, page } 
 
 suite(`listen(...) handles left click combos`, async ({ puppeteer: { reloadNext, page } }) => {
   await page.evaluate(async () => {
-    (window as unknown as WithLogic).testState = {
+    (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithLogic).Logic.Listenable('cmd+mousedown')
-        .listen(() => (window as unknown as WithLogic).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+mousedown')
+        .listen(() => (window as unknown as WithGlobals).testState.value = true)
     }
   })
 
@@ -257,7 +257,7 @@ suite(`listen(...) handles left click combos`, async ({ puppeteer: { reloadNext,
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
-            setTimeout(() => resolve((window as unknown as WithLogic).testState.value), 20)
+            setTimeout(() => resolve((window as unknown as WithGlobals).testState.value), 20)
           })
         }),
         expected = true
@@ -269,10 +269,10 @@ suite(`listen(...) handles left click combos`, async ({ puppeteer: { reloadNext,
 
 suite(`listen(...) handles right click combos`, async ({ puppeteer: { reloadNext, page } }) => {
   await page.evaluate(async () => {
-    (window as unknown as WithLogic).testState = {
+    (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithLogic).Logic.Listenable('cmd+rightclick')
-        .listen(() => (window as unknown as WithLogic).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+rightclick')
+        .listen(() => (window as unknown as WithGlobals).testState.value = true)
     }
   })
 
@@ -281,7 +281,7 @@ suite(`listen(...) handles right click combos`, async ({ puppeteer: { reloadNext
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
-            setTimeout(() => resolve((window as unknown as WithLogic).testState.value), 20)
+            setTimeout(() => resolve((window as unknown as WithGlobals).testState.value), 20)
           })
         }),
         expected = true
@@ -293,7 +293,7 @@ suite(`listen(...) handles right click combos`, async ({ puppeteer: { reloadNext
 
 suite(`listen(...) handles recognizeable`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
               effects: defineEffect => [
                 defineEffect('keydown', () => {}),
@@ -313,7 +313,7 @@ suite(`listen(...) handles recognizeable`, async ({ puppeteer: { reloadNext, pag
 
 suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
               effects: defineEffect => [
                 defineEffect('keydown', () => {}),
@@ -322,7 +322,7 @@ suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page
             }
           })
           instance.listen(() => {})
-          return instance.recognizeable instanceof (window as unknown as WithLogic).Logic.Recognizeable
+          return instance.recognizeable instanceof (window as unknown as WithGlobals).Logic.Recognizeable
         }),
         expected = true
 
@@ -334,7 +334,7 @@ suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page
 suite(`stop(...) handles observations`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('resize')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('resize')
           
           instance.listen(() => value = true, { target: document.body })
           instance.stop()
@@ -353,13 +353,13 @@ suite(`stop(...) handles observations`, async ({ puppeteer: { page } }) => {
 
 suite(`stop(...) handles media queries`, async ({ puppeteer: { page } }) => {
   await page.evaluate(async () => {
-    (window as unknown as WithLogic).testState = {
+    (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithLogic).Logic.Listenable('(min-width: 900px)')
-        .listen(() => (window as unknown as WithLogic).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('(min-width: 900px)')
+        .listen(() => (window as unknown as WithGlobals).testState.value = true)
     };
 
-    (window as unknown as WithLogic).testState.instance.stop()
+    (window as unknown as WithGlobals).testState.instance.stop()
   })
   
   // Puppeteer viewport defaults to 800x600
@@ -368,7 +368,7 @@ suite(`stop(...) handles media queries`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
-            setTimeout(() => resolve((window as unknown as WithLogic).testState.value), 20)
+            setTimeout(() => resolve((window as unknown as WithGlobals).testState.value), 20)
           })
         }),
         expected = false
@@ -379,7 +379,7 @@ suite(`stop(...) handles media queries`, async ({ puppeteer: { page } }) => {
 
 suite(`stop(...) handles idle`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('idle')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('idle')
           instance.listen(() => {})
           instance.stop()
           return instance.active.size
@@ -391,7 +391,7 @@ suite(`stop(...) handles idle`, async ({ puppeteer: { page } }) => {
 
 suite(`stop(...) handles visibility change`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('visibilitychange')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('visibilitychange')
           instance.listen(() => {})
           instance.stop()
           return instance.active.size
@@ -403,13 +403,13 @@ suite(`stop(...) handles visibility change`, async ({ puppeteer: { page } }) => 
 
 suite(`stop(...) handles keycombos`, async ({ puppeteer: { page } }) => {
   await page.evaluate(async () => {
-    (window as unknown as WithLogic).testState = {
+    (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithLogic).Logic.Listenable('cmd+b')
-        .listen(() => (window as unknown as WithLogic).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+b')
+        .listen(() => (window as unknown as WithGlobals).testState.value = true)
     };
 
-    (window as unknown as WithLogic).testState.instance.stop()
+    (window as unknown as WithGlobals).testState.instance.stop()
   })
 
   await page.keyboard.down('Meta')
@@ -417,7 +417,7 @@ suite(`stop(...) handles keycombos`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
-            setTimeout(() => resolve((window as unknown as WithLogic).testState.value), 20)
+            setTimeout(() => resolve((window as unknown as WithGlobals).testState.value), 20)
           })
         }),
         expected = false
@@ -428,13 +428,13 @@ suite(`stop(...) handles keycombos`, async ({ puppeteer: { page } }) => {
 
 suite(`stop(...) handles left click combos`, async ({ puppeteer: { page } }) => {
   await page.evaluate(async () => {
-    (window as unknown as WithLogic).testState = {
+    (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithLogic).Logic.Listenable('cmd+mousedown')
-        .listen(() => (window as unknown as WithLogic).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+mousedown')
+        .listen(() => (window as unknown as WithGlobals).testState.value = true)
     };
 
-    (window as unknown as WithLogic).testState.instance.stop()
+    (window as unknown as WithGlobals).testState.instance.stop()
   })
 
   await page.keyboard.down('Meta')
@@ -442,7 +442,7 @@ suite(`stop(...) handles left click combos`, async ({ puppeteer: { page } }) => 
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
-            setTimeout(() => resolve((window as unknown as WithLogic).testState.value), 20)
+            setTimeout(() => resolve((window as unknown as WithGlobals).testState.value), 20)
           })
         }),
         expected = false
@@ -452,13 +452,13 @@ suite(`stop(...) handles left click combos`, async ({ puppeteer: { page } }) => 
 
 suite(`stop(...) handles right click combos`, async ({ puppeteer: { page } }) => {
   await page.evaluate(async () => {
-    (window as unknown as WithLogic).testState = {
+    (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithLogic).Logic.Listenable('cmd+rightclick')
-        .listen(() => (window as unknown as WithLogic).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+rightclick')
+        .listen(() => (window as unknown as WithGlobals).testState.value = true)
     };
 
-    (window as unknown as WithLogic).testState.instance.stop()
+    (window as unknown as WithGlobals).testState.instance.stop()
   })
 
   await page.keyboard.down('Meta')
@@ -466,7 +466,7 @@ suite(`stop(...) handles right click combos`, async ({ puppeteer: { page } }) =>
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
-            setTimeout(() => resolve((window as unknown as WithLogic).testState.value), 20)
+            setTimeout(() => resolve((window as unknown as WithGlobals).testState.value), 20)
           })
         }),
         expected = false
@@ -476,7 +476,7 @@ suite(`stop(...) handles right click combos`, async ({ puppeteer: { page } }) =>
 
 suite(`stop(...) handles recognizeable`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
               effects: defineEffect => [
                 defineEffect('keydown', () => {}),
@@ -496,7 +496,7 @@ suite(`stop(...) handles recognizeable`, async ({ puppeteer: { page } }) => {
 
 suite(`stop(...) can be limited to a target`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           instance.listen(() => {})
           instance.listen(() => {}, { target: document.body })
           const before = instance.active.size
@@ -510,7 +510,7 @@ suite(`stop(...) can be limited to a target`, async ({ puppeteer: { page } }) =>
 
 suite(`status is 'listening' when stop(...) is limited to a target such that not all active listeners are removed`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Listenable('click')
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('click')
           instance.listen(() => {})
           instance.listen(() => {}, { target: document.body })
           instance.stop({ target: document.body })

@@ -1,7 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
-import { WithLogic } from '../fixtures/types'
+import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
   createSuite('Dispatchable')
@@ -9,7 +9,7 @@ const suite = withPuppeteer(
 
 suite('stores the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown')
           return instance.type
         }),
         expected = 'keydown'
@@ -19,7 +19,7 @@ suite('stores the type', async ({ puppeteer: { page } }) => {
 
 suite('assignment sets the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown')
           instance.type = 'cmd+b'
           return instance.type
         }),
@@ -30,7 +30,7 @@ suite('assignment sets the type', async ({ puppeteer: { page } }) => {
 
 suite('setType sets the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown')
           instance.setType('cmd+b')
           return instance.type
         }),
@@ -41,7 +41,7 @@ suite('setType sets the type', async ({ puppeteer: { page } }) => {
 
 suite('status is "ready" after construction', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown')
           return instance.status
         }),
         expected = 'ready'
@@ -51,7 +51,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page } }) =>
 
 suite(`status is 'dispatched' after successful dispatch(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown')
           instance.dispatch()
           return instance.status
         }),
@@ -62,7 +62,7 @@ suite(`status is 'dispatched' after successful dispatch(...)`, async ({ puppetee
 
 suite(`dispatch(...) target defaults to window`, async ({ puppeteer: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown')
           window.addEventListener('keydown', event => result = event.type)
 
           let result
@@ -79,7 +79,7 @@ suite(`dispatch(...) target defaults to window`, async ({ puppeteer: { page, rel
 
 suite(`dispatch(...) can customize target`, async ({ puppeteer: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown'),
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown'),
                 el = document.createElement('span')
 
           el.addEventListener('keydown', () => result = true)
@@ -98,7 +98,7 @@ suite(`dispatch(...) can customize target`, async ({ puppeteer: { page, reloadNe
 
 suite(`dispatch(...) handles keyboard events, defaulting to keydown`, async ({ puppeteer: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('b' as '+b')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('b' as '+b')
           window.addEventListener('keydown', event => result = event.type)
 
           let result
@@ -115,7 +115,7 @@ suite(`dispatch(...) handles keyboard events, defaulting to keydown`, async ({ p
 
 suite(`dispatch(...) can optionally use keyup`, async ({ puppeteer: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('b' as '+b')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('b' as '+b')
           window.addEventListener('keyup', event => result = event.type)
 
           let result
@@ -132,7 +132,7 @@ suite(`dispatch(...) can optionally use keyup`, async ({ puppeteer: { page, relo
 
 suite(`dispatch(...) can optionally init event`, async ({ puppeteer: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown')
           window.addEventListener('keydown', event => result = event.bubbles)
 
           let result
@@ -149,7 +149,7 @@ suite(`dispatch(...) can optionally init event`, async ({ puppeteer: { page, rel
 
 suite(`dispatch(...) updates cancelled`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithLogic).Logic.Dispatchable('keydown'),
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown'),
                 before = instance.cancelled
 
           instance.dispatch()
