@@ -6,6 +6,7 @@ const external = [
         'fast-fuzzy',
         '@sindresorhus/slugify',
         'dompurify',
+        'lazy-collections',
         /@babel\/runtime/,
       ],
       shared = new configureable.Rollup()
