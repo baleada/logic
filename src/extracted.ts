@@ -12,22 +12,22 @@ import {
   createMap,
   Pipeable,
 } from './pipes'
-import type { ListenableKeycombo, ListenableSupportedEventType, ListenEffect, ListenEffectParam, ListenOptions } from './classes/Listenable'
+import { ListenableKeycombo, ListenableSupportedEventType, ListenEffect, ListenEffectParam, ListenOptions, toImplementation } from './classes/Listenable'
 import { DispatchOptions } from './classes/Dispatchable'
 
 // DISPATCHABLE
 type ToEventOptions<EventType extends ListenableSupportedEventType> = EventType extends ListenableKeycombo
   ? { keyDirection?: 'up' | 'down', init?: DispatchOptions<EventType>['init'] }
   : { init?: DispatchOptions<EventType>['init'] }
-export function toEvent<EventType extends ListenableSupportedEventType> (combo: string[], options: ToEventOptions<EventType> = {}) {
-  const modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
-        { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo),
-        type = fromComboItemNameToType(name)
+export function toEvent<EventType extends ListenableSupportedEventType> (eventType: EventType, options: ToEventOptions<EventType> = {}): ListenEffectParam<EventType> {
+  const implementation = toImplementation(eventType)
 
-  switch (type) {
-    case 'singleCharacter':
-    case 'other':
-    case 'modifier':
+  switch (implementation) {
+    case 'keycombo': {
+      const combo = toCombo(eventType),
+            modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
+            { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo)
+      
       return new KeyboardEvent(
         'keyDirection' in options ? `key${options.keyDirection}` : 'keydown',
         {
@@ -41,8 +41,14 @@ export function toEvent<EventType extends ListenableSupportedEventType> (combo: 
             {}
           )(modifiers)
         }
-      )
-    case 'click':
+      ) as ListenEffectParam<EventType>
+    }
+    case 'leftclickcombo':
+    case 'rightclickcombo': {
+        const combo = toCombo(eventType),
+              modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
+              { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo)
+
       return new MouseEvent(
         name === 'rightclick' ? 'contextmenu' : name,
         {
@@ -55,14 +61,232 @@ export function toEvent<EventType extends ListenableSupportedEventType> (combo: 
             {}
           )(modifiers)
         }
-      )
-    case 'custom':
-      return new Event(
-        name,
-        (options.init || {})
-      )
+      ) as ListenEffectParam<EventType>
+    }
+    case 'pointercombo': {
+      const combo = toCombo(eventType),
+            modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
+            { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo)
+
+      return new PointerEvent(
+        name === 'rightclick' ? 'contextmenu' : name,
+        {
+          ...(options.init || {}),
+          ...createReduce<ListenableModifier | ListenableModifierAlias, { [flag in ListenableModifierFlag]?: true }>(
+            (flags, alias) => { 
+              flags[toModifierFlag(alias)] = true
+              return flags
+            },
+            {}
+          )(modifiers)
+        }
+      ) as ListenEffectParam<EventType>
+    }
+    case 'documentevent':
+    case 'event':
+      // @ts-ignore  
+      if (eventType === 'abort') return new UIEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'animationcancel') return new AnimationEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'animationend') return new AnimationEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'animationiteration') return new AnimationEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'animationstart') return new AnimationEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'auxclick') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'beforeinput') return new InputEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'blur') return new FocusEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'cancel') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'canplay') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'canplaythrough') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'change') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'click') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'close') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'compositionend') return new CompositionEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'compositionstart') return new CompositionEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'compositionupdate') return new CompositionEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'contextmenu') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'cuechange') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'dblclick') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'drag') return new DragEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'dragend') return new DragEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'dragenter') return new DragEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'dragexit') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'dragleave') return new DragEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'dragover') return new DragEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'dragstart') return new DragEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'drop') return new DragEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'durationchange') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'emptied') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'ended') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'error') return new ErrorEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'focus') return new FocusEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'focusin') return new FocusEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'focusout') return new FocusEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'gotpointercapture') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'input') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'invalid') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'keydown') return new KeyboardEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'keypress') return new KeyboardEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'keyup') return new KeyboardEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'load') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'loadeddata') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'loadedmetadata') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'loadstart') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'lostpointercapture') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'mousedown') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'mouseenter') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'mouseleave') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'mousemove') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'mouseout') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'mouseover') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'mouseup') return new MouseEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'pause') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'play') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'playing') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'pointercancel') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'pointerdown') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'pointerenter') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'pointerleave') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'pointermove') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'pointerout') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'pointerover') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'pointerup') return new PointerEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'progress') return new ProgressEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'ratechange') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'reset') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'scroll') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'securitypolicyviolation') return new SecurityPolicyViolationEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'seeked') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'seeking') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'select') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'selectionchange') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'selectstart') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'stalled') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'submit') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'suspend') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'timeupdate') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'toggle') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'touchcancel') return new TouchEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'touchend') return new TouchEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'touchmove') return new TouchEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'touchstart') return new TouchEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'transitioncancel') return new TransitionEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'transitionend') return new TransitionEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'transitionrun') return new TransitionEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'transitionstart') return new TransitionEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'volumechange') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'waiting') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'wheel') return new WheelEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'copy') return new ClipboardEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'cut') return new ClipboardEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'paste') return new ClipboardEvent(options.init)
+      // @ts-ignore
+      if (eventType === 'fullscreenchange') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'fullscreenerror') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'pointerlockchange') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'pointerlockerror') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'readystatechange') return new Event(options.init)
+      // @ts-ignore
+      if (eventType === 'visibilitychange') return new Event(options.init)
   }
 }
+
+type EventTypeMaps = Omit<HTMLElementEventMap, 'resize'> & Omit<DocumentEventMap, 'resize'>
+
 
 // LISTENABLE
 export function toKey (name: string | ListenableKeyAlias): string {
@@ -146,8 +370,8 @@ export function ensurePointercombo (type: string): string[] {
 }
 
 const unique = lazyCollectionUnique<string>()
-const toComboItems = lazyCollectionMap<string, string>(name => name === '' ? DELIMITER : name)
-const DELIMITER = '+'
+const toComboItems = lazyCollectionMap<string, string>(name => name === '' ? delimiter : name)
+const delimiter = '+'
 export function toCombo (type: string): string[] {
   // If the delimiter is used as a character in the type,
   // two empty strings will be produced by the split.
@@ -156,7 +380,7 @@ export function toCombo (type: string): string[] {
     unique,
     toComboItems,
     lazyCollectionToArray(),
-  )(type.split(DELIMITER)) as string[]
+  )(type.split(delimiter)) as string[]
 }
 
 export function fromComboItemNameToType (name: string) {

@@ -1,4 +1,5 @@
 import { toEvent, toCombo } from '../extracted'
+import { toImplementation } from './Listenable'
 import type {
   ListenableClickcombo,
   ListenableKeycombo,
@@ -68,7 +69,6 @@ export class Dispatchable<Type extends ListenableSupportedEventType> {
 type EventHandlersEventInitMap =
   GlobalEventHandlersEventInitMap
   & DocumentAndElementEventHandlersEventInitMap
-  & ElementEventInitMap
   & DocumentEventInitMap
 
 type GlobalEventHandlersEventInitMap = {
@@ -162,7 +162,7 @@ type GlobalEventHandlersEventInitMap = {
   "transitionstart": TransitionEventInit;
   "volumechange": EventInit;
   "waiting": EventInit;
-  "wheel": WheelEvent;
+  "wheel": WheelEventInit;
 }
 
 type DocumentAndElementEventHandlersEventInitMap = {
@@ -178,9 +178,4 @@ type DocumentEventInitMap = {
   "pointerlockerror": EventInit;
   "readystatechange": EventInit;
   "visibilitychange": EventInit;
-}
-
-type ElementEventInitMap = {
-  "fullscreenchange": EventInit;
-  "fullscreenerror": EventInit;
 }
