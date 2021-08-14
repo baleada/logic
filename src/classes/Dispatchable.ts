@@ -10,11 +10,7 @@ export type DispatchableOptions = Record<string, never>
 
 export type DispatchableStatus = 'ready' | 'dispatched'
 
-export type DispatchOptions<EventType extends ListenableSupportedEventType> = EventType extends ListenableKeycombo 
-  ? { keyDirection?: 'up' | 'down' } & EventDispatchOptions<EventType>
-  : EventDispatchOptions<EventType>
-
-type EventDispatchOptions<EventType extends ListenableSupportedEventType> = {
+export type DispatchOptions<EventType extends ListenableSupportedEventType> = {
   init?:
     EventType extends ListenableClickcombo ? EventHandlersEventInitMap['mousedown'] :
     EventType extends ListenablePointercombo ? EventHandlersEventInitMap['pointerdown'] :
@@ -23,7 +19,7 @@ type EventDispatchOptions<EventType extends ListenableSupportedEventType> = {
     EventType extends keyof Omit<DocumentEventMap, 'resize'> ? EventHandlersEventInitMap[EventType] :
     never
   target?: Window & typeof globalThis | Document | Element
-}
+} & (EventType extends ListenableKeycombo ? { keyDirection?: 'up' | 'down' } : Record<string, never>)
 
 export class Dispatchable<Type extends ListenableSupportedEventType> {
   constructor (type: Type, options: DispatchableOptions = {}) {

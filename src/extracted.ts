@@ -13,12 +13,13 @@ import {
   Pipeable,
 } from './pipes'
 import type { ListenableKeycombo, ListenableSupportedEventType, ListenEffect, ListenEffectParam, ListenOptions } from './classes/Listenable'
+import { DispatchOptions } from './classes/Dispatchable'
 
 // DISPATCHABLE
-type ToEventOptions<Type extends ListenableSupportedEventType> = Type extends ListenableKeycombo
-  ? { keyDirection?: 'up' | 'down', init?: EventInit }
-  : { init?: EventInit }
-export function toEvent<Type extends ListenableSupportedEventType> (combo: string[], options: ToEventOptions<Type> = {}) {
+type ToEventOptions<EventType extends ListenableSupportedEventType> = EventType extends ListenableKeycombo
+  ? { keyDirection?: 'up' | 'down', init?: DispatchOptions<EventType>['init'] }
+  : { init?: DispatchOptions<EventType>['init'] }
+export function toEvent<EventType extends ListenableSupportedEventType> (combo: string[], options: ToEventOptions<EventType> = {}) {
   const modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
         { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo),
         type = fromComboItemNameToType(name)
@@ -159,66 +160,30 @@ export function toCombo (type: string): string[] {
 }
 
 export function fromComboItemNameToType (name: string) {
-  return lazyCollectionFind((type: ListenableComboItemType) => predicatesByType.get(type)(name))(listenableComboItemTypes) as ListenableComboItemType ?? 'custom'
+  return lazyCollectionFind((type: ListenableComboItemType) => predicatesByType[type](name))(listenableComboItemTypes) as ListenableComboItemType ?? 'custom'
 }
 
 export type ListenableComboItemType = 'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click' | 'pointer'
 
 const listenableComboItemTypes = new Set<ListenableComboItemType>(['singleCharacter', 'arrow', 'other', 'modifier', 'click', 'pointer'])
 
-const predicatesByType: Map<ListenableComboItemType, (name: string) => boolean> = new Map([
-  [
-    'singleCharacter',
-    name => typeREs.get('singleCharacter').test(name)
-  ],
-  [
-    'arrow',
-    name => typeREs.get('arrow').test(name)
-  ],
-  [
-    'other',
-    name => typeREs.get('other').test(name)
-  ],
-  [
-    'modifier',
-    name => typeREs.get('modifier').test(name)
-  ],
-  [
-    'click',
-    name => typeREs.get('click').test(name)
-  ],
-  [
-    'pointer',
-    name => typeREs.get('pointer').test(name)
-  ],
-])
+const predicatesByType: Record<ListenableComboItemType, (name: string) => boolean> = {
+  singleCharacter: name => typeREs['singleCharacter'].test(name),
+  arrow: name => typeREs['arrow'].test(name),
+  other: name => typeREs['other'].test(name),
+  modifier: name => typeREs['modifier'].test(name),
+  click: name => typeREs['click'].test(name),
+  pointer: name => typeREs['pointer'].test(name),
+}
 
-const typeREs: Map<ListenableComboItemType, RegExp> = new Map([
-  [
-    'singleCharacter',
-    /^!?[a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]$/
-  ],
-  [
-    'arrow',
-    /^!?(arrow|vertical|horizontal|up|down|right|left)$/
-  ],
-  [
-    'other',
-    /^!?(enter|backspace|space|tab|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete)$/
-  ],
-  [
-    'modifier',
-    /^!?(cmd|command|meta|shift|ctrl|control|alt|opt|option)$/
-  ],
-  [
-    'click',
-    /^!?(rightclick|contextmenu|click|mousedown|mouseup|dblclick)$/
-  ],
-  [
-    'pointer',
-    /^!?(pointerdown|pointerup|pointermove|pointerover|pointerout|pointerenter|pointerleave|pointercancel|gotpointercapture|lostpointercapture)$/
-  ],
-])
+const typeREs: Record<ListenableComboItemType, RegExp> = {
+  singleCharacter: /^!?[a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]$/,
+  arrow: /^!?(arrow|vertical|horizontal|up|down|right|left)$/,
+  other: /^!?(enter|backspace|space|tab|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete)$/,
+  modifier: /^!?(cmd|command|meta|shift|ctrl|control|alt|opt|option)$/,
+  click: /^!?(rightclick|contextmenu|click|mousedown|mouseup|dblclick)$/,
+  pointer: /^!?(pointerdown|pointerup|pointermove|pointerover|pointerout|pointerenter|pointerleave|pointercancel|gotpointercapture|lostpointercapture)$/,
+}
 
 export type ListenableModifierAlias = 'cmd' | 'command' | 'ctrl' | 'opt' | 'option'
 export type ListenableModifier = 'meta' | 'command' | 'control' | 'alt' | 'shift'
