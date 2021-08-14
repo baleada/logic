@@ -58,7 +58,7 @@ suite(`transforms modifier combos`, async({ puppeteer: { page } }) => {
 
 suite(`transforms click combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const event = (window as unknown as WithGlobals).Logic_extracted.toEvent('click' as '+click'),
+          const event = (window as unknown as WithGlobals).Logic_extracted.toEvent('click' as '+click', {}),
                 { clientX, clientY } = event
           
           return { clientX, clientY }
@@ -109,7 +109,7 @@ suite(`transforms modified modifier combos`, async({ puppeteer: { page } }) => {
 
 suite(`transforms modified click combos`, async({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const event = (window as unknown as WithGlobals).Logic_extracted.toEvent('shift+click'),
+          const event = (window as unknown as WithGlobals).Logic_extracted.toEvent('shift+click', {}),
                 { clientX, clientY, shiftKey } = event
           
           return { clientX, clientY, shiftKey }

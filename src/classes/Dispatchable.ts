@@ -20,10 +20,10 @@ export type DispatchOptions<EventType extends ListenableSupportedEventType> = {
     EventType extends keyof Omit<DocumentEventMap, 'resize'> ? EventHandlersEventInitMap[EventType] :
     never
   target?: Window & typeof globalThis | Document | Element
-} & (EventType extends ListenableKeycombo ? { keyDirection?: 'up' | 'down' } : Record<string, never>)
+} & (EventType extends ListenableKeycombo ? { keyDirection?: 'up' | 'down' } : {})
 
-export class Dispatchable<Type extends ListenableSupportedEventType> {
-  constructor (type: Type, options: DispatchableOptions = {}) {
+export class Dispatchable<EventType extends ListenableSupportedEventType> {
+  constructor (type: EventType, options: DispatchableOptions = {}) {
     this.setType(type)
     this.ready()
   }
@@ -45,17 +45,17 @@ export class Dispatchable<Type extends ListenableSupportedEventType> {
     return this.computedStatus
   }
 
-  private computedType: string
+  private computedType: EventType
   setType (type) {
     this.computedType = type
     return this
   }
 
   private computedCancelled: boolean
-  dispatch (options: DispatchOptions<Type> = {}) {
+  dispatch (options: DispatchOptions<EventType> = {}) {
     const { target = window, ...rest } = options,
-          event = toEvent(toCombo(this.type), rest)
-
+          event = toEvent(this.type, rest)
+    
     this.computedCancelled = !target.dispatchEvent(event)
     this.dispatched()
 

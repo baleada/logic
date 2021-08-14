@@ -12,14 +12,11 @@ import {
   createMap,
   Pipeable,
 } from './pipes'
-import { ListenableKeycombo, ListenableSupportedEventType, ListenEffect, ListenEffectParam, ListenOptions, toImplementation } from './classes/Listenable'
+import { ListenableSupportedEventType, ListenEffect, ListenEffectParam, ListenOptions, toImplementation } from './classes/Listenable'
 import { DispatchOptions } from './classes/Dispatchable'
 
 // DISPATCHABLE
-type ToEventOptions<EventType extends ListenableSupportedEventType> = EventType extends ListenableKeycombo
-  ? { keyDirection?: 'up' | 'down', init?: DispatchOptions<EventType>['init'] }
-  : { init?: DispatchOptions<EventType>['init'] }
-export function toEvent<EventType extends ListenableSupportedEventType> (eventType: EventType, options: ToEventOptions<EventType> = {}): ListenEffectParam<EventType> {
+export function toEvent<EventType extends ListenableSupportedEventType> (eventType: EventType, options: Omit<DispatchOptions<EventType>, 'target'>): ListenEffectParam<EventType> {
   const implementation = toImplementation(eventType)
 
   switch (implementation) {
@@ -29,6 +26,7 @@ export function toEvent<EventType extends ListenableSupportedEventType> (eventTy
             { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo)
       
       return new KeyboardEvent(
+        // @ts-ignore
         'keyDirection' in options ? `key${options.keyDirection}` : 'keydown',
         {
           ...(options.init || {}),
@@ -84,204 +82,105 @@ export function toEvent<EventType extends ListenableSupportedEventType> (eventTy
     }
     case 'documentevent':
     case 'event':
-      // @ts-ignore  
-      if (eventType === 'abort') return new UIEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'animationcancel') return new AnimationEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'animationend') return new AnimationEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'animationiteration') return new AnimationEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'animationstart') return new AnimationEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'auxclick') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'beforeinput') return new InputEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'blur') return new FocusEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'cancel') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'canplay') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'canplaythrough') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'change') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'click') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'close') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'compositionend') return new CompositionEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'compositionstart') return new CompositionEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'compositionupdate') return new CompositionEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'contextmenu') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'cuechange') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'dblclick') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'drag') return new DragEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'dragend') return new DragEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'dragenter') return new DragEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'dragexit') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'dragleave') return new DragEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'dragover') return new DragEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'dragstart') return new DragEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'drop') return new DragEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'durationchange') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'emptied') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'ended') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'error') return new ErrorEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'focus') return new FocusEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'focusin') return new FocusEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'focusout') return new FocusEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'gotpointercapture') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'input') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'invalid') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'keydown') return new KeyboardEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'keypress') return new KeyboardEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'keyup') return new KeyboardEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'load') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'loadeddata') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'loadedmetadata') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'loadstart') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'lostpointercapture') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'mousedown') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'mouseenter') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'mouseleave') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'mousemove') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'mouseout') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'mouseover') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'mouseup') return new MouseEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'pause') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'play') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'playing') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'pointercancel') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'pointerdown') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'pointerenter') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'pointerleave') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'pointermove') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'pointerout') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'pointerover') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'pointerup') return new PointerEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'progress') return new ProgressEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'ratechange') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'reset') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'scroll') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'securitypolicyviolation') return new SecurityPolicyViolationEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'seeked') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'seeking') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'select') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'selectionchange') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'selectstart') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'stalled') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'submit') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'suspend') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'timeupdate') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'toggle') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'touchcancel') return new TouchEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'touchend') return new TouchEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'touchmove') return new TouchEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'touchstart') return new TouchEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'transitioncancel') return new TransitionEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'transitionend') return new TransitionEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'transitionrun') return new TransitionEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'transitionstart') return new TransitionEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'volumechange') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'waiting') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'wheel') return new WheelEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'copy') return new ClipboardEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'cut') return new ClipboardEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'paste') return new ClipboardEvent(options.init)
-      // @ts-ignore
-      if (eventType === 'fullscreenchange') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'fullscreenerror') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'pointerlockchange') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'pointerlockerror') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'readystatechange') return new Event(options.init)
-      // @ts-ignore
-      if (eventType === 'visibilitychange') return new Event(options.init)
+      if (eventType === 'abort') return new UIEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'animationcancel') return new AnimationEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'animationend') return new AnimationEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'animationiteration') return new AnimationEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'animationstart') return new AnimationEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'auxclick') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'beforeinput') return new InputEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'blur') return new FocusEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'cancel') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'canplay') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'canplaythrough') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'change') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'click') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'close') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'compositionend') return new CompositionEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'compositionstart') return new CompositionEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'compositionupdate') return new CompositionEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'contextmenu') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'cuechange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'dblclick') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'drag') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'dragend') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'dragenter') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'dragexit') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'dragleave') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'dragover') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'dragstart') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'drop') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'durationchange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'emptied') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'ended') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'error') return new ErrorEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'focus') return new FocusEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'focusin') return new FocusEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'focusout') return new FocusEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'gotpointercapture') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'input') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'invalid') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'keydown') return new KeyboardEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'keypress') return new KeyboardEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'keyup') return new KeyboardEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'load') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'loadeddata') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'loadedmetadata') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'loadstart') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'lostpointercapture') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'mousedown') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'mouseenter') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'mouseleave') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'mousemove') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'mouseout') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'mouseover') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'mouseup') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pause') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'play') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'playing') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointercancel') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointerdown') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointerenter') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointerleave') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointermove') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointerout') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointerover') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointerup') return new PointerEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'progress') return new ProgressEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'ratechange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'reset') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'scroll') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'securitypolicyviolation') return new SecurityPolicyViolationEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'seeked') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'seeking') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'select') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'selectionchange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'selectstart') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'stalled') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'submit') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'suspend') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'timeupdate') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'toggle') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'touchcancel') return new TouchEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'touchend') return new TouchEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'touchmove') return new TouchEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'touchstart') return new TouchEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'transitioncancel') return new TransitionEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'transitionend') return new TransitionEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'transitionrun') return new TransitionEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'transitionstart') return new TransitionEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'volumechange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'waiting') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'wheel') return new WheelEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'copy') return new ClipboardEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'cut') return new ClipboardEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'paste') return new ClipboardEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'fullscreenchange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'fullscreenerror') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointerlockchange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'pointerlockerror') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'readystatechange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'visibilitychange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
   }
 }
 

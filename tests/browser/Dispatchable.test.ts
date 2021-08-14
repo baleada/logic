@@ -19,7 +19,7 @@ suite('stores the type', async ({ puppeteer: { page } }) => {
 
 suite('assignment sets the type', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown')
+          const instance = new (window as unknown as WithGlobals).Logic.Dispatchable('keydown' as 'keydown' | 'cmd+b')
           instance.type = 'cmd+b'
           return instance.type
         }),
