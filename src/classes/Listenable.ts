@@ -407,7 +407,6 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     }
 
     for (const type of this.recognizeableEffectsKeys) {
-      console.log(type)
       const listenable = new Listenable(type)
       listenable.listen(guardedEffect as ListenEffect<Type>, options)
       this.active.add({ id: listenable } as ListenableActive<Type>)
