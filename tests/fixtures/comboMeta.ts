@@ -17,14 +17,6 @@ export const clicks = leftclicks.concat(rightclicks)
 export const pointers = [
   'pointerdown',
   'pointerup',
-  'pointermove',
-  'pointerover',
-  'pointerout',
-  'pointerenter',
-  'pointerleave',
-  'pointercancel',
-  'gotpointercapture',
-  'lostpointercapture',
 ]
 
 export const singleCharacters = [
@@ -125,26 +117,28 @@ export const singleCharacters = [
 ]
 
 export const arrows = [
-  'arrow',
-  'vertical',
-  'horizontal',
   'up',
   'right',
   'down',
   'left',
+  'arrow',
+  'vertical',
+  'horizontal',
 ]
     
 export const others = [
-  'tab',
-  'space',
-  'enter',
   'backspace',
+  'camera',
+  'capslock',
+  'delete',
+  'end',
+  'enter',
   'esc',
   'home',
-  'end',
   'pagedown',
   'pageup',
-  'capslock',
+  'space',
+  'tab',
   'f1',
   'f2',
   'f3',
@@ -165,8 +159,6 @@ export const others = [
   'f18',
   'f19',
   'f20',
-  'camera',
-  'delete',
 ]
     
 export const modifiers: ListenableModifier[] = [

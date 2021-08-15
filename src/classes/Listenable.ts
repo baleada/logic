@@ -47,7 +47,7 @@ type ListenableLeftClick = 'click' | 'mousedown' | 'mouseup' | 'dblclick'
 type ListenableRightClick = 'rightclick' | 'contextmenu'
 
 export type ListenablePointercombo =  `${string}+${ListenablePointer}`
-type ListenablePointer =  'pointerdown' | 'pointerup' | 'pointermove' | 'pointerover' | 'pointerout' | 'pointerenter' | 'pointerleave' | 'pointercancel' | 'gotpointercapture' | 'lostpointercapture'
+type ListenablePointer =  'pointerdown' | 'pointerup'
 
 // Would love to incorporate the more specific types, but it slows down type checking way too much
 export type ListenableKeycombo = `${string}+${string}`
@@ -614,7 +614,7 @@ const implementationREs: { [implementation: string]: RegExp } = {
   keycombo: /^((!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|space|arrow|vertical|horizontal|up|right|down|left|enter|backspace|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete|cmd|command|meta|shift|ctrl|control|alt|opt|option))\+)*(!?([a-zA-Z0-9,<.>/?;:'"[{\]}\\|`~!@#$%^&*()-_=+]|tab|space|arrow|vertical|horizontal|up|right|down|left|enter|backspace|esc|home|end|pagedown|pageup|capslock|f[0-9]{1,2}|camera|delete|cmd|command|meta|shift|ctrl|control|alt|opt|option))$/,
   leftclickcombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt|option))\+){0,4}!?(click|mousedown|mouseup|dblclick)$/,
   rightclickcombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt|option))\+){0,4}!?(rightclick|contextmenu)$/,
-  pointercombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt|option))\+){0,4}!?(pointerdown|pointerup|pointermove|pointerover|pointerout|pointerenter|pointerleave|pointercancel|gotpointercapture|lostpointercapture)$/,
+  pointercombo: /^(!?((cmd|command|meta|shift|ctrl|control|alt|opt|option))\+){0,4}!?(pointerdown|pointerup)$/,
 }
 
 export function toAddEventListenerParams<Type extends ListenableSupportedEventType> (effect: ListenEffect<Type>, options: ListenOptions<Type>) {
