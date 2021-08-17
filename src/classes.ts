@@ -23,7 +23,7 @@ export { Grantable } from './classes/Grantable'
 export type { GrantableOptions, GrantableStatus } from './classes/Grantable'
 
 export { Listenable } from './classes/Listenable'
-export type { ListenableSupportedType, ListenableSupportedEventType, ListenableOptions, ListenableStatus, ListenEffect, ListenEffectParam, ListenOptions, ListenableActive } from './classes/Listenable'
+export type { ListenableSupportedType, ListenableSupportedEventType, ListenableKeycombo, ListenableClickcombo, ListenablePointercombo, ListenableOptions, ListenableStatus, ListenEffect, ListenEffectParam, ListenOptions, ListenableActive } from './classes/Listenable'
 export { eventMatchesKeycombo } from './classes/Listenable'
 export { ensureKeycombo } from './extracted'
 export type { ListenableKeycomboItem } from './extracted'
