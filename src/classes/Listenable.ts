@@ -103,7 +103,7 @@ export type ListenOptions<Type extends ListenableSupportedType> =
 type ObservationListenOptions = { target?: Element }
 
 type EventListenOptions = {
-  target?: Element | Document | Window & typeof globalThis
+  target?: Element | Document | (Window & typeof globalThis)
   addEventListener?: AddEventListenerOptions,
   useCapture?: boolean,
   // Can support wantsUnstrusted if needed
@@ -349,7 +349,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     this.computedStatus = 'listening'
   }
 
-  stop (options: { target?: Element | Document | Window & typeof globalThis } = {}) {
+  stop (options: { target?: Element | Document | (Window & typeof globalThis) } = {}) {
     const { target } = options
 
     switch (this.status) {
