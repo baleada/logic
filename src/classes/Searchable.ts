@@ -45,7 +45,7 @@ export class Searchable<Item extends string | object> {
     return this
   }
 
-  search (query: string, options: SearcherOptions<Item>) {
+  search (query: string, options?: SearcherOptions<Item>) {
     this.computedResults = this.searcher.search<SearcherOptions<Item>>(query, options)
 
     this.searched()
