@@ -150,7 +150,7 @@ export function toEvent<EventType extends ListenableSupportedEventType> (eventTy
       if (eventType === 'ratechange') return new Event(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'reset') return new Event(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'scroll') return new Event(eventType, options.init) as ListenEffectParam<EventType>
-      if (eventType === 'securitypolicyviolation') return new SecurityPolicyViolationEvent(eventType, options.init) as ListenEffectParam<EventType>
+      if (eventType === 'securitypolicyviolation') return new SecurityPolicyViolationEvent(eventType, options.init as SecurityPolicyViolationEventInit) as ListenEffectParam<EventType>
       if (eventType === 'seeked') return new Event(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'seeking') return new Event(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'select') return new Event(eventType, options.init) as ListenEffectParam<EventType>

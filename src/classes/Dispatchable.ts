@@ -70,6 +70,12 @@ type EventHandlersEventInitMap =
   GlobalEventHandlersEventInitMap
   & DocumentAndElementEventHandlersEventInitMap
   & DocumentEventInitMap
+  & HTMLElementEventMap
+
+type HTMLElementEventMap = {
+  "fullscreenchange": EventInit;
+  "fullscreenerror": EventInit;
+}
 
 type GlobalEventHandlersEventInitMap = {
   "abort": UIEventInit;
@@ -80,7 +86,6 @@ type GlobalEventHandlersEventInitMap = {
   "auxclick": MouseEventInit;
   "beforeinput": InputEventInit;
   "blur": FocusEventInit;
-  "cancel": EventInit;
   "canplay": EventInit;
   "canplaythrough": EventInit;
   "change": EventInit;
@@ -95,7 +100,6 @@ type GlobalEventHandlersEventInitMap = {
   "drag": DragEventInit;
   "dragend": DragEventInit;
   "dragenter": DragEventInit;
-  "dragexit": EventInit;
   "dragleave": DragEventInit;
   "dragover": DragEventInit;
   "dragstart": DragEventInit;
@@ -107,6 +111,7 @@ type GlobalEventHandlersEventInitMap = {
   "focus": FocusEventInit;
   "focusin": FocusEventInit;
   "focusout": FocusEventInit;
+  "formdata": FormDataEventInit;
   "gotpointercapture": PointerEventInit;
   "input": EventInit;
   "invalid": EventInit;
@@ -162,6 +167,10 @@ type GlobalEventHandlersEventInitMap = {
   "transitionstart": TransitionEventInit;
   "volumechange": EventInit;
   "waiting": EventInit;
+  "webkitanimationend": EventInit;
+  "webkitanimationiteration": EventInit;
+  "webkitanimationstart": EventInit;
+  "webkittransitionend": EventInit;
   "wheel": WheelEventInit;
 }
 
