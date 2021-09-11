@@ -13,7 +13,7 @@ const external = [
         .input(['src/classes.ts', 'src/pipes.ts'])
         .external(external)
         .resolve()
-        .typescript(),
+        .esbuild(),
       esm = shared
         .delete({ targets: 'lib/*', verbose: true })
         .esm({ file: 'lib/index.js', target: 'browser' })
