@@ -56,11 +56,20 @@ export class Navigateable<Item> {
   }
 
   navigate (location: number) {
-    const ensuredLocation = location < 0
-      ? 0
-      : location > this.array.length - 1
-        ? this.array.length - 1
-        : location
+    const ensuredLocation = (() => {
+      if (location < 0) {
+        return 0
+      }
+
+      if (location > this.array.length - 1) {
+        // At this low level, there aren't strong arguments for or against
+        // preventing -1 as a location for an empty array. However, enforcing
+        // a minimum index of 0 makes life easier in the Vue Features package.
+        return Math.max(this.array.length - 1, 0)
+      }
+
+      return location
+    })()
       
     this.computedLocation = ensuredLocation
 

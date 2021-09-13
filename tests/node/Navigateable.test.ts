@@ -86,6 +86,25 @@ suite('navigate(newLocation) navigates to newLocation', context => {
   assert.is(instance.location, 1)
 })
 
+suite('navigate(newLocation) navigates to 0 when array is empty', context => {
+  const instance = new Navigateable([]);
+
+  (() => {
+    instance.navigate(0)
+    assert.is(instance.location, 0)
+  })();
+  
+  (() => {
+    instance.navigate(-42)
+    assert.is(instance.location, 0)
+  })();
+  
+  (() => {
+    instance.navigate(42)
+    assert.is(instance.location, 0)
+  })()  
+})
+
 /* next */
 suite('next() increments the current location by 1 when distance is default', context => {
   const instance = context.setup()
