@@ -92,7 +92,7 @@ export type ListenOptions<Type extends ListenableSupportedType> =
   Type extends 'mutate' ? { observe?: MutationObserverInit } & ObservationListenOptions :
   Type extends 'resize' ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
   Type extends 'idle' ? { requestIdleCallback?: IdleRequestOptions } :
-  Type extends ListenableMediaQuery ? {} :
+  Type extends ListenableMediaQuery ? { instantEffect?: (list: MediaQueryList) => any } :
   Type extends ListenableClickcombo ? EventListenOptions :
   Type extends ListenablePointercombo ? EventListenOptions :
   Type extends ListenableKeycombo ? { keyDirection?: 'up' | 'down' } & EventListenOptions :
@@ -200,7 +200,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
         this.resizeListen(effect as unknown as ListenEffect<'resize'>, options as ListenOptions<'resize'>)
         break
       case 'mediaquery':
-        this.mediaQueryListen(effect as ListenEffect<'(_)'>)
+        this.mediaQueryListen(effect as ListenEffect<'(_)'>, options as ListenOptions<'(_)'>)
         break
       case 'idle':
         this.idleListen(effect as unknown as ListenEffect<'idle'>, options as ListenOptions<'idle'>)
@@ -251,8 +251,12 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     id.observe(target, observe)
     this.active.add({ target, id } as ListenableActive<Type>)
   }
-  private mediaQueryListen (effect: ListenEffect<'(_)'>) {
+  private mediaQueryListen (effect: ListenEffect<'(_)'>, options: ListenOptions<'(_)'>) {
     const target = window.matchMedia(this.type)
+
+    if (isFunction(options.instantEffect)) {
+      (options.instantEffect as ListenOptions<'(_)'>['instantEffect'])(target)
+    }
 
     target.addEventListener('change', effect)
     this.active.add({ target, id: ['change', effect] } as ListenableActive<Type>)
