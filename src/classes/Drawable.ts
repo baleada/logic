@@ -1,27 +1,25 @@
 import { getStroke } from 'perfect-freehand'
 import type { StrokeOptions } from 'perfect-freehand'
+import polygonClipping from 'polygon-clipping'
 import { createReduce } from '../pipes'
 
 export type DrawableOptions = {
-  toPath?: (stroke: ReturnType<typeof getStroke>) => string
+  toD?: (stroke: ReturnType<typeof getStroke>) => string
 }
 
-type DrawableStatus = 'ready' | 'drawing' | 'drawn'
+export type DrawableStatus = 'ready' | 'drawing' | 'drawn'
 
 const defaultOptions: DrawableOptions = {
-  toPath: stroke => stroke.length === 0
+  toD: stroke => stroke.length === 0
     ? ''
-    : createReduce<number[], string>((d, [x0, y0], index) => {
-      const [x1, y1] = stroke[(index + 1) % stroke.length]
-      return `${d} ${x0} ${y0} ${(x0 + x1) / 2} ${(y0 + y1) / 2}${index === stroke.length - 1 ? ' Z': ''}`
-    }, `M ${stroke[0][0]} ${stroke[0][1]} Q`)(stroke)
+    : toD(stroke)
 }
 
 export class Drawable {
-  private computedPath: string
-  private toPath: DrawableOptions['toPath']
+  private computedD: string
+  private toD: DrawableOptions['toD']
   constructor (stroke: ReturnType<typeof getStroke>, options: DrawableOptions = {}) {
-    this.toPath = options?.toPath || defaultOptions.toPath
+    this.toD = options?.toD || defaultOptions.toD
     this.setStroke(stroke)
     this.ready()
   }
@@ -42,14 +40,14 @@ export class Drawable {
     return this.computedStatus
   }
 
-  get path () {
-    return this.computedPath
+  get d () {
+    return this.computedD
   }
   
   private computedStroke: ReturnType<typeof getStroke>
   setStroke (stroke: ReturnType<typeof getStroke>) {
     this.computedStroke = stroke
-    this.computedPath = this.toPath(stroke)
+    this.computedD = this.toD(stroke)
     return this
   }
 
@@ -68,4 +66,25 @@ export class Drawable {
     this.computedStatus = 'drawn'
   }
 
+}
+
+export function toD (stroke: number[][]) {
+  return createReduce<number[], string>((d, [x0, y0], index) => {
+    const [x1, y1] = stroke[(index + 1) % stroke.length]
+    return `${d} ${x0} ${y0} ${(x0 + x1) / 2} ${(y0 + y1) / 2}`
+  }, `M ${stroke[0][0]} ${stroke[0][1]} Q`)(stroke) + 'Z'
+}
+
+export function toFlattenedD (stroke: number[][]) {
+  if (stroke.length === 0) {
+    return ''
+  }
+
+  const multiPolygon = polygonClipping.union([stroke as [number, number][]])
+
+  return createReduce<polygonClipping.Polygon, string>((dFromMultiPolygon, polygon) => {
+    return dFromMultiPolygon + createReduce<polygonClipping.Ring, string>((dFromRing, points) => {
+      return dFromRing + toD(points)
+    }, '')(polygon)
+  }, '')(multiPolygon)
 }

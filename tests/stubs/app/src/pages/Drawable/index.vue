@@ -5,8 +5,8 @@
     style="touch-action: none;"
   >
     <path
-      v-show="path"
-      :d="path"
+      v-show="d"
+      :d="d"
       fill="slate"
     />
   </svg>
@@ -14,18 +14,24 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { Drawable } from '../../../../../../src/classes/Drawable'
+import { Drawable, toFlattenedD } from '../../../../../../src/classes/Drawable'
+import { createReduce } from '../../../../../../src/pipes'
+import polygonClipping from 'polygon-clipping'
 
 const points = ref([]),
-      drawable = ref(new Drawable([])),
-      path = computed(() => drawable.value
+      drawable = ref(
+        new Drawable([], {
+          toD: toFlattenedD
+        })
+      ),
+      d = computed(() => drawable.value
         .draw(points.value, {
           size: 16,
           thinning: 0.5,
           smoothing: 0.5,
           streamline: 0.5,
         })
-        .path
+        .d
       )
 
 function pointerDownEffect (e: PointerEvent) {
