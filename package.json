@@ -68,7 +68,8 @@
     "dompurify": "^2.2.6",
     "fast-fuzzy": "^1.10.8",
     "lazy-collections": "^0.8.0",
-    "perfect-freehand": "^1.0.4"
+    "perfect-freehand": "^1.0.4",
+    "polygon-clipping": "^0.15.3"
   },
   "sideEffects": false
 }

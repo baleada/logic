@@ -6,6 +6,8 @@ const external = [
         'fast-fuzzy',
         '@sindresorhus/slugify',
         'dompurify',
+        'perfect-freehand',
+        'polygon-clipping',
         'lazy-collections',
         /@babel\/runtime/,
       ],
