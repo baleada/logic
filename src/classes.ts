@@ -1,5 +1,6 @@
 export { Animateable } from './classes/Animateable'
 export type { AnimateableKeyframe, AnimateableOptions, AnimateableStatus, AnimateFrame, AnimateFrameEffect, AnimateOptions } from './classes/Animateable'
+export { linear, materialStandard, materialDecelerated, materialAccelerated, verouEase, verouEaseIn, verouEaseOut, verouEaseInOut, easingsNetInSine, easingsNetOutSine, easingsNetInOutSine, easingsNetInQuad, easingsNetOutQuad, easingsNetInOutQuad, easingsNetInCubic, easingsNetOutCubic, easingsNetInOutCubic, easingsNetInQuart, easingsNetInQuint, easingsNetOutQuint, easingsNetInOutQuint, easingsNetInExpo, easingsNetOutExpo, easingsNetInOutExpo, easingsNetInCirc, easingsNetOutCirc, easingsNetInOutCirc, easingsNetInBack, easingsNetOutBack, easingsNetInOutBack } from './classes/Animateable'
 
 export { Completeable } from './classes/Completeable'
 export type { CompleteableOptions, CompleteableStatus, CompleteOptions } from './classes/Completeable'
@@ -12,6 +13,10 @@ export type { DelayableEffect, DelayableOptions, DelayableStatus } from './class
 
 export { Dispatchable } from './classes/Dispatchable'
 export type { DispatchableOptions, DispatchableStatus, DispatchOptions } from './classes/Dispatchable'
+
+export { Drawable } from './classes/Drawable'
+export type { DrawableOptions, DrawableStatus } from './classes/Drawable'
+export { toD, toFlattenedD } from './classes/Drawable'
 
 export { Fetchable } from './classes/Fetchable'
 export type { FetchableOptions, FetchableStatus, FetchOptions, FetchOptionsApi } from './classes/Fetchable'
