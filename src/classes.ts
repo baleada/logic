@@ -15,7 +15,7 @@ export { Dispatchable } from './classes/Dispatchable'
 export type { DispatchableOptions, DispatchableStatus, DispatchOptions } from './classes/Dispatchable'
 
 export { Drawable } from './classes/Drawable'
-export type { DrawableOptions, DrawableStatus } from './classes/Drawable'
+export type { DrawableState, DrawableOptions, DrawableStatus } from './classes/Drawable'
 export { toD, toFlattenedD } from './classes/Drawable'
 
 export { Fetchable } from './classes/Fetchable'

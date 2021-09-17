@@ -3,8 +3,10 @@ import type { StrokeOptions } from 'perfect-freehand'
 import polygonClipping from 'polygon-clipping'
 import { createReduce } from '../pipes'
 
+export type DrawableState = ReturnType<typeof getStroke>
+
 export type DrawableOptions = {
-  toD?: (stroke: ReturnType<typeof getStroke>) => string
+  toD?: (stroke: DrawableState) => string
 }
 
 export type DrawableStatus = 'ready' | 'drawing' | 'drawn'
@@ -18,7 +20,7 @@ const defaultOptions: DrawableOptions = {
 export class Drawable {
   private computedD: string
   private toD: DrawableOptions['toD']
-  constructor (stroke: ReturnType<typeof getStroke>, options: DrawableOptions = {}) {
+  constructor (stroke: DrawableState, options: DrawableOptions = {}) {
     this.toD = options?.toD || defaultOptions.toD
     this.setStroke(stroke)
     this.ready()
@@ -44,8 +46,8 @@ export class Drawable {
     return this.computedD
   }
   
-  private computedStroke: ReturnType<typeof getStroke>
-  setStroke (stroke: ReturnType<typeof getStroke>) {
+  private computedStroke: DrawableState
+  setStroke (stroke: DrawableState) {
     this.computedStroke = stroke
     this.computedD = this.toD(stroke)
     return this
