@@ -67,7 +67,7 @@ suite(`status is stored in browser when DOM is available`, async ({ puppeteer: {
           
           return value
         }, key),
-        expected = { [`${key}_status`]: 'ready' }
+        expected = { [`${key} status`]: 'ready' }
     
   assert.equal(value, expected)
 })
@@ -119,7 +119,7 @@ suite(`status is not stored in browser after successful removeStatus(...)`, asyn
           const instance = new (window as unknown as WithGlobals).Logic.Storeable(key)
           instance.removeStatus()
           
-          const value = instance.storage.getItem(`${key}_status`)
+          const value = instance.storage.getItem(`${key} status`)
           
           window.localStorage.clear()
           
@@ -143,7 +143,7 @@ suite(`setKey(...) updates browser storage keys when status is 'stored'`, async 
           
           return value
         }, key),
-        expected = { stub: 'baleada', stub_status: 'stored' }
+        expected = { stub: 'baleada', 'stub status': 'stored' }
     
   assert.equal(value, expected)
 })
@@ -162,7 +162,7 @@ suite(`setKey(...) updates browser storage keys when status is 'removed'`, async
           
           return value
         }, key),
-        expected = { stub_status: 'removed' }
+        expected = { 'stub status': 'removed' }
     
   assert.equal(value, expected)
 })
@@ -178,7 +178,7 @@ suite(`store(...) stores item in browser storage`, async ({ puppeteer: { page },
           
           return value
         }, key),
-        expected = { [`${key}`]: 'baleada', [`${key}_status`]: 'stored' }
+        expected = { [`${key}`]: 'baleada', [`${key} status`]: 'stored' }
     
   assert.equal(value, expected)
 })
@@ -212,14 +212,14 @@ suite(`remove(...) removes item from browser storage`, async ({ puppeteer: { pag
           
           return value
         }, key),
-        expected = { [`${key}_status`]: 'removed' }
+        expected = { [`${key} status`]: 'removed' }
     
   assert.equal(value, expected)
 })
 
 suite(`respects statusKeySuffix option`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
-          const instance = new (window as unknown as WithGlobals).Logic.Storeable(key, { statusKeySuffix: '_stub' })
+          const instance = new (window as unknown as WithGlobals).Logic.Storeable(key, { statusKeySuffix: ' stub' })
           
           const value = JSON.parse(JSON.stringify(instance.storage))
           
@@ -227,12 +227,12 @@ suite(`respects statusKeySuffix option`, async ({ puppeteer: { page }, key }) =>
           
           return value
         }, key),
-        expected = { [`${key}_stub`]: 'ready' }
+        expected = { [`${key} stub`]: 'ready' }
     
   assert.equal(value, expected)
 })
 
-suite(`statusKeySuffix defaults to '_status'`, async ({ puppeteer: { page }, key }) => {
+suite(`statusKeySuffix defaults to ' status'`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           const instance = new (window as unknown as WithGlobals).Logic.Storeable(key)
           
@@ -242,7 +242,7 @@ suite(`statusKeySuffix defaults to '_status'`, async ({ puppeteer: { page }, key
           
           return value
         }, key),
-        expected = { [`${key}_status`]: 'ready' }
+        expected = { [`${key} status`]: 'ready' }
     
   assert.equal(value, expected)
 })
@@ -258,7 +258,7 @@ suite(`respects type option`, async ({ puppeteer: { page }, key }) => {
           
           return value
         }, key),
-        expected = { [`${key}_status`]: 'ready' }
+        expected = { [`${key} status`]: 'ready' }
     
   assert.equal(value, expected)
 })
@@ -274,7 +274,7 @@ suite(`type defaults to localStorage`, async ({ puppeteer: { page }, key }) => {
           
           return value
         }, key),
-        expected = { [`${key}_status`]: 'ready' }
+        expected = { [`${key} status`]: 'ready' }
     
   assert.equal(value, expected)
 })

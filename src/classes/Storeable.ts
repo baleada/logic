@@ -13,7 +13,7 @@ export type StoreableStatus = 'ready' | 'constructing' | 'stored' | 'errored' | 
 
 const defaultOptions: StoreableOptions = {
   type: 'local',
-  statusKeySuffix: '_status',
+  statusKeySuffix: ' status',
 }
 
 export class Storeable {
