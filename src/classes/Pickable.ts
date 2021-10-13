@@ -1,21 +1,21 @@
 import { find as lazyCollectionFind } from 'lazy-collections'
-import { createMap, createFilter, createConcat } from "../pipes"
+import { createMap, createFilter, createConcat, Pipeable } from "../pipes"
 import { isUndefined } from '../extracted'
 
 export type PickableOptions = {
-  initialPicked?: number | number[],
+  initialPicks?: number | number[],
 }
 
 export type PickableStatus = 'ready' | 'picked' | 'omitted'
 
 const defaultOptions: PickableOptions = {
-  initialPicked: [],
+  initialPicks: [],
 }
 
 export class Pickable<Item> {
   constructor (array: Item[], options: PickableOptions = {}) {
-    this.computedArray = array
-    this.pick(options.initialPicked ?? defaultOptions.initialPicked)
+    this.setArray(array)
+    this.pick(options.initialPicks ?? defaultOptions.initialPicks)
     this.ready()
   }
   private computedStatus: PickableStatus
@@ -30,54 +30,62 @@ export class Pickable<Item> {
   set array (array: Item[]) {
     this.setArray(array)
   }
-  private computedPicked: number[]
-  get picked () {
-    return this.computedPicked
+  private computedPicks: number[]
+  get picks () {
+    return this.computedPicks
   }
-  set picked (indices: number[]) {
+  set picks (indices: number[]) {
     this.pick(indices)
   }
   get status () {
     return this.computedStatus
   }
   get items () {
-    return this.toItems(this.picked)
+    return this.toItems(this.picks)
   }
   private toItems = createMap<number, Item>(index => this.array[index])
   get multiple () {
-    return this.picked.length > 1
+    return this.picks.length > 1
   }
 
+
+  private toPossiblePicks: (indices: number[]) => number[]
   setArray (array: Item[]) {
     this.computedArray = array
+    this.toPossiblePicks = createFilter<number>(index => index >= 0 && index < array.length)
     return this
   }
 
-  setPicked (indexOrIndices: number | number[]) {
+  setPicks (indexOrIndices: number | number[]) {
     return this.pick(indexOrIndices)
   }
 
   pick (indexOrIndices: number | number[]) {
-    this.computedPicked = createConcat<number>(ensureIndices(indexOrIndices))(this.computedPicked || [])
-    this._picked()
+    const newPicks = new Pipeable(indexOrIndices).pipe(
+      ensureIndices,
+      this.toPossiblePicks
+    )
+
+    this.computedPicks = createConcat<number>(newPicks)(this.computedPicks || [])
+    this.picked()
 
     return this
   }
-  private _picked () {
+  private picked () {
     this.computedStatus = 'picked'
   }
 
   omit (indexOrIndices?: number | number[]) {
     if (isUndefined(indexOrIndices)) {
-      this.computedPicked = []
+      this.computedPicks = []
       this.omitted()
       return this
     }
 
-    const indices = ensureIndices(indexOrIndices),
-          filter = createFilter<number>(pickedItem => !(lazyCollectionFind(index => pickedItem === index)(indices) as number))
+    const omits = ensureIndices(indexOrIndices),
+          filter = createFilter<number>(pick => !(lazyCollectionFind(omit => pick === omit)(omits) as number))
 
-    this.computedPicked = filter(this.computedPicked)
+    this.computedPicks = filter(this.computedPicks)
     this.omitted()
     return this
   }

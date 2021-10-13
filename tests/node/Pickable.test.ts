@@ -36,31 +36,31 @@ suite(`setArray sets the array`, context => {
 suite(`initial picked is empty by default`, context => {
   const instance = context.setup()
 
-  assert.equal(instance.picked, [])
+  assert.equal(instance.picks, [])
 })
 
 suite(`initial picked can be customized via options`, context => {
   const instance = context.setup({
-    initialPicked: [1],
+    initialPicks: [1],
   })
 
-  assert.equal(instance.picked, [1])
+  assert.equal(instance.picks, [1])
 })
 
 suite(`assignment sets picked`, context => {
   const instance = context.setup()
 
-  instance.picked = [1]
+  instance.picks = [1]
 
-  assert.equal(instance.picked, [1])
+  assert.equal(instance.picks, [1])
 })
 
-suite(`setPicked sets picked`, context => {
+suite(`setPicks sets picked`, context => {
   const instance = context.setup()
 
-  instance.setPicked(1)
+  instance.setPicks(1)
 
-  assert.equal(instance.picked, [1])
+  assert.equal(instance.picks, [1])
 })
 
 suite(`pick(index) appends index to array`, context => {
@@ -68,7 +68,7 @@ suite(`pick(index) appends index to array`, context => {
 
   instance.pick(1)
 
-  assert.equal(instance.picked, [1])
+  assert.equal(instance.picks, [1])
 })
 
 suite(`pick(indices) appends indices to picked, in original order`, context => {
@@ -76,7 +76,15 @@ suite(`pick(indices) appends indices to picked, in original order`, context => {
 
   instance.pick([1, 2]).pick([0, 3])
 
-  assert.equal(instance.picked, [1, 2, 0, 3])
+  assert.equal(instance.picks, [1, 2, 0, 3])
+})
+
+suite(`pick(indices) ignores indices less than zero or greater than or equal to array length`, context => {
+  const instance = context.setup()
+
+  instance.pick([-1, 1, 42])
+
+  assert.equal(instance.picks, [1])
 })
 
 suite(`omit(index) removes index from picked`, context => {
@@ -84,7 +92,7 @@ suite(`omit(index) removes index from picked`, context => {
 
   instance.pick([1, 2]).omit(2)
 
-  assert.equal(instance.picked, [1])
+  assert.equal(instance.picks, [1])
 })
 
 suite(`omit(indices) removes indices from picked`, context => {
@@ -92,7 +100,7 @@ suite(`omit(indices) removes indices from picked`, context => {
 
   instance.pick([1, 2]).pick([0, 3]).omit([1, 3])
 
-  assert.equal(instance.picked, [2, 0])
+  assert.equal(instance.picks, [2, 0])
 })
 
 suite(`omit() empties picked`, context => {
@@ -100,7 +108,7 @@ suite(`omit() empties picked`, context => {
 
   instance.pick([1, 2]).omit()
 
-  assert.equal(instance.picked, [])
+  assert.equal(instance.picks, [])
 })
 
 suite(`items retrieves items`, context => {
