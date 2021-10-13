@@ -1,8 +1,10 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { Navigateable } from '../../src/classes/Navigateable'
+import { Navigateable, NavigateableOptions } from '../../src/classes/Navigateable'
 
-const suite = createSuite('Navigateable')
+const suite = createSuite<{
+  setup: (options?: NavigateableOptions) => Navigateable<string>
+}>('Navigateable')
 
 suite.before.each(context => {
   context.setup = (options = {}) => new Navigateable(
@@ -11,33 +13,33 @@ suite.before.each(context => {
   )
 })
 
-suite('stores the array', context => {
+suite(`stores the array`, context => {
   const instance = context.setup()
 
   assert.equal(instance.array, ['tortilla', 'frijoles', 'mantequilla', 'aguacate', 'huevito'])
 })
 
-suite('assignment sets the array', context => {
+suite(`assignment sets the array`, context => {
   const instance = context.setup()
   instance.array = ['Baleada']
 
   assert.equal(instance.array, ['Baleada'])
 })
 
-suite('setArray sets the array', context => {
+suite(`setArray sets the array`, context => {
   const instance = context.setup()
   instance.setArray(['Baleada'])
 
   assert.equal(instance.array, ['Baleada'])
 })
 
-suite('initial location is 0 by default', context => {
+suite(`initial location is 0 by default`, context => {
   const instance = context.setup()
 
   assert.is(instance.location, 0)
 })
 
-suite('initial location can be customized via options', context => {
+suite(`initial location can be customized via options`, context => {
   const instance = context.setup({
     initialLocation: 1,
   })
@@ -45,7 +47,7 @@ suite('initial location can be customized via options', context => {
   assert.is(instance.location, 1)
 })
 
-suite('assignment sets the location', context => {
+suite(`assignment sets the location`, context => {
   const instance = context.setup()
 
   instance.location = 1
@@ -53,7 +55,7 @@ suite('assignment sets the location', context => {
   assert.is(instance.location, 1)
 })
 
-suite('setLocation sets the location', context => {
+suite(`setLocation sets the location`, context => {
   const instance = context.setup()
 
   instance.setLocation(1)
@@ -62,7 +64,7 @@ suite('setLocation sets the location', context => {
 })
 
 /* navigate */
-suite('navigate(newLocation) navigates to the last item in the array when newLocation is greater than the index of the last item in the array', context => {
+suite(`navigate(newLocation) navigates to the last item in the array when newLocation is greater than the index of the last item in the array`, context => {
   const instance = context.setup()
 
   instance.navigate(42)
@@ -70,7 +72,7 @@ suite('navigate(newLocation) navigates to the last item in the array when newLoc
   assert.is(instance.location, instance.array.length - 1)
 })
 
-suite('navigate(newLocation) navigates to 0 when newLocation is less than 0', context => {
+suite(`navigate(newLocation) navigates to 0 when newLocation is less than 0`, context => {
   const instance = context.setup()
 
   instance.navigate(-42)
@@ -78,7 +80,7 @@ suite('navigate(newLocation) navigates to 0 when newLocation is less than 0', co
   assert.is(instance.location, 0)
 })
 
-suite('navigate(newLocation) navigates to newLocation', context => {
+suite(`navigate(newLocation) navigates to newLocation`, context => {
   const instance = context.setup()
 
   instance.navigate(1)
@@ -86,7 +88,7 @@ suite('navigate(newLocation) navigates to newLocation', context => {
   assert.is(instance.location, 1)
 })
 
-suite('navigate(newLocation) navigates to 0 when array is empty', context => {
+suite(`navigate(newLocation) navigates to 0 when array is empty`, context => {
   const instance = new Navigateable([]);
 
   (() => {
@@ -106,7 +108,7 @@ suite('navigate(newLocation) navigates to 0 when array is empty', context => {
 })
 
 /* next */
-suite('next() increments the current location by 1 when distance is default', context => {
+suite(`next() increments the current location by 1 when distance is default`, context => {
   const instance = context.setup()
 
   instance.next()
@@ -114,7 +116,7 @@ suite('next() increments the current location by 1 when distance is default', co
   assert.is(instance.location, 1)
 })
 
-suite('next() increments the current location by distance when distance is not default', context => {
+suite(`next() increments the current location by distance when distance is not default`, context => {
   const instance = context.setup()
 
   instance.next({ distance: 2, })
@@ -122,7 +124,7 @@ suite('next() increments the current location by distance when distance is not d
   assert.is(instance.location, 2)
 })
 
-suite('next() loops back through the array by default when the current location is greater than the last location', context => {
+suite(`next() loops back through the array by default when the current location is greater than the last location`, context => {
   const instance = context.setup()
 
   instance.navigate(instance.array.length - 1)
@@ -131,7 +133,7 @@ suite('next() loops back through the array by default when the current location 
   assert.is(instance.location, 0)
 })
 
-suite('next() loops continuously through the array by default until current location is less than or equal to the last location', context => {
+suite(`next() loops continuously through the array by default until current location is less than or equal to the last location`, context => {
   const instance = context.setup()
 
   instance.next({ distance: 15 })
@@ -139,7 +141,7 @@ suite('next() loops continuously through the array by default until current loca
   assert.is(instance.location, 0)
 })
 
-suite('next() stops at the last location when loops is false AND incremented location is greater than the last location', context => {
+suite(`next() stops at the last location when loops is false AND incremented location is greater than the last location`, context => {
   const instance = context.setup()
 
   instance.navigate(instance.array.length - 1)
@@ -149,7 +151,7 @@ suite('next() stops at the last location when loops is false AND incremented loc
 })
 
 /* prev */
-suite('previous() decrements the current location by 1 when distance is default', context => {
+suite(`previous() decrements the current location by 1 when distance is default`, context => {
   const instance = context.setup({
     initialLocation: 1
   })
@@ -159,7 +161,7 @@ suite('previous() decrements the current location by 1 when distance is default'
   assert.is(instance.location, 0)
 })
 
-suite('previous() decrements the current location by distance when distance is not default', context => {
+suite(`previous() decrements the current location by distance when distance is not default`, context => {
   const instance = context.setup({
     initialLocation: 2,
   })
@@ -169,7 +171,7 @@ suite('previous() decrements the current location by distance when distance is n
   assert.is(instance.location, 0)
 })
 
-suite('previous() loops back through the array by default when the current location is less than 0', context => {
+suite(`previous() loops back through the array by default when the current location is less than 0`, context => {
   const instance = context.setup()
 
   instance.previous()
@@ -177,7 +179,7 @@ suite('previous() loops back through the array by default when the current locat
   assert.is(instance.location, instance.array.length - 1)
 })
 
-suite('previous() loops continuously through the array by default until current location is greater than or equal to 0', context => {
+suite(`previous() loops continuously through the array by default until current location is greater than or equal to 0`, context => {
   const instance = context.setup()
 
   instance.previous({ distance: 15 })
@@ -185,7 +187,7 @@ suite('previous() loops continuously through the array by default until current 
   assert.is(instance.location, 0)
 })
 
-suite('previous() stops at 0 when loops is false AND decremented location is less than 0', context => {
+suite(`previous() stops at 0 when loops is false AND decremented location is less than 0`, context => {
   const instance = context.setup()
 
   instance.previous({ loops: false })
@@ -193,7 +195,7 @@ suite('previous() stops at 0 when loops is false AND decremented location is les
   assert.is(instance.location, 0)
 })
 
-suite('random() navigates to a random location', context => {
+suite(`random() navigates to a random location`, context => {
   const instance = context.setup()
 
   instance.random()
@@ -201,7 +203,7 @@ suite('random() navigates to a random location', context => {
   assert.ok(instance.location >= 0 && instance.location <= instance.array.length)
 })
 
-suite('first() navigates to first item', context => {
+suite(`first() navigates to first item`, context => {
   const instance = context.setup()
 
   instance.first()
@@ -209,7 +211,7 @@ suite('first() navigates to first item', context => {
   assert.is(instance.location, 0)
 })
 
-suite('last() navigates to last item', context => {
+suite(`last() navigates to last item`, context => {
   const instance = context.setup()
 
   instance.last()
@@ -217,13 +219,13 @@ suite('last() navigates to last item', context => {
   assert.is(instance.location, instance.array.length - 1)
 })
 
-suite('status is "ready" after construction', context => {
+suite(`status is 'ready' after construction`, context => {
   const instance = context.setup()
 
   assert.is(instance.status, 'ready')
 })
 
-suite('status is "navigated" after any navigation function is called at least once', context => {
+suite(`status is 'navigated' after any navigation function is called at least once`, context => {
   const navigate = context.setup(),
         next = context.setup(),
         previous = context.setup(),
