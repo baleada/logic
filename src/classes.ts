@@ -33,9 +33,11 @@ export { eventMatchesKeycombo } from './classes/Listenable'
 export { ensureKeycombo } from './extracted'
 export type { ListenableKeycomboItem } from './extracted'
 
-
 export { Navigateable } from './classes/Navigateable'
 export type { NavigateableOptions, NavigateableStatus } from './classes/Navigateable'
+
+export { Pickable } from './classes/Pickable'
+export type { PickableOptions, PickableStatus } from './classes/Pickable'
 
 export { Recognizeable } from './classes/Recognizeable'
 export type { RecognizeableOptions, RecognizeableStatus, RecognizeableEffectApi, RecognizeOptions } from './classes/Recognizeable'
