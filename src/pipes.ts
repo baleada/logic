@@ -3,12 +3,13 @@ import {
   slice as lazyCollectionSlice,
   toArray as lazyCollectionToArray,
   findIndex as lazyCollectionFindIndex,
+  find as lazyCollectionFind,
   concat as lazyCollectionConcat,
   filter as lazyCollectionFilter,
   map as lazyCollectionMap,
   unique as lazyCollectionUnique,
   reduce as lazyCollectionReduce,
-  toArray,
+  sum as lazyCollectionSum,
 } from 'lazy-collections'
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
@@ -261,6 +262,32 @@ export function createClamp ({ min, max }: { min: number, max: number }): Number
     const maxed = Math.max(number, min)
     return Math.min(maxed, max)
   }
+}
+
+type Potentiality<Outcome> = { outcome: Outcome, probability: number }
+
+export function createDetermine<Outcome> (potentialities: Potentiality<Outcome>[]): NumberFunction<Outcome> {
+  type Predicate = { outcome: Outcome, predicate: (determinant: number) => boolean }
+
+  const predicates = createMap<Potentiality<Outcome>, Predicate>(({ outcome, probability }, index) => {
+          const lowerBound: number = index === 0
+                  ? 0
+                  : lazyCollectionPipe(
+                    lazyCollectionSlice<Potentiality<Outcome>>(0, index - 1),
+                    lazyCollectionReduce<number, Potentiality<Outcome>>((lowerBound, { probability }) => lowerBound + probability, 0)
+                  )(potentialities),
+                upperBound = lowerBound + probability
+
+          return {
+            outcome,
+            predicate: determinant => 
+              (determinant >= lowerBound && determinant < upperBound)
+              || determinant < 0 && index === 0
+              || index === predicates.length - 1
+          }
+        })(potentialities)
+
+  return determinant => (lazyCollectionFind<Predicate>(({ predicate }) => predicate(determinant))(predicates) as Predicate).outcome
 }
 
 
