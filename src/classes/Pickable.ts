@@ -62,12 +62,13 @@ export class Pickable<Item> {
 
   pick (indexOrIndices: number | number[], options: { replaces?: boolean } = {}) {
     const { replaces } = options
-
+    
     const newPicks = new Pipeable(indexOrIndices).pipe(
       ensureIndices,
       this.toPossiblePicks,
       possiblePicks => {
         if (replaces) return possiblePicks
+        // TODO: Option to handle duplicates differently
         return createFilter<number>(possiblePick => !(lazyCollectionFind<number>(pick => pick === possiblePick)(this.picks || [])))(possiblePicks)
       }
     )
@@ -94,7 +95,7 @@ export class Pickable<Item> {
     }
 
     const omits = ensureIndices(indexOrIndices),
-          filter = createFilter<number>(pick => !(lazyCollectionFind(omit => pick === omit)(omits) as number))
+          filter = createFilter<number>(pick => isUndefined(lazyCollectionFind(omit => pick === omit)(omits)))
 
     this.computedPicks = filter(this.computedPicks)
     this.omitted()

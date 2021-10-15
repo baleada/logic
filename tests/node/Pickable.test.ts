@@ -111,6 +111,14 @@ suite(`omit(index) removes index from picked`, context => {
   assert.equal(instance.picks, [1])
 })
 
+suite(`omit(index) can remove falsey values`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1]).omit(0)
+
+  assert.equal(instance.picks, [1])
+})
+
 suite(`omit(indices) removes indices from picked`, context => {
   const instance = context.setup()
 
