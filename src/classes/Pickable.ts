@@ -60,15 +60,26 @@ export class Pickable<Item> {
     return this.pick(indexOrIndices)
   }
 
-  pick (indexOrIndices: number | number[]) {
+  pick (indexOrIndices: number | number[], options: { replaces?: boolean } = {}) {
+    const { replaces } = options
+
     const newPicks = new Pipeable(indexOrIndices).pipe(
       ensureIndices,
-      this.toPossiblePicks
+      this.toPossiblePicks,
+      possiblePicks => {
+        if (replaces) return possiblePicks
+        return createFilter<number>(possiblePick => !(lazyCollectionFind<number>(pick => pick === possiblePick)(this.picks || [])))(possiblePicks)
+      }
     )
 
-    this.computedPicks = createConcat<number>(newPicks)(this.computedPicks || [])
-    this.picked()
+    if (replaces) {
+      this.computedPicks = newPicks
+      this.picked()
+      return this
+    }
 
+    this.computedPicks = createConcat<number>(newPicks)(this.picks || [])
+    this.picked()
     return this
   }
   private picked () {

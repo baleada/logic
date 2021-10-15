@@ -79,12 +79,28 @@ suite(`pick(indices) appends indices to picked, in original order`, context => {
   assert.equal(instance.picks, [1, 2, 0, 3])
 })
 
-suite(`pick(indices) ignores indices less than zero or greater than or equal to array length`, context => {
+suite(`pick(...) ignores indices less than zero or greater than or equal to array length`, context => {
   const instance = context.setup()
 
   instance.pick([-1, 1, 42])
 
   assert.equal(instance.picks, [1])
+})
+
+suite(`pick(...) replaces picks when 'replaces' option is true`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1, 2, 3]).pick([1], { replaces: true })
+
+  assert.equal(instance.picks, [1])
+})
+
+suite(`pick(...) ignores duplicate picks`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1, 2, 3]).pick([1])
+
+  assert.equal(instance.picks, [0, 1, 2, 3])
 })
 
 suite(`omit(index) removes index from picked`, context => {
