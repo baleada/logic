@@ -138,7 +138,7 @@ export class Completeable {
     return toNextMatch({ string: this.string, re, from })
   }
 
-  complete (completion: string, options: { select?: 'completion' | 'completionEnd' } = {}) {
+  complete (completion: string, options: CompleteOptions = {}) {
     this.completing()
 
     const { select } = { ...defaultCompleteOptions, ...options },
