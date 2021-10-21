@@ -188,6 +188,14 @@ suite('complete(completion, options) correctly computes new selection when optio
   assert.equal(instance.selection, { start: 0, end: 'Baleada'.length, direction: 'none' })
 })
 
+suite('complete(completion, options) lets user compute new selection when options.select is the select callback', context => {
+  const instance = context.setup()
+
+  instance.complete('Baleada', { select: ({ before, completion, after }) => ({ start: 0, end: 0, direction: 'none' }) })
+
+  assert.equal(instance.selection, { start: 0, end: 0, direction: 'none' })
+})
+
 suite('complete(completion, options) correctly computes new selection when options.select is "completion" and segment is not start to end', context => {
   const instance = context.setup({ segment: { from: 'divider', to: 'divider' } })
 

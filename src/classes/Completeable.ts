@@ -1,5 +1,6 @@
 import { join as lazyCollectionJoin } from 'lazy-collections'
 import { createReverse, Pipeable } from "../pipes"
+import { isFunction } from '../extracted'
 
 export type CompleteableOptions = {
   segment?: {
@@ -20,7 +21,9 @@ const defaultOptions: CompleteableOptions = {
   divider: /\s/, // Keep an eye out for use cases where a { before, after } object would be needed, or where multi-character dividers need to be used
 }
 
-export type CompleteOptions = { select?: 'completion' | 'completionEnd' }
+export type CompleteOptions = {
+  select?: 'completion' | 'completionEnd' | (({ before, completion, after }: { before: string, completion: string, after: string }) => Completeable['selection'])
+}
 
 const defaultCompleteOptions: CompleteOptions = {
   select: 'completionEnd',
@@ -139,21 +142,25 @@ export class Completeable {
     this.completing()
 
     const { select } = { ...defaultCompleteOptions, ...options },
-          textBefore = this.getTextBefore(),
-          textAfter = this.getTextAfter(),
-          completedString = textBefore + completion + textAfter,
+          before = this.getBefore(),
+          after = this.getAfter(),
+          completedString = before + completion + after,
           completedSelection = (() => {
+            if (isFunction(select)) {
+              return select({ before, completion, after })
+            }
+
             switch (select) {
               case 'completion':
                 return {
-                  start: textBefore.length,
-                  end: `${textBefore}${completion}`.length,
+                  start: before.length,
+                  end: `${before}${completion}`.length,
                   direction: this.selection.direction,
                 }
               case 'completionEnd':
                 return {
-                  start: `${textBefore}${completion}`.length,
-                  end: `${textBefore}${completion}`.length,
+                  start: `${before}${completion}`.length,
+                  end: `${before}${completion}`.length,
                   direction: this.selection.direction,
                 }
             }
@@ -166,7 +173,7 @@ export class Completeable {
 
     return this
   }
-  private getTextBefore () {
+  private getBefore () {
     switch (this.segmentFrom) {
       case 'start':
         return ''
@@ -176,7 +183,7 @@ export class Completeable {
         return this.string.slice(0, this.dividerIndices.before + 1) // Add 1 to make sure the divider is included
     }
   }
-  private getTextAfter () {
+  private getAfter () {
     switch (this.segmentTo) {
       case 'end':
         return ''
