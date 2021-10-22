@@ -1,6 +1,12 @@
 export type NavigateableOptions = { initialLocation?: number }
 
-export type NavigateableStatus = 'ready' | 'navigated'
+export type NavigateableStatus = 'ready'
+  | 'navigated'
+  | 'navigated to next'
+  | 'navigated to previous'
+  | 'navigated to random'
+  | 'navigated to first'
+  | 'navigated to last'
 
 const defaultOptions: NavigateableOptions = {
   initialLocation: 0,
@@ -56,6 +62,15 @@ export class Navigateable<Item> {
   }
 
   navigate (location: number) {
+    this._navigate(location)
+    this.navigated()
+    return this
+  }
+  private navigated () {
+    this.computedStatus = 'navigated'
+  }
+
+  private _navigate (location: number) {
     const ensuredLocation = (() => {
       if (location < 0) {
         return 0
@@ -72,13 +87,6 @@ export class Navigateable<Item> {
     })()
       
     this.computedLocation = ensuredLocation
-
-    this.navigated()
-
-    return this
-  }
-  private navigated () {
-    this.computedStatus = 'navigated'
   }
 
   next (options: { distance?: number, loops?: boolean } = {}) {
@@ -104,9 +112,13 @@ export class Navigateable<Item> {
             })()
           })()
 
-    this.navigate(newLocation)
+    this._navigate(newLocation)
+    this.nexted()
 
     return this
+  }
+  private nexted () {
+    this.computedStatus = 'navigated to next'
   }
 
   previous (options: { distance?: number, loops?: boolean } = {}) {
@@ -131,25 +143,40 @@ export class Navigateable<Item> {
             })()
           })()
 
-    this.navigate(newLocation)
+    this._navigate(newLocation)
+    this.previoused()
 
     return this
+  }
+  private previoused () {
+    this.computedStatus = 'navigated to previous'
   }
   
   random () {
     const newLocation = Math.floor(Math.random() * (this.array.length))
-    this.navigate(newLocation)
-
+    this._navigate(newLocation)
+    this.randomed()
     return this
+  }
+  private randomed () {
+    this.computedStatus = 'navigated to random'
   }
 
   first () {
-    this.navigate(0)
+    this._navigate(0)
+    this.firsted()
     return this
+  }
+  private firsted () {
+    this.computedStatus = 'navigated to first'
   }
 
   last () {
-    this.navigate(this.array.length - 1)
+    this._navigate(this.array.length - 1)
+    this.lasted()
     return this
+  }
+  private lasted () {
+    this.computedStatus = 'navigated to last'
   }
 }

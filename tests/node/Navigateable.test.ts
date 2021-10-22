@@ -225,22 +225,53 @@ suite(`status is 'ready' after construction`, context => {
   assert.is(instance.status, 'ready')
 })
 
-suite(`status is 'navigated' after any navigation function is called at least once`, context => {
-  const navigate = context.setup(),
-        next = context.setup(),
-        previous = context.setup(),
-        random = context.setup(),
-        first = context.setup(),
-        last = context.setup()
-
-  navigate.navigate(1)
-  next.next()
-  previous.previous()
-  random.random()
-  first.first()
-  last.last()
-
-  assert.ok([navigate, next, previous, random, first, last].every(instance => instance.status === 'navigated'))
+suite(`status is 'navigated' after navigate(...)`, context => {
+  const instance = context.setup()
+  
+  instance.navigate(1)
+  
+  assert.is(instance.status, 'navigated')
 })
+
+suite(`status is 'navigated to next' after next(...)`, context => {
+  const instance = context.setup()
+  
+  instance.next()
+  
+  assert.is(instance.status, 'navigated to next')
+})
+
+suite(`status is 'navigated to previous' after previous(...)`, context => {
+  const instance = context.setup()
+  
+  instance.previous()
+  
+  assert.is(instance.status, 'navigated to previous')
+})
+
+suite(`status is 'navigated to random' after random(...)`, context => {
+  const instance = context.setup()
+  
+  instance.random()
+  
+  assert.is(instance.status, 'navigated to random')
+})
+
+suite(`status is 'navigated to first' after first(...)`, context => {
+  const instance = context.setup()
+  
+  instance.first()
+  
+  assert.is(instance.status, 'navigated to first')
+})
+
+suite(`status is 'navigated to last' after last(...)`, context => {
+  const instance = context.setup()
+  
+  instance.last()
+  
+  assert.is(instance.status, 'navigated to last')
+})
+
 
 suite.run()
