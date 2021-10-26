@@ -87,20 +87,100 @@ suite(`pick(...) ignores indices less than zero or greater than or equal to arra
   assert.equal(instance.picks, [1])
 })
 
-suite(`pick(...) replaces picks when 'replaces' option is true`, context => {
+suite(`pick(...) replaces picks when 'replace' is 'all'`, context => {
   const instance = context.setup()
 
-  instance.pick([0, 1, 2, 3]).pick([1], { replaces: true })
+  instance.pick([0, 1, 2, 3]).pick([1], { replace: 'all' })
 
   assert.equal(instance.picks, [1])
 })
 
-suite(`pick(...) ignores duplicate picks`, context => {
+suite(`pick(...) ignores duplicate picks when 'replace' is 'all'`, context => {
   const instance = context.setup()
 
-  instance.pick([0, 1, 2, 3]).pick([1])
+  instance.pick([0, 1, 2, 3]).pick([1, 1], { replace: 'all' })
+
+  assert.equal(instance.picks, [1])
+})
+
+suite(`pick(...) does not replace picks when 'replace' is 'none'`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1, 2]).pick([3], { replace: 'none' })
 
   assert.equal(instance.picks, [0, 1, 2, 3])
+})
+
+suite(`pick(...) ignores duplicate picks when 'replace' is 'none'`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1, 2, 3]).pick([1], { replace: 'none' })
+
+  assert.equal(instance.picks, [0, 1, 2, 3])
+})
+
+suite(`pick(...) uses FIFO replacement when 'replace' is 'fifo' and replacement is shorter than current`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1, 2]).pick([3], { replace: 'fifo' })
+
+  assert.equal(instance.picks, [1, 2, 3])
+})
+
+suite(`pick(...) uses FIFO replacement when 'replace' is 'fifo' and replacement is the same length as current`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1]).pick([2, 3], { replace: 'fifo' })
+
+  assert.equal(instance.picks, [2, 3])
+})
+
+suite(`pick(...) uses FIFO replacement when 'replace' is 'fifo' and replacement is longer than current`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1]).pick([2, 3, 4], { replace: 'fifo' })
+
+  assert.equal(instance.picks, [3, 4])
+})
+
+suite(`pick(...) ignores duplicate picks when 'replace' is 'fifo'`, context => {
+  const instance = context.setup()
+
+  instance.pick([1, 2, 3]).pick([1], { replace: 'fifo' })
+
+  assert.equal(instance.picks, [1, 2, 3])
+})
+
+suite(`pick(...) uses LIFO replacement when 'replace' is 'lifo' and replacement is shorter than current`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1, 2]).pick([3], { replace: 'lifo' })
+
+  assert.equal(instance.picks, [0, 1, 3])
+})
+
+suite(`pick(...) uses LIFO replacement when 'replace' is 'lifo' and replacement is the same length as current`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1]).pick([2, 3], { replace: 'lifo' })
+
+  assert.equal(instance.picks, [2, 3])
+})
+
+suite(`pick(...) uses LIFO replacement when 'replace' is 'lifo' and replacement is longer than current`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1]).pick([2, 3, 4], { replace: 'lifo' })
+
+  assert.equal(instance.picks, [2, 3])
+})
+
+suite(`pick(...) ignores duplicate picks when 'replace' is 'lifo'`, context => {
+  const instance = context.setup()
+
+  instance.pick([1, 2, 3]).pick([1], { replace: 'lifo' })
+
+  assert.equal(instance.picks, [1, 2, 3])
 })
 
 suite(`omit(index) removes index from picked`, context => {

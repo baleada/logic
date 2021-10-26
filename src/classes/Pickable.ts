@@ -1,5 +1,11 @@
-import { find as lazyCollectionFind } from 'lazy-collections'
-import { createMap, createFilter, createConcat, Pipeable } from "../pipes"
+import {
+  find,
+  pipe,
+  slice,
+  concat,
+  toArray,
+} from 'lazy-collections'
+import { createMap, createFilter, createConcat, Pipeable, createSlice, createUnique } from "../pipes"
 import { isUndefined } from '../extracted'
 
 export type PickableOptions = {
@@ -72,26 +78,61 @@ export class Pickable<Item> {
     return this.pick(indexOrIndices)
   }
 
-  pick (indexOrIndices: number | number[], options: { replaces?: boolean } = {}) {
-    const { replaces } = options
+  pick (indexOrIndices: number | number[], options: { replace?: 'none' | 'all' | 'fifo' | 'lifo' } = {}) {
+    const { replace = 'none' } = options
     
-    const newPicks = new Pipeable(indexOrIndices).pipe(
+    this.computedPicks = new Pipeable(indexOrIndices).pipe(
       ensureIndices,
       this.toPossiblePicks,
-      possiblePicks => {
-        if (replaces) return possiblePicks
-        // TODO: Option to handle duplicates differently
-        return createFilter<number>(possiblePick => !(lazyCollectionFind<number>(pick => pick === possiblePick)(this.picks || [])))(possiblePicks)
+      (possiblePicks: number[]) => {
+        if (replace === 'all') {
+          return toUnique(possiblePicks)
+        }
+
+        const possibleWithoutDuplicates = createFilter<number>(possiblePick => !(find<number>(pick => pick === possiblePick)(this.picks || [])))(possiblePicks)
+
+        switch (replace) {
+          case 'none':
+            return createConcat<number>(this.picks || [], possibleWithoutDuplicates)([])
+          case 'fifo':
+            if (possibleWithoutDuplicates.length === 0) {
+              return this.picks
+            }
+
+            if (possibleWithoutDuplicates.length === this.picks.length) {
+              return possibleWithoutDuplicates
+            }
+
+            if (possibleWithoutDuplicates.length > this.picks.length) {
+              return createSlice<number>({ from: possibleWithoutDuplicates.length - this.picks.length })(possibleWithoutDuplicates)
+            }
+
+            return new Pipeable(this.picks).pipe(
+              createSlice<number>({ from: possibleWithoutDuplicates.length }),
+              createConcat<number>(possibleWithoutDuplicates)
+            )
+          case 'lifo': 
+            if (possibleWithoutDuplicates.length === 0) {
+              return this.picks
+            }
+
+            if (possibleWithoutDuplicates.length === this.picks.length) {
+              return possibleWithoutDuplicates
+            }
+
+            if (possibleWithoutDuplicates.length > this.picks.length) {
+              return createSlice<number>({ from: 0, to: possibleWithoutDuplicates.length - this.picks.length + 1 })(possibleWithoutDuplicates)
+            }
+
+            return new Pipeable(this.picks).pipe(
+              createSlice<number>({ from: 0, to: this.picks.length - possibleWithoutDuplicates.length }),
+              createConcat<number>(possibleWithoutDuplicates)
+            )
+        }
       }
     )
 
-    if (replaces) {
-      this.computedPicks = newPicks
-      this.picked()
-      return this
-    }
-
-    this.computedPicks = createConcat<number>(newPicks)(this.picks || [])
+    
     this.picked()
     return this
   }
@@ -107,7 +148,7 @@ export class Pickable<Item> {
     }
 
     const omits = ensureIndices(indexOrIndices),
-          filter = createFilter<number>(pick => isUndefined(lazyCollectionFind(omit => pick === omit)(omits)))
+          filter = createFilter<number>(pick => isUndefined(find(omit => pick === omit)(omits)))
 
     this.computedPicks = filter(this.computedPicks)
     this.omitted()
@@ -123,3 +164,5 @@ function ensureIndices (indexOrIndices: number | number[]): number[] {
     ? indexOrIndices
     : [indexOrIndices]
 }
+
+const toUnique = createUnique<number>()
