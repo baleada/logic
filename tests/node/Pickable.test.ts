@@ -135,7 +135,7 @@ suite(`omit() empties picked`, context => {
   assert.equal(instance.picks, [])
 })
 
-suite(`first retrieves lowest picked index`, context => {
+suite(`first retrieves first (as determined by the order of pickable.array) pick`, context => {
   const instance = context.setup(),
         value = instance.pick([1, 2, 0]).first,
         expected = 0
@@ -143,10 +143,26 @@ suite(`first retrieves lowest picked index`, context => {
   assert.is(value, expected)
 })
 
-suite(`last retrieves highest picked index`, context => {
+suite(`last retrieves last (as determined by the order of pickable.array) pick`, context => {
   const instance = context.setup(),
         value = instance.pick([1, 2, 0]).last,
         expected = 2
+
+  assert.is(value, expected)
+})
+
+suite(`oldest retrieves first (as determined by the order of pickable.picks) pick`, context => {
+  const instance = context.setup(),
+        value = instance.pick([1, 2, 0]).oldest,
+        expected = 1
+
+  assert.is(value, expected)
+})
+
+suite(`newest retrieves last (as determined by the order of pickable.picks) pick`, context => {
+  const instance = context.setup(),
+        value = instance.pick([1, 2, 0]).newest,
+        expected = 0
 
   assert.is(value, expected)
 })

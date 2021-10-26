@@ -43,6 +43,12 @@ export class Pickable<Item> {
   get last () {
     return Math.max(...this.picks)
   }
+  get oldest () {
+    return this.picks[0]
+  }
+  get newest () {
+    return this.picks[this.picks.length - 1]
+  }
   get status () {
     return this.computedStatus
   }
