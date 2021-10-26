@@ -1,10 +1,4 @@
-import {
-  find,
-  pipe,
-  slice,
-  concat,
-  toArray,
-} from 'lazy-collections'
+import { find } from 'lazy-collections'
 import { createMap, createFilter, createConcat, Pipeable, createSlice, createUnique } from "../pipes"
 import { isUndefined } from '../extracted'
 
