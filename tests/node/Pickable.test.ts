@@ -135,6 +135,22 @@ suite(`omit() empties picked`, context => {
   assert.equal(instance.picks, [])
 })
 
+suite(`first retrieves lowest picked index`, context => {
+  const instance = context.setup(),
+        value = instance.pick([1, 2, 0]).first,
+        expected = 0
+
+  assert.is(value, expected)
+})
+
+suite(`last retrieves highest picked index`, context => {
+  const instance = context.setup(),
+        value = instance.pick([1, 2, 0]).last,
+        expected = 2
+
+  assert.is(value, expected)
+})
+
 suite(`items retrieves items`, context => {
   const instance = context.setup()
 

@@ -37,6 +37,12 @@ export class Pickable<Item> {
   set picks (indices: number[]) {
     this.pick(indices)
   }
+  get first () {
+    return Math.min(...this.picks)
+  }
+  get last () {
+    return Math.max(...this.picks)
+  }
   get status () {
     return this.computedStatus
   }
