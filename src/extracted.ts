@@ -1,10 +1,10 @@
 import {
-  find as lazyCollectionFind,
-  map as lazyCollectionMap,
-  unique as lazyCollectionUnique,
-  some as lazyCollectionSome,
-  toArray as lazyCollectionToArray,
-  pipe as lazyCollectionPipe,
+  find,
+  map,
+  unique,
+  some,
+  toArray,
+  pipe,
 } from 'lazy-collections'
 import {
   createSlice,
@@ -268,22 +268,22 @@ export function ensurePointercombo (type: string): string[] {
   return toCombo(type)
 }
 
-const unique = lazyCollectionUnique<string>()
-const toComboItems = lazyCollectionMap<string, string>(name => name === '' ? delimiter : name)
+const toUnique = unique<string>()
+const toComboItems = map<string, string>(name => name === '' ? delimiter : name)
 const delimiter = '+'
 export function toCombo (type: string): string[] {
   // If the delimiter is used as a character in the type,
   // two empty strings will be produced by the split.
   // createUnique ensures those two are combined into one.
-  return lazyCollectionPipe(
-    unique,
+  return pipe(
+    toUnique,
     toComboItems,
-    lazyCollectionToArray(),
+    toArray(),
   )(type.split(delimiter)) as string[]
 }
 
 export function fromComboItemNameToType (name: string) {
-  return lazyCollectionFind((type: ListenableComboItemType) => predicatesByType[type](name))(listenableComboItemTypes) as ListenableComboItemType ?? 'custom'
+  return find((type: ListenableComboItemType) => predicatesByType[type](name))(listenableComboItemTypes) as ListenableComboItemType ?? 'custom'
 }
 
 export type ListenableComboItemType = 'singleCharacter' | 'arrow' | 'other' | 'modifier' | 'click' | 'pointer'
@@ -347,7 +347,7 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
   return ((event: ListenEffectParam<Type>) => {
     const { target } = event,
           [matchesOnly, matchesExcept] = target instanceof Element
-            ? createMap<string[], boolean>(selectors => lazyCollectionSome<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
+            ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
             : [false, true]
 
     if (matchesOnly) {

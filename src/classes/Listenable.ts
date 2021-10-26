@@ -1,7 +1,7 @@
 import {
-  some as lazyCollectionSome,
-  every as lazyCollectionEvery,
-  find as lazyCollectionFind,
+  some,
+  every,
+  find,
 } from 'lazy-collections'
 import { Recognizeable, createDefineEffect } from './Recognizeable'
 import type { RecognizeableOptions, RecognizeableEffectApi } from './Recognizeable'
@@ -391,7 +391,7 @@ function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive
     return
   }
 
-  if (lazyCollectionSome<string>(type => observerAssertionsByType[type](stoppable.id))(['intersect', 'mutate', 'resize'])) {
+  if (some<string>(type => observerAssertionsByType[type](stoppable.id))(['intersect', 'mutate', 'resize'])) {
     const { id } = stoppable as ListenableActive<'intersect' | 'mutate' | 'resize'>
     id.disconnect()
     return
@@ -414,7 +414,7 @@ function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive
 }
 
 export function toImplementation (type: string) {
-  return lazyCollectionFind<ListenableImplementation>(implementation => predicatesByImplementation.get(implementation)(type))(predicatesByImplementation.keys()) as ListenableImplementation
+  return find<ListenableImplementation>(implementation => predicatesByImplementation.get(implementation)(type))(predicatesByImplementation.keys()) as ListenableImplementation
 }
 
 type ListenableImplementation = 'recognizeable' | 'intersection' | 'mutation' | 'resize' | 'mediaquery' | 'idle' | 'documentevent' | 'keycombo' | 'leftclickcombo' | 'rightclickcombo' | 'pointercombo' | 'event'
@@ -496,7 +496,7 @@ export function toAddEventListenerParams<Type extends ListenableSupportedEventTy
 }
 
 export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEvent, keycombo: ListenableKeycomboItem[] }): boolean {
-  return lazyCollectionEvery<ListenableKeycomboItem>(({ name, type }, index) => {
+  return every<ListenableKeycomboItem>(({ name, type }, index) => {
     switch (type) {
       case 'singleCharacter':
       case 'other':
@@ -563,7 +563,7 @@ const horizontalArrows = new Set(['arrowright', 'arrowleft'])
 
 
 export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEvent, clickcombo: string[] }): boolean {
-  return lazyCollectionEvery<string>(name => (
+  return every<string>(name => (
     fromComboItemNameToType(name) === 'click'
     ||
     (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))
@@ -573,7 +573,7 @@ export function eventMatchesClickcombo ({ event, clickcombo }: { event: MouseEve
 }
 
 export function eventMatchesPointercombo ({ event, pointercombo }: { event: PointerEvent, pointercombo: string[] }): boolean {
-  return lazyCollectionEvery<string>(name => (
+  return every<string>(name => (
     fromComboItemNameToType(name) === 'pointer'
     ||
     (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))

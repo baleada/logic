@@ -1,9 +1,9 @@
 import BezierEasing from 'bezier-easing'
 import { mix } from '@snigo.dev/color'
 import {
-  filter as lazyCollectionFilter,
-  pipe as lazyCollectionPipe,
-  reduce as lazyCollectionReduce,
+  filter,
+  pipe,
+  reduce,
 } from 'lazy-collections'
 import { Listenable } from './Listenable'
 import { isFunction, isUndefined, isNumber, isString, isArray } from '../extracted'
@@ -481,9 +481,9 @@ export class Animateable {
         }
     })()
 
-    return lazyCollectionPipe(
-      lazyCollectionFilter<Easeable>(({ progress: { start, end } }) => start < naiveTimeProgress && end >= naiveTimeProgress),
-      lazyCollectionReduce<AnimateFrame, Easeable>(
+    return pipe(
+      filter<Easeable>(({ progress: { start, end } }) => start < naiveTimeProgress && end >= naiveTimeProgress),
+      reduce<AnimateFrame, Easeable>(
         (frame, { property, progress, value: { previous, next }, toAnimationProgress }) => {
           const timeProgress = (naiveTimeProgress - progress.start) / (progress.end - progress.start),
                 animationProgress = toAnimationProgress(timeProgress)

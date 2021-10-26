@@ -1,4 +1,4 @@
-import { join as lazyCollectionJoin } from 'lazy-collections'
+import { join } from 'lazy-collections'
 import { createReverse, Pipeable } from "../pipes"
 import { isFunction } from '../extracted'
 
@@ -201,7 +201,7 @@ export class Completeable {
   }
 }
 
-const join = lazyCollectionJoin(''),
+const toString = join(''),
       reverse = createReverse<string>()
 export function toPreviousMatch ({ string, re, from }: { string: string, re: RegExp, from: number }): number {
   let indexOf
@@ -212,7 +212,7 @@ export function toPreviousMatch ({ string, re, from }: { string: string, re: Reg
             (string: string) => string.slice(0, from),
             (sliced: string) => sliced.split(''),
             reverse,
-            join
+            toString,
           ) as string,
           toNextMatchIndex = toNextMatch({ string: reversedStringBeforeFrom, re, from: 0 })
     

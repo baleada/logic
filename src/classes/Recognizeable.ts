@@ -1,7 +1,7 @@
 import {
-  map as lazyCollectionMap,
-  pipe as lazyCollectionPipe,
-  join as lazyCollectionJoin,
+  pipe,
+  map,
+  join,
 } from 'lazy-collections'
 import {
   isArray,
@@ -263,8 +263,8 @@ function createToType<Type extends ListenableSupportedType, Metadata> ({
 const leftclickcomboEventTypes = new Set(['click', 'mousedown', 'mouseup', 'dblclick']),
       rightclickComboEventTypes = new Set(['contextmenu']),
       keycomboEventTypes = new Set(['keydown', 'keyup']),
-      toJoinedClickcombo = lazyCollectionJoin('+'),
-      toJoinedKeycombo = lazyCollectionPipe(
-        lazyCollectionMap<ListenableKeycomboItem, string>(({ name }) => name),
-        lazyCollectionJoin('+'),
+      toJoinedClickcombo = join('+'),
+      toJoinedKeycombo = pipe(
+        map<ListenableKeycomboItem, string>(({ name }) => name),
+        toJoinedClickcombo,
       )
