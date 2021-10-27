@@ -37,11 +37,13 @@ export class Pickable<Item> {
   set picks (indices: number[]) {
     this.pick(indices)
   }
+  computedFirst: number
   get first () {
-    return Math.min(...this.picks)
+    return this.computedFirst
   }
+  computedLast: number 
   get last () {
-    return Math.max(...this.picks)
+    return this.computedLast
   }
   get oldest () {
     return this.picks[0]
@@ -126,6 +128,8 @@ export class Pickable<Item> {
       }
     )
 
+    this.computedFirst = Math.min(...this.picks)
+    this.computedLast = Math.max(...this.picks)
     
     this.picked()
     return this
@@ -137,14 +141,18 @@ export class Pickable<Item> {
   omit (indexOrIndices?: number | number[]) {
     if (isUndefined(indexOrIndices)) {
       this.computedPicks = []
+      this.computedFirst = undefined
+      this.computedLast = undefined
       this.omitted()
       return this
     }
 
-    const omits = ensureIndices(indexOrIndices),
-          filter = createFilter<number>(pick => isUndefined(find(omit => pick === omit)(omits)))
+    const omits = ensureIndices(indexOrIndices)
 
-    this.computedPicks = filter(this.computedPicks)
+    this.computedPicks = createFilter<number>(pick => isUndefined(find(omit => pick === omit)(omits)))(this.computedPicks)
+    this.computedFirst = Math.min(...this.picks)
+    this.computedLast = Math.max(...this.picks)
+    
     this.omitted()
     return this
   }
