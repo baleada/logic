@@ -8,11 +8,22 @@ export type NavigateableStatus = 'ready'
   | 'navigated to first'
   | 'navigated to last'
 
+export type NavigateOptions = {
+  allows?: 'possible' | 'any',
+}
+
+export type NextAndPreviousOptions = {
+  distance?: number,
+  loops?: boolean,
+}
+
 const defaultOptions: NavigateableOptions = {
   initialLocation: 0,
 }
 
-const defaultNextAndPreviousOptions: { distance?: number, loops?: boolean } = {
+const defaultNavigateOptions: NavigateOptions = { allows: 'possible' }
+
+const defaultNextAndPreviousOptions: NextAndPreviousOptions = {
   distance: 1,
   loops: true,
 }
@@ -61,8 +72,9 @@ export class Navigateable<Item> {
     return this
   }
 
-  navigate (location: number) {
-    this._navigate(location)
+  navigate (location: number, options: NavigateOptions = {}) {
+    const { allows } = { ...defaultNavigateOptions, ...options }
+    this._navigate(location, { allows })
     this.navigated()
     return this
   }
@@ -70,17 +82,18 @@ export class Navigateable<Item> {
     this.computedStatus = 'navigated'
   }
 
-  private _navigate (location: number) {
-    const ensuredLocation = (() => {
-      if (location < 0) {
-        return 0
-      }
+  private _navigate (location: number, options: NavigateOptions = {}) {
+    const { allows } = { ...defaultNavigateOptions, ...options }
 
-      if (location > this.array.length - 1) {
-        // At this low level, there aren't strong arguments for or against
-        // preventing -1 as a location for an empty array. However, enforcing
-        // a minimum index of 0 makes life easier in the Vue Features package.
-        return Math.max(this.array.length - 1, 0)
+    const ensuredLocation = (() => {
+      if (allows === 'possible') {
+        if (location < 0 && allows === 'possible') {
+          return 0
+        }
+  
+        if (location > this.array.length - 1) {
+          return Math.max(this.array.length - 1, 0)
+        }
       }
 
       return location
@@ -89,10 +102,15 @@ export class Navigateable<Item> {
     this.computedLocation = ensuredLocation
   }
 
-  next (options: { distance?: number, loops?: boolean } = {}) {
-    const { distance, loops } = { ...defaultNextAndPreviousOptions, ...options },
-          lastLocation = this.array.length - 1,
+  next (options: NextAndPreviousOptions & NavigateOptions = {}) {
+    const { distance, loops, allows } = { ...defaultNextAndPreviousOptions, ...defaultNavigateOptions, ...options },
           newLocation = (() => {
+            if (allows === 'any') {
+              return this.location + distance
+            }
+
+            const lastLocation = this.array.length - 1
+
             if (this.location + distance <= lastLocation) {
               return this.location + distance
             }
@@ -112,7 +130,7 @@ export class Navigateable<Item> {
             })()
           })()
 
-    this._navigate(newLocation)
+    this._navigate(newLocation, { allows })
     this.nexted()
 
     return this
@@ -121,9 +139,13 @@ export class Navigateable<Item> {
     this.computedStatus = 'navigated to next'
   }
 
-  previous (options: { distance?: number, loops?: boolean } = {}) {
-    const { distance, loops } = { ...defaultNextAndPreviousOptions, ...options },
+  previous (options: NextAndPreviousOptions & NavigateOptions = {}) {
+    const { distance, loops, allows } = { ...defaultNextAndPreviousOptions, ...defaultNavigateOptions, ...options },
           newLocation = (() => {
+            if (allows === 'any') {
+              return this.location - distance
+            }
+
             if (this.location - distance >= 0) {
               return this.location - distance
             }
@@ -143,7 +165,7 @@ export class Navigateable<Item> {
             })()
           })()
 
-    this._navigate(newLocation)
+    this._navigate(newLocation, { allows })
     this.previoused()
 
     return this
