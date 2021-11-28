@@ -111,12 +111,12 @@ suite(`navigate() optionally allows impossible locations`, context => {
   const instance = context.setup();
 
   (() => {
-    instance.navigate(42, { allows: 'any' })
+    instance.navigate(42, { allow: 'any' })
     assert.is(instance.location, 42)
   })();
   
   (() => {
-    instance.navigate(-42, { allows: 'any' })
+    instance.navigate(-42, { allow: 'any' })
     assert.is(instance.location, -42)
   })();
 })
@@ -168,7 +168,7 @@ suite(`next() optionally allows impossible locations`, context => {
   const instance = context.setup()
 
   instance.navigate(instance.array.length - 1)
-  instance.next({ allows: 'any' })
+  instance.next({ allow: 'any' })
 
   assert.is(instance.location, instance.array.length)
 })
@@ -221,7 +221,7 @@ suite(`previous() stops at 0 when loops is false AND decremented location is les
 suite(`previous() optionally allows impossible locations`, context => {
   const instance = context.setup()
 
-  instance.previous({ allows: 'any' })
+  instance.previous({ allow: 'any' })
 
   assert.is(instance.location, -1)
 })

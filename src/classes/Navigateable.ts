@@ -9,7 +9,7 @@ export type NavigateableStatus = 'ready'
   | 'navigated to last'
 
 export type NavigateOptions = {
-  allows?: 'possible' | 'any',
+  allow?: 'possible' | 'any',
 }
 
 export type NextAndPreviousOptions = {
@@ -21,7 +21,7 @@ const defaultOptions: NavigateableOptions = {
   initialLocation: 0,
 }
 
-const defaultNavigateOptions: NavigateOptions = { allows: 'possible' }
+const defaultNavigateOptions: NavigateOptions = { allow: 'possible' }
 
 const defaultNextAndPreviousOptions: NextAndPreviousOptions = {
   distance: 1,
@@ -73,8 +73,8 @@ export class Navigateable<Item> {
   }
 
   navigate (location: number, options: NavigateOptions = {}) {
-    const { allows } = { ...defaultNavigateOptions, ...options }
-    this._navigate(location, { allows })
+    const { allow } = { ...defaultNavigateOptions, ...options }
+    this._navigate(location, { allow })
     this.navigated()
     return this
   }
@@ -83,11 +83,11 @@ export class Navigateable<Item> {
   }
 
   private _navigate (location: number, options: NavigateOptions = {}) {
-    const { allows } = { ...defaultNavigateOptions, ...options }
+    const { allow } = { ...defaultNavigateOptions, ...options }
 
     const ensuredLocation = (() => {
-      if (allows === 'possible') {
-        if (location < 0 && allows === 'possible') {
+      if (allow === 'possible') {
+        if (location < 0 && allow === 'possible') {
           return 0
         }
   
@@ -103,9 +103,9 @@ export class Navigateable<Item> {
   }
 
   next (options: NextAndPreviousOptions & NavigateOptions = {}) {
-    const { distance, loops, allows } = { ...defaultNextAndPreviousOptions, ...defaultNavigateOptions, ...options },
+    const { distance, loops, allow } = { ...defaultNextAndPreviousOptions, ...defaultNavigateOptions, ...options },
           newLocation = (() => {
-            if (allows === 'any') {
+            if (allow === 'any') {
               return this.location + distance
             }
 
@@ -130,7 +130,7 @@ export class Navigateable<Item> {
             })()
           })()
 
-    this._navigate(newLocation, { allows })
+    this._navigate(newLocation, { allow })
     this.nexted()
 
     return this
@@ -140,9 +140,9 @@ export class Navigateable<Item> {
   }
 
   previous (options: NextAndPreviousOptions & NavigateOptions = {}) {
-    const { distance, loops, allows } = { ...defaultNextAndPreviousOptions, ...defaultNavigateOptions, ...options },
+    const { distance, loops, allow } = { ...defaultNextAndPreviousOptions, ...defaultNavigateOptions, ...options },
           newLocation = (() => {
-            if (allows === 'any') {
+            if (allow === 'any') {
               return this.location - distance
             }
 
@@ -165,7 +165,7 @@ export class Navigateable<Item> {
             })()
           })()
 
-    this._navigate(newLocation, { allows })
+    this._navigate(newLocation, { allow })
     this.previoused()
 
     return this
