@@ -164,15 +164,6 @@ suite(`next() stops at the last location when loops is false AND incremented loc
   assert.is(instance.location, instance.array.length - 1)
 })
 
-suite(`next() optionally allows impossible locations`, context => {
-  const instance = context.setup()
-
-  instance.navigate(instance.array.length - 1)
-  instance.next({ allow: 'any' })
-
-  assert.is(instance.location, instance.array.length)
-})
-
 /* previous */
 suite(`previous() decrements the current location by 1 when distance is default`, context => {
   const instance = context.setup({
@@ -216,14 +207,6 @@ suite(`previous() stops at 0 when loops is false AND decremented location is les
   instance.previous({ loops: false })
 
   assert.is(instance.location, 0)
-})
-
-suite(`previous() optionally allows impossible locations`, context => {
-  const instance = context.setup()
-
-  instance.previous({ allow: 'any' })
-
-  assert.is(instance.location, -1)
 })
 
 suite(`random() navigates to a random location`, context => {
