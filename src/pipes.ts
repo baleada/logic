@@ -305,6 +305,23 @@ export function createRename<Key, Value> ({ from, to }: { from: Key, to: Key }):
 }
 
 
+// OBJECT
+export type ObjectFunction<Key extends string | number | symbol, Value, Returned> = (transform: Record<Key, Value>) => Returned
+
+// Preferable to Object.entries for type safety
+export function createToEntries<Key extends string | number | symbol, Value> (): ObjectFunction<Key, Value, [Key, Value][]> {
+  return object => {
+    const entries = []
+
+    for (const key in object) {
+      entries.push([key, object[key]])
+    }
+
+    return entries
+  }
+}
+
+
 // PIPEABLE
 export class Pipeable {
   constructor (private state: any) {}

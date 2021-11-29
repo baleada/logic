@@ -22,6 +22,7 @@ import {
   createClamp,
   createDetermine,
   createRename,
+  createToEntries,
   Pipeable,
 } from '../../src/pipes'
 
@@ -29,7 +30,8 @@ type Context = {
   array: string[],
   number: number,
   string: string,
-  map: Map<string, string>
+  map: Map<string, string>,
+  object: Record<string, string>,
 }
 
 const suite = createSuite<Context>('pipes')
@@ -39,6 +41,7 @@ suite.before(context => {
   context.number = 42
   context.string = 'Baleada: a toolkit for building web apps'
   context.map = new Map([['one', 'value'], ['two', 'value']])
+  context.object = { one: 'value', two: 'value' }
 })
 
 // ARRAY
@@ -323,6 +326,14 @@ suite(`createRename({ from, to }) renames 'from' name to 'to' name`, ({ map }) =
 
   assert.ok(value.isMap)
   assert.equal(new Map(value.array), new Map([['uno', 'value'], ['two', 'value']]))
+})
+
+
+// OBJECT
+suite(`createToEntries() transform object into entries`, ({ object }) => {
+  const value = createToEntries<string, string>()(object)
+
+  assert.equal(value, [['one', 'value'], ['two', 'value']])
 })
 
 
