@@ -85,7 +85,7 @@ export class Pickable<Item> {
           return toUnique(possiblePicks)
         }
 
-        const possibleWithoutDuplicates = createFilter<number>(possiblePick => !(find<number>(pick => pick === possiblePick)(this.picks || [])))(possiblePicks)
+        const possibleWithoutDuplicates = createFilter<number>(possiblePick => typeof find<number>(pick => pick === possiblePick)(this.picks || []) !== 'number')(possiblePicks)
 
         switch (replace) {
           case 'none':

@@ -119,6 +119,14 @@ suite(`pick(...) ignores duplicate picks when 'replace' is 'none'`, context => {
   assert.equal(instance.picks, [0, 1, 2, 3])
 })
 
+suite(`pick(...) ignores duplicate 0 picks when 'replace' is 'none'`, context => {
+  const instance = context.setup()
+
+  instance.pick([0, 1, 2, 3]).pick([0], { replace: 'none' })
+
+  assert.equal(instance.picks, [0, 1, 2, 3])
+})
+
 suite(`pick(...) uses FIFO replacement when 'replace' is 'fifo' and replacement is shorter than current`, context => {
   const instance = context.setup()
 
