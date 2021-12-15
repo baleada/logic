@@ -90,7 +90,6 @@ export function toEvent<EventType extends ListenableSupportedEventType> (eventTy
       if (eventType === 'auxclick') return new MouseEvent(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'beforeinput') return new InputEvent(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'blur') return new FocusEvent(eventType, options.init) as ListenEffectParam<EventType>
-      if (eventType === 'cancel') return new Event(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'canplay') return new Event(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'canplaythrough') return new Event(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'change') return new Event(eventType, options.init) as ListenEffectParam<EventType>
@@ -105,7 +104,6 @@ export function toEvent<EventType extends ListenableSupportedEventType> (eventTy
       if (eventType === 'drag') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'dragend') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'dragenter') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
-      if (eventType === 'dragexit') return new Event(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'dragleave') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'dragover') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
       if (eventType === 'dragstart') return new DragEvent(eventType, options.init) as ListenEffectParam<EventType>
