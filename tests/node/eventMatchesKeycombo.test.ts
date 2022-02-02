@@ -38,6 +38,31 @@ suite(`predicates single characters`, () => {
   }
 })
 
+suite(`predicates single characters whose keys are different and unsupported when altKey is true`, () => {
+  assert.ok(
+    eventMatchesKeycombo({
+      event: { key: 'å', code: 'KeyA', altKey: true } as KeyboardEvent,
+      keycombo: [{ name: 'a', type: 'singleCharacter' }],
+    })
+  )
+  
+  assert.ok(
+    eventMatchesKeycombo({
+      event: { key: '¡', code: 'Digit1', altKey: true } as KeyboardEvent,
+      keycombo: [{ name: '1', type: 'singleCharacter' }],
+    })
+  )
+})
+
+suite(`predicates single characters whose keys are not different or unsupported when altKey is true`, () => {
+  assert.ok(
+    eventMatchesKeycombo({
+      event: { key: '+', code: 'Equal', altKey: true } as KeyboardEvent,
+      keycombo: [{ name: '+', type: 'singleCharacter' }],
+    })
+  )
+})
+
 suite(`predicates others`, () => {
   for (const other of others) {
     assert.ok(

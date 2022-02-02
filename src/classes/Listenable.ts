@@ -23,7 +23,7 @@ import type {
   ListenableModifierAlias,
   ListenableKeycomboItem,
 } from '../extracted'
-import { createReduce } from '../pipes'
+import { createClip, createReduce } from '../pipes'
 
 export type ListenableSupportedType = 'recognizeable'
   | 'intersect'
@@ -499,6 +499,17 @@ export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEven
   return every<ListenableKeycomboItem>(({ name, type }, index) => {
     switch (type) {
       case 'singleCharacter':
+        if (name === '!') {
+          return event.key === '!'
+        }
+
+        const keyToTest = event.altKey && fromComboItemNameToType(event.key) === 'custom'
+          ? fromCodeToSingleCharacter(event.code)
+          : event.key.toLowerCase()
+
+        return name.startsWith('!')
+          ? keyToTest !== toKey(name.slice(1)).toLowerCase()
+          : keyToTest === toKey(name).toLowerCase()
       case 'other':
         if (name === '!') {
           return event.key === '!'
@@ -521,6 +532,38 @@ export function eventMatchesKeycombo ({ event, keycombo }: { event: KeyboardEven
           : isModified({ event, alias: name })
     }
   })(keycombo) as boolean
+}
+
+export function fromCodeToSingleCharacter (code: KeyboardEvent['code']): string {
+  for (const c in aliasesByCode) {
+    if (c === code) {
+      return aliasesByCode[c]
+    }
+  }
+
+  for (const prefix of ['Key', 'Digit']) {
+    const re = new RegExp(`^${prefix}`)
+    if (re.test(code)) {
+      return createClip(re)(code).toLowerCase()
+    }
+  }
+
+  // This will likely fail silently
+  return code
+}
+
+const aliasesByCode = {
+  'Backquote': '`',
+  'Minus': '-',
+  'Equal': '=',
+  'BracketLeft': '[',
+  'BracketRight': ']',
+  'Backslash': '\\',
+  'Semicolon': ';',
+  'Quote': '\'',
+  'Comma': ',',
+  'Period': '.',
+  'Slash': '/'
 }
 
 type ListenableArrowAlias = 'arrow' | '!arrow' | 'vertical' | '!vertical' | 'horizontal' | '!horizontal' | 'default'
