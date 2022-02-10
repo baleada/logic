@@ -17,6 +17,7 @@ import {
   createMap,
   createConcat,
   createReverse,
+  createSort,
   createSlug,
   createClip,
   createClamp,
@@ -190,6 +191,16 @@ suite(`createReverse() reverses the array`, ({ array }) => {
   })(array)
 
   assert.equal(value, ['huevito', 'aguacate', 'mantequilla', 'frijoles', 'tortilla'])
+})
+
+suite(`createSort() sorts the array`, ({ array }) => {
+  const value = createSort<string>((a, b) => {
+    if (a > b) return 1
+    if (a < b) return -1
+    return 0
+  })(array)
+
+  assert.equal(value, ['aguacate', 'frijoles', 'huevito', 'mantequilla', 'tortilla'])
 })
 
 suite(`createDelete({ index }) removes the item at index from the array`, ({ array }) => {
