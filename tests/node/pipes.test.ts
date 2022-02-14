@@ -147,7 +147,7 @@ suite(`async maps`, async () => {
 
 suite(`createSlice({ from, to }) slices the array from 'from' to 'to'`, ({ array }) => {
   const value = (array => {
-    return createSlice<string>({ from: 1, to: 4 })(array)
+    return createSlice<string>(1, 4)(array)
   })(array)
 
   assert.equal(value, ['frijoles', 'mantequilla', 'aguacate'])
@@ -155,7 +155,7 @@ suite(`createSlice({ from, to }) slices the array from 'from' to 'to'`, ({ array
 
 suite(`createSlice({ from }) slices the array from 'from' to end`, ({ array }) => {
   const value = (array => {
-    return createSlice<string>({ from: 1 })(array)
+    return createSlice<string>(1)(array)
   })(array)
 
   assert.equal(value, ['frijoles', 'mantequilla', 'aguacate', 'huevito'])
@@ -205,47 +205,47 @@ suite(`createSort() sorts the array`, ({ array }) => {
 
 suite(`createDelete({ index }) removes the item at index from the array`, ({ array }) => {
   const value = (array => {
-    return createDelete<string>({ index: 2 })(array)
+    return createDelete<string>(2)(array)
   })(array)
 
   assert.equal(value, ['tortilla', 'frijoles', 'aguacate', 'huevito'])
 })
 
-suite(`createDelete({ item }) removes item from the array`, ({ array }) => {
-  const value = (array => {
-    return createDelete<string>({ item: 'mantequilla' })(array)
-  })(array)
+// suite(`createDelete({ item }) removes item from the array`, ({ array }) => {
+//   const value = (array => {
+//     return createDelete<string>({ item: 'mantequilla' })(array)
+//   })(array)
 
-  assert.equal(value, ['tortilla', 'frijoles', 'aguacate', 'huevito'])
-})
+//   assert.equal(value, ['tortilla', 'frijoles', 'aguacate', 'huevito'])
+// })
 
-suite(`createDelete({ index, item }) ignores item and removes the item at index from the array`, ({ array }) => {
-  const value = (array => {
-    return createDelete<string>({ index: 0, item: 'mantequilla' })(array)
-  })(array)
+// suite(`createDelete({ index, item }) ignores item and removes the item at index from the array`, ({ array }) => {
+//   const value = (array => {
+//     return createDelete<string>({ index: 0, item: 'mantequilla' })(array)
+//   })(array)
 
-  assert.equal(value, ['frijoles', 'mantequilla', 'aguacate', 'huevito'])
-})
+//   assert.equal(value, ['frijoles', 'mantequilla', 'aguacate', 'huevito'])
+// })
 
 suite(`createInsert({ item, index }) inserts the item at index`, ({ array }) => {
   const value = (array => {
-    return createInsert({ item: 'baleada', index: 2 })(array)
+    return createInsert('baleada', 2)(array)
   })(array)
 
   assert.equal(value, ['tortilla', 'frijoles', 'baleada', 'mantequilla', 'aguacate', 'huevito'])
 })
 
-suite(`createInsert({ items, index }) inserts the items at index`, ({ array }) => {
-  const value = (array => {
-    return createInsert({ items: ['baleada', 'toolkit'], index: 2 })(array)
-  })(array)
+// suite(`createInsert({ items, index }) inserts the items at index`, ({ array }) => {
+//   const value = (array => {
+//     return createInsert({ items: ['baleada', 'toolkit'], index: 2 })(array)
+//   })(array)
 
-  assert.equal(value, ['tortilla', 'frijoles', 'baleada', 'toolkit', 'mantequilla', 'aguacate', 'huevito'])
-})
+//   assert.equal(value, ['tortilla', 'frijoles', 'baleada', 'toolkit', 'mantequilla', 'aguacate', 'huevito'])
+// })
 
 suite(`createReorder({ from: index, to: index }) moves 'from' index forward to 'to' index`, ({ array }) => {
   const value = (array => {
-    return createReorder<string>({ from: 1, to: 3 })(array)
+    return createReorder<string>(1, 3)(array)
   })(array)
 
   assert.equal(value, ['tortilla', 'mantequilla', 'aguacate', 'frijoles', 'huevito'])
@@ -253,7 +253,7 @@ suite(`createReorder({ from: index, to: index }) moves 'from' index forward to '
 
 suite(`createReorder({ from: index, to: index }) moves 'from' index backward to 'to' index`, ({ array }) => {
   const value = (array => {
-    return createReorder<string>({ from: 3, to: 1 })(array)
+    return createReorder<string>(3, 1)(array)
   })(array)
 
   assert.equal(value, ['tortilla', 'aguacate', 'frijoles', 'mantequilla', 'huevito'])
@@ -261,10 +261,10 @@ suite(`createReorder({ from: index, to: index }) moves 'from' index backward to 
 
 suite(`createReorder({ from: { start, itemCount = 1 }, to: index }) moves item from 'start' forward to 'to' index`, ({ array }) => {
   const value = (array => {
-    return createReorder<string>({
-      from: { start: 0, itemCount: 1 },
-      to: 1
-    })(array)
+    return createReorder<string>(
+      { start: 0, itemCount: 1 },
+      1
+    )(array)
   })(array)
 
   assert.equal(value, ['frijoles', 'tortilla', 'mantequilla', 'aguacate', 'huevito'])
@@ -272,10 +272,10 @@ suite(`createReorder({ from: { start, itemCount = 1 }, to: index }) moves item f
 
 suite(`createReorder({ from: { start, itemCount != 0 }, to: index }) moves 'itemCount' items from 'start' to 'to' index`, ({ array }) => {
   const value = (array => {
-    return createReorder<string>({
-      from: { start: 0, itemCount: 2 },
-      to: 2
-    })(array)
+    return createReorder<string>(
+      { start: 0, itemCount: 2 },
+      2
+    )(array)
   })(array)
 
   assert.equal(value, ['mantequilla', 'tortilla', 'frijoles', 'aguacate', 'huevito'])
@@ -283,7 +283,7 @@ suite(`createReorder({ from: { start, itemCount != 0 }, to: index }) moves 'item
 
 suite(`createSwap({ indices }) swaps the item at the first index with the item at the second index`, ({ array }) => {
   const value1 = (array => {
-    return createSwap<string>({ indices: [0, 4] })(array)
+    return createSwap<string>([0, 4])(array)
   })(array)
   assert.equal(
     value1,
@@ -291,7 +291,7 @@ suite(`createSwap({ indices }) swaps the item at the first index with the item a
   )
   
   const value2 = (array => {
-    return createSwap<string>({ indices: [4, 0] })(array)
+    return createSwap<string>([4, 0])(array)
   })(array)
   assert.equal(
     value2,
@@ -299,7 +299,7 @@ suite(`createSwap({ indices }) swaps the item at the first index with the item a
   )
   
   const value3 = (array => {
-    return createSwap<string>({ indices: [0, 1] })(array)
+    return createSwap<string>([0, 1])(array)
   })(array)
   assert.equal(
     value3,
@@ -309,7 +309,7 @@ suite(`createSwap({ indices }) swaps the item at the first index with the item a
 
 suite(`createReplace({ item, index }) replaces the item at index with a new item`, ({ array }) => {
   const value = (array => {
-    return createReplace({ item: 'baleada', index: 2 })(array)
+    return createReplace(2, 'baleada')(array)
   })(array)
 
   assert.equal(value, ['tortilla', 'frijoles', 'baleada', 'aguacate', 'huevito'])
@@ -327,7 +327,7 @@ suite(`createUnique() removes duplicates`, ({ array }) => {
 // MAP
 suite(`createRename({ from, to }) renames 'from' name to 'to' name`, ({ map }) => {
   const value = (mapAsArray => {
-    const value = createRename<string, string>({ from: 'one', to: 'uno' })(new Map(mapAsArray))
+    const value = createRename<string, string>('one', 'uno')(new Map(mapAsArray))
 
     return {
       isMap: value instanceof Map,
@@ -405,7 +405,7 @@ suite(`createSlug(...) respects options`, () => {
 // NUMBER
 suite(`createClamp({ min, max }) handles number between min and max`, ({ number }) => {
   const value = (number => {
-    return createClamp({ min: 0, max: 100 })(number)
+    return createClamp(0, 100)(number)
   })(number)
 
   assert.is(value, 42)
@@ -413,7 +413,7 @@ suite(`createClamp({ min, max }) handles number between min and max`, ({ number 
 
 suite(`createClamp({ min, max }) handles number below min`, ({ number }) => {
   const value = (number => {
-    return createClamp({ min: 50, max: 100 })(number)
+    return createClamp(50, 100)(number)
   })(number)
 
   assert.is(value, 50)
@@ -421,7 +421,7 @@ suite(`createClamp({ min, max }) handles number below min`, ({ number }) => {
 
 suite(`createClamp({ min, max }) handles number above max`, ({ number }) => {
   const value = (number => {
-    return createClamp({ min: 0, max: 36 })(number)
+    return createClamp(0, 36)(number)
   })(number)
 
   assert.is(value, 36)

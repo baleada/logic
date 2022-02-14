@@ -943,7 +943,7 @@ export function toInterpolated (
     sliceEnd = nextIsLonger ? Math.floor(exactSliceEnd) : Math.ceil(exactSliceEnd),
     sliceTarget = nextIsLonger ? next : previous
 
-    return createSlice({ from: 0, to: sliceEnd })(sliceTarget)
+    return createSlice(0, sliceEnd)(sliceTarget)
   }
 }
 

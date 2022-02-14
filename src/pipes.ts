@@ -69,36 +69,29 @@ export function createFilterAsync<Item> (condition: (item?: Item, index?: number
 // ARRAY
 export type ArrayFunction<Item, Returned> = (array: Item[]) => Returned
 
-export function createDelete<Item> (required: { index: number } | { item: Item }): ArrayFunction<Item, Item[]> {
+export function createDelete<Item> (index: number): ArrayFunction<Item, Item[]> {
   return array => {
-    const deleteIndex = 'index' in required 
-      ? required.index
-      : findIndex<Item>(element => element === required?.item)(array) as number
-    
     return createConcat(
-      createSlice<Item>({ from: 0, to: deleteIndex })(array),
-      createSlice<Item>({ from: deleteIndex + 1 })(array)
+      createSlice<Item>(0, index)(array),
+      createSlice<Item>(index + 1)(array)
     )([])
   }
 }
 
-export function createInsert<Item> (required: ({ item: Item } | { items: Item[] }) & { index: number }): ArrayFunction<Item, Item[]> {
+export function createInsert<Item> (item: Item, index: number): ArrayFunction<Item, Item[]> {
   return array => {
-    const itemsToInsert = 'items' in required ? required.items : [required.item],
-          withItems = createConcat(array, itemsToInsert)([])
+    const withItems = createConcat(array, [item])([])
 
-    return createReorder<Item>({
-      from: { start: array.length, itemCount: itemsToInsert.length },
-      to: required.index
-    })(withItems)
+    return createReorder<Item>(
+      { start: array.length, itemCount: 1 },
+      index
+    )(withItems)
   }
 }
 
 export function createReorder<Item> (
-  { from, to }: {
-    from: { start: number, itemCount: number } | number,
-    to: number
-  }
+  from: { start: number, itemCount: number } | number,
+  to: number
 ): ArrayFunction<Item, Item[]> {
   return array => {
     const [itemsToMoveStartIndex, itemsToMoveCount] = isObject(from)
@@ -111,12 +104,12 @@ export function createReorder<Item> (
       return array
     }
 
-    const itemsToMove = createSlice<Item>({ from: itemsToMoveStartIndex, to: itemsToMoveStartIndex + itemsToMoveCount })(array)
+    const itemsToMove = createSlice<Item>(itemsToMoveStartIndex, itemsToMoveStartIndex + itemsToMoveCount)(array)
 
     if (itemsToMoveStartIndex < insertIndex) {
-      const beforeItemsToMove = itemsToMoveStartIndex === 0 ? [] : createSlice<Item>({ from: 0, to: itemsToMoveStartIndex })(array),
-            betweenItemsToMoveAndInsertIndex = createSlice<Item>({ from: itemsToMoveStartIndex + itemsToMoveCount, to: insertIndex + 1 })(array),
-            afterInsertIndex = createSlice<Item>({ from: insertIndex + 1 })(array)
+      const beforeItemsToMove = itemsToMoveStartIndex === 0 ? [] : createSlice<Item>(0, itemsToMoveStartIndex)(array),
+            betweenItemsToMoveAndInsertIndex = createSlice<Item>(itemsToMoveStartIndex + itemsToMoveCount, insertIndex + 1)(array),
+            afterInsertIndex = createSlice<Item>(insertIndex + 1)(array)
   
       return createConcat<Item>(
         beforeItemsToMove,
@@ -127,9 +120,9 @@ export function createReorder<Item> (
     }
     
     if (itemsToMoveStartIndex > insertIndex) {
-      const beforeInsertion = insertIndex === 0 ? [] : createSlice<Item>({ from: 0, to: insertIndex })(array),
-            betweenInsertionAndItemsToMove = createSlice<Item>({ from: insertIndex, to: itemsToMoveStartIndex })(array),
-            afterItemsToMove = createSlice<Item>({ from: itemsToMoveStartIndex + itemsToMoveCount })(array)
+      const beforeInsertion = insertIndex === 0 ? [] : createSlice<Item>(0, insertIndex)(array),
+            betweenInsertionAndItemsToMove = createSlice<Item>(insertIndex, itemsToMoveStartIndex)(array),
+            afterItemsToMove = createSlice<Item>(itemsToMoveStartIndex + itemsToMoveCount)(array)
   
       return createConcat<Item>(
         beforeInsertion,
@@ -147,21 +140,21 @@ function isObject (value: unknown): value is Record<any, any> {
   return typeof value === 'object'
 }
 
-export function createSwap<Item> ({ indices }: { indices: [number, number] }): ArrayFunction<Item, Item[]> {
+export function createSwap<Item> (indices: [number, number]): ArrayFunction<Item, Item[]> {
   return array => {
     const { 0: from, 1: to } = indices,
           { reorderFrom, reorderTo } = ((): { reorderFrom: ArrayFunction<Item, Item[]>, reorderTo: ArrayFunction<Item, Item[]> } => {
             if (from < to) {
               return {
-                reorderFrom: createReorder<Item>({ from, to }),
-                reorderTo: createReorder<Item>({ from: to - 1, to: from })
+                reorderFrom: createReorder<Item>(from, to),
+                reorderTo: createReorder<Item>(to - 1, from)
               }
             }
 
             if (from > to) {
               return {
-                reorderFrom: createReorder<Item>({ from, to }),
-                reorderTo: createReorder<Item>({ from: to + 1, to: from })
+                reorderFrom: createReorder<Item>(from, to),
+                reorderTo: createReorder<Item>(to + 1, from)
               }
             }
 
@@ -175,12 +168,12 @@ export function createSwap<Item> ({ indices }: { indices: [number, number] }): A
   }
 }
 
-export function createReplace<Item> ({ index, item }: { index: number, item: Item }): ArrayFunction<Item, Item[]> {
+export function createReplace<Item> (index: number, item: Item): ArrayFunction<Item, Item[]> {
   return array => {
     return createConcat<Item>(
-      createSlice<Item>({ from: 0, to: index })(array),
+      createSlice<Item>(0, index)(array),
       [item],
-      createSlice<Item>({ from: index + 1 })(array)
+      createSlice<Item>(index + 1)(array)
     )([])
   }
 }
@@ -192,7 +185,7 @@ export function createUnique<Item> (): ArrayFunction<Item, Item[]> {
   )(array) as Item[]
 }
 
-export function createSlice<Item> ({ from, to }: { from: number, to?: number }): ArrayFunction<Item, Item[]> {
+export function createSlice<Item> (from: number, to?: number): ArrayFunction<Item, Item[]> {
   return array => {
     return from === to
       ? []
@@ -239,7 +232,7 @@ export function createReverse<Item> (): ArrayFunction<Item, Item[]> {
 export function createSort<Item> (compare: (itemA: Item, itemB: Item) => number): ArrayFunction<Item, Item[]> {
   return array => {
     return new Pipeable(array).pipe(
-      createSlice({ from: 0 }),
+      createSlice(0),
       sliced => sliced.sort(compare)
     )
   }
@@ -265,7 +258,7 @@ export function createClip (required: string | RegExp): StringFunction<string> {
 // NUMBER
 export type NumberFunction<Returned> = (number: number) => Returned
 
-export function createClamp ({ min, max }: { min: number, max: number }): NumberFunction<number> {
+export function createClamp (min: number, max: number): NumberFunction<number> {
   return number => {
     const maxed = Math.max(number, min)
     return Math.min(maxed, max)
@@ -302,11 +295,11 @@ export function createDetermine<Outcome> (potentialities: Potentiality<Outcome>[
 // MAP
 export type MapFunction<Key, Value, Returned> = (transform: Map<Key, Value>) => Returned
 
-export function createRename<Key, Value> ({ from, to }: { from: Key, to: Key }): MapFunction<Key, Value, Map<Key, Value>> {
+export function createRename<Key, Value> (from: Key, to: Key): MapFunction<Key, Value, Map<Key, Value>> {
   return map => {
     const keys = [...map.keys()],
           keyToRenameIndex = findIndex(k => k === from)(keys) as number,
-          newKeys = createReplace({ index: keyToRenameIndex, item: to })(keys),
+          newKeys = createReplace(keyToRenameIndex, to)(keys),
           values = [...map.values()]
 
     return createReduce<Key, Map<Key, Value>>((renamed, key, index) => renamed.set(key, values[index]), new Map())(newKeys)

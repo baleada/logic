@@ -22,8 +22,8 @@ export function toEvent<EventType extends ListenableSupportedEventType> (eventTy
   switch (implementation) {
     case 'keycombo': {
       const combo = toCombo(eventType),
-            modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
-            { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo)
+            modifiers = createSlice<string>(0, combo.length - 1)(combo) as (ListenableModifier | ListenableModifierAlias)[],
+            { 0: name } = createSlice<string>(combo.length - 1)(combo)
       
       return new KeyboardEvent(
         // @ts-ignore
@@ -44,8 +44,8 @@ export function toEvent<EventType extends ListenableSupportedEventType> (eventTy
     case 'leftclickcombo':
     case 'rightclickcombo': {
         const combo = toCombo(eventType),
-              modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
-              { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo)
+              modifiers = createSlice<string>(0, combo.length - 1)(combo) as (ListenableModifier | ListenableModifierAlias)[],
+              { 0: name } = createSlice<string>(combo.length - 1)(combo)
 
       return new MouseEvent(
         name === 'rightclick' ? 'contextmenu' : name,
@@ -63,8 +63,8 @@ export function toEvent<EventType extends ListenableSupportedEventType> (eventTy
     }
     case 'pointercombo': {
       const combo = toCombo(eventType),
-            modifiers = createSlice<string>({ from: 0, to: combo.length - 1 })(combo) as (ListenableModifier | ListenableModifierAlias)[],
-            { 0: name } = createSlice<string>({ from: combo.length - 1 })(combo)
+            modifiers = createSlice<string>(0, combo.length - 1)(combo) as (ListenableModifier | ListenableModifierAlias)[],
+            { 0: name } = createSlice<string>(combo.length - 1)(combo)
 
       return new PointerEvent(
         name === 'rightclick' ? 'contextmenu' : name,

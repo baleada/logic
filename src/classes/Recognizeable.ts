@@ -137,7 +137,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
             ? Math.max(0, this.sequence.length - this.maxSequenceLength)
             : 0,
           newSequence = createConcat(
-            createSlice<ListenEffectParam<Type>>({ from: excess })(this.sequence),
+            createSlice<ListenEffectParam<Type>>(excess)(this.sequence),
             [sequenceItem]
           )([])
     

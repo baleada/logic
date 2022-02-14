@@ -100,11 +100,11 @@ export class Pickable<Item> {
             }
 
             if (possibleWithoutDuplicates.length > this.picks.length) {
-              return createSlice<number>({ from: possibleWithoutDuplicates.length - this.picks.length })(possibleWithoutDuplicates)
+              return createSlice<number>(possibleWithoutDuplicates.length - this.picks.length)(possibleWithoutDuplicates)
             }
 
             return new Pipeable(this.picks).pipe(
-              createSlice<number>({ from: possibleWithoutDuplicates.length }),
+              createSlice<number>(possibleWithoutDuplicates.length),
               createConcat<number>(possibleWithoutDuplicates)
             )
           case 'lifo': 
@@ -117,11 +117,11 @@ export class Pickable<Item> {
             }
 
             if (possibleWithoutDuplicates.length > this.picks.length) {
-              return createSlice<number>({ from: 0, to: possibleWithoutDuplicates.length - this.picks.length + 1 })(possibleWithoutDuplicates)
+              return createSlice<number>(0, possibleWithoutDuplicates.length - this.picks.length + 1)(possibleWithoutDuplicates)
             }
 
             return new Pipeable(this.picks).pipe(
-              createSlice<number>({ from: 0, to: this.picks.length - possibleWithoutDuplicates.length }),
+              createSlice<number>(0, this.picks.length - possibleWithoutDuplicates.length),
               createConcat<number>(possibleWithoutDuplicates)
             )
         }
