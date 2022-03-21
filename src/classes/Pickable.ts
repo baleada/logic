@@ -138,7 +138,7 @@ export class Pickable<Item> {
     this.computedStatus = 'picked'
   }
 
-  omit (indexOrIndices?: number | number[]) {
+  omit (indexOrIndices?: number | number[], options: { reference?: 'array' | 'picks' } = { reference: 'array' }) {
     if (isUndefined(indexOrIndices)) {
       this.computedPicks = []
       this.computedFirst = undefined
@@ -149,7 +149,11 @@ export class Pickable<Item> {
 
     const omits = ensureIndices(indexOrIndices)
 
-    this.computedPicks = createFilter<number>(pick => isUndefined(find(omit => pick === omit)(omits)))(this.computedPicks)
+    this.computedPicks = createFilter<number>((pick, index) =>
+      options.reference === 'array'
+        ? isUndefined(find(omit => pick === omit)(omits))
+        : isUndefined(find(omit => index === omit)(omits))
+    )(this.computedPicks)
     this.computedFirst = Math.min(...this.picks)
     this.computedLast = Math.max(...this.picks)
     

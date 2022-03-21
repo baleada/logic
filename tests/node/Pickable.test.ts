@@ -215,6 +215,14 @@ suite(`omit(indices) removes indices from picked`, context => {
   assert.equal(instance.picks, [2, 0])
 })
 
+suite(`omit(index) with 'reference' option set to 'picks' omits picks based on their position in the picks array`, context => {
+  const instance = context.setup()
+
+  instance.pick([1, 2]).pick([0, 3]).omit(0, { reference: 'picks' })
+
+  assert.equal(instance.picks, [2, 0, 3])
+})
+
 suite(`omit() empties picked`, context => {
   const instance = context.setup()
 
