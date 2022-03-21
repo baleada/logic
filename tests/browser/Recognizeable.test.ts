@@ -405,7 +405,7 @@ suite(`correctly routes IdleDeadline`, async ({ puppeteer: { page } }) => {
                   }
                 )
 
-          instance.recognize({ didTimeout: true })
+          instance.recognize({ didTimeout: true, timeRemaining: () => 0 })
                 
           return instance.status
         }),
