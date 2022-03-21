@@ -20,7 +20,9 @@ suite(`detects shift`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`detects meta`, async ({ puppeteer: { page } }) => {
-  (async () => {
+  let stub
+  
+  stub = await (async () => {
     const value = await page.evaluate(async () => {
             return {
               true: (window as unknown as WithGlobals).Logic_extracted.isModified({ event: new MouseEvent('click', { metaKey: true }), alias: 'cmd' }),
@@ -30,9 +32,9 @@ suite(`detects meta`, async ({ puppeteer: { page } }) => {
 
     assert.ok(value.true)
     assert.not.ok(value.false)
-  })();
+  })()
   
-  (async () => {
+  stub = await (async () => {
     const value = await page.evaluate(async () => {
             return {
               true: (window as unknown as WithGlobals).Logic_extracted.isModified({ event: new MouseEvent('click', { metaKey: true }), alias: 'command' }),
@@ -42,9 +44,9 @@ suite(`detects meta`, async ({ puppeteer: { page } }) => {
 
     assert.ok(value.true)
     assert.not.ok(value.false)
-  })();
+  })()
   
-  (async () => {
+  stub = await (async () => {
     const value = await page.evaluate(async () => {
             return {
               true: (window as unknown as WithGlobals).Logic_extracted.isModified({ event: new MouseEvent('click', { metaKey: true }), alias: 'meta' }),
@@ -54,11 +56,13 @@ suite(`detects meta`, async ({ puppeteer: { page } }) => {
 
     assert.ok(value.true)
     assert.not.ok(value.false)
-  })();
+  })()
 })
 
 suite(`detects control`, async ({ puppeteer: { page } }) => {
-  (async () => {
+  let stub
+
+  stub = await (async () => {
     const value = await page.evaluate(async () => {
             return {
               true: (window as unknown as WithGlobals).Logic_extracted.isModified({ event: new MouseEvent('click', { ctrlKey: true }), alias: 'control' }),
@@ -68,9 +72,9 @@ suite(`detects control`, async ({ puppeteer: { page } }) => {
 
     assert.ok(value.true)
     assert.not.ok(value.false)
-  })();
+  })()
   
-  (async () => {
+  stub = await (async () => {
     const value = await page.evaluate(async () => {
             return {
               true: (window as unknown as WithGlobals).Logic_extracted.isModified({ event: new MouseEvent('click', { ctrlKey: true }), alias: 'ctrl' }),
@@ -80,11 +84,12 @@ suite(`detects control`, async ({ puppeteer: { page } }) => {
 
     assert.ok(value.true)
     assert.not.ok(value.false)
-  })();
+  })()
 })
 
 suite(`detects alt`, async ({ puppeteer: { page } }) => {
-  (async () => {
+  let stub
+  stub = await (async () => {
     const value = await page.evaluate(async () => {
             return {
               true: (window as unknown as WithGlobals).Logic_extracted.isModified({ event: new MouseEvent('click', { altKey: true }), alias: 'alt' }),
@@ -94,9 +99,9 @@ suite(`detects alt`, async ({ puppeteer: { page } }) => {
 
     assert.ok(value.true)
     assert.not.ok(value.false)
-  })();
+  })()
   
-  (async () => {
+  stub = await (async () => {
     const value = await page.evaluate(async () => {
             return {
               true: (window as unknown as WithGlobals).Logic_extracted.isModified({ event: new MouseEvent('click', { altKey: true }), alias: 'option' }),
@@ -106,9 +111,9 @@ suite(`detects alt`, async ({ puppeteer: { page } }) => {
 
     assert.ok(value.true)
     assert.not.ok(value.false)
-  })();
+  })()
   
-  (async () => {
+  stub = await (async () => {
     const value = await page.evaluate(async () => {
             return {
               true: (window as unknown as WithGlobals).Logic_extracted.isModified({ event: new MouseEvent('click', { altKey: true }), alias: 'opt' }),
@@ -118,7 +123,7 @@ suite(`detects alt`, async ({ puppeteer: { page } }) => {
 
     assert.ok(value.true)
     assert.not.ok(value.false)
-  })();
+  })()
 })
 
 suite.run()
