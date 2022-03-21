@@ -59,12 +59,12 @@ export class Copyable {
   
   private computedResponse: undefined
   private computedError: Error
-  async copy (options: { type: 'clipboard' | 'deprecated' } = { type: 'clipboard' }) {    
+  async copy (options: { kind: 'clipboard' | 'deprecated' } = { kind: 'clipboard' }) {    
     this.copying()
     
-    const { type } = options
+    const { kind } = options
 
-    switch (type) {
+    switch (kind) {
       case 'clipboard':
         try {
           this.computedResponse = await navigator.clipboard.writeText(this.string) as undefined

@@ -247,10 +247,10 @@ suite(`statusKeySuffix defaults to ' status'`, async ({ puppeteer: { page }, key
   assert.equal(value, expected)
 })
 
-suite(`respects type option`, async ({ puppeteer: { page }, key }) => {
+suite(`respects kind option`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           // @ts-ignore
-          new window.Logic.Storeable(key, { type: 'session' })
+          new window.Logic.Storeable(key, { kind: 'session' })
   
           const value = JSON.parse(JSON.stringify(window.sessionStorage))
         
@@ -263,7 +263,7 @@ suite(`respects type option`, async ({ puppeteer: { page }, key }) => {
   assert.equal(value, expected)
 })
 
-suite(`type defaults to localStorage`, async ({ puppeteer: { page }, key }) => {
+suite(`kind defaults to localStorage`, async ({ puppeteer: { page }, key }) => {
   const value = await page.evaluate(async key => {
           // @ts-ignore
           new window.Logic.Storeable(key)

@@ -5,23 +5,23 @@ import {
 } from '../extracted'
 
 export type StoreableOptions = {
-  type?: 'local' | 'session',
+  kind?: 'local' | 'session',
   statusKeySuffix?: string
 }
 
 export type StoreableStatus = 'ready' | 'constructing' | 'stored' | 'errored' | 'removed'
 
 const defaultOptions: StoreableOptions = {
-  type: 'local',
+  kind: 'local',
   statusKeySuffix: ' status',
 }
 
 export class Storeable {
-  private type: 'local' | 'session'
+  private kind: 'local' | 'session'
   private statusKeySuffix: string
   constructor (key: string, options: StoreableOptions = {}) {
     this.constructing()
-    this.type = options.type ?? defaultOptions.type
+    this.kind = options.kind ?? defaultOptions.kind
     this.statusKeySuffix = options.statusKeySuffix ?? defaultOptions.statusKeySuffix
 
     this.setKey(key)
@@ -58,7 +58,7 @@ export class Storeable {
     return this.computedStatus
   }
   get storage () {
-    switch (this.type) {
+    switch (this.kind) {
     case 'local':
       return localStorage
     case 'session':

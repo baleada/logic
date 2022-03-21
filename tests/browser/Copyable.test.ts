@@ -98,30 +98,6 @@ suite(`isClipboardText is true after successful copy(...)`, async ({ puppeteer: 
   assert.is(value, expected)
 })
 
-suite(`copy() updates optional clipboard.text after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
-  const value = await page.evaluate(async string => {
-          const clipboard = { text: '' },
-                instance = new (window as unknown as WithGlobals).Logic.Copyable(string, { clipboard })
-          await instance.copy()
-          return instance.isClipboardText
-        }, string),
-        expected = true
-  
-  assert.is(value, expected)
-})
-
-suite(`copy({ type: 'element' }) updates optional clipboard.text after successful copy(...)`, async ({ puppeteer: { page }, string }) => {
-  const value = await page.evaluate(async string => {
-          const clipboard = { text: '' },
-                instance = new (window as unknown as WithGlobals).Logic.Copyable(string, { clipboard })
-          await instance.copy({ type: 'deprecated' })
-          return instance.isClipboardText
-        }, string),
-        expected = true
-  
-  assert.is(value, expected)
-})
-
 // TODO: Test global copy and cut tracking
 
 suite.run()
