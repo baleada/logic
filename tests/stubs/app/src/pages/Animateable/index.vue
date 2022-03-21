@@ -17,8 +17,7 @@
 
 <script lang="ts">
 import { ref, defineComponent } from 'vue'
-import { Animateable } from '../../../../../../src/classes'
-import { easingsNetInOutBack } from '@baleada/animateable-utils'
+import { Animateable, easingsNetInOutBack } from '../../../../../../src/classes'
 
 export default defineComponent({
   setup () {
