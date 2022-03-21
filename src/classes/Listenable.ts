@@ -57,7 +57,10 @@ export type ListenableSupportedEventType = ListenableClickcombo
   | keyof Omit<HTMLElementEventMap, 'resize'>
   | keyof Omit<DocumentEventMap, 'resize'>
 
-export type ListenableOptions<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = { recognizeable?: RecognizeableOptions<Type, RecognizeableMetadata> }
+export type ListenableOptions<
+  Type extends ListenableSupportedType,
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+> = { recognizeable?: RecognizeableOptions<Type, RecognizeableMetadata> }
 
 export type ListenEffect<Type extends ListenableSupportedType> = 
   Type extends 'intersect' ? (entries: ListenEffectParam<Type>) => any :
@@ -111,7 +114,10 @@ type EventListenOptions = {
   only?: string[],
 }
 
-export type ListenableActive<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
+export type ListenableActive<
+  Type extends ListenableSupportedType,
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+> = 
   Type extends 'intersect' ? { target: Element, id: IntersectionObserver } :
   Type extends 'mutate' ? { target: Element, id: MutationObserver } :
   Type extends 'resize' ? { target: Element, id: ResizeObserver } :
