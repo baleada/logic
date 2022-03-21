@@ -8,8 +8,18 @@ export type PickableOptions = {
 
 export type PickableStatus = 'ready' | 'picked' | 'omitted'
 
+export type PickOptions = {
+  replace?: 'none' | 'all' | 'fifo' | 'lifo',
+  allowsDuplicates?: boolean,
+}
+
 const defaultOptions: PickableOptions = {
   initialPicks: [],
+}
+
+const defaultPickOptions: PickOptions = {
+  replace: 'none',
+  allowsDuplicates: false,
 }
 
 export class Pickable<Item> {
@@ -74,55 +84,59 @@ export class Pickable<Item> {
     return this.pick(indexOrIndices)
   }
 
-  pick (indexOrIndices: number | number[], options: { replace?: 'none' | 'all' | 'fifo' | 'lifo' } = {}) {
-    const { replace = 'none' } = options
+  pick (indexOrIndices: number | number[], options: PickOptions = {}) {
+    const { replace, allowsDuplicates } = { ...defaultPickOptions, ...options }
     
     this.computedPicks = new Pipeable(indexOrIndices).pipe(
       ensureIndices,
       this.toPossiblePicks,
       (possiblePicks: number[]) => {
         if (replace === 'all') {
-          return toUnique(possiblePicks)
+          return allowsDuplicates ? possiblePicks : toUnique(possiblePicks)
         }
 
-        const possibleWithoutDuplicates = createFilter<number>(possiblePick => typeof find<number>(pick => pick === possiblePick)(this.picks || []) !== 'number')(possiblePicks)
+        const maybeWithoutDuplicates = allowsDuplicates
+          ? possiblePicks
+          : createFilter<number>(possiblePick =>
+            typeof find<number>(pick => pick === possiblePick)(this.picks || []) !== 'number'
+          )(possiblePicks)
 
         switch (replace) {
           case 'none':
-            return createConcat<number>(this.picks || [], possibleWithoutDuplicates)([])
+            return createConcat<number>(this.picks || [], maybeWithoutDuplicates)([])
           case 'fifo':
-            if (possibleWithoutDuplicates.length === 0) {
+            if (maybeWithoutDuplicates.length === 0) {
               return this.picks
             }
 
-            if (possibleWithoutDuplicates.length === this.picks.length) {
-              return possibleWithoutDuplicates
+            if (maybeWithoutDuplicates.length === this.picks.length) {
+              return maybeWithoutDuplicates
             }
 
-            if (possibleWithoutDuplicates.length > this.picks.length) {
-              return createSlice<number>(possibleWithoutDuplicates.length - this.picks.length)(possibleWithoutDuplicates)
+            if (maybeWithoutDuplicates.length > this.picks.length) {
+              return createSlice<number>(maybeWithoutDuplicates.length - this.picks.length)(maybeWithoutDuplicates)
             }
 
             return new Pipeable(this.picks).pipe(
-              createSlice<number>(possibleWithoutDuplicates.length),
-              createConcat<number>(possibleWithoutDuplicates)
+              createSlice<number>(maybeWithoutDuplicates.length),
+              createConcat<number>(maybeWithoutDuplicates)
             )
           case 'lifo': 
-            if (possibleWithoutDuplicates.length === 0) {
+            if (maybeWithoutDuplicates.length === 0) {
               return this.picks
             }
 
-            if (possibleWithoutDuplicates.length === this.picks.length) {
-              return possibleWithoutDuplicates
+            if (maybeWithoutDuplicates.length === this.picks.length) {
+              return maybeWithoutDuplicates
             }
 
-            if (possibleWithoutDuplicates.length > this.picks.length) {
-              return createSlice<number>(0, possibleWithoutDuplicates.length - this.picks.length + 1)(possibleWithoutDuplicates)
+            if (maybeWithoutDuplicates.length > this.picks.length) {
+              return createSlice<number>(0, maybeWithoutDuplicates.length - this.picks.length + 1)(maybeWithoutDuplicates)
             }
 
             return new Pipeable(this.picks).pipe(
-              createSlice<number>(0, this.picks.length - possibleWithoutDuplicates.length),
-              createConcat<number>(possibleWithoutDuplicates)
+              createSlice<number>(0, this.picks.length - maybeWithoutDuplicates.length),
+              createConcat<number>(maybeWithoutDuplicates)
             )
         }
       }
