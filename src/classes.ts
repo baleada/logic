@@ -11,8 +11,8 @@ export type { CopyableOptions, CopyableStatus } from './classes/Copyable'
 export { Delayable } from './classes/Delayable'
 export type { DelayableEffect, DelayableOptions, DelayableStatus } from './classes/Delayable'
 
-export { Dispatchable } from './classes/Dispatchable'
-export type { DispatchableOptions, DispatchableStatus, DispatchOptions } from './classes/Dispatchable'
+// export { Dispatchable } from './classes/Dispatchable'
+// export type { DispatchableOptions, DispatchableStatus, DispatchOptions } from './classes/Dispatchable'
 
 export { Drawable } from './classes/Drawable'
 export type { DrawableState, DrawableOptions, DrawableStatus } from './classes/Drawable'
