@@ -68,8 +68,9 @@ export class Pickable<Item> {
     return this.toItems(this.picks)
   }
   private toItems = createMap<number, Item>(index => this.array[index])
+  computedMultiple: boolean
   get multiple () {
-    return this.picks.length > 1
+    return this.computedMultiple
   }
 
 
@@ -144,6 +145,7 @@ export class Pickable<Item> {
 
     this.computedFirst = Math.min(...this.picks)
     this.computedLast = Math.max(...this.picks)
+    this.computedMultiple = toUnique(this.picks).length > 1
     
     this.picked()
     return this
@@ -157,6 +159,7 @@ export class Pickable<Item> {
       this.computedPicks = []
       this.computedFirst = undefined
       this.computedLast = undefined
+      this.computedMultiple = false
       this.omitted()
       return this
     }
@@ -170,6 +173,7 @@ export class Pickable<Item> {
     )(this.computedPicks)
     this.computedFirst = Math.min(...this.picks)
     this.computedLast = Math.max(...this.picks)
+    this.computedMultiple = toUnique(this.picks).length > 1
     
     this.omitted()
     return this

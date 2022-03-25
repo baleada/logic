@@ -304,12 +304,19 @@ suite(`items retrieves items`, context => {
   assert.equal(instance.items, ['frijoles', 'mantequilla'])
 })
 
-suite(`pickedMultiple indicates whether or not multiple items have been picked`, context => {
+suite(`multiple indicates whether or not multiple items have been picked`, context => {
   const instance = context.setup()
 
   assert.is(instance.multiple, false)
   assert.is(instance.pick([1, 2]).multiple, true)
   assert.is(instance.omit().multiple, false)
+})
+
+suite(`multiple considers unique picks only`, context => {
+  const instance = context.setup()
+
+  assert.is(instance.multiple, false)
+  assert.is(instance.pick([1, 1], { allowsDuplicates: true }).multiple, false)
 })
 
 suite(`status is 'ready' after construction`, context => {
