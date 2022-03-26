@@ -30,7 +30,7 @@ suite(`doesn't guard when except and only are empty`, async ({ puppeteer: { page
 
   const value = await page.evaluate(() => {
     document.body.removeEventListener('click', (window as unknown as WithGlobals).testState.effect)
-    return value
+    return (window as unknown as WithGlobals).testState.value
   })
   
   assert.is(value, 1)
@@ -53,7 +53,7 @@ suite(`guards against except when only is empty`, async ({ puppeteer: { page } }
 
   const value = await page.evaluate(() => {
     document.body.removeEventListener('click', (window as unknown as WithGlobals).testState.effect)
-    return value
+    return (window as unknown as WithGlobals).testState.value
   })
   
   assert.is(value, 0)
@@ -76,7 +76,7 @@ suite(`overrides except with only`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(() => {
     document.body.removeEventListener('click', (window as unknown as WithGlobals).testState.effect)
-    return value
+    return (window as unknown as WithGlobals).testState.value
   })
   
   assert.is(value, 1)
@@ -99,7 +99,7 @@ suite(`guards against mismatches with only`, async ({ puppeteer: { page } }) => 
 
   const value = await page.evaluate(() => {
     document.body.removeEventListener('click', (window as unknown as WithGlobals).testState.effect)
-    return value
+    return (window as unknown as WithGlobals).testState.value
   })
   
   assert.is(value, 0)
