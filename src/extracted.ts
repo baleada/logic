@@ -209,6 +209,7 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
     || type === 'mousedown'
     || type === 'mouseup'
     || type === 'dblclick'
+    || type === 'contextmenu'
   ) {
     return ((event: ListenEffectParam<'mousedown'>) => {
       const { target } = event,
