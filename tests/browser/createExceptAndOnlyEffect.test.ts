@@ -14,21 +14,22 @@ suite.before(context => {
 })
 
 suite(`doesn't guard when except and only are empty`, async ({ puppeteer: { page } }) => {
-  const value = await page.evaluate(() => {
-    let value = 0;
+  await page.evaluate(() => {
+    (window as unknown as WithGlobals).testState = { value: 0 };
 
-    const effect = (window as unknown as WithGlobals).Logic_extracted.createExceptAndOnlyEffect<MouseEvent>(
-      () => value++,
+    ;(window as unknown as WithGlobals).testState.effect = (window as unknown as WithGlobals).Logic_extracted.createExceptAndOnlyEffect(
+      'click',
+      () => (window as unknown as WithGlobals).testState.value++,
       {}
     )
 
-    document.body.addEventListener('click', effect)
+    document.body.addEventListener('click', (window as unknown as WithGlobals).testState.effect)
+  })
 
-    const click = new (window as unknown as WithGlobals).Logic.Dispatchable<MouseEvent>('click')
-    click.dispatch({ target: document.body })
+  await page.click('body')
 
-    document.body.removeEventListener('click', effect)
-
+  const value = await page.evaluate(() => {
+    document.body.removeEventListener('click', (window as unknown as WithGlobals).testState.effect)
     return value
   })
   
@@ -36,21 +37,22 @@ suite(`doesn't guard when except and only are empty`, async ({ puppeteer: { page
 })
 
 suite(`guards against except when only is empty`, async ({ puppeteer: { page } }) => {
-  const value = await page.evaluate(() => {
-    let value = 0;
+  await page.evaluate(() => {
+    (window as unknown as WithGlobals).testState = { value: 0 };
 
-    const effect = (window as unknown as WithGlobals).Logic_extracted.createExceptAndOnlyEffect<MouseEvent>(
-      () => value++,
+    ;(window as unknown as WithGlobals).testState.effect = (window as unknown as WithGlobals).Logic_extracted.createExceptAndOnlyEffect(
+      'click',
+      () => (window as unknown as WithGlobals).testState.value++,
       { except: ['body'] }
     )
 
-    document.body.addEventListener('click', effect)
+    document.body.addEventListener('click', (window as unknown as WithGlobals).testState.effect)
+  })
 
-    const click = new (window as unknown as WithGlobals).Logic.Dispatchable<MouseEvent>('click')
-    click.dispatch({ target: document.body })
+  await page.click('body')
 
-    document.body.removeEventListener('click', effect)
-
+  const value = await page.evaluate(() => {
+    document.body.removeEventListener('click', (window as unknown as WithGlobals).testState.effect)
     return value
   })
   
@@ -58,21 +60,22 @@ suite(`guards against except when only is empty`, async ({ puppeteer: { page } }
 })
 
 suite(`overrides except with only`, async ({ puppeteer: { page } }) => {
-  const value = await page.evaluate(() => {
-    let value = 0;
+  await page.evaluate(() => {
+    (window as unknown as WithGlobals).testState = { value: 0 };
 
-    const effect = (window as unknown as WithGlobals).Logic_extracted.createExceptAndOnlyEffect<MouseEvent>(
-      () => value++,
+    ;(window as unknown as WithGlobals).testState.effect = (window as unknown as WithGlobals).Logic_extracted.createExceptAndOnlyEffect(
+      'click',
+      () => (window as unknown as WithGlobals).testState.value++,
       { only: ['body'], except: ['body'] }
     )
 
-    document.body.addEventListener('click', effect)
+    document.body.addEventListener('click', (window as unknown as WithGlobals).testState.effect)
+  })
 
-    const click = new (window as unknown as WithGlobals).Logic.Dispatchable<MouseEvent>('click')
-    click.dispatch({ target: document.body })
+  await page.click('body')
 
-    document.body.removeEventListener('click', effect)
-
+  const value = await page.evaluate(() => {
+    document.body.removeEventListener('click', (window as unknown as WithGlobals).testState.effect)
     return value
   })
   
@@ -80,21 +83,22 @@ suite(`overrides except with only`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`guards against mismatches with only`, async ({ puppeteer: { page } }) => {
-  const value = await page.evaluate(() => {
-    let value = 0;
+  await page.evaluate(() => {
+    (window as unknown as WithGlobals).testState = { value: 0 };
 
-    const effect = (window as unknown as WithGlobals).Logic_extracted.createExceptAndOnlyEffect<MouseEvent>(
-      () => value++,
+    ;(window as unknown as WithGlobals).testState.effect = (window as unknown as WithGlobals).Logic_extracted.createExceptAndOnlyEffect(
+      'click',
+      () => (window as unknown as WithGlobals).testState.value++,
       { only: ['.stub'] }
     )
 
-    document.body.addEventListener('click', effect)
+    document.body.addEventListener('click', (window as unknown as WithGlobals).testState.effect)
+  })
 
-    const click = new (window as unknown as WithGlobals).Logic.Dispatchable<MouseEvent>('click')
-    click.dispatch({ target: document.body })
+  await page.click('body')
 
-    document.body.removeEventListener('click', effect)
-
+  const value = await page.evaluate(() => {
+    document.body.removeEventListener('click', (window as unknown as WithGlobals).testState.effect)
     return value
   })
   

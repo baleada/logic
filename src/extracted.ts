@@ -7,16 +7,18 @@ import {
   pipe,
 } from 'lazy-collections'
 import {
-  createSlice,
-  createReduce,
   createMap,
   Pipeable,
 } from './pipes'
-import { ListenableSupportedEventType, ListenEffect, ListenEffectParam, ListenOptions, toImplementation } from './classes/Listenable'
-
-
-type EventTypeMaps = Omit<HTMLElementEventMap, 'resize'> & Omit<DocumentEventMap, 'resize'>
-
+import {
+  ListenableSupportedEventType,
+  ListenEffect,
+  ListenEffectParam,
+  ListenOptions,
+  eventMatchesKeycombo,
+  eventMatchesClickcombo,
+  eventMatchesPointercombo,
+} from './classes/Listenable'
 
 // LISTENABLE
 export function toKey (name: string | ListenableKeyAlias): string {
@@ -172,8 +174,91 @@ const flagsByModifierOrAlias: Record<ListenableModifier | ListenableModifierAlia
   option: 'altKey',
 }
 
-export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventType> (effect: ListenEffect<Type>, options: ListenOptions<Type>): ListenEffect<Type> {
+export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventType> (type: Type, effect: ListenEffect<Type>, options: ListenOptions<Type>): (param: ListenEffectParam<Type>) => void {
   const { except = [], only = [] } = options
+
+  if (
+    type === 'keydown'
+    || type === 'keyup'
+  ) {
+    return ((event: ListenEffectParam<'keydown'>) => {
+      const { target } = event,
+            [matchesOnly, matchesExcept] = target instanceof Element
+              ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
+              : [false, true],
+            api: Parameters<ListenEffect<'keydown'>>[1] = {
+              is: keycombo => eventMatchesKeycombo(event, ensureKeycombo(keycombo)),
+            }
+  
+      if (matchesOnly) {
+        // @ts-ignore
+        effect(event, api)
+        return
+      }
+      
+      if (only.length === 0 && !matchesExcept) {
+        // @ts-ignore
+        effect(event, api)
+        return
+      }
+    }) as (param: ListenEffectParam<Type>) => void
+  }
+  
+  if (
+    type === 'click'
+    || type === 'mousedown'
+    || type === 'mouseup'
+    || type === 'dblclick'
+  ) {
+    return ((event: ListenEffectParam<'mousedown'>) => {
+      const { target } = event,
+            [matchesOnly, matchesExcept] = target instanceof Element
+              ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
+              : [false, true],
+            api: Parameters<ListenEffect<'mousedown'>>[1] = {
+              is: clickcombo => eventMatchesClickcombo(event, ensureClickcombo(clickcombo)),
+            }
+  
+      if (matchesOnly) {
+        // @ts-ignore
+        effect(event, api)
+        return
+      }
+      
+      if (only.length === 0 && !matchesExcept) {
+        // @ts-ignore
+        effect(event, api)
+        return
+      }
+    }) as (param: ListenEffectParam<Type>) => void
+  }
+
+  if (
+    type === 'pointerdown'
+    || type === 'pointerup'
+  ) {
+    return ((event: ListenEffectParam<'pointerdown'>) => {
+      const { target } = event,
+            [matchesOnly, matchesExcept] = target instanceof Element
+              ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
+              : [false, true],
+            api: Parameters<ListenEffect<'pointerdown'>>[1] = {
+              is: pointercombo => eventMatchesPointercombo(event, ensurePointercombo(pointercombo)),
+            }
+  
+      if (matchesOnly) {
+        // @ts-ignore
+        effect(event, api)
+        return
+      }
+      
+      if (only.length === 0 && !matchesExcept) {
+        // @ts-ignore
+        effect(event, api)
+        return
+      }
+    }) as (param: ListenEffectParam<Type>) => void
+  }
   
   return ((event: ListenEffectParam<Type>) => {
     const { target } = event,
@@ -183,16 +268,16 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
 
     if (matchesOnly) {
       // @ts-ignore
-      effect(event)
+      effect(event, {})
       return
     }
     
     if (only.length === 0 && !matchesExcept) {
       // @ts-ignore
-      effect(event)
+      effect(event, {})
       return
     }
-  }) as ListenEffect<Type>
+  }) as (param: ListenEffectParam<Type>) => void
 }
 
 export function isModified<EventType extends KeyboardEvent | MouseEvent> ({ event, alias }: { event: EventType, alias: string }) {

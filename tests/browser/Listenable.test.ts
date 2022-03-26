@@ -223,8 +223,10 @@ suite(`listen(...) handles keycombos`, async ({ puppeteer: { reloadNext, page } 
   await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+b')
-        .listen(() => (window as unknown as WithGlobals).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('keydown')
+        .listen((event, { is }) => {
+          if (is('cmd+b')) (window as unknown as WithGlobals).testState.value = true
+        })
     }
   })
 
@@ -247,8 +249,10 @@ suite(`listen(...) handles left click combos`, async ({ puppeteer: { reloadNext,
   await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+mousedown')
-        .listen(() => (window as unknown as WithGlobals).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('mousedown')
+        .listen((event, { is }) => {
+          if (is('cmd+mousedown')) (window as unknown as WithGlobals).testState.value = true
+        })
     }
   })
 
@@ -271,8 +275,10 @@ suite(`listen(...) handles right click combos`, async ({ puppeteer: { reloadNext
   await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+rightclick')
-        .listen(() => (window as unknown as WithGlobals).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('contextmenu')
+        .listen((event, { is }) => {
+          if (is('cmd+rightclick')) (window as unknown as WithGlobals).testState.value = true
+        })
     }
   })
 
@@ -293,12 +299,12 @@ suite(`listen(...) handles right click combos`, async ({ puppeteer: { reloadNext
 
 suite(`listen(...) handles recognizeable`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithGlobals).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
-              effects: defineEffect => [
-                defineEffect('keydown', () => {}),
-                defineEffect('mousedown', () => {}),
-              ]
+              effects: {
+                keydown: () => {},
+                mousedown: () => {},
+              }
             }
           })
           instance.listen(() => {})
@@ -313,12 +319,12 @@ suite(`listen(...) handles recognizeable`, async ({ puppeteer: { reloadNext, pag
 
 suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithGlobals).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
-              effects: defineEffect => [
-                defineEffect('keydown', () => {}),
-                defineEffect('mousedown', () => {}),
-              ],
+              effects: {
+                keydown: () => {},
+                mousedown: () => {},
+              },
             }
           })
           instance.listen(() => {})
@@ -405,8 +411,10 @@ suite(`stop(...) handles keycombos`, async ({ puppeteer: { page } }) => {
   await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+b')
-        .listen(() => (window as unknown as WithGlobals).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('keydown')
+        .listen((event, { is }) => {
+          if (is('cmd+b')) (window as unknown as WithGlobals).testState.value = true
+        })
     };
 
     (window as unknown as WithGlobals).testState.instance.stop()
@@ -430,8 +438,10 @@ suite(`stop(...) handles left click combos`, async ({ puppeteer: { page } }) => 
   await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+mousedown')
-        .listen(() => (window as unknown as WithGlobals).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('mousedown')
+        .listen((event, { is }) => {
+          if (is('cmd+mousedown')) (window as unknown as WithGlobals).testState.value = true
+        })
     };
 
     (window as unknown as WithGlobals).testState.instance.stop()
@@ -454,8 +464,10 @@ suite(`stop(...) handles right click combos`, async ({ puppeteer: { page } }) =>
   await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState = {
       value: false,
-      instance: new (window as unknown as WithGlobals).Logic.Listenable('cmd+rightclick')
-        .listen(() => (window as unknown as WithGlobals).testState.value = true)
+      instance: new (window as unknown as WithGlobals).Logic.Listenable('contextmenu')
+        .listen((event, { is }) => {
+          if (is('cmd+rightclick')) (window as unknown as WithGlobals).testState.value = true
+        })
     };
 
     (window as unknown as WithGlobals).testState.instance.stop()
@@ -476,12 +488,12 @@ suite(`stop(...) handles right click combos`, async ({ puppeteer: { page } }) =>
 
 suite(`stop(...) handles recognizeable`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithGlobals).Logic.Listenable<'keydown' | 'mousedown'>('recognizeable' as 'keydown' | 'mousedown', {
+          const instance = new (window as unknown as WithGlobals).Logic.Listenable('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
-              effects: defineEffect => [
-                defineEffect('keydown', () => {}),
-                defineEffect('mousedown', () => {}),
-              ]
+              effects: {
+                keydown: () => {},
+                mousedown: () => {},
+              }
             }
 
           })
