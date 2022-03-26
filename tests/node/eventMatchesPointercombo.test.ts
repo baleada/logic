@@ -8,10 +8,10 @@ const suite = createSuite('eventMatchesPointercombo')
 suite(`predicates pointers`, () => {
   for (const pointer of pointers) {
     assert.ok(
-      eventMatchesPointercombo({
-        event: {} as PointerEvent,
-        pointercombo: [pointer]
-      })
+      eventMatchesPointercombo(
+        {} as PointerEvent,
+        [pointer]
+      )
     )
   }
 })
@@ -19,51 +19,51 @@ suite(`predicates pointers`, () => {
 suite(`predicates modifiers as modifiers`, () => {
   for (const modifier of (modifiers as string[]).concat(modifierAliases)) {
     assert.ok(
-      eventMatchesPointercombo({
-        event: {
+      eventMatchesPointercombo(
+        {
           altKey: true,
           metaKey: true,
           shiftKey: true,
           ctrlKey: true,
         } as PointerEvent,
-        pointercombo: [modifier, 'pointerdown']
-      })
+        [modifier, 'pointerdown']
+      )
     )
 
     assert.not.ok(
-      eventMatchesPointercombo({
-        event: {
+      eventMatchesPointercombo(
+        {
           altKey: false,
           metaKey: false,
           shiftKey: false,
           ctrlKey: false,
         } as PointerEvent,
-        pointercombo: [modifier, 'pointerdown']
-      })
+        [modifier, 'pointerdown']
+      )
     )
     
     assert.ok(
-      eventMatchesPointercombo({
-        event: {
+      eventMatchesPointercombo(
+        {
           altKey: false,
           metaKey: false,
           shiftKey: false,
           ctrlKey: false,
         } as PointerEvent,
-        pointercombo: ['!' + modifier, 'pointerdown']
-      })
+        ['!' + modifier, 'pointerdown']
+      )
     )
 
     assert.not.ok(
-      eventMatchesPointercombo({
-        event: {
+      eventMatchesPointercombo(
+        {
           altKey: true,
           metaKey: true,
           shiftKey: true,
           ctrlKey: true,
         } as PointerEvent,
-        pointercombo: ['!' + modifier, 'pointerdown']
-      })
+        ['!' + modifier, 'pointerdown']
+      )
     )
   }
 })

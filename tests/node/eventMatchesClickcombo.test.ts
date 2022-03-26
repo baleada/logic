@@ -8,10 +8,10 @@ const suite = createSuite('eventMatchesClickcombo')
 suite(`predicates clicks`, () => {
   for (const click of clicks) {
     assert.ok(
-      eventMatchesClickcombo({
-        event: {} as MouseEvent,
-        clickcombo: [click]
-      })
+      eventMatchesClickcombo(
+        {} as MouseEvent,
+        [click]
+      )
     )
   }
 })
@@ -19,51 +19,51 @@ suite(`predicates clicks`, () => {
 suite(`predicates modifiers as modifiers`, () => {
   for (const modifier of (modifiers as string[]).concat(modifierAliases)) {
     assert.ok(
-      eventMatchesClickcombo({
-        event: {
+      eventMatchesClickcombo(
+        {
           altKey: true,
           metaKey: true,
           shiftKey: true,
           ctrlKey: true,
         } as MouseEvent,
-        clickcombo: [modifier, 'click']
-      })
+        [modifier, 'click']
+      )
     )
 
     assert.not.ok(
-      eventMatchesClickcombo({
-        event: {
+      eventMatchesClickcombo(
+        {
           altKey: false,
           metaKey: false,
           shiftKey: false,
           ctrlKey: false,
         } as MouseEvent,
-        clickcombo: [modifier, 'click']
-      })
+        [modifier, 'click']
+      )
     )
 
     assert.ok(
-      eventMatchesClickcombo({
-        event: {
+      eventMatchesClickcombo(
+        {
           altKey: false,
           metaKey: false,
           shiftKey: false,
           ctrlKey: false,
         } as MouseEvent,
-        clickcombo: ['!' + modifier, 'click']
-      })
+        ['!' + modifier, 'click']
+      )
     )
 
     assert.not.ok(
-      eventMatchesClickcombo({
-        event: {
+      eventMatchesClickcombo(
+        {
           altKey: true,
           metaKey: true,
           shiftKey: true,
           ctrlKey: true,
         } as MouseEvent,
-        clickcombo: ['!' + modifier, 'click']
-      })
+        ['!' + modifier, 'click']
+      )
     )
   }
 })
