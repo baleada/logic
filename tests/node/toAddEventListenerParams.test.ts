@@ -6,6 +6,7 @@ const suite = createSuite('toAddEventListenerParams')
 
 suite(`listener options prefers addEventListener options object`, context => {
   const { effectOptions: { 0: value } } = toAddEventListenerParams(
+          'click',
           () => {},
           { addEventListener: {}, useCapture: true }
         ),
@@ -16,6 +17,7 @@ suite(`listener options prefers addEventListener options object`, context => {
 
 suite(`listener options includes useCapture when addEventListener is falsy`, context => {
   const { effectOptions: { 0: value } } = toAddEventListenerParams(
+          'click',
           () => {},
           { useCapture: true }
         ),

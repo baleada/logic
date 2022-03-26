@@ -4,7 +4,6 @@ import { Animateable } from '../../src/classes/Animateable'
 import { Completeable } from '../../src/classes/Completeable'
 import { Copyable } from '../../src/classes/Copyable'
 import { Delayable } from '../../src/classes/Delayable'
-import { Dispatchable } from '../../src/classes/Dispatchable'
 import { Fetchable } from '../../src/classes/Fetchable'
 import { Fullscreenable } from '../../src/classes/Fullscreenable'
 import { Grantable } from '../../src/classes/Grantable'
@@ -42,12 +41,6 @@ suite(`can construct Delayable instance in a server environment`, () => {
   assert.ok(instance instanceof Delayable)
 })
 
-suite(`can construct Dispatchable instance in a server environment`, () => {
-  const instance = new Dispatchable('')
-
-  assert.ok(instance instanceof Dispatchable)
-})
-
 suite(`can construct Fetchable instance in a server environment`, () => {
   const instance = new Fetchable('')
 
@@ -67,7 +60,7 @@ suite(`can construct Grantable instance in a server environment`, () => {
 })
 
 suite(`can construct Listenable instance in a server environment`, () => {
-  const instance = new Listenable('')
+  const instance = new Listenable('keydown')
 
   assert.ok(instance instanceof Listenable)
 })
