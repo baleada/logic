@@ -34,7 +34,7 @@ export { Pickable } from './classes/Pickable'
 export type { PickableOptions, PickableStatus } from './classes/Pickable'
 
 export { Recognizeable } from './classes/Recognizeable'
-export type { RecognizeableOptions, RecognizeableStatus, RecognizeableEffectApi, RecognizeOptions } from './classes/Recognizeable'
+export type { RecognizeableOptions, RecognizeableStatus, RecognizeableEffect, RecognizeOptions } from './classes/Recognizeable'
 
 export { Resolveable } from './classes/Resolveable'
 export type { ResolveableGetPromise, ResolveableOptions, ResolveableStatus } from './classes/Resolveable'
