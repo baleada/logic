@@ -41,7 +41,7 @@ export type ListenablePointercombo =  `${string}+${ListenablePointer}`
 type ListenablePointer =  'pointerdown' | 'pointerup'
 
 // Would love to incorporate the more specific types, but it slows down type checking way too much
-export type ListenableKeycombo = `${string}+${string}`
+export type ListenableKeycombo = string // `${string}+${string}`
 export type ListenableSupportedEventType = keyof Omit<HTMLElementEventMap, 'resize'> | keyof Omit<DocumentEventMap, 'resize'>
 
 export type ListenableOptions<
