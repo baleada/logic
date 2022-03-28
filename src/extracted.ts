@@ -206,10 +206,9 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
   
   if (
     type === 'click'
-    || type === 'mousedown'
-    || type === 'mouseup'
     || type === 'dblclick'
     || type === 'contextmenu'
+    || type.startsWith('mouse')
   ) {
     return ((event: ListenEffectParam<'mousedown'>) => {
       const { target } = event,
@@ -234,10 +233,7 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
     }) as (param: ListenEffectParam<Type>) => void
   }
 
-  if (
-    type === 'pointerdown'
-    || type === 'pointerup'
-  ) {
+  if (type.startsWith('pointer')) {
     return ((event: ListenEffectParam<'pointerdown'>) => {
       const { target } = event,
             [matchesOnly, matchesExcept] = target instanceof Element

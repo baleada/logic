@@ -34,11 +34,11 @@ export type ListenableSupportedType = 'recognizeable'
 type ListenableMediaQuery = `(${string})`
 
 export type ListenableClickcombo = `${string}+${ListenableLeftClick | ListenableRightClick}`
-type ListenableLeftClick = 'click' | 'mousedown' | 'mouseup' | 'dblclick'
+type ListenableLeftClick = 'click' | 'dblclick' | `mouse${string}`
 type ListenableRightClick = 'rightclick' | 'contextmenu'
 
 export type ListenablePointercombo =  `${string}+${ListenablePointer}`
-type ListenablePointer =  'pointerdown' | 'pointerup'
+type ListenablePointer =  `pointer${string}`
 
 // Would love to incorporate the more specific types, but it slows down type checking way too much
 export type ListenableKeycombo = string // `${string}+${string}`
