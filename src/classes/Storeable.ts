@@ -16,7 +16,7 @@ const defaultOptions: StoreableOptions = {
   statusKeySuffix: ' status',
 }
 
-export class Storeable {
+export class Storeable<String extends string> {
   private kind: 'local' | 'session'
   private statusKeySuffix: string
   constructor (key: string, options: StoreableOptions = {}) {
@@ -66,7 +66,7 @@ export class Storeable {
     }
   }
   get string () {
-    return this.storage.getItem(this.key)
+    return this.storage.getItem(this.key) as String
   }
   get error () {
     return this.computedError
@@ -101,9 +101,9 @@ export class Storeable {
     return this
   }
 
-  private computedString: string
+  private computedString: String
   private computedError: Error
-  store (string: string) {
+  store (string: String) {
     try {
       this.storage.setItem(this.key, string)
       this.computedString = string // This assignment allows reactivity tools to detect data change
