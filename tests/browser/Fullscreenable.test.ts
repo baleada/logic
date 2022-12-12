@@ -98,6 +98,7 @@ suite(`enter(...) is an alias for fullscreen(...)`, async ({ puppeteer: { page }
 
 suite(`status is 'errored' after unsuccessful fullscreen(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-expect-error
           const instance = new (window as unknown as WithGlobals).Logic.Fullscreenable(() => ({}))
           await instance.fullscreen()
           return instance.status
@@ -109,6 +110,7 @@ suite(`status is 'errored' after unsuccessful fullscreen(...)`, async ({ puppete
 
 suite(`stores the error after unsuccessful fullscreen(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-expect-error
           const instance = new (window as unknown as WithGlobals).Logic.Fullscreenable(() => ({}))
           await instance.fullscreen()
           return instance.error.name
