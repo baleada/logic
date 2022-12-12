@@ -3,8 +3,6 @@ import type { ListenEffect } from './Listenable'
 
 export type CopyableOptions = Record<never, never>
 
-// TODO: Listen for window copy events to update status
-
 export type CopyableStatus = 'ready' | 'copying' | 'copied' | 'errored'
 
 export class Copyable {
@@ -107,7 +105,7 @@ export class Copyable {
     this.computedStatus = 'errored'
   }
 
-  effectClipboardTextChanges () {
+  listenForClipboardEvents () {
     this.copyListenable.listen(this.copyAndCutEffect)
     this.cutListenable.listen(this.copyAndCutEffect)
   }
