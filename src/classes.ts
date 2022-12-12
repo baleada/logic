@@ -2,6 +2,10 @@ export { Animateable } from './classes/Animateable'
 export type { AnimateableKeyframe, AnimateableOptions, AnimateableStatus, AnimateFrame, AnimateFrameEffect, AnimateOptions } from './classes/Animateable'
 export { linear, materialStandard, materialDecelerated, materialAccelerated, verouEase, verouEaseIn, verouEaseOut, verouEaseInOut, easingsNetInSine, easingsNetOutSine, easingsNetInOutSine, easingsNetInQuad, easingsNetOutQuad, easingsNetInOutQuad, easingsNetInCubic, easingsNetOutCubic, easingsNetInOutCubic, easingsNetInQuart, easingsNetInQuint, easingsNetOutQuint, easingsNetInOutQuint, easingsNetInExpo, easingsNetOutExpo, easingsNetInOutExpo, easingsNetInCirc, easingsNetOutCirc, easingsNetInOutCirc, easingsNetInBack, easingsNetOutBack, easingsNetInOutBack } from './classes/Animateable'
 
+export { Broadcastable } from './classes/Broadcastable'
+export type { BroadcastableOptions, BroadcastableStatus } from './classes/Broadcastable'
+export { toMessageListenParams } from './classes/Broadcastable'
+
 export { Completeable } from './classes/Completeable'
 export type { CompleteableOptions, CompleteableStatus, CompleteOptions } from './classes/Completeable'
 
@@ -44,6 +48,9 @@ export type { SanitizeableOptions, SanitizeableStatus } from './classes/Sanitize
 
 export { Searchable } from './classes/Searchable'
 export type { SearchableOptions, SearchableStatus } from './classes/Searchable'
+
+export { Shareable } from './classes/Shareable'
+export type { ShareableOptions, ShareableStatus } from './classes/Shareable'
 
 export { Storeable } from './classes/Storeable'
 export type { StoreableOptions, StoreableStatus } from './classes/Storeable'
