@@ -229,11 +229,11 @@ export function createReverse<Item> (): ArrayFunction<Item, Item[]> {
   }
 }
 
-export function createSort<Item> (compare: (itemA: Item, itemB: Item) => number): ArrayFunction<Item, Item[]> {
+export function createSort<Item> (compare?: (itemA: Item, itemB: Item) => number): ArrayFunction<Item, Item[]> {
   return array => {
     return new Pipeable(array).pipe(
       createSlice(0),
-      sliced => sliced.sort(compare)
+      sliced => compare ? sliced.sort(compare) : sliced.sort()
     )
   }
 }
