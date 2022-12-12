@@ -4,7 +4,7 @@ export type BroadcastableOptions = {
   name?: string
 }
 
-export type BroadcastableStatus = 'ready' | 'broadcasting' | 'broadcasted' | 'stopped'
+export type BroadcastableStatus = 'ready' | 'broadcasting' | 'broadcasted' | 'errored' | 'stopped'
 
 const defaultOptions: BroadcastableOptions = {
   name: 'baleada',
@@ -17,7 +17,6 @@ export class Broadcastable<State> {
     this.name = options.name ?? defaultOptions.name
     this.ready()
   }
-  private computedChannel: BroadcastChannel
   private computedStatus: BroadcastableStatus
   private ready () {
     this.computedStatus = 'ready'
@@ -32,8 +31,13 @@ export class Broadcastable<State> {
   get status () {
     return this.computedStatus
   }
+  private computedChannel: BroadcastChannel
   get channel () {
     return this.computedChannel || (this.computedChannel = new BroadcastChannel(this.name))
+  }
+  private computedError: Error
+  get error () {
+    return this.computedError
   }
 
   private computedState: State
@@ -44,8 +48,15 @@ export class Broadcastable<State> {
 
   broadcast () {
     this.broadcasting()
-    this.channel.postMessage(this.state)
-    this.broadcasted()
+
+    try {
+      this.channel.postMessage(this.state)
+      this.broadcasted()
+    } catch (error) {
+      this.computedError = error
+      this.errored()
+    }
+
     return this
   }
   private broadcasting () {
@@ -53,6 +64,9 @@ export class Broadcastable<State> {
   }
   private broadcasted () {
     this.computedStatus = 'broadcasted'
+  }
+  private errored () {
+    this.computedStatus = 'errored'
   }
   
   stop () {
