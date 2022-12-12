@@ -178,9 +178,8 @@ suite(`arrayBuffer is Resolveable after successful fetch(...)`, async ({ puppete
   const value = await page.evaluate(async resource => {
           const instance = new (window as unknown as WithGlobals).Logic.Fetchable(resource)
           await instance.get()
-          const arrayBuffer = await instance.arrayBuffer
-          // @ts-ignore
-          return arrayBuffer instanceof window.Logic.Resolveable
+          const arrayBuffer = instance.arrayBuffer
+          return arrayBuffer instanceof (window as unknown as WithGlobals).Logic.Resolveable
         }, resource)
 
   assert.ok(value)
@@ -190,9 +189,8 @@ suite(`blob is Resolveable after successful fetch(...)`, async ({ puppeteer: { p
   const value = await page.evaluate(async resource => {
           const instance = new (window as unknown as WithGlobals).Logic.Fetchable(resource)
           await instance.get()
-          const blob = await instance.blob
-          // @ts-ignore
-          return blob instanceof window.Logic.Resolveable
+          const blob = instance.blob
+          return blob instanceof (window as unknown as WithGlobals).Logic.Resolveable
         }, resource)
 
   assert.ok(value)
@@ -202,9 +200,8 @@ suite(`formData is Resolveable after successful fetch(...)`, async ({ puppeteer:
   const value = await page.evaluate(async resource => {
           const instance = new (window as unknown as WithGlobals).Logic.Fetchable(resource)
           await instance.get()
-          const formData = await instance.formData
-          // @ts-ignore
-          return formData instanceof window.Logic.Resolveable
+          const formData = instance.formData
+          return formData instanceof (window as unknown as WithGlobals).Logic.Resolveable
         }, resource)
 
   assert.ok(value)
@@ -214,9 +211,8 @@ suite(`json is Resolveable after successful fetch(...)`, async ({ puppeteer: { p
   const value = await page.evaluate(async resource => {
           const instance = new (window as unknown as WithGlobals).Logic.Fetchable(resource)
           await instance.get()
-          const json = await instance.json
-          // @ts-ignore
-          return json instanceof window.Logic.Resolveable
+          const json = instance.json
+          return json instanceof (window as unknown as WithGlobals).Logic.Resolveable
         }, resource)
 
   assert.ok(value)
@@ -226,9 +222,8 @@ suite(`text is Resolveable after successful fetch(...)`, async ({ puppeteer: { p
   const value = await page.evaluate(async resource => {
           const instance = new (window as unknown as WithGlobals).Logic.Fetchable(resource)
           await instance.get()
-          const text = await instance.text
-          // @ts-ignore
-          return text instanceof window.Logic.Resolveable
+          const text = instance.text
+          return text instanceof (window as unknown as WithGlobals).Logic.Resolveable
         }, resource)
 
   assert.ok(value)

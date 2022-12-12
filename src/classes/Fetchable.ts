@@ -1,7 +1,7 @@
 import { Resolveable } from './Resolveable'
 import { isFunction } from '../extracted'
 
-export type FetchableOptions = Record<string, never>
+export type FetchableOptions = Record<never, never>
 
 export type FetchableStatus = 'ready' | 'fetching' | 'fetched' | 'aborted' | 'errored'
 
@@ -53,39 +53,19 @@ export class Fetchable {
     return this.computedError
   }
   get arrayBuffer () {
-    return this.getUsedBody(this.computedArrayBuffer)
+    return this.computedArrayBuffer
   }
   get blob () {
-    return this.getUsedBody(this.computedBlob)
+    return this.computedBlob
   }
   get formData () {
-    return this.getUsedBody(this.computedFormData)
+    return this.computedFormData
   }
   get json () {
-    return this.getUsedBody(this.computedJson)
+    return this.computedJson
   }
   get text () {
-    return this.getUsedBody(this.computedText)
-  }
-
-  private getUsedBody<Value> (resolveable: Resolveable<Value>) {
-    const bodyUsed = 'bodyUsed' in this.response ? this.response.bodyUsed : false
-    
-    if (!bodyUsed) {
-      return resolveable.resolve()
-    }
-    
-    switch (resolveable.status) {
-      case 'ready':
-        // Unreachable state
-        break
-      case 'resolving':
-        // warn?
-        break
-      case 'resolved':
-      case 'errored':
-        return resolveable
-    }
+    return this.computedText
   }
 
   private computedResource: string
@@ -97,20 +77,31 @@ export class Fetchable {
   private computedResponse: Response
   private computedError: Error
   async fetch (options: FetchOptions = {}) {
-    this.computedStatus = 'fetching'
+    this.fetching()
 
     try {
       this.computedResponse = await fetch(this.resource, { signal: this.abortController.signal, ...ensureOptions(options) })
-      this.computedStatus = 'fetched'
+      this.fetched()
     } catch (error) {
       this.computedError = error as Error
 
-      this.computedStatus = error.name === 'AbortError'
-        ? 'aborted'
-        : 'errored'
+      if (error.name === 'AbortError') this.aborted()
+      else this.errored()
     }
 
     return this
+  }
+  private fetching () {
+    this.computedStatus = 'fetching'
+  }
+  private fetched () {
+    this.computedStatus = 'fetched'
+  }
+  private aborted () {
+    this.computedStatus = 'aborted'
+  }
+  private errored () {
+    this.computedStatus = 'errored'
   }
   async get (options: FetchOptions = {}) {
     await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'get' })
