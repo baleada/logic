@@ -1,7 +1,7 @@
 import { createMapAsync } from '../pipes'
 import { isArray } from '../extracted'
 
-export type ResolveableOptions = Record<string, never>
+export type ResolveableOptions = Record<never, never>
 
 export type ResolveableGetPromise<Value> = (...args: any[]) => (Promise<Value> | Promise<Value>[])
 
