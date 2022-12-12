@@ -4,9 +4,8 @@ import {
   find,
 } from 'lazy-collections'
 import { Recognizeable } from './Recognizeable'
-import type { RecognizeableOptions, RecognizeableEffect } from './Recognizeable'
+import type { RecognizeableOptions } from './Recognizeable'
 import {
-  isArray,
   isNumber,
   toKey,
   fromComboItemNameToType,
@@ -20,13 +19,15 @@ import type {
   ListenableModifierAlias,
   ListenableKeycomboItem,
 } from '../extracted'
-import { createClip, createReduce } from '../pipes'
+import { createClip } from '../pipes'
 
 export type ListenableSupportedType = 'recognizeable'
   | 'intersect'
   | 'mutate'
   | 'resize'
   | 'idle'
+  | 'message'
+  | 'messageerror'
   | ListenableMediaQuery
   | keyof Omit<HTMLElementEventMap, 'resize'>
   | keyof Omit<DocumentEventMap, 'resize'>
@@ -54,6 +55,7 @@ export type ListenEffect<Type extends ListenableSupportedType> =
   Type extends 'mutate' ? (records: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
   Type extends 'resize' ? (entries: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
   Type extends 'idle' ? (deadline: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
+  Type extends ('message' | 'messageerror') ? (event: MessageEvent, api: ListenEffectApi<Type>) => any : 
   Type extends ListenableMediaQuery ? (event: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
   Type extends (ListenableLeftClick | ListenableRightClick) ? (event: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
   Type extends (ListenablePointer) ? (event: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
@@ -78,6 +80,7 @@ export type ListenEffectApi<Type extends ListenableSupportedType> =
   Type extends 'mutate' ? Record<never, never> :
   Type extends 'resize' ? Record<never, never> :
   Type extends 'idle' ? Record<never, never> :
+  Type extends ('message' | 'messageerror') ? Record<never, never> :
   Type extends ListenableMediaQuery ? Record<never, never> :
   Type extends (ListenableLeftClick | ListenableRightClick) ? MouseEventApi :
   Type extends (ListenablePointer) ? PointerEventApi :
@@ -87,15 +90,15 @@ export type ListenEffectApi<Type extends ListenableSupportedType> =
   never
   
 export type MouseEventApi = {
-  is: (clickcombo: ListenableClickcombo) => boolean,
+  matches: (clickcombo: ListenableClickcombo) => boolean,
 }
 
 export type PointerEventApi = {
-  is: (pointercombo: ListenablePointercombo) => boolean,
+  matches: (pointercombo: ListenablePointercombo) => boolean,
 }
 
 export type KeyboardEventApi = {
-  is: (keycombo: ListenableKeycombo) => boolean,
+  matches: (keycombo: ListenableKeycombo) => boolean,
 }
 
 export type ListenOptions<Type extends ListenableSupportedType> = 
@@ -103,6 +106,7 @@ export type ListenOptions<Type extends ListenableSupportedType> =
   Type extends 'mutate' ? { observe?: MutationObserverInit } & ObservationListenOptions :
   Type extends 'resize' ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
   Type extends 'idle' ? { requestIdleCallback?: IdleRequestOptions } :
+  Type extends ('message' | 'messageerror') ? { target?: BroadcastChannel } :
   Type extends ListenableMediaQuery ? { instantEffect?: (list: MediaQueryList) => any } :
   Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? EventListenOptions :
   Type extends keyof Omit<DocumentEventMap, 'resize'> ? EventListenOptions :
@@ -127,12 +131,13 @@ export type ListenableActive<
   Type extends 'mutate' ? { target: Element, id: MutationObserver } :
   Type extends 'resize' ? { target: Element, id: ResizeObserver } :
   Type extends 'idle' ? { target: Window & typeof globalThis, id: number } :
+  Type extends ('message' | 'messageerror') ? { target: BroadcastChannel, id: [type: string, effect: (event: MessageEvent) => void] } :
   Type extends ListenableMediaQuery ? { target: MediaQueryList, id: [type: string, effect: (param: ListenEffectParam<Type>) => void] } :
   Type extends ListenableSupportedEventType ? { target: Element | Document, id: ListenableActiveEventId<Type> } :
   { id: Listenable<Type, RecognizeableMetadata> }
 
 type ListenableActiveEventId<Type extends ListenableSupportedEventType> = [
-  type: string,
+  type: Type,
   exceptAndOnlyEffect: (param: ListenEffectParam<Type>) => void,
   optionsOrUseCapture: AddEventListenerOptions | boolean,
 ]
@@ -202,6 +207,9 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
       case 'idle':
         this.idleListen(effect as unknown as ListenEffect<'idle'>, options as ListenOptions<'idle'>)
         break
+      case 'message':
+        this.messageListen(effect as unknown as ListenEffect<'message'>, options as ListenOptions<'message'>)
+        break
       case 'recognizeable':
         // @ts-ignore
         this.recognizeableListen(effect as ListenEffect<Type>, options as ListenOptions<Type>)
@@ -256,6 +264,12 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
           id = window.requestIdleCallback(deadline => effect(deadline, {}), requestIdleCallback)
 
     this.active.add({ target: window, id } as ListenableActive<Type>)
+  }
+  private messageListen (effect: ListenEffect<'message'>, options: ListenOptions<'message'>) {
+    const { target = new BroadcastChannel('baleada') } = options
+
+    target.addEventListener(this.type as 'message', event => effect(event, {}))
+    this.active.add({ target, id: [this.type, effect] } as ListenableActive<Type>)
   }
   private recognizeableListen (effect: (sequenceItem: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any, options: ListenOptions<Type>) {
     const guardedEffect = (sequenceItem: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => {
@@ -344,7 +358,7 @@ function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive
     return
   }
 
-  if (isArray(stoppable.id)) {
+  if ('target' in stoppable && stoppable.target instanceof MediaQueryList) {
     const { target, id } = stoppable as ListenableActive<'(_)'>
     target.removeEventListener(id[0], id[1])
     return
@@ -353,6 +367,12 @@ function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive
   if (isNumber(stoppable.id)) {
     const { target, id } = stoppable as ListenableActive<'idle'>
     target.cancelIdleCallback(id)
+    return
+  }
+
+  if ('target' in stoppable && stoppable.target instanceof BroadcastChannel) {
+    const { target, id } = stoppable as ListenableActive<'message'>
+    target.removeEventListener(id[0], id[1])
     return
   }
   
@@ -365,7 +385,7 @@ export function toImplementation (type: string) {
   return find<ListenableImplementation>(implementation => predicatesByImplementation.get(implementation)(type))(predicatesByImplementation.keys()) as ListenableImplementation
 }
 
-type ListenableImplementation = 'recognizeable' | 'intersection' | 'mutation' | 'resize' | 'mediaquery' | 'idle' | 'documentevent' | 'event'
+type ListenableImplementation = 'recognizeable' | 'intersection' | 'mutation' | 'resize' | 'mediaquery' | 'idle' | 'message' | 'documentevent' | 'event'
 
 const predicatesByImplementation = new Map<ListenableImplementation, ((type: string) => boolean)>([
   [
@@ -391,6 +411,10 @@ const predicatesByImplementation = new Map<ListenableImplementation, ((type: str
   [
     'idle',
     type => type === 'idle'
+  ],
+  [
+    'message',
+    type => type === 'message' || type === 'messageerror'
   ],
   [
     'documentevent',

@@ -187,7 +187,7 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
               ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
               : [false, true],
             api: Parameters<ListenEffect<'keydown'>>[1] = {
-              is: keycombo => eventMatchesKeycombo(event, ensureKeycombo(keycombo)),
+              matches: keycombo => eventMatchesKeycombo(event, ensureKeycombo(keycombo)),
             }
   
       if (matchesOnly) {
@@ -216,7 +216,7 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
               ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
               : [false, true],
             api: Parameters<ListenEffect<'mousedown'>>[1] = {
-              is: clickcombo => eventMatchesClickcombo(event, ensureClickcombo(clickcombo)),
+              matches: clickcombo => eventMatchesClickcombo(event, ensureClickcombo(clickcombo)),
             }
   
       if (matchesOnly) {
@@ -240,7 +240,7 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
               ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
               : [false, true],
             api: Parameters<ListenEffect<'pointerdown'>>[1] = {
-              is: pointercombo => eventMatchesPointercombo(event, ensurePointercombo(pointercombo)),
+              matches: pointercombo => eventMatchesPointercombo(event, ensurePointercombo(pointercombo)),
             }
   
       if (matchesOnly) {

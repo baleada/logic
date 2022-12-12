@@ -205,6 +205,31 @@ suite(`listen(...) handles idle`, async ({ puppeteer: { reloadNext, page } }) =>
   reloadNext()
 })
 
+suite(`listen(...) handles message`, async ({ puppeteer: { browser, reloadNext, page } }) => {
+  await page.evaluate(async () => {
+    const instance = new (window as unknown as WithGlobals).Logic.Listenable('message')
+    instance.listen(event => (window as unknown as WithGlobals).testState = event.data)
+  })
+
+  const page2: typeof page = await browser.newPage()
+  await page2.goto('http://localhost:5173')
+  await page2.evaluate(() => {
+    new BroadcastChannel('baleada').postMessage('baleada')
+  })
+
+  const value = await page.evaluate(async () => {
+          return (window as unknown as WithGlobals).testState
+        }),
+        expected = 'baleada'
+
+  assert.is(value, expected)
+
+  reloadNext()
+})
+
+// Not sure how to trigger messageerror
+suite.skip(`listen(...) handles messageerror`, async ({ puppeteer: { browser, reloadNext, page } }) => {})
+
 suite(`listen(...) handles visibility change`, async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new (window as unknown as WithGlobals).Logic.Listenable('visibilitychange')
@@ -224,8 +249,8 @@ suite(`listen(...) handles keycombos`, async ({ puppeteer: { reloadNext, page } 
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('keydown')
-        .listen((event, { is }) => {
-          if (is('cmd+b')) (window as unknown as WithGlobals).testState.value = true
+        .listen((event, { matches }) => {
+          if (matches('cmd+b')) (window as unknown as WithGlobals).testState.value = true
         })
     }
   })
@@ -250,8 +275,8 @@ suite(`listen(...) handles left click combos`, async ({ puppeteer: { reloadNext,
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('mousedown')
-        .listen((event, { is }) => {
-          if (is('cmd+mousedown')) (window as unknown as WithGlobals).testState.value = true
+        .listen((event, { matches }) => {
+          if (matches('cmd+mousedown')) (window as unknown as WithGlobals).testState.value = true
         })
     }
   })
@@ -276,8 +301,8 @@ suite(`listen(...) handles right click combos`, async ({ puppeteer: { reloadNext
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('contextmenu')
-        .listen((event, { is }) => {
-          if (is('cmd+rightclick')) (window as unknown as WithGlobals).testState.value = true
+        .listen((event, { matches }) => {
+          if (matches('cmd+rightclick')) (window as unknown as WithGlobals).testState.value = true
         })
     }
   })
@@ -412,8 +437,8 @@ suite(`stop(...) handles keycombos`, async ({ puppeteer: { page } }) => {
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('keydown')
-        .listen((event, { is }) => {
-          if (is('cmd+b')) (window as unknown as WithGlobals).testState.value = true
+        .listen((event, { matches }) => {
+          if (matches('cmd+b')) (window as unknown as WithGlobals).testState.value = true
         })
     };
 
@@ -439,8 +464,8 @@ suite(`stop(...) handles left click combos`, async ({ puppeteer: { page } }) => 
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('mousedown')
-        .listen((event, { is }) => {
-          if (is('cmd+mousedown')) (window as unknown as WithGlobals).testState.value = true
+        .listen((event, { matches }) => {
+          if (matches('cmd+mousedown')) (window as unknown as WithGlobals).testState.value = true
         })
     };
 
@@ -465,8 +490,8 @@ suite(`stop(...) handles right click combos`, async ({ puppeteer: { page } }) =>
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('contextmenu')
-        .listen((event, { is }) => {
-          if (is('cmd+rightclick')) (window as unknown as WithGlobals).testState.value = true
+        .listen((event, { matches }) => {
+          if (matches('cmd+rightclick')) (window as unknown as WithGlobals).testState.value = true
         })
     };
 
