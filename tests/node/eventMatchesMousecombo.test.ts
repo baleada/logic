@@ -1,14 +1,15 @@
 import { suite as createSuite } from 'uvu'
+
 import * as assert from 'uvu/assert'
-import { eventMatchesClickcombo } from '../../src/classes/Listenable'
+import { eventMatchesMousecombo } from '../../src/classes/Listenable'
 import { clicks, modifiers, modifierAliases } from '../fixtures/comboMeta'
 
-const suite = createSuite('eventMatchesClickcombo')
+const suite = createSuite('eventMatchesMousecombo')
 
 suite(`predicates clicks`, () => {
   for (const click of clicks) {
     assert.ok(
-      eventMatchesClickcombo(
+      eventMatchesMousecombo(
         {} as MouseEvent,
         [click]
       )
@@ -19,7 +20,7 @@ suite(`predicates clicks`, () => {
 suite(`predicates modifiers as modifiers`, () => {
   for (const modifier of (modifiers as string[]).concat(modifierAliases)) {
     assert.ok(
-      eventMatchesClickcombo(
+      eventMatchesMousecombo(
         {
           altKey: true,
           metaKey: true,
@@ -31,7 +32,7 @@ suite(`predicates modifiers as modifiers`, () => {
     )
 
     assert.not.ok(
-      eventMatchesClickcombo(
+      eventMatchesMousecombo(
         {
           altKey: false,
           metaKey: false,
@@ -43,7 +44,7 @@ suite(`predicates modifiers as modifiers`, () => {
     )
 
     assert.ok(
-      eventMatchesClickcombo(
+      eventMatchesMousecombo(
         {
           altKey: false,
           metaKey: false,
@@ -55,7 +56,7 @@ suite(`predicates modifiers as modifiers`, () => {
     )
 
     assert.not.ok(
-      eventMatchesClickcombo(
+      eventMatchesMousecombo(
         {
           altKey: true,
           metaKey: true,

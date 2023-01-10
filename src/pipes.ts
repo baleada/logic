@@ -9,13 +9,24 @@ import {
   map,
   unique,
   reduce,
+  every,
 } from 'lazy-collections'
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
+import {
+  eventMatchesKeycombo,
+  eventMatchesMousecombo,
+  eventMatchesPointercombo,
+} from './classes/Listenable'
+import {
+  ensureKeycombo,
+  ensureMousecombo,
+  ensurePointercombo
+} from './extracted'
 
 // REDUCE
 export function createReduceAsync<Item, Accumulator> (
-  accumulate: (accumulator?: Accumulator, item?: Item, index?: number) => Promise<Accumulator>,
+  accumulate: (accumulator: Accumulator, item: Item, index: number) => Promise<Accumulator>,
   initialValue?: Accumulator
 ): (array: Item[]) => Promise<Accumulator> {
   return async array => {
@@ -30,7 +41,7 @@ export function createReduceAsync<Item, Accumulator> (
 }
 
 export function createReduce<Item, Accumulator> (
-  accumulate: (accumulator?: Accumulator, item?: Item, index?: number) => Accumulator,
+  accumulate: (accumulator: Accumulator, item: Item, index: number) => Accumulator,
   initialValue?: Accumulator
 ): (array: Item[]) => Accumulator {
   return array => reduce<Accumulator, Item>(accumulate, initialValue)(array) as Accumulator
@@ -39,14 +50,14 @@ export function createReduce<Item, Accumulator> (
 // ARRAY ASYNC
 export type ArrayFunctionAsync<Item, Returned> = (array: Item[]) => Promise<Returned>
 
-export function createForEachAsync<Item> (forEach: (item?: Item, index?: number) => any): ArrayFunctionAsync<Item, any> {
+export function createForEachAsync<Item> (forEach: (item: Item, index: number) => any): ArrayFunctionAsync<Item, any> {
   return async array => {
     await createReduceAsync<Item, any>(async (_, item, index) => await forEach(item, index))(array)
     return array
   }
 }
 
-export function createMapAsync<Item, Mapped> (transform: (item?: Item, index?: number) => Promise<Mapped>): ArrayFunctionAsync<Item, Mapped[]> {
+export function createMapAsync<Item, Mapped> (transform: (item: Item, index: number) => Promise<Mapped>): ArrayFunctionAsync<Item, Mapped[]> {
   return async array => {
     return await createReduceAsync<Item, Mapped[]>(
       async (resolvedMaps, item, index) => {
@@ -59,7 +70,7 @@ export function createMapAsync<Item, Mapped> (transform: (item?: Item, index?: n
   }
 }
 
-export function createFilterAsync<Item> (condition: (item?: Item, index?: number) => Promise<boolean>): ArrayFunctionAsync<Item, Item[]> {
+export function createFilterAsync<Item> (condition: (item: Item, index: number) => Promise<boolean>): ArrayFunctionAsync<Item, Item[]> {
   return async array => {
     const transformedAsync = await createMapAsync<Item, boolean>(condition)(array)
     return createFilter<Item>((_, index) => transformedAsync[index])(array)
@@ -69,7 +80,7 @@ export function createFilterAsync<Item> (condition: (item?: Item, index?: number
 // ARRAY
 export type ArrayFunction<Item, Returned> = (array: Item[]) => Returned
 
-export function createDelete<Item> (index: number): ArrayFunction<Item, Item[]> {
+export function createRemove<Item> (index: number): ArrayFunction<Item, Item[]> {
   return array => {
     return createConcat(
       createSlice<Item>(0, index)(array),
@@ -196,14 +207,14 @@ export function createSlice<Item> (from: number, to?: number): ArrayFunction<Ite
   }
 }
 
-export function createFilter<Item> (condition: (item?: Item, index?: number) => boolean): ArrayFunction<Item, Item[]> {
+export function createFilter<Item> (condition: (item: Item, index: number) => boolean): ArrayFunction<Item, Item[]> {
   return array => pipe(
     filter(condition),
     toArray()
   )(array) as Item[]
 }
 
-export function createMap<Item, Transformed = Item> (transform: (item?: Item, index?: number) => Transformed): ArrayFunction<Item, Transformed[]> {
+export function createMap<Item, Transformed = Item> (transform: (item: Item, index: number) => Transformed): ArrayFunction<Item, Transformed[]> {
   return array => pipe(
     map(transform),
     toArray()
@@ -321,6 +332,22 @@ export function createToEntries<Key extends string | number | symbol, Value> ():
 
     return entries
   }
+}
+
+
+// EVENT
+export type EventFunction<Evt extends Event, Returned> = (event: Evt) => Returned
+
+export function createMatchesKeycombo (keycombo: string): EventFunction<KeyboardEvent, boolean> {
+  return event => eventMatchesKeycombo(event, ensureKeycombo(keycombo))
+}
+
+export function createMatchesMousecombo (mousecombo: string): EventFunction<MouseEvent, boolean> {
+  return event => eventMatchesMousecombo(event, ensureMousecombo(mousecombo))
+}
+
+export function createMatchesPointercombo (pointercombo: string): EventFunction<PointerEvent, boolean> {
+  return event => eventMatchesPointercombo(event, ensurePointercombo(pointercombo))
 }
 
 

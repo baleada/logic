@@ -81,7 +81,7 @@ export class Broadcastable<State> {
 
 export function toMessageListenParams<State> (
   instance: Broadcastable<State>,
-  effect: (event: MessageEvent<State>, api: Parameters<ListenEffect<'message'>>[1]) => void
+  effect: (event: MessageEvent<State>) => void
 ): Parameters<Listenable<'message'>['listen']> {
     return [
       effect,

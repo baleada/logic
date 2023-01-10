@@ -15,9 +15,6 @@ import {
   ListenEffect,
   ListenEffectParam,
   ListenOptions,
-  eventMatchesKeycombo,
-  eventMatchesClickcombo,
-  eventMatchesPointercombo,
 } from './classes/Listenable'
 
 // LISTENABLE
@@ -90,10 +87,10 @@ export function ensureKeycombo (type: string): ListenableKeycomboItem[] {
   ) as ListenableKeycomboItem[]
 }
 
-// export type ListenableClickcomboItem = ListenableModifier | ListenableModifierAlias | 'click'
-export type ListenableClickcomboItem = string
+// export type ListenableMousecomboItem = ListenableModifier | ListenableModifierAlias | 'click'
+export type ListenableMousecomboItem = string
 
-export function ensureClickcombo (type: string): string[] {
+export function ensureMousecombo (type: string): string[] {
   return toCombo(type)
 }
 
@@ -185,20 +182,17 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
       const { target } = event,
             [matchesOnly, matchesExcept] = target instanceof Element
               ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
-              : [false, true],
-            api: Parameters<ListenEffect<'keydown'>>[1] = {
-              matches: keycombo => eventMatchesKeycombo(event, ensureKeycombo(keycombo)),
-            }
+              : [false, true]
   
       if (matchesOnly) {
         // @ts-ignore
-        effect(event, api)
+        effect(event)
         return
       }
       
       if (only.length === 0 && !matchesExcept) {
         // @ts-ignore
-        effect(event, api)
+        effect(event)
         return
       }
     }) as (param: ListenEffectParam<Type>) => void
@@ -214,20 +208,17 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
       const { target } = event,
             [matchesOnly, matchesExcept] = target instanceof Element
               ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
-              : [false, true],
-            api: Parameters<ListenEffect<'mousedown'>>[1] = {
-              matches: clickcombo => eventMatchesClickcombo(event, ensureClickcombo(clickcombo)),
-            }
+              : [false, true]
   
       if (matchesOnly) {
         // @ts-ignore
-        effect(event, api)
+        effect(event)
         return
       }
       
       if (only.length === 0 && !matchesExcept) {
-        // @ts-ignore
-        effect(event, api)
+        // @ts-expect-error
+        effect(event)
         return
       }
     }) as (param: ListenEffectParam<Type>) => void
@@ -238,20 +229,17 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
       const { target } = event,
             [matchesOnly, matchesExcept] = target instanceof Element
               ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
-              : [false, true],
-            api: Parameters<ListenEffect<'pointerdown'>>[1] = {
-              matches: pointercombo => eventMatchesPointercombo(event, ensurePointercombo(pointercombo)),
-            }
+              : [false, true]
   
       if (matchesOnly) {
-        // @ts-ignore
-        effect(event, api)
+        // @ts-expect-error
+        effect(event)
         return
       }
       
       if (only.length === 0 && !matchesExcept) {
-        // @ts-ignore
-        effect(event, api)
+        // @ts-expect-error
+        effect(event)
         return
       }
     }) as (param: ListenEffectParam<Type>) => void

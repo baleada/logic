@@ -249,8 +249,9 @@ suite(`listen(...) handles keycombos`, async ({ puppeteer: { reloadNext, page } 
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('keydown')
-        .listen((event, { matches }) => {
-          if (matches('cmd+b')) (window as unknown as WithGlobals).testState.value = true
+        .listen(event => {
+          const matches = (window as unknown as WithGlobals).Logic.createMatchesKeycombo('cmd+b')
+          if (matches(event)) (window as unknown as WithGlobals).testState.value = true
         })
     }
   })
@@ -275,8 +276,9 @@ suite(`listen(...) handles left click combos`, async ({ puppeteer: { reloadNext,
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('mousedown')
-        .listen((event, { matches }) => {
-          if (matches('cmd+mousedown')) (window as unknown as WithGlobals).testState.value = true
+        .listen(event => {
+          const matches = (window as unknown as WithGlobals).Logic.createMatchesMousecombo('cmd+mousedown')
+          if (matches(event)) (window as unknown as WithGlobals).testState.value = true
         })
     }
   })
@@ -301,8 +303,9 @@ suite(`listen(...) handles right click combos`, async ({ puppeteer: { reloadNext
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('contextmenu')
-        .listen((event, { matches }) => {
-          if (matches('cmd+rightclick')) (window as unknown as WithGlobals).testState.value = true
+        .listen(event => {
+          const matches = (window as unknown as WithGlobals).Logic.createMatchesMousecombo('cmd+rightclick')
+          if (matches(event)) (window as unknown as WithGlobals).testState.value = true
         })
     }
   })
@@ -437,8 +440,9 @@ suite(`stop(...) handles keycombos`, async ({ puppeteer: { page } }) => {
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('keydown')
-        .listen((event, { matches }) => {
-          if (matches('cmd+b')) (window as unknown as WithGlobals).testState.value = true
+        .listen(event => {
+          const matches = (window as unknown as WithGlobals).Logic.createMatchesKeycombo('cmd+b')
+          if (matches(event)) (window as unknown as WithGlobals).testState.value = true
         })
     };
 
@@ -464,8 +468,9 @@ suite(`stop(...) handles left click combos`, async ({ puppeteer: { page } }) => 
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('mousedown')
-        .listen((event, { matches }) => {
-          if (matches('cmd+mousedown')) (window as unknown as WithGlobals).testState.value = true
+        .listen(event => {
+          const matches = (window as unknown as WithGlobals).Logic.createMatchesMousecombo('cmd+mousedown')
+          if (matches(event)) (window as unknown as WithGlobals).testState.value = true
         })
     };
 
@@ -490,8 +495,9 @@ suite(`stop(...) handles right click combos`, async ({ puppeteer: { page } }) =>
     (window as unknown as WithGlobals).testState = {
       value: false,
       instance: new (window as unknown as WithGlobals).Logic.Listenable('contextmenu')
-        .listen((event, { matches }) => {
-          if (matches('cmd+rightclick')) (window as unknown as WithGlobals).testState.value = true
+        .listen(event => {
+          const matches = (window as unknown as WithGlobals).Logic.createMatchesMousecombo('cmd+rightclick')
+          if (matches(event)) (window as unknown as WithGlobals).testState.value = true
         })
     };
 

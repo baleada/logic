@@ -34,7 +34,7 @@ export type ListenableSupportedType = 'recognizeable'
 
 type ListenableMediaQuery = `(${string})`
 
-export type ListenableClickcombo = `${string}+${ListenableLeftClick | ListenableRightClick}`
+export type ListenableMousecombo = `${string}+${ListenableLeftClick | ListenableRightClick}`
 type ListenableLeftClick = 'click' | 'dblclick' | `mouse${string}`
 type ListenableRightClick = 'rightclick' | 'contextmenu'
 
@@ -51,17 +51,17 @@ export type ListenableOptions<
 > = { recognizeable?: RecognizeableOptions<Type, RecognizeableMetadata> }
 
 export type ListenEffect<Type extends ListenableSupportedType> = 
-  Type extends 'intersect' ? (entries: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
-  Type extends 'mutate' ? (records: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
-  Type extends 'resize' ? (entries: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
-  Type extends 'idle' ? (deadline: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
-  Type extends ('message' | 'messageerror') ? (event: MessageEvent, api: ListenEffectApi<Type>) => any : 
-  Type extends ListenableMediaQuery ? (event: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
-  Type extends (ListenableLeftClick | ListenableRightClick) ? (event: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
-  Type extends (ListenablePointer) ? (event: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
-  Type extends ('keydown' | 'keyup') ? (event: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
-  Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? (event: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
-  Type extends keyof Omit<DocumentEventMap, 'resize'> ? (event: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any :
+  Type extends 'intersect' ? (entries: ListenEffectParam<Type>) => any :
+  Type extends 'mutate' ? (records: ListenEffectParam<Type>) => any :
+  Type extends 'resize' ? (entries: ListenEffectParam<Type>) => any :
+  Type extends 'idle' ? (deadline: ListenEffectParam<Type>) => any :
+  Type extends ('message' | 'messageerror') ? (event: MessageEvent) => any : 
+  Type extends ListenableMediaQuery ? (event: ListenEffectParam<Type>) => any :
+  Type extends (ListenableLeftClick | ListenableRightClick) ? (event: ListenEffectParam<Type>) => any :
+  Type extends (ListenablePointer) ? (event: ListenEffectParam<Type>) => any :
+  Type extends ('keydown' | 'keyup') ? (event: ListenEffectParam<Type>) => any :
+  Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? (event: ListenEffectParam<Type>) => any :
+  Type extends keyof Omit<DocumentEventMap, 'resize'> ? (event: ListenEffectParam<Type>) => any :
   never
 
 export type ListenEffectParam<Type extends ListenableSupportedType> = 
@@ -74,32 +74,6 @@ export type ListenEffectParam<Type extends ListenableSupportedType> =
   Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? HTMLElementEventMap[Type] :
   Type extends keyof Omit<DocumentEventMap, 'resize'> ? DocumentEventMap[Type] :
   never
-
-export type ListenEffectApi<Type extends ListenableSupportedType> = 
-  Type extends 'intersect' ? Record<never, never> :
-  Type extends 'mutate' ? Record<never, never> :
-  Type extends 'resize' ? Record<never, never> :
-  Type extends 'idle' ? Record<never, never> :
-  Type extends ('message' | 'messageerror') ? Record<never, never> :
-  Type extends ListenableMediaQuery ? Record<never, never> :
-  Type extends (ListenableLeftClick | ListenableRightClick) ? MouseEventApi :
-  Type extends (ListenablePointer) ? PointerEventApi :
-  Type extends ('keydown' | 'keyup') ? KeyboardEventApi :
-  Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? Record<never, never> :
-  Type extends keyof Omit<DocumentEventMap, 'resize'> ? Record<never, never> :
-  never
-  
-export type MouseEventApi = {
-  matches: (clickcombo: ListenableClickcombo) => boolean,
-}
-
-export type PointerEventApi = {
-  matches: (pointercombo: ListenablePointercombo) => boolean,
-}
-
-export type KeyboardEventApi = {
-  matches: (keycombo: ListenableKeycombo) => boolean,
-}
 
 export type ListenOptions<Type extends ListenableSupportedType> = 
   Type extends 'intersect' ? { observer?: IntersectionObserverInit } & ObservationListenOptions :
@@ -254,29 +228,29 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
       (options.instantEffect as ListenOptions<'(_)'>['instantEffect'])(target)
     }
 
-    const withApi = (event: ListenEffectParam<'(_)'>) => effect(event, {})
+    const withApi = (event: ListenEffectParam<'(_)'>) => effect(event)
 
     target.addEventListener('change', withApi)
     this.active.add({ target, id: ['change', withApi] } as ListenableActive<Type>)
   }
   private idleListen (effect: ListenEffect<'idle'>, options: ListenOptions<'idle'>) {
     const { requestIdleCallback } = options,
-          id = window.requestIdleCallback(deadline => effect(deadline, {}), requestIdleCallback)
+          id = window.requestIdleCallback(deadline => effect(deadline), requestIdleCallback)
 
     this.active.add({ target: window, id } as ListenableActive<Type>)
   }
   private messageListen (effect: ListenEffect<'message'>, options: ListenOptions<'message'>) {
     const { target = new BroadcastChannel('baleada') } = options
 
-    target.addEventListener(this.type as 'message', event => effect(event, {}))
+    target.addEventListener(this.type as 'message', event => effect(event))
     this.active.add({ target, id: [this.type, effect] } as ListenableActive<Type>)
   }
-  private recognizeableListen (effect: (sequenceItem: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => any, options: ListenOptions<Type>) {
-    const guardedEffect = (sequenceItem: ListenEffectParam<Type>, api: ListenEffectApi<Type>) => {
-      this.recognizeable.recognize(sequenceItem, api, { onRecognized: sequenceItem => effect(sequenceItem, api) })
+  private recognizeableListen (effect: (sequenceItem: ListenEffectParam<Type>) => any, options: ListenOptions<Type>) {
+    const guardedEffect = (sequenceItem: ListenEffectParam<Type>) => {
+      this.recognizeable.recognize(sequenceItem, { onRecognized: sequenceItem => effect(sequenceItem) })
 
       if (this.recognizeable.status === 'recognized') {
-        effect(sequenceItem, api)
+        effect(sequenceItem)
       }
     }
 
@@ -556,14 +530,14 @@ const arrows = new Set(['arrowup', 'arrowright', 'arrowdown', 'arrowleft'])
 const verticalArrows = new Set(['arrowup', 'arrowdown'])
 const horizontalArrows = new Set(['arrowright', 'arrowleft'])
 
-export function eventMatchesClickcombo (event: MouseEvent, clickcombo: string[]): boolean {
+export function eventMatchesMousecombo (event: MouseEvent, Mousecombo: string[]): boolean {
   return every<string>(name => (
     fromComboItemNameToType(name) === 'click'
     ||
     (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))
     ||
     (!name.startsWith('!') && isModified({ alias: name, event }))
-  ))(clickcombo) as boolean
+  ))(Mousecombo) as boolean
 }
 
 export function eventMatchesPointercombo (event: PointerEvent, pointercombo: string[]): boolean {
