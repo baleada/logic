@@ -5,6 +5,7 @@ import {
   some,
   toArray,
   pipe,
+  join
 } from 'lazy-collections'
 import {
   createMap,
@@ -80,7 +81,7 @@ export type ListenableKeycomboItem = {
 }
 
 const toListenableKeycomboItems = createMap<string, ListenableKeycomboItem>(name => ({ name, type: fromComboItemNameToType(name) }))
-export function ensureKeycombo (type: string): ListenableKeycomboItem[] {
+export function narrowKeycombo (type: string): ListenableKeycomboItem[] {
   return new Pipeable(type).pipe(
     toCombo,
     toListenableKeycomboItems
@@ -90,11 +91,11 @@ export function ensureKeycombo (type: string): ListenableKeycomboItem[] {
 // export type ListenableMousecomboItem = ListenableModifier | ListenableModifierAlias | 'click'
 export type ListenableMousecomboItem = string
 
-export function ensureMousecombo (type: string): string[] {
+export function narrowMousecombo (type: string): string[] {
   return toCombo(type)
 }
 
-export function ensurePointercombo (type: string): string[] {
+export function narrowPointercombo (type: string): string[] {
   return toCombo(type)
 }
 
@@ -104,7 +105,7 @@ const delimiter = '+'
 export function toCombo (type: string): string[] {
   // If the delimiter is used as a character in the type,
   // two empty strings will be produced by the split.
-  // createUnique ensures those two are combined into one.
+  // createUnique narrows those two are combined into one.
   return pipe(
     toUnique,
     toComboItems,
@@ -265,7 +266,7 @@ export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventT
   }) as (param: ListenEffectParam<Type>) => void
 }
 
-export function isModified<EventType extends KeyboardEvent | MouseEvent> ({ event, alias }: { event: EventType, alias: string }) {
+export function predicateModified<EventType extends KeyboardEvent | MouseEvent> ({ event, alias }: { event: EventType, alias: string }) {
   return predicatesByModifier[alias]?.(event)
 }
 
@@ -291,26 +292,48 @@ export function domIsAvailable (): boolean {
 }
 
 // PREDICATES
-export function isArray (value: unknown): value is any[] {
+export function predicateArray (value: unknown): value is any[] {
   return Array.isArray(value)
 }
 
-export function isUndefined (value: unknown): value is undefined {
+export function predicateUndefined (value: unknown): value is undefined {
   return value === undefined
 }
 
-export function isFunction (value: unknown): value is (...args: any[]) => any {
+export function predicateFunction (value: unknown): value is (...args: any[]) => any {
   return typeof value === 'function'
 }
 
-export function isNull (value: unknown): value is null {
+export function predicateNull (value: unknown): value is null {
   return value === null
 }
 
-export function isNumber (value: unknown): value is number {
+export function predicateNumber (value: unknown): value is number {
   return typeof value === 'number'
 }
 
-export function isString (value: unknown): value is string {
+export function predicateString (value: unknown): value is string {
   return typeof value === 'string'
+}
+
+// Adapted from React Aria https://github.com/adobe/react-spectrum/blob/b6786da906973130a1746b2bee63215bba013ca4/packages/%40react-aria/focus/src/FocusScope.tsx#L256
+const tabbableSelector = join(':not([hidden]):not([tabindex="-1"]),')([
+  'input:not([disabled]):not([type=hidden])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  'button:not([disabled])',
+  'a[href]',
+  'area[href]',
+  'summary',
+  'iframe',
+  'object',
+  'embed',
+  'audio[controls]',
+  'video[controls]',
+  '[contenteditable]',
+  '[tabindex]:not([disabled])',
+]) as string
+
+export function predicateFocusable (element: HTMLElement): boolean {
+  return element.matches(tabbableSelector)
 }

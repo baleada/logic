@@ -1,5 +1,5 @@
 import { Resolveable } from './Resolveable'
-import { isFunction } from '../extracted'
+import { predicateFunction } from '../extracted'
 
 export type FetchableOptions = Record<never, never>
 
@@ -80,7 +80,7 @@ export class Fetchable {
     this.fetching()
 
     try {
-      this.computedResponse = await fetch(this.resource, { signal: this.abortController.signal, ...ensureOptions(options) })
+      this.computedResponse = await fetch(this.resource, { signal: this.abortController.signal, ...narrowOptions(options) })
       this.fetched()
     } catch (error) {
       this.computedError = error as Error
@@ -104,23 +104,23 @@ export class Fetchable {
     this.computedStatus = 'errored'
   }
   async get (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'get' })
+    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'get' })
     return this
   }
   async patch (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'patch' })
+    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'patch' })
     return this
   }
   async post (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'post' })
+    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'post' })
     return this
   }
   async put (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'put' })
+    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'put' })
     return this
   }
   async delete (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...ensureOptions(options), method: 'delete' })
+    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'delete' })
     return this
   }
   abort () {
@@ -129,8 +129,8 @@ export class Fetchable {
   }
 }
 
-function ensureOptions (options: RequestInit | ((api: FetchOptionsApi) => RequestInit)) {
-  return isFunction(options)
+function narrowOptions (options: RequestInit | ((api: FetchOptionsApi) => RequestInit)) {
+  return predicateFunction(options)
     ? options({ withJson })
     : options
 }

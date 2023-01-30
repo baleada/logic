@@ -1,7 +1,7 @@
 import {
-  isArray,
-  isNumber,
-  isFunction
+  predicateArray,
+  predicateNumber,
+  predicateFunction
 } from '../extracted'
 import { createSlice, createConcat } from '../pipes'
 import {
@@ -104,7 +104,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     this.recognizing()
 
     const type = this.toType(sequenceItem),
-          excess = isNumber(this.maxSequenceLength)
+          excess = predicateNumber(this.maxSequenceLength)
             ? Math.max(0, this.sequence.length - this.maxSequenceLength)
             : 0,
           newSequence = createConcat(
@@ -134,7 +134,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     this.computedStatus = 'recognizing'
   }
   private toType (sequenceItem: ListenEffectParam<Type>) {
-    if (isArray(sequenceItem)) {
+    if (predicateArray(sequenceItem)) {
       if (sequenceItem[0] instanceof IntersectionObserverEntry) {
         return 'intersect'
       }

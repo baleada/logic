@@ -1,6 +1,6 @@
 import { join } from 'lazy-collections'
 import { createReverse, Pipeable } from "../pipes"
-import { isFunction } from '../extracted'
+import { predicateFunction } from '../extracted'
 
 export type CompleteableOptions = {
   segment?: {
@@ -146,7 +146,7 @@ export class Completeable {
           after = this.getAfter(),
           completedString = before + completion + after,
           completedSelection = (() => {
-            if (isFunction(select)) {
+            if (predicateFunction(select)) {
               return select({ before, completion, after })
             }
 

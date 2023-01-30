@@ -10,6 +10,7 @@ import {
   unique,
   reduce,
   every,
+  join,
 } from 'lazy-collections'
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
@@ -19,9 +20,10 @@ import {
   eventMatchesPointercombo,
 } from './classes/Listenable'
 import {
-  ensureKeycombo,
-  ensureMousecombo,
-  ensurePointercombo
+  narrowKeycombo,
+  narrowMousecombo,
+  narrowPointercombo,
+  predicateFocusable
 } from './extracted'
 
 // REDUCE
@@ -105,7 +107,7 @@ export function createReorder<Item> (
   to: number
 ): ArrayFunction<Item, Item[]> {
   return array => {
-    const [itemsToMoveStartIndex, itemsToMoveCount] = isObject(from)
+    const [itemsToMoveStartIndex, itemsToMoveCount] = predicateObject(from)
             ? [from.start, from.itemCount]
             : [from, 1],
           insertIndex = to
@@ -147,7 +149,7 @@ export function createReorder<Item> (
   }
 }
 
-function isObject (value: unknown): value is Record<any, any> {
+function predicateObject (value: unknown): value is Record<any, any> {
   return typeof value === 'object'
 }
 
@@ -339,15 +341,42 @@ export function createToEntries<Key extends string | number | symbol, Value> ():
 export type EventFunction<Evt extends Event, Returned> = (event: Evt) => Returned
 
 export function createMatchesKeycombo (keycombo: string): EventFunction<KeyboardEvent, boolean> {
-  return event => eventMatchesKeycombo(event, ensureKeycombo(keycombo))
+  return event => eventMatchesKeycombo(event, narrowKeycombo(keycombo))
 }
 
 export function createMatchesMousecombo (mousecombo: string): EventFunction<MouseEvent, boolean> {
-  return event => eventMatchesMousecombo(event, ensureMousecombo(mousecombo))
+  return event => eventMatchesMousecombo(event, narrowMousecombo(mousecombo))
 }
 
 export function createMatchesPointercombo (pointercombo: string): EventFunction<PointerEvent, boolean> {
-  return event => eventMatchesPointercombo(event, ensurePointercombo(pointercombo))
+  return event => eventMatchesPointercombo(event, narrowPointercombo(pointercombo))
+}
+
+
+// HTMLELEMENT
+export type ElementFunction<El extends HTMLElement, Returned> = (element: El) => Returned
+
+export function createToFocusable (order: 'first' | 'last', elementIsCandidate?: boolean): ElementFunction<HTMLElement, HTMLElement | undefined> {
+  return element => {
+    if (elementIsCandidate && predicateFocusable(element)) return element
+
+    switch (order) {
+      case 'first':
+        for (let i = 0; i < element.children.length; i++) {
+          const focusable = createToFocusable(order, true)(element.children[i] as HTMLElement);
+          if (focusable) return focusable;
+        }
+        
+        break
+      case 'last':
+        for (let i = element.children.length - 1; i > -1; i--) {
+          const focusable = createToFocusable(order, true)(element.children[i] as HTMLElement);
+          if (focusable) return focusable;
+        }
+
+        break
+    }
+  }
 }
 
 

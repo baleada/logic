@@ -44,7 +44,7 @@ export class Resolveable<Value> {
     try {
       const promises = this.getPromise(...args)
 
-      this.computedValue = isArray(promises)
+      this.computedValue = predicateArray(promises)
         ? await createMapAsync<Promise<Value>, Value>(async promise => await promise)(promises)
         : await promises
 

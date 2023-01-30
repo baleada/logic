@@ -85,7 +85,7 @@ export class Navigateable<Item> {
   private _navigate (location: number, options: NavigateOptions = {}) {
     const { allow } = { ...defaultNavigateOptions, ...options }
 
-    const ensuredLocation = (() => {
+    const narrowedLocation = (() => {
       if (allow === 'possible') {
         if (location < 0 && allow === 'possible') {
           return 0
@@ -99,7 +99,7 @@ export class Navigateable<Item> {
       return location
     })()
       
-    this.computedLocation = ensuredLocation
+    this.computedLocation = narrowedLocation
   }
 
   next (options: NextAndPreviousOptions = {}) {
