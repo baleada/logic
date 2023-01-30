@@ -1,5 +1,5 @@
 import { createMapAsync } from '../pipes'
-import { isArray } from '../extracted'
+import { predicateArray } from '../extracted'
 
 export type ResolveableOptions = Record<never, never>
 

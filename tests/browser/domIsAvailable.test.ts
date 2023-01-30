@@ -2,7 +2,6 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 import { domIsAvailable } from '../../src/extracted'
-import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
   createSuite('domIsAvailable')

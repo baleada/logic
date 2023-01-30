@@ -1,7 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
-import { WithGlobals } from '../fixtures/types'
 
 type Context = {
   descriptor: { name: string }
@@ -81,6 +80,7 @@ suite(`status is 'queried' after successful query(...)`, async ({ puppeteer: { p
 
 suite(`status is 'errored' after unsuccessful query(...)`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
+          // @ts-expect-error
           const instance = new window.Logic.Grantable({ name: 'stub' })
           await instance.query()
           return instance.status

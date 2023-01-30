@@ -1,7 +1,6 @@
 import { withPuppeteer } from '@baleada/prepare'
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
   createSuite('createExceptAndOnlyEffect')
