@@ -1,7 +1,6 @@
 import * as classes from '../../../../src/classes'
 import * as pipes from '../../../../src/pipes'
 import * as extracted from '../../../../src/extracted'
-import { WithGlobals } from '../../../fixtures/types'
 
 import { createApp, nextTick } from 'vue'
 import App from './App.vue'
@@ -14,10 +13,10 @@ const Logic = {
   ...extracted,
 };
 
-(window as unknown as WithGlobals).Logic = Logic;
-(window as unknown as WithGlobals).Logic_classes = classes;
-(window as unknown as WithGlobals).Logic_pipes = pipes;
-(window as unknown as WithGlobals).Logic_extracted = extracted;
+window.Logic = Logic;
+window.Logic_classes = classes;
+window.Logic_pipes = pipes;
+window.Logic_extracted = extracted;
 
 const app = createApp(App),
       history = createWebHistory(),
@@ -30,4 +29,4 @@ const app = createApp(App),
 app.use(router)
 app.mount('#app');
 
-(window as unknown as WithGlobals).nextTick = nextTick
+window.nextTick = nextTick

@@ -9,6 +9,9 @@
       "dompurify",
       "@sindresorhus/slugify"
     ],
+    "typeRoots": [
+      "./tests/@types"
+    ],
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

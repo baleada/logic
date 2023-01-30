@@ -9,7 +9,7 @@ const suite = withPuppeteer(
 
 suite('stores the state', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithGlobals).Logic.Broadcastable('Baleada: a toolkit for building web apps')
+          const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           return instance.state
         }),
         expected = 'Baleada: a toolkit for building web apps'
@@ -19,7 +19,7 @@ suite('stores the state', async ({ puppeteer: { page } }) => {
 
 suite('assignment sets the state', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithGlobals).Logic.Broadcastable('Baleada: a toolkit for building web apps')
+          const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           instance.state = 'Baleada: a toolkit'
           return instance.state
         }),
@@ -30,7 +30,7 @@ suite('assignment sets the state', async ({ puppeteer: { page } }) => {
 
 suite('setState sets the state', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithGlobals).Logic.Broadcastable('Baleada: a toolkit for building web apps')
+          const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           instance.setState('Baleada: a toolkit')
           return instance.state
         }),
@@ -41,7 +41,7 @@ suite('setState sets the state', async ({ puppeteer: { page } }) => {
 
 suite('status is "ready" after construction', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithGlobals).Logic.Broadcastable('Baleada: a toolkit for building web apps')
+          const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           return instance.status
         }),
         expected = 'ready'
@@ -51,7 +51,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page } }) =>
 
 suite(`channel is BroadcastChannel`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithGlobals).Logic.Broadcastable('Baleada: a toolkit for building web apps')
+          const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           return instance.channel instanceof BroadcastChannel
         }),
         expected = true
@@ -65,16 +65,16 @@ suite(`broadcast(...) broadcasts state`, async ({ puppeteer: { browser, reloadNe
   await page2.evaluate(() => {
     const instance = new BroadcastChannel('baleada')
     instance.addEventListener('message', event => {
-      (window as unknown as WithGlobals).testState = event.data
+      window.testState = event.data
     })
   })
   
   await page.evaluate(async () => {
-    const instance = new (window as unknown as WithGlobals).Logic.Broadcastable('Baleada: a toolkit for building web apps')
+    const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
     instance.broadcast()
   })
 
-  const value = await page2.evaluate(() => (window as unknown as WithGlobals).testState),
+  const value = await page2.evaluate(() => window.testState),
         expected = 'Baleada: a toolkit for building web apps'
 
   assert.is(value, expected)
@@ -84,7 +84,7 @@ suite(`broadcast(...) broadcasts state`, async ({ puppeteer: { browser, reloadNe
 
 suite(`status is 'broadcasted' after successful broadcast`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithGlobals).Logic.Broadcastable('Baleada: a toolkit for building web apps')
+          const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           instance.broadcast()
           return instance.status
         }),
@@ -95,7 +95,7 @@ suite(`status is 'broadcasted' after successful broadcast`, async ({ puppeteer: 
 
 suite(`broadcast(...) stores the error`, async ({ puppeteer: { browser, reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithGlobals).Logic.Broadcastable(() => 'Baleada: a toolkit for building web apps')
+          const instance = new window.Logic.Broadcastable(() => 'Baleada: a toolkit for building web apps')
           instance.broadcast()
           return !!instance.error.message
         }),
@@ -108,7 +108,7 @@ suite(`broadcast(...) stores the error`, async ({ puppeteer: { browser, reloadNe
 
 suite(`status is 'errored' after unsuccessful broadcast`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithGlobals).Logic.Broadcastable(() => 'Baleada: a toolkit for building web apps')
+          const instance = new window.Logic.Broadcastable(() => 'Baleada: a toolkit for building web apps')
           instance.broadcast()
           return instance.status
         }),
@@ -123,17 +123,17 @@ suite(`stop(...) closes the channel`, async ({ puppeteer: { browser, reloadNext,
   await page2.evaluate(() => {
     const instance = new BroadcastChannel('baleada')
     instance.addEventListener('message', event => {
-      (window as unknown as WithGlobals).testState = event.data
+      window.testState = event.data
     })
   })
   
   await page.evaluate(async () => {
-    const instance = new (window as unknown as WithGlobals).Logic.Broadcastable('Baleada: a toolkit for building web apps')
+    const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
     instance.stop()
     instance.broadcast()
   })
 
-  const value = await page2.evaluate(() => !!(window as unknown as WithGlobals).testState),
+  const value = await page2.evaluate(() => !!window.testState),
         expected = false
 
   assert.is(value, expected)
@@ -143,7 +143,7 @@ suite(`stop(...) closes the channel`, async ({ puppeteer: { browser, reloadNext,
 
 suite(`status is 'stopped' after successful stop`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const instance = new (window as unknown as WithGlobals).Logic.Broadcastable('Baleada: a toolkit for building web apps')
+          const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           instance.stop()
           return instance.status
         }),
