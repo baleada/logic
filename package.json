@@ -41,9 +41,9 @@
   "bugs": {
     "url": "https://github.com/baleada/logic/issues"
   },
-  "homepage": "https://baleada.netlify.com",
+  "homepage": "https://baleada.dev",
   "devDependencies": {
-    "@baleada/prepare": "^0.5.29",
+    "@baleada/prepare": "^0.5.30",
     "@types/node": "^14.14.41",
     "@vitejs/plugin-vue": "^3.2.0",
     "esbuild": "^0.15.13",
@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.20.6",
-    "@sindresorhus/slugify": "^2.1.1",
+    "@sindresorhus/slugify": "^2.2.0",
     "@snigo.dev/color": "^0.0.6",
     "@types/dompurify": "^2.4.0",
     "@types/requestidlecallback": "^0.3.5",
