@@ -106,6 +106,63 @@ suite(`effect API denied() sets status`, async ({ puppeteer: { page } }) => {
   assert.is(value, 'denied')
 })
 
+suite(`effect API recognizedUntilReady() sets status`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    const instance = new window.Logic.Recognizeable(
+      [],
+      {
+        effects: {
+          click: (event, { recognizedUntilReady }) => recognizedUntilReady(),
+        }
+      }
+    )
+      
+    instance.recognize(new MouseEvent('click'))
+      
+    return instance.status
+  })
+
+  assert.is(value, 'recognized until ready')
+})
+
+suite(`effect API deniedUntilReady() sets status`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    const instance = new window.Logic.Recognizeable(
+      [],
+      {
+        effects: {
+          click: (event, { deniedUntilReady }) => deniedUntilReady(),
+        }
+      }
+    )
+      
+    instance.recognize(new MouseEvent('click'))
+      
+    return instance.status
+  })
+
+  assert.is(value, 'denied until ready')
+})
+
+suite(`effect API ready() sets status`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(() => {
+    const instance = new window.Logic.Recognizeable(
+      [],
+      {
+        effects: {
+          click: (event, { ready }) => ready(),
+        }
+      }
+    )
+      
+    instance.recognize(new MouseEvent('click'))
+      
+    return instance.status
+  })
+
+  assert.is(value, 'ready')
+})
+
 suite(`effect API getSequence() gets the new sequence`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     let sequence
@@ -459,6 +516,9 @@ suite(`includes all desired keys in effect API`, async ({ puppeteer: { page } })
           'setMetadata',
           'recognized',
           'denied',
+          'recognizedUntilReady',
+          'deniedUntilReady',
+          'ready',
           'getSequence',
           'onRecognized',
         ]

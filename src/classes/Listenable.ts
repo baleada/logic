@@ -246,11 +246,25 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     this.active.add({ target, id: [this.type, effect] } as ListenableActive<Type>)
   }
   private recognizeableListen (effect: (sequenceItem: ListenEffectParam<Type>) => any, options: ListenOptions<Type>) {
+    let effectStatus: 'ready' | 'performed' = 'ready'
+
     const guardedEffect = (sequenceItem: ListenEffectParam<Type>) => {
       this.recognizeable.recognize(sequenceItem, { onRecognized: sequenceItem => effect(sequenceItem) })
 
-      if (this.recognizeable.status === 'recognized') {
-        effect(sequenceItem)
+      switch (this.recognizeable.status) {
+        case 'recognized until ready':
+          if (effectStatus === 'ready') {
+            effect(sequenceItem)
+            effectStatus = 'performed'
+          }
+          break
+        case 'recognized':
+          effect(sequenceItem)
+          effectStatus = 'ready'
+          break
+        default:
+          effectStatus = 'ready'
+          break
       }
     }
 
@@ -425,9 +439,7 @@ export function eventMatchesKeycombo (event: KeyboardEvent, keycombo: Listenable
   return every<ListenableKeycomboItem>(({ name, type }, index) => {
     switch (type) {
       case 'singleCharacter':
-        if (name === '!') {
-          return event.key === '!'
-        }
+        if (name === '!') return event.key === '!'
 
         const keyToTest = event.altKey && fromComboItemNameToType(event.key) === 'custom'
           ? fromCodeToSingleCharacter(event.code)
