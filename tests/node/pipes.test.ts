@@ -25,6 +25,8 @@ import {
   createRename,
   createToEntries,
   createToKeys,
+  createToSome,
+  createToEvery,
   Pipeable,
 } from '../../src/pipes'
 
@@ -348,12 +350,41 @@ suite(`createToEntries() transforms object into entries`, ({ object }) => {
   assert.equal(value, [['one', 'value'], ['two', 'value']])
 })
 
-// createToKeys
 suite(`createToKeys() transforms object into keys`, ({ object }) => {
   const value = createToKeys<string>()(object)
 
   assert.equal(value, ['one', 'two'])
 })
+
+suite(`createToSome() transforms object into some`, ({ object }) => {
+  ;(() => {
+    const value = createToSome<string, string>((key, value) => key && value)(object)
+
+    assert.ok(value)
+  })()
+
+  ;(() => {
+    const value = createToSome<string, string>((key, value) => key && !value)(object)
+
+    assert.not.ok(value)
+  })()
+})
+
+suite(`createToEvery() transforms object into every`, ({ object }) => {
+  ;(() => {
+    const value = createToEvery<string, string>((key, value) => key && value)(object)
+
+    assert.ok(value)
+  })()
+
+  ;(() => {
+    const value = createToEvery<string, string>((key, value) => key && !value)(object)
+
+    assert.not.ok(value)
+  })()
+})
+
+
 
 
 // STRING

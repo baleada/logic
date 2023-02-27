@@ -70,9 +70,9 @@ export function createMapAsync<Item, Mapped> (transform: (item: Item, index: num
   }
 }
 
-export function createFilterAsync<Item> (condition: (item: Item, index: number) => Promise<boolean>): ArrayFunctionAsync<Item, Item[]> {
+export function createFilterAsync<Item> (predicate: (item: Item, index: number) => Promise<boolean>): ArrayFunctionAsync<Item, Item[]> {
   return async array => {
-    const transformedAsync = await createMapAsync<Item, boolean>(condition)(array)
+    const transformedAsync = await createMapAsync<Item, boolean>(predicate)(array)
     return createFilter<Item>((_, index) => transformedAsync[index])(array)
   }
 }
@@ -207,9 +207,9 @@ export function createSlice<Item> (from: number, to?: number): ArrayFunction<Ite
   }
 }
 
-export function createFilter<Item> (condition: (item: Item, index: number) => boolean): ArrayFunction<Item, Item[]> {
+export function createFilter<Item> (predicate: (item: Item, index: number) => boolean): ArrayFunction<Item, Item[]> {
   return array => pipe(
-    filter(condition),
+    filter(predicate),
     toArray()
   )(array) as Item[]
 }
@@ -346,6 +346,30 @@ export function createToKeys<Key extends string | number | symbol> (): ObjectFun
     }
 
     return keys
+  }
+}
+
+export function createToSome<Key extends string | number | symbol, Value> (predicate: (key: Key, value: Value) => unknown): ObjectFunction<Key, Value, boolean> {
+  return object => {
+    for (const key in object) {
+      if (predicate(key, object[key])) {
+        return true
+      }
+    }
+
+    return false
+  }
+}
+
+export function createToEvery<Key extends string | number | symbol, Value> (predicate: (key: Key, value: Value) => unknown): ObjectFunction<Key, Value, boolean> {
+  return object => {
+    for (const key in object) {
+      if (!predicate(key, object[key])) {
+        return false
+      }
+    }
+
+    return true
   }
 }
 
