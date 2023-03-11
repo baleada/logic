@@ -1,4 +1,4 @@
-import { Listenable } from "./Listenable"
+import { Listenable } from './Listenable'
 import type { ListenEffect } from './Listenable'
 
 export type CopyableOptions = Record<never, never>

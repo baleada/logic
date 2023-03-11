@@ -1,35 +1,32 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import {
-  createReduceAsync,
-  createReduce,
-  createForEachAsync,
-  createMapAsync,
-  createFilterAsync,
-  createRemove,
-  createInsert,
-  createReorder,
-  createSwap,
-  createReplace,
-  createUnique,
-  createSlice,
-  createFilter,
-  createMap,
-  createConcat,
-  createReverse,
-  createSort,
-  createSlug,
-  createClip,
-  createClamp,
-  createDetermine,
-  createRename,
-  createToEntries,
-  createToKeys,
-  createToSome,
-  createToEvery,
-  createPredicateEqual,
-  Pipeable,
-} from '../../src/pipes'
+import { createReduceAsync } from '../../src/pipes/createReduceAsync'
+import { createReduce } from '../../src/pipes/createReduce'
+import { createForEachAsync } from '../../src/pipes/createForEachAsync'
+import { createMapAsync } from '../../src/pipes/createMapAsync'
+import { createFilterAsync } from '../../src/pipes/createFilterAsync'
+import { createRemove } from '../../src/pipes/createRemove'
+import { createInsert } from '../../src/pipes/createInsert'
+import { createReorder } from '../../src/pipes/createReorder'
+import { createSwap } from '../../src/pipes/createSwap'
+import { createReplace } from '../../src/pipes/createReplace'
+import { createUnique } from '../../src/pipes/createUnique'
+import { createSlice } from '../../src/pipes/createSlice'
+import { createFilter } from '../../src/pipes/createFilter'
+import { createMap } from '../../src/pipes/createMap'
+import { createConcat } from '../../src/pipes/createConcat'
+import { createReverse } from '../../src/pipes/createReverse'
+import { createSort } from '../../src/pipes/createSort'
+import { createSlug } from '../../src/pipes/createSlug'
+import { createClip } from '../../src/pipes/createClip'
+import { createClamp } from '../../src/pipes/createClamp'
+import { createDetermine } from '../../src/pipes/createDetermine'
+import { createRename } from '../../src/pipes/createRename'
+import { createToEntries } from '../../src/pipes/createToEntries'
+import { createToKeys } from '../../src/pipes/createToKeys'
+import { createToSome } from '../../src/pipes/createToSome'
+import { createToEvery } from '../../src/pipes/createToEvery'
+import { createPredicateEqual } from '../../src/pipes/createPredicateEqual'
 
 type Context = {
   array: string[],

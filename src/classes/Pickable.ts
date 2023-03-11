@@ -1,5 +1,12 @@
 import { find } from 'lazy-collections'
-import { createMap, createFilter, createConcat, Pipeable, createSlice, createUnique } from "../pipes"
+import {
+  Pipeable,
+  createConcat,
+  createMap,
+  createFilter,
+  createSlice,
+  createUnique,
+} from '../pipes'
 import { predicateUndefined } from '../extracted'
 
 export type PickableOptions = {

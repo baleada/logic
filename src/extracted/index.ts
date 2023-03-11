@@ -2,21 +2,12 @@ import {
   find,
   map,
   unique,
-  some,
   toArray,
   pipe,
-  join
 } from 'lazy-collections'
-import {
-  createMap,
-  Pipeable,
-} from './pipes'
-import {
-  ListenableSupportedEventType,
-  ListenEffect,
-  ListenEffectParam,
-  ListenOptions,
-} from './classes/Listenable'
+import { Pipeable, createMap } from '../pipes'
+
+export type { DeepRequired, Expand } from './types'
 
 // LISTENABLE
 export function toKey (name: string | ListenableKeyAlias): string {
@@ -172,100 +163,6 @@ const flagsByModifierOrAlias: Record<ListenableModifier | ListenableModifierAlia
   option: 'altKey',
 }
 
-export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventType> (type: Type, effect: ListenEffect<Type>, options: ListenOptions<Type>): (param: ListenEffectParam<Type>) => void {
-  const { except = [], only = [] } = options
-
-  if (
-    type === 'keydown'
-    || type === 'keyup'
-  ) {
-    return ((event: ListenEffectParam<'keydown'>) => {
-      const { target } = event,
-            [matchesOnly, matchesExcept] = target instanceof Element
-              ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
-              : [false, true]
-  
-      if (matchesOnly) {
-        // @ts-ignore
-        effect(event)
-        return
-      }
-      
-      if (only.length === 0 && !matchesExcept) {
-        // @ts-ignore
-        effect(event)
-        return
-      }
-    }) as (param: ListenEffectParam<Type>) => void
-  }
-  
-  if (
-    type === 'click'
-    || type === 'dblclick'
-    || type === 'contextmenu'
-    || type.startsWith('mouse')
-  ) {
-    return ((event: ListenEffectParam<'mousedown'>) => {
-      const { target } = event,
-            [matchesOnly, matchesExcept] = target instanceof Element
-              ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
-              : [false, true]
-  
-      if (matchesOnly) {
-        // @ts-ignore
-        effect(event)
-        return
-      }
-      
-      if (only.length === 0 && !matchesExcept) {
-        // @ts-expect-error
-        effect(event)
-        return
-      }
-    }) as (param: ListenEffectParam<Type>) => void
-  }
-
-  if (type.startsWith('pointer')) {
-    return ((event: ListenEffectParam<'pointerdown'>) => {
-      const { target } = event,
-            [matchesOnly, matchesExcept] = target instanceof Element
-              ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
-              : [false, true]
-  
-      if (matchesOnly) {
-        // @ts-expect-error
-        effect(event)
-        return
-      }
-      
-      if (only.length === 0 && !matchesExcept) {
-        // @ts-expect-error
-        effect(event)
-        return
-      }
-    }) as (param: ListenEffectParam<Type>) => void
-  }
-  
-  return ((event: ListenEffectParam<Type>) => {
-    const { target } = event,
-          [matchesOnly, matchesExcept] = target instanceof Element
-            ? createMap<string[], boolean>(selectors => some<string>(selector => target.matches(selector))(selectors) as boolean)([only, except])
-            : [false, true]
-
-    if (matchesOnly) {
-      // @ts-ignore
-      effect(event, {})
-      return
-    }
-    
-    if (only.length === 0 && !matchesExcept) {
-      // @ts-ignore
-      effect(event, {})
-      return
-    }
-  }) as (param: ListenEffectParam<Type>) => void
-}
-
 export function predicateModified<EventType extends KeyboardEvent | MouseEvent> ({ event, alias }: { event: EventType, alias: string }) {
   return predicatesByModifier[alias]?.(event)
 }
@@ -282,58 +179,16 @@ const predicatesByModifier: Record<ListenableModifier | ListenableModifierAlias,
   option: <EventType extends KeyboardEvent | MouseEvent>(event: EventType): boolean => event.altKey,
 }
 
-// STOREABLE
-export function domIsAvailable (): boolean {
-  try {
-    return !!window
-  } catch (error) {
-    return false
-  }
-}
+export { createExceptAndOnlyEffect } from './createExceptAndOnlyEffect'
 
-// PREDICATES
-export function predicateArray (value: unknown): value is any[] {
-  return Array.isArray(value)
-}
+export { getDomAvailability } from './getDomAvailability'
 
-export function predicateUndefined (value: unknown): value is undefined {
-  return value === undefined
-}
-
-export function predicateFunction (value: unknown): value is (...args: any[]) => any {
-  return typeof value === 'function'
-}
-
-export function predicateNull (value: unknown): value is null {
-  return value === null
-}
-
-export function predicateNumber (value: unknown): value is number {
-  return typeof value === 'number'
-}
-
-export function predicateString (value: unknown): value is string {
-  return typeof value === 'string'
-}
-
-// Adapted from React Aria https://github.com/adobe/react-spectrum/blob/b6786da906973130a1746b2bee63215bba013ca4/packages/%40react-aria/focus/src/FocusScope.tsx#L256
-const tabbableSelector = join(':not([hidden]):not([tabindex="-1"]),')([
-  'input:not([disabled]):not([type=hidden])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
-  'button:not([disabled])',
-  'a[href]',
-  'area[href]',
-  'summary',
-  'iframe',
-  'object',
-  'embed',
-  'audio[controls]',
-  'video[controls]',
-  '[contenteditable]',
-  '[tabindex]:not([disabled])',
-]) as string
-
-export function predicateFocusable (element: HTMLElement): boolean {
-  return element.matches(tabbableSelector)
-}
+export {
+  predicateArray,
+  predicateUndefined,
+  predicateFunction,
+  predicateNull,
+  predicateNumber,
+  predicateString,
+  predicateObject,
+} from './predicates'

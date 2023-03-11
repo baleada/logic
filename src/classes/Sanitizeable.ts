@@ -1,5 +1,5 @@
 import createDOMPurify, { DOMPurifyI, Config } from 'dompurify'
-import { domIsAvailable } from '../extracted'
+import { getDomAvailability } from '../extracted'
 
 export type SanitizeableOptions = Config
 
@@ -15,7 +15,7 @@ export class Sanitizeable {
   private computedDompurify: DOMPurifyI
   private computedStatus: SanitizeableStatus
   private ready () {
-    if (domIsAvailable()) {
+    if (getDomAvailability() === 'available') {
       this.computedDompurify = createDOMPurify()
       this.computedDompurify.setConfig(this.domPurifyConfig)
     }
@@ -30,7 +30,7 @@ export class Sanitizeable {
     this.setHtml(html)
   }
   get dompurify () {
-    if (!this.computedDompurify && domIsAvailable()) {
+    if (!this.computedDompurify && getDomAvailability() === 'available') {
       this.computedDompurify = createDOMPurify()
       this.computedDompurify.setConfig(this.domPurifyConfig)
     }

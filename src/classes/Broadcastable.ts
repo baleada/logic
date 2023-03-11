@@ -1,4 +1,4 @@
-import type { Listenable, ListenEffect } from "./Listenable"
+import type { Listenable, ListenEffect } from './Listenable'
 
 export type BroadcastableOptions = {
   name?: string
