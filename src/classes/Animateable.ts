@@ -9,7 +9,13 @@ import {
   toArray,
 } from 'lazy-collections'
 import { Listenable } from './Listenable'
-import { predicateFunction, predicateUndefined, predicateNumber, predicateString, predicateArray } from '../extracted'
+import {
+  predicateFunction,
+  predicateUndefined,
+  predicateNumber,
+  predicateString,
+  predicateArray
+} from '../extracted'
 import {
   createConcat,
   createFilter,

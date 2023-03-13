@@ -1,6 +1,5 @@
-import { createReorder } from './createReorder'
-
 import type { ArrayFunction } from './types'
+import { createReorder } from './createReorder'
 import { Pipeable } from './Pipeable'
 
 export function createSwap<Item>(indices: [number, number]): ArrayFunction<Item, Item[]> {

@@ -1,8 +1,7 @@
 import { createReduceAsync } from './createReduceAsync'
-
 import { createReduce } from './createReduce'
-// PIPEABLE
 
+// PIPEABLE
 export class Pipeable {
   constructor(private state: any) { }
 

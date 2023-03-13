@@ -1,9 +1,7 @@
 import { findIndex } from 'lazy-collections'
-
+import type { MapFunction } from './types'
 import { createReduce } from './createReduce'
 import { createReplace } from './createReplace'
-
-import type { MapFunction } from './types'
 
 export function createRename<Key, Value>(from: Key, to: Key): MapFunction<Key, Value, Map<Key, Value>> {
   return map => {

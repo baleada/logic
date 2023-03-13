@@ -71,11 +71,10 @@ export type ListenableKeycomboItem = {
   type: ListenableComboItemType | 'custom'
 }
 
-const toListenableKeycomboItems = createMap<string, ListenableKeycomboItem>(name => ({ name, type: fromComboItemNameToType(name) }))
 export function narrowKeycombo (type: string): ListenableKeycomboItem[] {
   return new Pipeable(type).pipe(
     toCombo,
-    toListenableKeycomboItems
+    createMap<string, ListenableKeycomboItem>(name => ({ name, type: fromComboItemNameToType(name) }))
   ) as ListenableKeycomboItem[]
 }
 

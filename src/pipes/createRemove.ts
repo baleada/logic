@@ -1,5 +1,4 @@
 import type { ArrayFunction } from './types'
-
 import { createConcat } from './createConcat'
 import { createSlice } from './createSlice'
 

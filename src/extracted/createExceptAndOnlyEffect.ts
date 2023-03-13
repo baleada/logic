@@ -1,5 +1,5 @@
-import { some } from 'lazy-collections';
-import { createMap } from '../pipes';
+import { some } from 'lazy-collections'
+import { createMap } from '../pipes'
 import {
   ListenableSupportedEventType,
   ListenEffect,
