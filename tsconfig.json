@@ -4,8 +4,6 @@
     "module": "esnext",
     "types": [
       "node",
-      "resize-observer-browser",
-      "requestidlecallback",
       "dompurify",
       "@sindresorhus/slugify"
     ],
@@ -17,10 +15,14 @@
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationDir": "types",
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "paths": {
+      "@*": ["./src/*"],
+    },
   },
   "include": [
     "src/**/*",
+    "tests/**/*",
   ],
   "exclude": [
     "node_modules"

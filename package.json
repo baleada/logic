@@ -12,7 +12,9 @@
     }
   },
   "scripts": {
-    "prepare": "tsc && rollup --config rollup.config.ts --configPlugin typescript --bundleConfigAsCjs",
+    "tsc": "tsc --project tsconfig.build.json",
+    "rollup": "rollup --config rollup.config.ts --configPlugin 'typescript={tsconfig: `tsconfig.build.json`}' --bundleConfigAsCjs",
+    "prepare": "npm run tsc && npm run rollup",
     "test:coverage": "node -r esbuild-register scripts/testCoverage.ts",
     "test:only": "run() { uvu -r esbuild-register tests/$2 $1.test.ts$; }; run",
     "test:node": "npm run test:only . node",
@@ -30,7 +32,8 @@
     "user interface",
     "user interface logic",
     "class",
-    "pipe"
+    "pipe",
+    "factory"
   ],
   "author": {
     "name": "Alex Vipond",
@@ -43,17 +46,17 @@
   },
   "homepage": "https://baleada.dev",
   "devDependencies": {
-    "@baleada/prepare": "^0.5.30",
+    "@baleada/prepare": "^0.5.39",
     "@types/node": "^14.14.41",
-    "@vitejs/plugin-vue": "^3.2.0",
-    "esbuild": "^0.15.13",
-    "esbuild-register": "^3.3.3",
-    "rollup": "^3.2.5",
-    "tslib": "^2.4.1",
-    "typescript": "^4.8.4",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "esbuild": "^0.17.11",
+    "esbuild-register": "^3.4.2",
+    "rollup": "^3.19.1",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5",
     "uvu": "^0.5.6",
-    "vite": "^3.2.5",
-    "vue": "^3.2.45",
+    "vite": "^4.1.4",
+    "vue": "^3.2.47",
     "vue-router": "^4.1.6"
   },
   "dependencies": {
@@ -61,8 +64,6 @@
     "@sindresorhus/slugify": "^2.2.0",
     "@snigo.dev/color": "^0.0.6",
     "@types/dompurify": "^2.4.0",
-    "@types/requestidlecallback": "^0.3.5",
-    "@types/resize-observer-browser": "^0.1.7",
     "bezier-easing": "^2.1.0",
     "dequal": "^2.0.3",
     "dompurify": "^2.4.1",
