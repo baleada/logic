@@ -2,8 +2,8 @@
 
 export function getDomAvailability(): 'available' | 'unavailable' {
   try {
-    return !!window ? 'available' : 'unavailable';
+    return !!window ? 'available' : 'unavailable'
   } catch (error) {
-    return 'unavailable';
+    return 'unavailable'
   }
 }

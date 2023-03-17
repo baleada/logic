@@ -1,19 +1,20 @@
 import { find } from 'lazy-collections'
-import { createFilter } from '../../pipes'
-import {
+import { createFindAsync } from '../../pipes'
+import { createGraphFns } from './createGraphFns'
+import type {
   GraphNode,
-  GraphEdge,
+  GraphEdgeAsync,
   GraphState,
   GraphTraversal,
-  GraphSharedAncestor
+  GraphSharedAncestor,
 } from './types'
 
-export type DirectedAcyclic<
-  Id extends string = string,
-  Metadata = any,
+export type DirectedAcyclicFns<
+  Id extends string,
+  Metadata
 > = {
-  toSharedAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => GraphSharedAncestor<Id>[],
-  toTraversals: (node: GraphNode<Id>) => GraphTraversal<Id, Metadata>[],
+  toSharedAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => Promise<GraphSharedAncestor<Id>[]>,
+  toTraversals: (node: GraphNode<Id>) => Promise<GraphTraversal<Id, Metadata>[]>,
   walk: (
     stepEffect: (
       path: GraphNode<Id>[],
@@ -21,23 +22,23 @@ export type DirectedAcyclic<
       stop: () => void,
     ) => void,
     options?: { entry?: Id },
-  ) => void,
-  toPath: (state: GraphState<Id, Metadata>) => GraphNode<Id>[],
+  ) => Promise<void>,
+  toPath: (state: GraphState<Id, Metadata>) => Promise<GraphNode<Id>[]>,
   toIndegree: (id: Id) => number,
   toOutdegree: (id: Id) => number,
-  toIncoming: (id: Id) => GraphEdge<Id, Metadata>[],
-  toOutgoing: (id: Id) => GraphEdge<Id, Metadata>[],
+  toIncoming: (id: Id) => GraphEdgeAsync<Id, Metadata>[],
+  toOutgoing: (id: Id) => GraphEdgeAsync<Id, Metadata>[],
 }
 
-export function createDirectedAcyclic<
-  Id extends string = string,
-  Metadata = any,
+export function createDirectedAcyclicAsyncFns<
+  Id extends string,
+  Metadata
 > (
   nodes: GraphNode<Id>[],
-  edges: GraphEdge<Id, Metadata>[],
+  edges: GraphEdgeAsync<Id, Metadata>[],
   toUnsetMetadata: ((node: GraphNode<Id>) => Metadata),
   toMockMetadata: (node: GraphNode<Id>, totalConnectionsFollowed: number) => Metadata,
-): DirectedAcyclic<Id, Metadata> {
+): DirectedAcyclicFns<Id, Metadata> {
   const unsetState = {} as GraphState<Id, Metadata>
   for (const node of nodes) {
     unsetState[node] = {
@@ -46,9 +47,9 @@ export function createDirectedAcyclic<
     }
   }
 
-  const toSharedAncestors: DirectedAcyclic<Id, Metadata>['toSharedAncestors'] = (a, b) => {
-    const aTraversals = toTraversals(a),
-          bTraversals = toTraversals(b),
+  const toSharedAncestors: DirectedAcyclicFns<Id, Metadata>['toSharedAncestors'] = async (a, b) => {
+    const aTraversals = await toTraversals(a),
+          bTraversals = await toTraversals(b),
           sharedAncestors: GraphSharedAncestor<Id>[] = []
 
     for (const { path: aPath } of aTraversals) {
@@ -64,7 +65,7 @@ export function createDirectedAcyclic<
                 distances: {
                   [a]: aPath.length - aPathIndex - 1,
                   [b]: bPath.length - bPathIndex - 1,
-                }
+                },
               } as GraphSharedAncestor<Id>)
             }
           }
@@ -75,10 +76,10 @@ export function createDirectedAcyclic<
     return sharedAncestors
   }
 
-  const toTraversals: DirectedAcyclic<Id, Metadata>['toTraversals'] = node => {
+  const toTraversals: DirectedAcyclicFns<Id, Metadata>['toTraversals'] = async node => {
     const traversals: GraphTraversal<Id, Metadata>[] = []
     
-    walk((path, state) => {
+    await walk((path, state) => {
       if (path.at(-1) === node) {
         traversals.push({
           path,
@@ -90,7 +91,7 @@ export function createDirectedAcyclic<
     return traversals
   }
 
-  const walk: DirectedAcyclic<Id, Metadata>['walk'] = (stepEffect, options = {}) => {
+  const walk: DirectedAcyclicFns<Id, Metadata>['walk'] = async (stepEffect, options = {}) => {
     const { entry } = options,
           state: GraphState<Id, Metadata> = JSON.parse(JSON.stringify(unsetState)),
           stop = () => {
@@ -102,13 +103,15 @@ export function createDirectedAcyclic<
       || find<GraphNode<Id>>(node => toIndegree(node) === 0)(nodes) as GraphNode<Id>
     let status: 'walking' | 'stopped' = 'walking'
 
+    const path = await toPath(unsetState)
+
     stepEffect(
-      toPath(unsetState),
+      path,
       JSON.parse(JSON.stringify(unsetState)),
       stop,
     )
   
-    function step () {
+    async function step () {
       if (status === 'stopped') return
 
       const isExhausted = totalConnectionsFollowedByNode[location] === toOutdegree(location)
@@ -119,10 +122,10 @@ export function createDirectedAcyclic<
         state[location].status = 'unset'
         state[location].metadata = toUnsetMetadata(location)
 
-        const path = toPath(state)
+        const path = await toPath(state)
         location = path.at(-2)
 
-        step()
+        await step()
         return
       }
       
@@ -131,7 +134,7 @@ export function createDirectedAcyclic<
       state[location].status = 'set'
       state[location].metadata = toMockMetadata(location, totalConnectionsFollowedByNode[location])
       
-      const path = toPath(state)
+      const path = await toPath(state)
 
       stepEffect(
         path,
@@ -145,26 +148,26 @@ export function createDirectedAcyclic<
 
       if (toOutdegree(newLocation) > 0) location = newLocation
 
-      step()
+      await step()
     }
   
-    step()
+    await step()
   }
 
-  const toPath: DirectedAcyclic<Id, Metadata>['toPath'] = state => {
+  const toPath: DirectedAcyclicFns<Id, Metadata>['toPath'] = async state => {
     const path = [
             find<GraphNode<Id>>(
               node => toIndegree(node) === 0
-            )(nodes) as GraphNode<Id>
+            )(nodes) as GraphNode<Id>,
           ],
           getLastOutdegree = () => toOutdegree(path.at(-1)),
           getLastStatus = () => state[path.at(-1)].status
   
     while (getLastOutdegree() > 0 && getLastStatus() === 'set') {
       const outgoing = toOutgoing(path.at(-1)),
-            edge = find<GraphEdge<Id, Metadata>>(
+            edge = await createFindAsync<GraphEdgeAsync<Id, Metadata>>(
               ({ predicateTraversable }) => predicateTraversable(state)
-            )(outgoing) as GraphEdge<Id, Metadata>
+            )(outgoing)
   
       path.push(edge.to)
     }
@@ -172,21 +175,12 @@ export function createDirectedAcyclic<
     return path
   }
 
-  const toIndegree: DirectedAcyclic<Id, Metadata>['toIndegree'] = node => {
-    return toIncoming(node).length
-  }
-
-  const toOutdegree: DirectedAcyclic<Id, Metadata>['toOutdegree'] = node => {
-    return toOutgoing(node).length
-  }
-
-  const toIncoming: DirectedAcyclic<Id, Metadata>['toIncoming'] = node => {
-    return createFilter<GraphEdge<Id, Metadata>>(({ to }) => to === node)(edges)
-  }
-  
-  const toOutgoing: DirectedAcyclic<Id, Metadata>['toOutgoing'] = node => {
-    return createFilter<GraphEdge<Id, Metadata>>(({ from }) => from === node)(edges)
-  }
+  const {
+    toIndegree,
+    toOutdegree,
+    toIncoming,
+    toOutgoing,
+  } = createGraphFns(nodes, edges)
 
   return {
     toSharedAncestors,

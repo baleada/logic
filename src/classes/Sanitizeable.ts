@@ -1,4 +1,5 @@
-import createDOMPurify, { DOMPurifyI, Config } from 'dompurify'
+import type { DOMPurifyI, Config } from 'dompurify'
+import createDOMPurify from 'dompurify'
 import { getDomAvailability } from '../extracted'
 
 export type SanitizeableOptions = Config

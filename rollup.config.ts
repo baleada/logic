@@ -15,8 +15,8 @@ const external = [
         .input([
           'src/classes/index.ts',
           'src/pipes/index.ts',
-          // 'src/recognizeable-effects/index.ts',
-          // 'src/graph-fns/index.ts',
+          // 'src/factories/recognizeable-effects/index.ts',
+          'src/factories/graph-fns/index.ts',
         ])
         .external(external)
         .resolve()
@@ -24,7 +24,7 @@ const external = [
       esm = shared
         .delete({ targets: 'lib/*', verbose: true })
         .esm({ file: 'lib/index.js', target: 'browser' })
-        .analyzer()
+        .analyzer({ limit: 0 })
         .configure(),
       cjs = shared
         .cjs({ file: 'lib/index.cjs' })

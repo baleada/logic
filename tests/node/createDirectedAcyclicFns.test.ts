@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { createDirectedAcyclic } from '../../src/factories/graph-fns/createDirectedAcyclic'
-import type { DirectedAcyclic } from '../../src/factories/graph-fns/createDirectedAcyclic'
+import { createDirectedAcyclicFns } from '../../src/factories/graph-fns/createDirectedAcyclicFns'
+import type { DirectedAcyclicFns } from '../../src/factories/graph-fns/createDirectedAcyclicFns'
 import type { GraphEdge, GraphNode } from '../../src/factories/graph-fns/types'
 
 const suite = createSuite<{
-  nodes: GraphNode[],
-  edges: GraphEdge[],
-  directedAcyclic: DirectedAcyclic<string, number>,
-}>('createDirectedAcyclic')
+  nodes: GraphNode<any>[],
+  edges: GraphEdge<any, any>[],
+  directedAcyclic: DirectedAcyclicFns<string, number>,
+}>('createDirectedAcyclicFns')
 
 suite.before(context => {
   context.nodes = [
@@ -31,80 +31,12 @@ suite.before(context => {
     { from: 'c', to: 'g', predicateTraversable: state => state.c.metadata === 1 },
   ]
 
-  context.directedAcyclic = createDirectedAcyclic(
+  context.directedAcyclic = createDirectedAcyclicFns(
     context.nodes,
     context.edges,
     () => 0,
     (node, totalConnectionsFollowed) => totalConnectionsFollowed,
   )
-})
-
-suite(`toIncoming(...) works`, ({ directedAcyclic }) => {
-  ;(() => {
-    const value = directedAcyclic.toIncoming('a'),
-          expected = []
-
-    assert.equal(value, expected)
-  })()
-  
-  ;(() => {
-    const value = directedAcyclic.toIncoming('b')
-
-    assert.is(value.length, 1)
-    for (const { to } of value) {
-      assert.is(to, 'b')
-    }
-  })()
-})
-
-suite(`toOutgoing(...) works`, ({ directedAcyclic }) => {
-  ;(() => {
-    const value = directedAcyclic.toOutgoing('a')
-    
-    assert.is(value.length, 3)
-    for (const { from } of value) {
-      assert.is(from, 'a')
-    }
-  })()
-  
-  ;(() => {
-    const value = directedAcyclic.toOutgoing('g'),
-          expected = []
-
-    assert.equal(value, expected)
-  })()
-})
-
-suite(`toIndegree(...) works`, ({ directedAcyclic }) => {
-  ;(() => {
-    const value = directedAcyclic.toIndegree('a'),
-          expected = 0
-
-    assert.is(value, expected)
-  })()
-  
-  ;(() => {
-    const value = directedAcyclic.toIndegree('b'),
-          expected = 1
-
-    assert.is(value, expected)
-  })()
-})
-
-suite(`toOutdegree(...) works`, ({ directedAcyclic }) => {
-  ;(() => {
-    const value = directedAcyclic.toOutdegree('a'),
-          expected = 3
-
-    assert.is(value, expected)
-  })()
-  
-  ;(() => {
-    const value = directedAcyclic.toOutdegree('g'),
-          expected = 0
-
-    assert.is(value, expected)
-  })()
 })
 
 suite(`toPath(...) works`, ({ directedAcyclic }) => {
@@ -162,9 +94,9 @@ suite(`toTraversals works`, ({ directedAcyclic }) => {
                 d: { status: 'unset', metadata: 0 },
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 }
-              }
-            }
+                g: { status: 'unset', metadata: 0 },
+              },
+            },
           ]
 
     assert.equal(value, expected)
@@ -182,9 +114,9 @@ suite(`toTraversals works`, ({ directedAcyclic }) => {
                 d: { status: 'unset', metadata: 0 },
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 }
-              }
-            }
+                g: { status: 'unset', metadata: 0 },
+              },
+            },
           ]
     
     assert.equal(value, expected)
@@ -202,8 +134,8 @@ suite(`toTraversals works`, ({ directedAcyclic }) => {
                 d: { status: 'unset', metadata: 0 },
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 }
-              }
+                g: { status: 'unset', metadata: 0 },
+              },
             },
             {
               path: [ 'a', 'd' ],
@@ -214,9 +146,9 @@ suite(`toTraversals works`, ({ directedAcyclic }) => {
                 d: { status: 'unset', metadata: 0 },
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 }
-              }
-            }
+                g: { status: 'unset', metadata: 0 },
+              },
+            },
           ]
     
     assert.equal(value, expected)
@@ -234,7 +166,7 @@ suite(`toSharedAncestors works`, ({ directedAcyclic }) => {
   ;(() => {
     const value = directedAcyclic.toSharedAncestors('b', 'e'),
           expected = [
-            { node: 'a', distances: { b: 1, e: 2 } }
+            { node: 'a', distances: { b: 1, e: 2 } },
           ]
 
     assert.equal(value, expected)
@@ -244,7 +176,7 @@ suite(`toSharedAncestors works`, ({ directedAcyclic }) => {
     const value = directedAcyclic.toSharedAncestors('d', 'g'),
           expected = [
             { node: 'a', distances: { d: 2, g: 2 } },
-            { node: 'a', distances: { d: 1, g: 2 } }
+            { node: 'a', distances: { d: 1, g: 2 } },
           ]
 
     assert.equal(value, expected)

@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { createDecisionTree } from '../../src/factories/graph-fns/createDecisionTree'
-import type { DecisionTree } from '../../src/factories/graph-fns/createDecisionTree'
-import { GraphEdge, GraphNode } from '../../src/factories/graph-fns/types'
+import { createDecisionTreeFns } from '../../src/factories/graph-fns/createDecisionTreeFns'
+import type { DecisionTreeFns } from '../../src/factories/graph-fns/createDecisionTreeFns'
+import type { GraphEdge, GraphNode } from '../../src/factories/graph-fns/types'
 
 const suite = createSuite<{
-  nodes: GraphNode[],
-  edges: GraphEdge[],
-  decisionTree: DecisionTree<string>,
-}>('createDecisionTree')
+  nodes: GraphNode<any>[],
+  edges: GraphEdge<any, any>[],
+  decisionTree: DecisionTreeFns<string>,
+}>('createDecisionTreeFns')
 
 suite.before(context => {
   context.nodes = [
@@ -30,7 +30,7 @@ suite.before(context => {
     { from: 'c', to: 'g', predicateTraversable: state => state.c.metadata === true },
   ]
 
-  context.decisionTree = createDecisionTree(
+  context.decisionTree = createDecisionTreeFns(
     context.nodes,
     context.edges,
   )
@@ -56,7 +56,7 @@ suite(`walk prioritizes false branches by default`, ({ decisionTree }) => {
 })
 
 suite(`walk optionally prioritizes true branches`, ({ nodes, edges }) => {
-  const decisionTree = createDecisionTree(
+  const decisionTree = createDecisionTreeFns(
     nodes,
     edges,
     { walkPriority: true }

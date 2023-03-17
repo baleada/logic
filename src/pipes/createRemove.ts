@@ -7,6 +7,6 @@ export function createRemove<Item>(index: number): ArrayFunction<Item, Item[]> {
     return createConcat(
       createSlice<Item>(0, index)(array),
       createSlice<Item>(index + 1)(array)
-    )([]);
-  };
+    )([])
+  }
 }

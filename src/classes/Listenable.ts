@@ -3,8 +3,6 @@ import {
   every,
   find,
 } from 'lazy-collections'
-import { Recognizeable } from './Recognizeable'
-import type { RecognizeableOptions } from './Recognizeable'
 import {
   predicateNumber,
   toKey,
@@ -20,6 +18,8 @@ import type {
   ListenableKeycomboItem,
 } from '../extracted'
 import { createClip } from '../pipes'
+import type { RecognizeableOptions } from './Recognizeable'
+import { Recognizeable } from './Recognizeable'
 
 export type ListenableSupportedType = 'recognizeable'
   | 'intersect'
@@ -362,40 +362,40 @@ type ListenableImplementation = 'recognizeable' | 'intersection' | 'mutation' | 
 const predicatesByImplementation = new Map<ListenableImplementation, ((type: string) => boolean)>([
   [
     'recognizeable',
-    type => type === 'recognizeable'
+    type => type === 'recognizeable',
   ],
   [
     'intersection',
-    type => type === 'intersect'
+    type => type === 'intersect',
   ],
   [
     'mutation',
-    type => type === 'mutate'
+    type => type === 'mutate',
   ],
   [
     'resize',
-    type => type === 'resize'
+    type => type === 'resize',
   ],
   [
     'mediaquery',
-    type => implementationREs.mediaquery.test(type)
+    type => implementationREs.mediaquery.test(type),
   ],
   [
     'idle',
-    type => type === 'idle'
+    type => type === 'idle',
   ],
   [
     'message',
-    type => type === 'message' || type === 'messageerror'
+    type => type === 'message' || type === 'messageerror',
   ],
   [
     'documentevent',
-    type => documentEvents.has(type)
+    type => documentEvents.has(type),
   ],
   [
     'event',
-    () => true
-  ]
+    () => true,
+  ],
 ])
 
 const documentEvents = new Set([
@@ -475,24 +475,24 @@ export function fromCodeToSingleCharacter (code: KeyboardEvent['code']): string 
 }
 
 const aliasesByCode = {
-  'Backquote': '`',
-  'Minus': '-',
-  'Equal': '=',
-  'BracketLeft': '[',
-  'BracketRight': ']',
-  'Backslash': '\\',
-  'Semicolon': ';',
-  'Quote': '\'',
-  'Comma': ',',
-  'Period': '.',
-  'Slash': '/'
+  Backquote: '`',
+  Minus: '-',
+  Equal: '=',
+  BracketLeft: '[',
+  BracketRight: ']',
+  Backslash: '\\',
+  Semicolon: ';',
+  Quote: '\'',
+  Comma: ',',
+  Period: '.',
+  Slash: '/',
 }
 
 type ListenableArrowAlias = 'arrow' | '!arrow' | 'vertical' | '!vertical' | 'horizontal' | '!horizontal' | 'default'
 const predicatesByArrow: Map<ListenableArrowAlias, (required: { event: KeyboardEvent, name?: string }) => boolean> = new Map([
   [
     'arrow',
-    ({ event }) => arrows.has(event.key.toLowerCase())
+    ({ event }) => arrows.has(event.key.toLowerCase()),
   ],
   [
     '!arrow',
@@ -519,7 +519,7 @@ const predicatesByArrow: Map<ListenableArrowAlias, (required: { event: KeyboardE
     ({ event, name }) => name.startsWith('!')
       ? event.key.toLowerCase() !== `arrow${name.toLowerCase()}`
       : event.key.toLowerCase() === `arrow${name.toLowerCase()}`,
-  ]
+  ],
 ])
 
 const arrows = new Set(['arrowup', 'arrowright', 'arrowdown', 'arrowleft'])

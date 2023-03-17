@@ -8,6 +8,6 @@ export function createReplace<Item>(index: number, item: Item): ArrayFunction<It
       createSlice<Item>(0, index)(array),
       [item],
       createSlice<Item>(index + 1)(array)
-    )([]);
-  };
+    )([])
+  }
 }

@@ -1,5 +1,5 @@
-import { join } from 'lazy-collections'
-import { Pipeable, createReverse } from '../pipes'
+import { join, pipe } from 'lazy-collections'
+import { createReverse } from '../pipes'
 import { predicateFunction } from '../extracted'
 
 export type CompleteableOptions = {
@@ -208,12 +208,12 @@ export function toPreviousMatch ({ string, re, from }: { string: string, re: Reg
   if (!re.test(string.slice(0, from)) || from === 0) {
     indexOf = -1
   } else {
-    const reversedStringBeforeFrom = new Pipeable(string).pipe(
+    const reversedStringBeforeFrom = pipe(
             (string: string) => string.slice(0, from),
             (sliced: string) => sliced.split(''),
             reverse,
             toString,
-          ) as string,
+          )(string) as string,
           toNextMatchIndex = toNextMatch({ string: reversedStringBeforeFrom, re, from: 0 })
     
     indexOf = toNextMatchIndex === -1

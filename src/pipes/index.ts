@@ -1,10 +1,8 @@
-// PIPEABLE
-export { Pipeable } from './Pipeable'
-
-// PIPES
 export { createClamp } from './createClamp'
 
 export { createClip } from './createClip'
+
+export { createClone } from './createClone'
 
 export { createConcat } from './createConcat'
 
@@ -14,6 +12,10 @@ export type { Potentiality } from './createDetermine'
 export { createFilter } from './createFilter'
 
 export { createFilterAsync } from './createFilterAsync'
+
+export { createFindAsync } from './createFindAsync'
+
+export { createFindIndexAsync } from './createFindIndexAsync'
 
 export { createForEachAsync } from './createForEachAsync'
 

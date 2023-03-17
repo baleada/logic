@@ -1,6 +1,6 @@
+import { pipe } from 'lazy-collections'
 import type { ArrayFunction } from './types'
 import { createReorder } from './createReorder'
-import { Pipeable } from './Pipeable'
 
 export function createSwap<Item>(indices: [number, number]): ArrayFunction<Item, Item[]> {
   return array => {
@@ -8,23 +8,23 @@ export function createSwap<Item>(indices: [number, number]): ArrayFunction<Item,
       if (from < to) {
         return {
           reorderFrom: createReorder<Item>(from, to),
-          reorderTo: createReorder<Item>(to - 1, from)
-        };
+          reorderTo: createReorder<Item>(to - 1, from),
+        }
       }
 
       if (from > to) {
         return {
           reorderFrom: createReorder<Item>(from, to),
-          reorderTo: createReorder<Item>(to + 1, from)
-        };
+          reorderTo: createReorder<Item>(to + 1, from),
+        }
       }
 
       return {
         reorderFrom: array => array,
         reorderTo: array => array,
-      };
-    })();
+      }
+    })()
 
-    return new Pipeable(array).pipe(reorderFrom, reorderTo);
-  };
+    return pipe(reorderFrom, reorderTo)(array)
+  }
 }
