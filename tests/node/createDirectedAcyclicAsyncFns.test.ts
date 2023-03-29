@@ -1,13 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { createDirectedAcyclicAsyncFns } from '../../src/factories/graph-fns/createDirectedAcyclicAsyncFns'
-import type { DirectedAcyclicFns } from '../../src/factories/graph-fns/createDirectedAcyclicAsyncFns'
+import type { DirectedAcyclicAsyncFns } from '../../src/factories/graph-fns/createDirectedAcyclicAsyncFns'
 import type { GraphEdgeAsync, GraphNode } from '../../src/factories/graph-fns/types'
 
 const suite = createSuite<{
   nodes: GraphNode<any>[],
   edges: GraphEdgeAsync<any, any>[],
-  directedAcyclic: DirectedAcyclicFns<string, number>,
+  directedAcyclic: DirectedAcyclicAsyncFns<string, number>,
 }>('createDirectedAcyclicAsyncFns')
 
 suite.before(context => {
@@ -19,6 +19,7 @@ suite.before(context => {
     'e',
     'f',
     'g',
+    'h',
   ]
 
   context.edges = [
@@ -64,6 +65,12 @@ suite.before(context => {
         setTimeout(() => resolve(state.c.metadata === 1), 0)
       }),
     },
+    {
+      from: 'd', to: 'h',
+      predicateTraversable: async state => await new Promise(resolve => {
+        setTimeout(() => resolve(state.d.metadata === 0), 0)
+      }),
+    },
   ]
 
   context.directedAcyclic = createDirectedAcyclicAsyncFns(
@@ -74,13 +81,14 @@ suite.before(context => {
   )
 })
 
-suite(`toPath(...) works`, async ({ directedAcyclic }) => {
+suite('toPath(...) works', async ({ directedAcyclic }) => {
   await (async () => {
     const value = await directedAcyclic.toPath({
             a: { status: 'set', metadata: 0 },
             b: { status: 'set', metadata: 0 },
+            d: { status: 'set', metadata: 0 },
           }),
-          expected = ['a', 'b', 'd']
+          expected = ['a', 'b', 'd', 'h']
 
     assert.equal(value, expected)
   })()
@@ -96,7 +104,7 @@ suite(`toPath(...) works`, async ({ directedAcyclic }) => {
   })()
 })
 
-suite(`walk works`, async ({ directedAcyclic }) => {
+suite('walk works', async ({ directedAcyclic }) => {
   const value = [] as string[]
 
   await directedAcyclic.walk(path => value.push(path.at(-1)))  
@@ -107,6 +115,7 @@ suite(`walk works`, async ({ directedAcyclic }) => {
       'a',
       'b',
       'd',
+      'h',
       'e',
       'c',
       'f',
@@ -116,7 +125,7 @@ suite(`walk works`, async ({ directedAcyclic }) => {
   )
 })
 
-suite(`toTraversals works`, async ({ directedAcyclic }) => {
+suite('toTraversals works', async ({ directedAcyclic }) => {
   await (async () => {
     const value = await directedAcyclic.toTraversals('a'),
           expected = [
@@ -130,6 +139,7 @@ suite(`toTraversals works`, async ({ directedAcyclic }) => {
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
                 g: { status: 'unset', metadata: 0 },
+                h: { status: 'unset', metadata: 0 },
               },
             },
           ]
@@ -150,6 +160,7 @@ suite(`toTraversals works`, async ({ directedAcyclic }) => {
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
                 g: { status: 'unset', metadata: 0 },
+                h: { status: 'unset', metadata: 0 },
               },
             },
           ]
@@ -170,6 +181,7 @@ suite(`toTraversals works`, async ({ directedAcyclic }) => {
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
                 g: { status: 'unset', metadata: 0 },
+                h: { status: 'unset', metadata: 0 },
               },
             },
             {
@@ -182,6 +194,7 @@ suite(`toTraversals works`, async ({ directedAcyclic }) => {
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
                 g: { status: 'unset', metadata: 0 },
+                h: { status: 'unset', metadata: 0 },
               },
             },
           ]
@@ -190,7 +203,7 @@ suite(`toTraversals works`, async ({ directedAcyclic }) => {
   })()
 })
 
-suite(`toSharedAncestors works`, async ({ directedAcyclic }) => {
+suite('toSharedAncestors works', async ({ directedAcyclic }) => {
   await (async () => {
     const value = await directedAcyclic.toSharedAncestors('a', 'b'),
           expected = []
@@ -218,4 +231,53 @@ suite(`toSharedAncestors works`, async ({ directedAcyclic }) => {
   })
 })
 
+suite('toTree works', async ({ directedAcyclic }) => {
+  const value = await directedAcyclic.toTree(),
+        expected = [
+          {
+            node: 'a',
+            children: [
+              {
+                node: 'b',
+                children: [
+                  {
+                    node: 'd',
+                    children: [
+                      {
+                        node: 'h',
+                        children: [],
+                      },
+                    ],
+                  },
+                  {
+                    node: 'e',
+                    children: [],
+                  },
+                ],
+              },
+              {
+                node: 'c',
+                children: [
+                  {
+                    node: 'f',
+                    children: [],
+                  },
+                  {
+                    node: 'g',
+                    children: [],
+                  },
+                ],
+              },
+              {
+                node: 'd',
+                children: [],
+              },
+            ],
+          },
+        ]
+
+  assert.equal(value, expected)
+})
+
 suite.run()
+

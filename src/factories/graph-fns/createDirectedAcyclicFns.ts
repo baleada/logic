@@ -1,4 +1,6 @@
 import { find } from 'lazy-collections'
+import type { Expand } from '../../extracted'
+import type { GraphFns } from './createGraphFns'
 import { createGraphFns } from './createGraphFns'
 import type {
   GraphNode,
@@ -12,7 +14,7 @@ import type {
 export type DirectedAcyclicFns<
   Id extends string,
   Metadata
-> = {
+> = Expand<GraphFns<Id, Metadata, GraphEdge<Id, Metadata>> & {
   toTree: (options?: { entry?: Id }) => GraphTreeNode<Id>[],
   toSharedAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => GraphSharedAncestor<Id>[],
   toTraversals: (node: GraphNode<Id>) => GraphTraversal<Id, Metadata>[],
@@ -25,11 +27,7 @@ export type DirectedAcyclicFns<
     options?: { entry?: Id },
   ) => void,
   toPath: (state: GraphState<Id, Metadata>) => GraphNode<Id>[],
-  toIndegree: (id: Id) => number,
-  toOutdegree: (id: Id) => number,
-  toIncoming: (id: Id) => GraphEdge<Id, Metadata>[],
-  toOutgoing: (id: Id) => GraphEdge<Id, Metadata>[],
-}
+}>
 
 export function createDirectedAcyclicFns<
   Id extends string,
@@ -231,5 +229,6 @@ export function createDirectedAcyclicFns<
     toOutdegree,
     toIncoming,
     toOutgoing,
+    toEntry,
   }
 }

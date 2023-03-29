@@ -19,6 +19,7 @@ suite.before(context => {
     'e',
     'f',
     'g',
+    'h',
   ]
 
   context.edges = [
@@ -29,6 +30,7 @@ suite.before(context => {
     { from: 'b', to: 'e', predicateTraversable: state => state.b.metadata === 1 },
     { from: 'c', to: 'f', predicateTraversable: state => state.c.metadata === 0 },
     { from: 'c', to: 'g', predicateTraversable: state => state.c.metadata === 1 },
+    { from: 'd', to: 'h', predicateTraversable: state => state.d.metadata === 0 },
   ]
 
   context.directedAcyclic = createDirectedAcyclicFns(
@@ -44,8 +46,9 @@ suite('toPath(...) works', ({ directedAcyclic }) => {
     const value = directedAcyclic.toPath({
             a: { status: 'set', metadata: 0 },
             b: { status: 'set', metadata: 0 },
+            d: { status: 'set', metadata: 0 },
           }),
-          expected = ['a', 'b', 'd']
+          expected = ['a', 'b', 'd', 'h']
 
     assert.equal(value, expected)
   })()
@@ -72,6 +75,7 @@ suite('walk works', ({ directedAcyclic }) => {
       'a',
       'b',
       'd',
+      'h',
       'e',
       'c',
       'f',
@@ -95,6 +99,7 @@ suite('toTraversals works', ({ directedAcyclic }) => {
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
                 g: { status: 'unset', metadata: 0 },
+                h: { status: 'unset', metadata: 0 },
               },
             },
           ]
@@ -115,6 +120,7 @@ suite('toTraversals works', ({ directedAcyclic }) => {
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
                 g: { status: 'unset', metadata: 0 },
+                h: { status: 'unset', metadata: 0 },
               },
             },
           ]
@@ -135,6 +141,7 @@ suite('toTraversals works', ({ directedAcyclic }) => {
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
                 g: { status: 'unset', metadata: 0 },
+                h: { status: 'unset', metadata: 0 },
               },
             },
             {
@@ -147,6 +154,7 @@ suite('toTraversals works', ({ directedAcyclic }) => {
                 e: { status: 'unset', metadata: 0 },
                 f: { status: 'unset', metadata: 0 },
                 g: { status: 'unset', metadata: 0 },
+                h: { status: 'unset', metadata: 0 },
               },
             },
           ]
@@ -194,7 +202,12 @@ suite('toTree works', ({ directedAcyclic }) => {
                 children: [
                   {
                     node: 'd',
-                    children: [],
+                    children: [
+                      {
+                        node: 'h',
+                        children: [],
+                      },
+                    ],
                   },
                   {
                     node: 'e',
