@@ -52,7 +52,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page }, reso
   assert.is(value, expected)
 })
 
-suite(`status is 'fetching' immediately after fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('status is "fetching" immediately after fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           instance.fetch() // Can't method chain without await
@@ -63,7 +63,7 @@ suite(`status is 'fetching' immediately after fetch(...)`, async ({ puppeteer: {
   assert.is(value, expected)
 })
 
-suite(`status is 'fetched' after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('status is "fetched" after successful fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           return (await instance.fetch()).status
@@ -73,7 +73,7 @@ suite(`status is 'fetched' after successful fetch(...)`, async ({ puppeteer: { p
   assert.is(value, expected)
 })
 
-suite(`status is 'fetched' after successful get(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('status is "fetched" after successful get(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           return (await instance.get()).status
@@ -83,7 +83,7 @@ suite(`status is 'fetched' after successful get(...)`, async ({ puppeteer: { pag
   assert.is(value, expected)
 })
 
-suite.skip(`status is 'fetched' after successful patch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite.skip('status is "fetched" after successful patch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource.replace(/get$/, 'patch'))
           return (await instance.post()).status // TODO: Error: Failed to fetch. Not sure why.
@@ -93,7 +93,7 @@ suite.skip(`status is 'fetched' after successful patch(...)`, async ({ puppeteer
   assert.is(value, expected)
 })
 
-suite(`status is 'fetched' after successful post(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('status is "fetched" after successful post(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource.replace(/get$/, 'post'))
           return (await instance.post()).status
@@ -103,7 +103,7 @@ suite(`status is 'fetched' after successful post(...)`, async ({ puppeteer: { pa
   assert.is(value, expected)
 })
 
-suite(`status is 'fetched' after successful put(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('status is "fetched" after successful put(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource.replace(/get$/, 'put'))
           return (await instance.put()).status
@@ -113,7 +113,7 @@ suite(`status is 'fetched' after successful put(...)`, async ({ puppeteer: { pag
   assert.is(value, expected)
 })
 
-suite(`status is 'fetched' after successful delete(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('status is "fetched" after successful delete(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource.replace(/get$/, 'delete'))
           return (await instance.delete()).status
@@ -123,28 +123,54 @@ suite(`status is 'fetched' after successful delete(...)`, async ({ puppeteer: { 
   assert.is(value, expected)
 })
 
-suite.skip(`status is 'errored' after an unsuccessful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
-  const value = await page.evaluate(async resource => {
-          const instance = new window.Logic.Fetchable('stub')
-          // Not sure how to simulate a network failure. Fetch won't technically fail otherwise.
+suite('status is "retrying" after retry', async ({ puppeteer: { page }, resource }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new window.Logic.Fetchable('http://www.httpbin.dev/get')
+          instance.get({ retry: 1 })
+
+          await (new Promise(resolve => {
+            requestAnimationFrame(resolve)
+          }))
+
+          return instance.status
+        }, resource),
+        expected = 'retrying'
+
+  assert.is(value, expected)
+})
+
+suite('status is "errored" after error', async ({ puppeteer: { page }, resource }) => {
+  const value = await page.evaluate(async () => {
+          const instance = new window.Logic.Fetchable('http://www.httpbin.dev/get')
+          await instance.get()
+
+          // await (new Promise(resolve => {
+          //   requestAnimationFrame(resolve)
+          // }))
+
+          return instance.status
         }, resource),
         expected = 'errored'
 
   assert.is(value, expected)
 })
 
-suite(`status is 'aborted' after aborting fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('status is "aborted" after aborting fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           instance.fetch()
-          return (await instance.abort()).status
+          instance.abort()
+          await (new Promise(resolve => {
+            requestAnimationFrame(resolve)
+          }))
+          return instance.status
         }, resource),
         expected = 'aborted'
 
   assert.is(value, expected)
 })
 
-suite(`response is Response after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('response is Response after successful fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           await instance.fetch()
@@ -154,7 +180,7 @@ suite(`response is Response after successful fetch(...)`, async ({ puppeteer: { 
   assert.ok(value)
 })
 
-suite.skip(`response is Error after errored fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite.skip('response is Error after errored fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           // Not sure how to simulate network failure
@@ -163,17 +189,21 @@ suite.skip(`response is Error after errored fetch(...)`, async ({ puppeteer: { p
   assert.ok(value)
 })
 
-suite(`response is AbortError after aborted fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('response is AbortError after aborted fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           instance.fetch()
-          return (await instance.abort()).error.name === 'AbortError'
+          instance.abort()
+          await (new Promise(resolve => {
+            requestAnimationFrame(resolve)
+          }))
+          return instance.error.name === 'AbortError'
         }, resource)
 
   assert.ok(value)
 })
 
-suite(`arrayBuffer is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('arrayBuffer is Resolveable after successful fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           await instance.get()
@@ -184,7 +214,7 @@ suite(`arrayBuffer is Resolveable after successful fetch(...)`, async ({ puppete
   assert.ok(value)
 })
 
-suite(`blob is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('blob is Resolveable after successful fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           await instance.get()
@@ -195,7 +225,7 @@ suite(`blob is Resolveable after successful fetch(...)`, async ({ puppeteer: { p
   assert.ok(value)
 })
 
-suite(`formData is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('formData is Resolveable after successful fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           await instance.get()
@@ -206,7 +236,7 @@ suite(`formData is Resolveable after successful fetch(...)`, async ({ puppeteer:
   assert.ok(value)
 })
 
-suite(`json is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('json is Resolveable after successful fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           await instance.get()
@@ -217,7 +247,7 @@ suite(`json is Resolveable after successful fetch(...)`, async ({ puppeteer: { p
   assert.ok(value)
 })
 
-suite(`text is Resolveable after successful fetch(...)`, async ({ puppeteer: { page }, resource }) => {
+suite('text is Resolveable after successful fetch(...)', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           await instance.get()
@@ -228,7 +258,7 @@ suite(`text is Resolveable after successful fetch(...)`, async ({ puppeteer: { p
   assert.ok(value)
 })
 
-suite(`abortController can be accessed`, async ({ puppeteer: { page }, resource }) => {
+suite('abortController can be accessed', async ({ puppeteer: { page }, resource }) => {
   const value = await page.evaluate(async resource => {
           const instance = new window.Logic.Fetchable(resource)
           return instance.abortController instanceof AbortController
