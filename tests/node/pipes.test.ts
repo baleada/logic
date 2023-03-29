@@ -18,6 +18,7 @@ import { createConcat } from '../../src/pipes/createConcat'
 import { createReverse } from '../../src/pipes/createReverse'
 import { createSort } from '../../src/pipes/createSort'
 import { createSlug } from '../../src/pipes/createSlug'
+import { createList } from '../../src/pipes/createList'
 import { createClip } from '../../src/pipes/createClip'
 import { createClamp } from '../../src/pipes/createClamp'
 import { createDetermine } from '../../src/pipes/createDetermine'
@@ -462,6 +463,14 @@ suite('createSlug(...) respects options', () => {
   assert.is(value, 'fooatunicorn')
 })
 
+suite('createList(...) creates space-separated list of truthy values', () => {
+  const value = (() => {
+    return createList()('foo', 0, null, undefined, 'bar', 42, false)
+  })()
+
+  assert.is(value, 'foo bar 42')
+})
+
 
 // NUMBER
 suite('createClamp({ min, max }) handles number between min and max', ({ number }) => {
@@ -578,7 +587,7 @@ suite('createEqual(...) predicates equality', () => {
   })()
 })
 
-suite(`createClone(...) deep clones`, () => {
+suite('createClone(...) deep clones', () => {
   const object = { hello: 'world' },
         value = createClone()(object),
         expected = { hello: 'world' }

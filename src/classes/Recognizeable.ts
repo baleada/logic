@@ -24,9 +24,9 @@ export type RecognizeableEffectApi<Type extends ListenableSupportedType, Metadat
   setMetadata: (metadata: Metadata) => void,
   recognized: () => void,
   denied: () => void,
-  recognizedUntilReady: () => void,
-  deniedUntilReady: () => void,
-  ready: () => void,
+  enable: (type: Type) => void,
+  disable: (type: Type) => void,
+  getAbility: (type: Type) => 'enabled' | 'disabled',
   getSequence: () => ListenEffectParam<Type>[],
   onRecognized: (sequenceItem: ListenEffectParam<Type>) => any,
 }
@@ -35,8 +35,6 @@ export type RecognizeableStatus = 'recognized'
   | 'recognizing'
   | 'denied'
   | 'ready'
-  | 'recognized until ready'
-  | 'denied until ready'
 
 export type RecognizeOptions<Type extends ListenableSupportedType> = {
   onRecognized?: (sequenceItem: ListenEffectParam<Type>) => any,
@@ -44,7 +42,7 @@ export type RecognizeOptions<Type extends ListenableSupportedType> = {
 
 export class Recognizeable<Type extends ListenableSupportedType, Metadata extends Record<any, any>> {
   private maxSequenceLength: number | true
-  private effects: Map<string, RecognizeableEffect<Type, Metadata>>
+  private effects: RecognizeableOptions<Type, Metadata>['effects']
   private effectApi: RecognizeableEffectApi<Type, Metadata>
   constructor (sequence: ListenEffectParam<Type>[], options: RecognizeableOptions<Type, Metadata> = {}) {
     const defaultOptions: RecognizeableOptions<Type, Metadata> = {
@@ -53,7 +51,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     }
     
     this.maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
-    this.effects = new Map(Object.entries(options?.effects || defaultOptions.effects))
+    this.effects = options?.effects || defaultOptions.effects
 
     this.resetComputedMetadata()
 
@@ -67,8 +65,6 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
       setMetadata: (metadata: Metadata) => this.computedMetadata = metadata,
       recognized: () => this.recognized(),
       denied: () => this.denied(),
-      recognizedUntilReady: () => this.recognizedUntilReady(),
-      deniedUntilReady: () => this.deniedUntilReady(),
       ready: () => this.ready(),
     } as unknown as RecognizeableEffectApi<Type, Metadata>
 
@@ -85,12 +81,6 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
   }
   private denied () {
     this.computedStatus = 'denied'
-  }
-  private recognizedUntilReady () {
-    this.computedStatus = 'recognized until ready'
-  }
-  private deniedUntilReady () {
-    this.computedStatus = 'denied until ready'
   }
   private computedStatus: RecognizeableStatus
   private ready () {
@@ -117,7 +107,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
   }
 
   recognize (sequenceItem: ListenEffectParam<Type>, { onRecognized }: RecognizeOptions<Type> = {}) {
-    if (!this.status.includes('until ready')) this.recognizing()
+    this.recognizing()
 
     const type = this.toType(sequenceItem),
           excess = predicateNumber(this.maxSequenceLength)
@@ -131,20 +121,17 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     this.effectApi.getSequence = () => newSequence
     this.effectApi.onRecognized = onRecognized || (() => {})
 
-    this.effects.get(type)?.(sequenceItem, { ...this.effectApi })
+    this.effects[type]?.(sequenceItem, { ...this.effectApi })
       
     switch (this.status) {
       case 'ready':
       case 'denied':
-      case 'denied until ready':
         this.resetComputedMetadata()
         this.setSequence([])
         break
       case 'recognizing':
       case 'recognized':
         this.setSequence(newSequence)
-        break
-      case 'recognized until ready':
         break
     }
 
