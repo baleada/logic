@@ -12,6 +12,7 @@ const suite = createSuite<{
 
 suite.before(context => {
   context.nodes = [
+    'y',
     'a',
     'b',
     'c',
@@ -22,6 +23,7 @@ suite.before(context => {
   ]
 
   context.edges = [
+    { from: 'y', to: 'z', predicateTraversable: state => state.y.metadata === 0 },
     { from: 'a', to: 'b', predicateTraversable: state => state.a.metadata === 0 },
     { from: 'a', to: 'c', predicateTraversable: state => state.a.metadata === 1 },
     { from: 'a', to: 'd', predicateTraversable: state => state.a.metadata === 2 },
@@ -37,7 +39,7 @@ suite.before(context => {
   )
 })
 
-suite(`toIncoming(...) works`, ({ graphFns }) => {
+suite('toIncoming(...) works', ({ graphFns }) => {
   ;(() => {
     const value = graphFns.toIncoming('a'),
           expected = []
@@ -55,7 +57,7 @@ suite(`toIncoming(...) works`, ({ graphFns }) => {
   })()
 })
 
-suite(`toOutgoing(...) works`, ({ graphFns }) => {
+suite('toOutgoing(...) works', ({ graphFns }) => {
   ;(() => {
     const value = graphFns.toOutgoing('a')
     
@@ -73,7 +75,7 @@ suite(`toOutgoing(...) works`, ({ graphFns }) => {
   })()
 })
 
-suite(`toIndegree(...) works`, ({ graphFns }) => {
+suite('toIndegree(...) works', ({ graphFns }) => {
   ;(() => {
     const value = graphFns.toIndegree('a'),
           expected = 0
@@ -89,7 +91,7 @@ suite(`toIndegree(...) works`, ({ graphFns }) => {
   })()
 })
 
-suite(`toOutdegree(...) works`, ({ graphFns }) => {
+suite('toOutdegree(...) works', ({ graphFns }) => {
   ;(() => {
     const value = graphFns.toOutdegree('a'),
           expected = 3
@@ -104,3 +106,21 @@ suite(`toOutdegree(...) works`, ({ graphFns }) => {
     assert.is(value, expected)
   })()
 })
+
+suite('toEntry(...) works', ({ graphFns }) => {
+  ;(() => {
+    const value = graphFns.toEntry(),
+          expected = 'y'
+
+    assert.is(value, expected)
+  })()
+
+  ;(() => {
+    const value = graphFns.toEntry({ begin: 1 }),
+          expected = 'a'
+
+    assert.is(value, expected)
+  })()
+})
+
+suite.run()

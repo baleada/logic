@@ -4,6 +4,8 @@ export type {
   GraphEdge,
   GraphState,
   GraphTraversal,
+  GraphSharedAncestor,
+  GraphTreeNode,
 } from './types'
 
 export { createDirectedAcyclicFns } from './createDirectedAcyclicFns'

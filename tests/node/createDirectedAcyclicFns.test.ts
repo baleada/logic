@@ -39,7 +39,7 @@ suite.before(context => {
   )
 })
 
-suite(`toPath(...) works`, ({ directedAcyclic }) => {
+suite('toPath(...) works', ({ directedAcyclic }) => {
   ;(() => {
     const value = directedAcyclic.toPath({
             a: { status: 'set', metadata: 0 },
@@ -61,7 +61,7 @@ suite(`toPath(...) works`, ({ directedAcyclic }) => {
   })()
 })
 
-suite(`walk works`, ({ directedAcyclic }) => {
+suite('walk works', ({ directedAcyclic }) => {
   const value = [] as string[]
 
   directedAcyclic.walk(path => value.push(path.at(-1)))  
@@ -81,7 +81,7 @@ suite(`walk works`, ({ directedAcyclic }) => {
   )
 })
 
-suite(`toTraversals works`, ({ directedAcyclic }) => {
+suite('toTraversals works', ({ directedAcyclic }) => {
   ;(() => {
     const value = directedAcyclic.toTraversals('a'),
           expected = [
@@ -155,7 +155,7 @@ suite(`toTraversals works`, ({ directedAcyclic }) => {
   })()
 })
 
-suite(`toSharedAncestors works`, ({ directedAcyclic }) => {
+suite('toSharedAncestors works', ({ directedAcyclic }) => {
   ;(() => {
     const value = directedAcyclic.toSharedAncestors('a', 'b'),
           expected = []
@@ -181,6 +181,49 @@ suite(`toSharedAncestors works`, ({ directedAcyclic }) => {
 
     assert.equal(value, expected)
   })
+})
+
+suite('toTree works', ({ directedAcyclic }) => {
+  const value = directedAcyclic.toTree(),
+        expected = [
+          {
+            node: 'a',
+            children: [
+              {
+                node: 'b',
+                children: [
+                  {
+                    node: 'd',
+                    children: [],
+                  },
+                  {
+                    node: 'e',
+                    children: [],
+                  },
+                ],
+              },
+              {
+                node: 'c',
+                children: [
+                  {
+                    node: 'f',
+                    children: [],
+                  },
+                  {
+                    node: 'g',
+                    children: [],
+                  },
+                ],
+              },
+              {
+                node: 'd',
+                children: [],
+              },
+            ],
+          },
+        ]
+
+  assert.equal(value, expected)
 })
 
 suite.run()
