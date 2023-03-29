@@ -1,5 +1,7 @@
 export type AnyFunction<Returned> = (param: any) => Returned
 
+export type ManyFunction<Parameter, Returned> = (...params: Parameter[]) => Returned
+
 export type ArrayFunction<Item, Returned> = (array: Item[]) => Returned
 
 export type ArrayFunctionAsync<Item, Returned> = (array: Item[]) => Promise<Returned>

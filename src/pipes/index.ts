@@ -21,6 +21,8 @@ export { createForEachAsync } from './createForEachAsync'
 
 export { createInsert } from './createInsert'
 
+export { createList } from './createList'
+
 export { createMap } from './createMap'
 
 export { createMapAsync } from './createMapAsync'
