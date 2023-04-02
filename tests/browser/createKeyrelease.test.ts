@@ -196,29 +196,90 @@ suite('denies until all combos are released if non-matching keycombo happened', 
   await page.evaluate(() => window.testState.listenable.stop())
 })
 
-suite('recognizes until all keys are released if matching keycombo happened', async ({ playwright: { page } }) => {
+suite('only recognizes when first key of combo goes up', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
       'recognizeable' as KeyreleaseTypes,
-      { recognizeable: { effects: window.Logic.createKeyrelease(['A', 'B']) } }
+      { recognizeable: { effects: window.Logic.createKeyrelease('A+B') } }
     )
 
-    window.testState = { listenable: listenable.listen(() => {}) }
+    window.testState = {
+      count: 0,
+      listenable: listenable.listen(() => {
+        window.testState.count++
+      }),
+    }
   })
 
+  await page.keyboard.down('A')
+  await page.waitForTimeout(20)
+  await page.keyboard.down('B')
+  await page.waitForTimeout(20)
+  await page.keyboard.up('A')
+  await page.waitForTimeout(20)
+
+  await (async () => {
+    const value = await page.evaluate(() => window.testState.count),
+          expected = 1
+
+    assert.is(value, expected)
+  })()
+  
+  await page.keyboard.up('B')
+  await page.waitForTimeout(20)
+
+  await (async () => {
+    const value = await page.evaluate(() => window.testState.count),
+          expected = 1
+
+    assert.is(value, expected)
+  })()
+
+  await page.evaluate(() => window.testState.listenable.stop())
+})
+
+suite('does not require all keys to be released before re-recognizing', async ({ playwright: { page } }) => {
+  await page.evaluate(async () => {
+    const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
+      'recognizeable' as KeyreleaseTypes,
+      { recognizeable: { effects: window.Logic.createKeyrelease('A+B') } }
+    )
+
+    window.testState = {
+      count: 0,
+      listenable: listenable.listen(() => {
+        window.testState.count++
+      }),
+    }
+  })
+
+  await page.keyboard.down('A')
+  await page.waitForTimeout(20)
+  await page.keyboard.down('B')
+  await page.waitForTimeout(20)
+  await page.keyboard.up('A')
+  await page.waitForTimeout(20)
+
+  await (async () => {
+    const value = await page.evaluate(() => window.testState.count),
+          expected = 1
+
+    assert.is(value, expected)
+  })()
+  
   await page.keyboard.down('A')
   await page.waitForTimeout(20)
   await page.keyboard.up('A')
   await page.waitForTimeout(20)
 
-  const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
-        expected = 'recognized'
+  await (async () => {
+    const value = await page.evaluate(() => window.testState.count),
+          expected = 2
 
-  assert.is(value, expected)
+    assert.is(value, expected)
+  })()
 
   await page.evaluate(() => window.testState.listenable.stop())
 })
-
-// (Optionally?) should not require metas to be released
 
 suite.run()
