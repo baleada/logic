@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { h } from 'vue'
+import { h, ref, onBeforeUpdate, onMounted, watchPostEffect } from 'vue'
 import { createDirectedAcyclicFns, GraphTreeNode } from '../../../../../../src/factories/graph-fns';
 
 const nodes = [
@@ -29,6 +29,29 @@ const nodes = [
     text: 'World',
     style: ['em'],
   },
+  {
+    id: '5',
+    type: 'p',
+  },
+  {
+    id: '6',
+    type: 'text',
+    text: 'Hello',
+  },
+  {
+    id: '7',
+    type: 'text',
+    text: ' ',
+  },
+  {
+    id: '8',
+    type: 'text',
+    text: 'World',
+  },
+  {
+    id: '9',
+    type: 'div',
+  }
 ]
 
 const edges = [
@@ -47,6 +70,31 @@ const edges = [
     to: '4',
     predicateTraversable: state => state['1'].metadata === 2,
   },
+  {
+    from: '5',
+    to: '6',
+    predicateTraversable: state => state['5'].metadata === 0,
+  },
+  {
+    from: '5',
+    to: '7',
+    predicateTraversable: state => state['5'].metadata === 1,
+  },
+  {
+    from: '5',
+    to: '8',
+    predicateTraversable: state => state['5'].metadata === 2,
+  },
+  {
+    from: '9',
+    to: '1',
+    predicateTraversable: state => state['9'].metadata === 0,
+  },
+  {
+    from: '9',
+    to: '5',
+    predicateTraversable: state => state['9'].metadata === 1,
+  },
 ]
 
 const fns = createDirectedAcyclicFns(
@@ -64,14 +112,41 @@ function toVNodes (tree: GraphTreeNode<string>[]) {
   return tree.map(treeNode => {
     const node = nodes.find(({ id }) => id === treeNode.node)
 
-    return h(
-      node.type,
-      { key: node.id },
-      node.type === 'text'
-        ? [node.text]
-        : toVNodes(treeNode.children),
-    )
+    return node.type === 'text'
+      ? [node.text]
+      : h(
+        node.type,
+        { key: node.id, ref: getTreeElementRef(node.id) },
+        toVNodes(treeNode.children),
+      )
   })
 }
 
+const treeElements = ref<HTMLElement[]>([])
+const getTreeElementRef = (id: string) => (el: HTMLElement) => {
+  const index = nodes
+    .filter(node => !('text' in node))
+    .findIndex(node => node.id === id)
+  treeElements.value[index] = el
+}
+
+onBeforeUpdate(() => {
+  treeElements.value = []
+})
+
+onMounted(() => {
+  watchPostEffect(() => {
+    for (let i = 0; i < treeElements.value.length; i++) {
+      if (
+        fns.toIndegree(nodes.filter(node => !('text' in node))[i].id) === 0
+      ) {
+        continue
+      }
+
+      treeElements.value[i].addEventListener('click', event => {
+        console.log(event.target)
+      })
+    }
+  })
+})
 </script>
