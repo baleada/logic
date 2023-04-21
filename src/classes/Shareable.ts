@@ -1,4 +1,4 @@
-import { Resolveable } from "./Resolveable"
+import { Resolveable } from './Resolveable'
 
 export type ShareableOptions = Record<never, never>
 

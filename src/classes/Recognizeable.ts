@@ -2,7 +2,7 @@ import {
   predicateArray,
   predicateNumber,
 } from '../extracted'
-import { createSlice, createConcat } from '../pipes'
+import { createConcat, createSlice } from '../pipes'
 import {
   ListenableSupportedType,
   ListenEffectParam,
@@ -31,7 +31,12 @@ export type RecognizeableEffectApi<Type extends ListenableSupportedType, Metadat
   onRecognized: (sequenceItem: ListenEffectParam<Type>) => any,
 }
     
-export type RecognizeableStatus = 'recognized' | 'recognizing' | 'denied' | 'ready' | 'recognized until ready' | 'denied until ready'
+export type RecognizeableStatus = 'recognized'
+  | 'recognizing'
+  | 'denied'
+  | 'ready'
+  | 'recognized until ready'
+  | 'denied until ready'
 
 export type RecognizeOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
   onRecognized?: (sequenceItem: ListenEffectParam<Type>) => any,

@@ -1,24 +1,24 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
-import { domIsAvailable } from '../../src/extracted'
+import { getDomAvailability } from '../../src/extracted'
 
 const suite = withPuppeteer(
-  createSuite('domIsAvailable')
+  createSuite('getDomAvailability')
 )
 
 suite(`detects when DOM is not available`, async ({ puppeteer: { page } }) => {
-  const value = domIsAvailable(),
-        expected = false
+  const value = getDomAvailability(),
+        expected = 'unavailable'
 
   assert.is(value, expected)
 })
 
 suite(`detects when DOM is available`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          return window.Logic_extracted.domIsAvailable()
+          return window.Logic_extracted.getDomAvailability()
         }),
-        expected = true
+        expected = 'available'
 
   assert.is(value, expected)
 })

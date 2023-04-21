@@ -1,5 +1,5 @@
 import { join } from 'lazy-collections'
-import { createReverse, Pipeable } from "../pipes"
+import { Pipeable, createReverse } from '../pipes'
 import { predicateFunction } from '../extracted'
 
 export type CompleteableOptions = {

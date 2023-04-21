@@ -12,7 +12,12 @@ const external = [
         /@babel\/runtime/,
       ],
       shared = new configureable.Rollup()
-        .input(['src/classes.ts', 'src/pipes.ts'])
+        .input([
+          'src/classes/index.ts',
+          'src/pipes/index.ts',
+          // 'src/recognizeable-effects/index.ts',
+          // 'src/graph-fns/index.ts',
+        ])
         .external(external)
         .resolve()
         .esbuild(),

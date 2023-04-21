@@ -4,17 +4,17 @@ import {
   filter,
   pipe,
   reduce,
+  map,
+  reverse,
+  toArray,
 } from 'lazy-collections'
 import { Listenable } from './Listenable'
 import { predicateFunction, predicateUndefined, predicateNumber, predicateString, predicateArray } from '../extracted'
 import {
-  createSlice,
-  createMap,
-  createFilter,
-  createReduce,
-  Pipeable,
   createConcat,
-  createReverse,
+  createFilter,
+  createSlice,
+  createReduce,
 } from '../pipes'
 
 export type AnimateableKeyframe = {
@@ -175,10 +175,11 @@ export class Animateable {
     // Sort by progress without mutating original
     this.computedKeyframes = Array.from(keyframes).sort(({ progress: progressA }, { progress: progressB }) => progressA - progressB)
 
-    this.reversedKeyframes = new Pipeable(this.keyframes).pipe(
-      createReverse<AnimateableKeyframe>(),
-      createMap<AnimateableKeyframe>(({ progress, properties }) => ({ progress: 1 - progress, properties }))
-    ) as AnimateableKeyframe[]
+    this.reversedKeyframes = pipe(
+      reverse(),
+      map<AnimateableKeyframe, AnimateableKeyframe>(({ progress, properties }) => ({ progress: 1 - progress, properties })),
+      toArray()
+    )(this.keyframes) as AnimateableKeyframe[]
 
     this.properties = toProperties(this.keyframes)
     this.easeables = this.getEaseables({ keyframes: this.keyframes, properties: this.properties })

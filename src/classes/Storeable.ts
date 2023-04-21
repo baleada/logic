@@ -1,7 +1,7 @@
 import {
   predicateNull,
   predicateString,
-  domIsAvailable,
+  getDomAvailability,
 } from '../extracted'
 
 export type StoreableOptions = {
@@ -34,7 +34,7 @@ export class Storeable<String extends string> {
   private ready () {
     this.computedStatus = 'ready'
 
-    if (domIsAvailable()) {
+    if (getDomAvailability() === 'available') {
       if (predicateNull(this.storage.getItem(this.computedStatusKey))) {
         this.storeStatus()
       }
@@ -48,7 +48,7 @@ export class Storeable<String extends string> {
     this.setKey(key)
   }
   get status () {
-    if (domIsAvailable()) {
+    if (getDomAvailability() === 'available') {
       const storedStatus = this.storage.getItem(this.computedStatusKey)
       if (this.computedStatus !== storedStatus && predicateString(storedStatus)) {
         this.computedStatus = (storedStatus as 'ready' | 'constructing' | 'stored' | 'errored' | 'removed')
