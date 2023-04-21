@@ -2,10 +2,10 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { createDirectedAcyclicAsyncFns } from '../../src/factories/createDirectedAcyclicAsyncFns'
 import type { DirectedAcyclicAsyncFns } from '../../src/factories/createDirectedAcyclicAsyncFns'
-import type { GraphEdgeAsync, GraphNode } from '../../src/extracted/graph'
+import type { GraphEdgeAsync, GraphVertex } from '../../src/extracted/graph'
 
 const suite = createSuite<{
-  nodes: GraphNode<any>[],
+  nodes: GraphVertex<any>[],
   edges: GraphEdgeAsync<any, any>[],
   directedAcyclic: DirectedAcyclicAsyncFns<string, number>,
 }>('createDirectedAcyclicAsyncFns')

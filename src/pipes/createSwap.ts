@@ -1,10 +1,10 @@
 import { pipe } from 'lazy-collections'
-import type { ArrayFunction } from './types'
+import type { ArrayFn } from './types'
 import { createReorder } from './createReorder'
 
-export function createSwap<Item>(indices: [number, number]): ArrayFunction<Item, Item[]> {
+export function createSwap<Item>(indices: [number, number]): ArrayFn<Item, Item[]> {
   return array => {
-    const { 0: from, 1: to } = indices, { reorderFrom, reorderTo } = ((): { reorderFrom: ArrayFunction<Item, Item[]>; reorderTo: ArrayFunction<Item, Item[]>; } => {
+    const { 0: from, 1: to } = indices, { reorderFrom, reorderTo } = ((): { reorderFrom: ArrayFn<Item, Item[]>; reorderTo: ArrayFn<Item, Item[]>; } => {
       if (from < to) {
         return {
           reorderFrom: createReorder<Item>(from, to),

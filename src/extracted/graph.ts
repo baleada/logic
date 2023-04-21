@@ -1,9 +1,9 @@
 export type Graph<Id extends string, Metadata> = {
-  nodes: GraphNode<Id>[],
+  nodes: GraphVertex<Id>[],
   edges: GraphEdge<Id, Metadata>[],
 }
 
-export type GraphNode<Id extends string> = Id
+export type GraphVertex<Id extends string> = Id
 
 export type GraphEdge<
   Id extends string,
@@ -29,28 +29,28 @@ export type GraphTraversal<
   Id extends string,
   Metadata
 > = {
-  path: GraphNode<Id>[],
+  path: GraphVertex<Id>[],
   state: GraphState<Id, Metadata>
 }
 
 export type GraphCommonAncestor<Id extends string> = {
-  node: GraphNode<Id>,
-  distances: Record<GraphNode<Id>, number>
+  node: GraphVertex<Id>,
+  distances: Record<GraphVertex<Id>, number>
 }
 
 export type GraphTreeNode<Id extends string> = {
-  node: GraphNode<Id>,
+  node: GraphVertex<Id>,
   children: GraphTreeNode<Id>[],
 }
 
 export function defineGraph<Id extends string, Metadata> (
-  nodes: GraphNode<Id>[],
+  nodes: GraphVertex<Id>[],
   edges: GraphEdge<Id, Metadata>[]
 ) {
   return { nodes, edges }
 }
 
-export function defineGraphNodes<Id extends string> (nodes: GraphNode<Id>[]) {
+export function defineGraphVertexs<Id extends string> (nodes: GraphVertex<Id>[]) {
   return nodes
 }
 
@@ -59,7 +59,7 @@ export function defineGraphEdges<Id extends string, Metadata> (edges: GraphEdge<
 }
 
 export type GraphAsync<Id extends string, Metadata> = {
-  nodes: GraphNode<Id>[],
+  nodes: GraphVertex<Id>[],
   edges: GraphEdgeAsync<Id, Metadata>[],
 }
 
@@ -73,7 +73,7 @@ export type GraphEdgeAsync<
 }
 
 export function defineGraphAsync<Id extends string, Metadata> (
-  nodes: GraphNode<Id>[],
+  nodes: GraphVertex<Id>[],
   edges: GraphEdgeAsync<Id, Metadata>[]
 ) {
   return { nodes, edges }

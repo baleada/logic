@@ -1,6 +1,6 @@
 import { dequal } from 'dequal'
-import type { AnyFunction } from './types'
+import type { AnyFn } from './types'
 
-export function createEqual(compared: any): AnyFunction<boolean> {
+export function createEqual(compared: any): AnyFn<boolean> {
   return any => dequal(any, compared)
 }

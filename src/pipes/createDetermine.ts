@@ -4,11 +4,11 @@ import {
   reduce,
 } from 'lazy-collections'
 import { createMap } from './createMap'
-import type { NumberFunction } from './types'
+import type { NumberFn } from './types'
 
 export type Potentiality<Outcome> = { outcome: Outcome, probability: number }
 
-export function createDetermine<Outcome>(potentialities: Potentiality<Outcome>[]): NumberFunction<Outcome> {
+export function createDetermine<Outcome>(potentialities: Potentiality<Outcome>[]): NumberFn<Outcome> {
   type Predicate = {
     outcome: Outcome,
     predicate: (determinant: number) => boolean,

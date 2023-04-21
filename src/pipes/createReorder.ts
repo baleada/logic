@@ -1,12 +1,12 @@
 import { predicateObject } from '../extracted'
-import type { ArrayFunction } from './types'
+import type { ArrayFn } from './types'
 import { createConcat } from './createConcat'
 import { createSlice } from './createSlice'
 
 export function createReorder<Item>(
   from: { start: number; itemCount: number; } | number,
   to: number
-): ArrayFunction<Item, Item[]> {
+): ArrayFn<Item, Item[]> {
   return array => {
     const [itemsToMoveStartIndex, itemsToMoveCount] = predicateObject(from)
       ? [from.start, from.itemCount]

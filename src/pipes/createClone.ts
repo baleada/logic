@@ -1,8 +1,8 @@
 
 import { klona } from 'klona'
-import type { AnyFunction } from './types'
+import type { AnyFn } from './types'
 
-export function createClone<Any> (): AnyFunction<Any> {
+export function createClone<Any> (): AnyFn<Any> {
   return any => {
     return klona(any)
   }

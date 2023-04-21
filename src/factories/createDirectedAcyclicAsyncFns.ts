@@ -3,7 +3,7 @@ import { createFindAsync, createMapAsync } from '../pipes'
 import type { Expand } from '../extracted'
 import type {
   GraphAsync,
-  GraphNode,
+  GraphVertex,
   GraphEdgeAsync,
   GraphState,
   GraphTraversal,
@@ -22,18 +22,18 @@ export type DirectedAcyclicAsyncFns<
   Metadata
   > = Expand<GraphFns<Id, Metadata, GraphEdgeAsync<Id, Metadata>> & {
     toTree: (options?: { entry?: Id }) => Promise<GraphTreeNode<Id>[]>,
-  createCommonAncestors: (a: GraphNode<Id>) => Promise<(b: GraphNode<Id>) => Promise<GraphCommonAncestor<Id>[]>>,
-  createPredicateAncestor: (node: GraphNode<Id>) => Promise<(ancestor: GraphNode<Id>) => boolean>,
-  toTraversals: (node: GraphNode<Id>) => Promise<GraphTraversal<Id, Metadata>[]>,
+  createCommonAncestors: (a: GraphVertex<Id>) => Promise<(b: GraphVertex<Id>) => Promise<GraphCommonAncestor<Id>[]>>,
+  createPredicateAncestor: (node: GraphVertex<Id>) => Promise<(ancestor: GraphVertex<Id>) => boolean>,
+  toTraversals: (node: GraphVertex<Id>) => Promise<GraphTraversal<Id, Metadata>[]>,
   walk: (
     stepEffect: (
-      path: GraphNode<Id>[],
+      path: GraphVertex<Id>[],
       state: GraphState<Id, Metadata>,
       stop: () => void,
     ) => void,
     options?: { entry?: Id },
   ) => Promise<void>,
-  toPath: (state: GraphState<Id, Metadata>) => Promise<GraphNode<Id>[]>,
+  toPath: (state: GraphState<Id, Metadata>) => Promise<GraphVertex<Id>[]>,
   toIndegree: (id: Id) => number,
   toOutdegree: (id: Id) => number,
   toIncoming: (id: Id) => GraphEdgeAsync<Id, Metadata>[],
@@ -66,7 +66,7 @@ export function createDirectedAcyclicAsyncFns<
               children: [],
             },
           ],
-          createFindInTree = (node: GraphNode<Id>) => {
+          createFindInTree = (node: GraphVertex<Id>) => {
             return (tree: GraphTreeNode<Id>[]) => {
               for (const treeNode of tree) {
                 if (treeNode.node === node) return treeNode
@@ -160,10 +160,10 @@ export function createDirectedAcyclicAsyncFns<
           stop = () => {
             status = 'stopped'
           },
-          totalConnectionsFollowedByNode = {} as Record<GraphNode<Id>, number>
+          totalConnectionsFollowedByNode = {} as Record<GraphVertex<Id>, number>
   
     let location = entry
-      || find<GraphNode<Id>>(node => toIndegree(node) === 0)(nodes) as GraphNode<Id>
+      || find<GraphVertex<Id>>(node => toIndegree(node) === 0)(nodes) as GraphVertex<Id>
     let status: 'walking' | 'stopped' = 'walking'
 
     const path = await toPath(unsetState)
@@ -219,9 +219,9 @@ export function createDirectedAcyclicAsyncFns<
 
   const toPath: DirectedAcyclicAsyncFns<Id, Metadata>['toPath'] = async state => {
     const path = [
-            find<GraphNode<Id>>(
+            find<GraphVertex<Id>>(
               node => toIndegree(node) === 0
-            )(nodes) as GraphNode<Id>,
+            )(nodes) as GraphVertex<Id>,
           ],
           getLastOutdegree = () => toOutdegree(path.at(-1)),
           getLastStatus = () => state[path.at(-1)].status

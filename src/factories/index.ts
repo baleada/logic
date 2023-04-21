@@ -1,14 +1,14 @@
 // GRAPH FNS
 export {
   defineGraph,
-  defineGraphNodes,
+  defineGraphVertexs,
   defineGraphEdges,
   defineGraphAsync,
   defineGraphEdgesAsync,
 } from '../extracted'
 export type {
   Graph,
-  GraphNode,
+  GraphVertex,
   GraphEdge,
   GraphState,
   GraphTraversal,

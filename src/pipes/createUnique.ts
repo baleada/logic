@@ -1,7 +1,7 @@
 import { pipe, toArray, unique } from 'lazy-collections'
-import type { ArrayFunction } from './types'
+import type { ArrayFn } from './types'
 
-export function createUnique<Item>(): ArrayFunction<Item, Item[]> {
+export function createUnique<Item>(): ArrayFn<Item, Item[]> {
   return array => pipe(
     unique(),
     toArray()

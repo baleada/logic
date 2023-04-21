@@ -3,9 +3,9 @@ import {
   slice,
   toArray,
 } from 'lazy-collections'
-import type { ArrayFunction } from './types'
+import type { ArrayFn } from './types'
 
-export function createSlice<Item>(from: number, to?: number): ArrayFunction<Item, Item[]> {
+export function createSlice<Item>(from: number, to?: number): ArrayFn<Item, Item[]> {
   const toSliced = to ? slice(from, to - 1) : slice(from)
   
   return array => {

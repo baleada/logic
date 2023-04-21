@@ -1,8 +1,8 @@
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
-import type { StringFunction } from './types'
+import type { StringFn } from './types'
 
-export function createSlug(options?: SlugifyOptions): StringFunction<string> {
+export function createSlug(options?: SlugifyOptions): StringFn<string> {
   return string => {
     return slugify(string, options)
   }

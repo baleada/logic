@@ -2,10 +2,10 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { createDecisionTreeFns } from '../../src/factories/createDecisionTreeFns'
 import type { DecisionTreeFns } from '../../src/factories/createDecisionTreeFns'
-import type { GraphEdge, GraphNode } from '../../src/extracted/graph'
+import type { GraphEdge, GraphVertex } from '../../src/extracted/graph'
 
 const suite = createSuite<{
-  nodes: GraphNode<any>[],
+  nodes: GraphVertex<any>[],
   edges: GraphEdge<any, any>[],
   decisionTree: DecisionTreeFns<string>,
 }>('createDecisionTreeFns')

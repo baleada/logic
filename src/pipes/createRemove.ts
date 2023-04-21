@@ -1,8 +1,8 @@
-import type { ArrayFunction } from './types'
+import type { ArrayFn } from './types'
 import { createConcat } from './createConcat'
 import { createSlice } from './createSlice'
 
-export function createRemove<Item>(index: number): ArrayFunction<Item, Item[]> {
+export function createRemove<Item>(index: number): ArrayFn<Item, Item[]> {
   return array => {
     return createConcat(
       createSlice<Item>(0, index)(array),

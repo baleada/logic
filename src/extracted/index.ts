@@ -224,14 +224,14 @@ export type { KeycomboItem } from './keycombo'
 
 export {
   defineGraph,
-  defineGraphNodes,
+  defineGraphVertexs,
   defineGraphEdges,
   defineGraphAsync,
   defineGraphEdgesAsync,
 } from './graph'
 export type {
   Graph,
-  GraphNode,
+  GraphVertex as GraphVertex,
   GraphEdge,
   GraphAsync,
   GraphEdgeAsync,
@@ -241,5 +241,5 @@ export type {
   GraphTreeNode,
 } from './graph'
 
-export { defineAssociativeArray } from './associativeArray'
-export type { AssociativeArray } from './associativeArray'
+export { defineAssociativeArray } from './associative-array'
+export type { AssociativeArray } from './associative-array'

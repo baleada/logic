@@ -1,6 +1,6 @@
-import type { ArrayFunction } from './types'
+import type { ArrayFn } from './types'
 
-export function createReverse<Item>(): ArrayFunction<Item, Item[]> {
+export function createReverse<Item>(): ArrayFn<Item, Item[]> {
   return array => {
     const reversed = []
 

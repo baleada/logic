@@ -1,6 +1,6 @@
 import { join } from 'lazy-collections'
 import type { DeepRequired } from '../extracted'
-import type { ElementFunction } from './types'
+import type { ElementFn } from './types'
 
 export type CreateFocusableOptions = {
   elementIsCandidate?: boolean,
@@ -31,7 +31,7 @@ const defaultOptions: DeepRequired<CreateFocusableOptions> = {
 export function createFocusable (
   order: 'first' | 'last',
   options: CreateFocusableOptions = {}
-): ElementFunction<HTMLElement, HTMLElement | undefined> {
+): ElementFn<HTMLElement, HTMLElement | undefined> {
   const { elementIsCandidate, tabbableSelector } = { ...defaultOptions, ...options },
         predicateFocusable = (element: HTMLElement): boolean => element.matches(tabbableSelector)
 

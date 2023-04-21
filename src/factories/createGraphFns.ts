@@ -1,7 +1,7 @@
 import { slice, find, pipe } from 'lazy-collections'
 import { createFilter } from '../pipes'
 import type {
-  GraphNode,
+  GraphVertex,
   GraphEdge,
   GraphEdgeAsync,
 } from '../extracted'
@@ -23,7 +23,7 @@ export function createGraphFns<
   Metadata,
   Edge extends GraphEdge<Id, Metadata> | GraphEdgeAsync<Id, Metadata>
 > (
-  nodes: GraphNode<Id>[],
+  nodes: GraphVertex<Id>[],
   edges: Edge[],
 ): GraphFns<Id, Metadata, Edge> {
   const toIndegree: GraphFns<Id, Metadata, Edge>['toIndegree'] = node => {
@@ -46,8 +46,8 @@ export function createGraphFns<
     const { begin = 0 } = options
     return pipe(
       slice(begin),
-      find<GraphNode<Id>>(node => toIndegree(node) === 0),
-    )(nodes) as GraphNode<Id>
+      find<GraphVertex<Id>>(node => toIndegree(node) === 0),
+    )(nodes) as GraphVertex<Id>
   }
 
   return {

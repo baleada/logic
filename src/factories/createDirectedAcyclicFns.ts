@@ -1,7 +1,7 @@
 import { find, some } from 'lazy-collections'
 import type { Expand, Graph } from '../extracted'
 import type {
-  GraphNode,
+  GraphVertex,
   GraphEdge,
   GraphState,
   GraphTraversal,
@@ -13,8 +13,8 @@ import type { GraphFns } from './createGraphFns'
 import { createGraphFns } from './createGraphFns'
 
 export type CreateDirectedAcyclicFnsOptions<Id extends string, Metadata> = {
-  toUnsetMetadata?: (node: GraphNode<Id>) => Metadata,
-  toMockMetadata?: (node: GraphNode<Id>, totalConnectionsFollowed: number) => Metadata,
+  toUnsetMetadata?: (node: GraphVertex<Id>) => Metadata,
+  toMockMetadata?: (node: GraphVertex<Id>, totalConnectionsFollowed: number) => Metadata,
   kind?: 'directed acyclic' | 'multitree' | 'arborescence'
 }
 
@@ -23,18 +23,18 @@ export type DirectedAcyclicFns<
   Metadata
 > = Expand<GraphFns<Id, Metadata, GraphEdge<Id, Metadata>> & {
   toTree: (options?: { entry?: Id }) => GraphTreeNode<Id>[],
-  createCommonAncestors: (a: GraphNode<Id>) => (b: GraphNode<Id>) => GraphCommonAncestor<Id>[],
-  createPredicateAncestor: (node: GraphNode<Id>) => (ancestor: GraphNode<Id>) => boolean,
-  toTraversals: (node: GraphNode<Id>) => GraphTraversal<Id, Metadata>[],
+  createCommonAncestors: (a: GraphVertex<Id>) => (b: GraphVertex<Id>) => GraphCommonAncestor<Id>[],
+  createPredicateAncestor: (node: GraphVertex<Id>) => (ancestor: GraphVertex<Id>) => boolean,
+  toTraversals: (node: GraphVertex<Id>) => GraphTraversal<Id, Metadata>[],
   walk: (
     stepEffect: (
-      path: GraphNode<Id>[],
+      path: GraphVertex<Id>[],
       state: GraphState<Id, Metadata>,
       stop: () => void,
     ) => void,
     options?: { entry?: Id },
   ) => void,
-  toPath: (state: GraphState<Id, Metadata>) => GraphNode<Id>[],
+  toPath: (state: GraphState<Id, Metadata>) => GraphVertex<Id>[],
 }>
 
 export const defaultOptions: CreateDirectedAcyclicFnsOptions<string, any> = {
@@ -69,7 +69,7 @@ export function createDirectedAcyclicFns<
               children: [],
             },
           ],
-          createFindInTree = (node: GraphNode<Id>) => {
+          createFindInTree = (node: GraphVertex<Id>) => {
             return (tree: GraphTreeNode<Id>[]) => {
               for (const treeNode of tree) {
                 if (treeNode.node === node) return treeNode
@@ -163,7 +163,7 @@ export function createDirectedAcyclicFns<
           stop = () => {
             status = 'stopped'
           },
-          totalConnectionsFollowedByNode = {} as Record<GraphNode<Id>, number>
+          totalConnectionsFollowedByNode = {} as Record<GraphVertex<Id>, number>
   
     let location = entry || toEntry()
     let status: 'walking' | 'stopped' = 'walking'
@@ -221,9 +221,9 @@ export function createDirectedAcyclicFns<
 
   const toPath: DirectedAcyclicFns<Id, Metadata>['toPath'] = state => {
     const path = [
-            find<GraphNode<Id>>(
+            find<GraphVertex<Id>>(
               node => toIndegree(node) === 0
-            )(nodes) as GraphNode<Id>,
+            )(nodes) as GraphVertex<Id>,
           ],
           getLastOutdegree = () => toOutdegree(path.at(-1)),
           getLastStatus = () => state[path.at(-1)].status
