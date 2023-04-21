@@ -1,4 +1,3 @@
-// UNCATEGORIZED STRUCTURES
 export { defineAssociativeArray } from '../extracted'
 export type { AssociativeArray } from '../extracted'
 

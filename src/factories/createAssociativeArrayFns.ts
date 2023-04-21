@@ -1,32 +1,39 @@
 import { find, findIndex } from 'lazy-collections'
 import { createMap } from '../pipes'
-import type { AssociativeArray, DeepRequired } from '../extracted'
+import type { AssociativeArray } from '../extracted'
 
 export type AssociativeArrayFns<Key extends any, Value extends any> = {
-  get: (key: Key) => Value | undefined,
+  toValue: (key: Key) => Value | undefined,
   set: (key: Key, value: Value) => void,
-  has: (key: Key) => boolean,
+  predicateHas: (key: Key) => boolean,
   clear: () => void,
   delete: (key: Key) => boolean,
-  keys: () => Key[],
-  values: () => Value[],
+  toKeys: () => Key[],
+  toValues: () => Value[],
+  toEntries: () => AssociativeArray<Key, Value>,
+  // get: AssociativeArrayFns<Key, Value>['toValue'],
+  // has: AssociativeArrayFns<Key, Value>['predicateHas'],
+  // keys: AssociativeArrayFns<Key, Value>['toKeys'],
+  // values: AssociativeArrayFns<Key, Value>['toValues'],
 }
 
 export type AssociativeArrayFnsOptions<Key extends any> = {
+  initial?: AssociativeArray<Key, any>,
   createPredicateKey?: (query: Key) => (candidate: Key) => boolean
 }
 
-const defaultOptions: DeepRequired<AssociativeArrayFnsOptions<any>> = {
+const defaultOptions: Required<AssociativeArrayFnsOptions<any>> = {
+  initial: [],
   createPredicateKey: query => candidate => query === candidate,
 }
 
 export function createAssociativeArrayFns<Key extends any, Value extends any> (
-  associativeArray: AssociativeArray<Key, Value>,
   options: AssociativeArrayFnsOptions<Key> = {}
 ) {
-  const { createPredicateKey } = ({ ...defaultOptions, ...options } as AssociativeArrayFnsOptions<Key>)
+  const { initial, createPredicateKey } = ({ ...defaultOptions, ...options } as AssociativeArrayFnsOptions<Key>),
+        associativeArray = [...initial]
 
-  const get: AssociativeArrayFns<Key, Value>['get'] = key => {
+  const toValue: AssociativeArrayFns<Key, Value>['toValue'] = key => {
     const predicateKey = createPredicateKey(key)
 
     return find<typeof associativeArray[0]>(
@@ -48,7 +55,7 @@ export function createAssociativeArrayFns<Key extends any, Value extends any> (
     associativeArray[index][1] = value
   }
 
-  const has: AssociativeArrayFns<Key, Value>['has'] = key => {
+  const predicateHas: AssociativeArrayFns<Key, Value>['predicateHas'] = key => {
     const predicateKey = createPredicateKey(key)
 
     return findIndex<typeof associativeArray[0]>(
@@ -75,21 +82,30 @@ export function createAssociativeArrayFns<Key extends any, Value extends any> (
     return true
   }
 
-  const keys: AssociativeArrayFns<Key, Value>['keys'] = () => {
+  const toKeys: AssociativeArrayFns<Key, Value>['toKeys'] = () => {
     return createMap<typeof associativeArray[0], Key>(([key]) => key)(associativeArray)
   }
 
-  const values: AssociativeArrayFns<Key, Value>['values'] = () => {
+  const toValues: AssociativeArrayFns<Key, Value>['toValues'] = () => {
     return createMap<typeof associativeArray[0], Value>(([, value]) => value)(associativeArray)
   }
 
+  const toEntries: AssociativeArrayFns<Key, Value>['toEntries'] = () => {
+    return [...associativeArray]
+  }
+
   return {
-    get,
+    toValue,
     set,
-    has,
+    predicateHas,
     clear,
     delete: del,
-    keys,
-    values,
+    toKeys,
+    toValues,
+    toEntries,
+    // get: toValue,
+    // has: predicateHas,
+    // keys: toKeys,
+    // values: toValues,
   }
 }

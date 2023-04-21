@@ -1,40 +1,43 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import type { AssociativeArray, AssociativeArrayFns } from '../../src/factories/createAssociativeArrayFns'
+import type { AssociativeArrayFns } from '../../src/factories/createAssociativeArrayFns'
 import { createAssociativeArrayFns } from '../../src/factories/createAssociativeArrayFns'
-import { createEqual } from '../../src/pipes/createEqual'
+import { createEqual } from '../../src/pipes/any'
+import type { AssociativeArray } from '../../src/extracted'
 
 const suite = createSuite<{
-  associativeArray: AssociativeArray<string, number>,
+  initial: AssociativeArray<string, number>,
   associativeArrayFns: AssociativeArrayFns<string, number>,
 }>('createAssociativeArrayFns')
 
 suite.before(context => {
-  context.associativeArray = [['foo', 1]]
+  context.initial = [['foo', 1]]
 
-  context.associativeArrayFns = createAssociativeArrayFns(context.associativeArray)
+  context.associativeArrayFns = createAssociativeArrayFns({
+    initial: context.initial,
+  })
 })
 
-suite('get(...) works', ({ associativeArrayFns }) => {
+suite('toValue(...) works', ({ associativeArrayFns }) => {
   ;(() => {
-    const value = associativeArrayFns.get('foo'),
+    const value = associativeArrayFns.toValue('foo'),
           expected = 1
 
     assert.equal(value, expected)
   })()
 
   ;(() => {
-    const value = associativeArrayFns.get('bar'),
+    const value = associativeArrayFns.toValue('bar'),
           expected = undefined
 
     assert.equal(value, expected)
   })()
 })
 
-suite('set(...) works', ({ associativeArray, associativeArrayFns }) => {
+suite('set(...) works', ({ associativeArrayFns }) => {
   ;(() => {
     associativeArrayFns.set('foo', 2)
-    const value = associativeArray,
+    const value = associativeArrayFns.toEntries(),
           expected = [['foo', 2]]
 
     assert.equal(value, expected)
@@ -42,33 +45,33 @@ suite('set(...) works', ({ associativeArray, associativeArrayFns }) => {
 
   ;(() => {
     associativeArrayFns.set('bar', 2)
-    const value = associativeArray,
+    const value = associativeArrayFns.toEntries(),
           expected = [['foo', 2], ['bar', 2]]
 
     assert.equal(value, expected)
   })()
 })
 
-suite('has(...) works', ({ associativeArrayFns }) => {
+suite('predicateHas(...) works', ({ associativeArrayFns }) => {
   ;(() => {
-    const value = associativeArrayFns.has('foo'),
+    const value = associativeArrayFns.predicateHas('foo'),
           expected = true
 
     assert.equal(value, expected)
   })()
 
   ;(() => {
-    const value = associativeArrayFns.has('qux'),
+    const value = associativeArrayFns.predicateHas('qux'),
           expected = false
 
     assert.equal(value, expected)
   })()
 })
 
-suite('delete(...) works', ({ associativeArray, associativeArrayFns }) => {
+suite('delete(...) works', ({ associativeArrayFns }) => {
   ;(() => {
     associativeArrayFns.delete('foo')
-    const value = associativeArray,
+    const value = associativeArrayFns.toEntries(),
           expected = [['bar', 2]]
 
     assert.equal(value, expected)
@@ -76,37 +79,37 @@ suite('delete(...) works', ({ associativeArray, associativeArrayFns }) => {
 
   ;(() => {
     associativeArrayFns.delete('bar')
-    const value = associativeArray,
+    const value = associativeArrayFns.toEntries(),
           expected: AssociativeArray<string, number> = []
 
     assert.equal(value, expected)
   })()
 })
 
-suite('clear(...) works', ({ associativeArray, associativeArrayFns }) => {
+suite('clear(...) works', ({ associativeArrayFns }) => {
   associativeArrayFns.set('foo', 1)
   associativeArrayFns.set('bar', 2)
 
   associativeArrayFns.clear()
 
-  const value = associativeArray,
+  const value = associativeArrayFns.toEntries(),
         expected: AssociativeArray<string, number> = []
 
   assert.equal(value, expected)
 })
 
 suite('optional key predication works', () => {
-  const associativeArray: AssociativeArray<{ [key: string]: string }, number> = [
+  const initial: AssociativeArray<{ [key: string]: string }, number> = [
     [{ foo: 'bar' }, 1],
   ]
 
-  const associativeArrayFns = createAssociativeArrayFns(
-    associativeArray,
-    { createPredicateKey: createEqual },
-  )
+  const associativeArrayFns = createAssociativeArrayFns({
+    initial,
+    createPredicateKey: createEqual,
+  })
 
   ;(() => {
-    const value = associativeArrayFns.get({ foo: 'bar' }),
+    const value = associativeArrayFns.toValue({ foo: 'bar' }),
           expected = 1
 
     assert.equal(value, expected)
@@ -115,7 +118,7 @@ suite('optional key predication works', () => {
   ;(() => {
     associativeArrayFns.set({ foo: 'bar' }, 2)
 
-    const value = associativeArray,
+    const value = associativeArrayFns.toEntries(),
           expected = [
             [{ foo: 'bar' }, 2],
           ]
