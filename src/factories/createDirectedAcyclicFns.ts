@@ -1,7 +1,5 @@
-import { find } from 'lazy-collections'
-import type { Expand } from '../../extracted'
-import type { GraphFns } from './createGraphFns'
-import { createGraphFns } from './createGraphFns'
+import { find, some } from 'lazy-collections'
+import type { Expand, Graph } from '../extracted'
 import type {
   GraphNode,
   GraphEdge,
@@ -9,14 +7,24 @@ import type {
   GraphTraversal,
   GraphCommonAncestor,
   GraphTreeNode,
-} from './types'
+} from '../extracted'
+import { createMap } from '../pipes'
+import type { GraphFns } from './createGraphFns'
+import { createGraphFns } from './createGraphFns'
+
+export type CreateDirectedAcyclicFnsOptions<Id extends string, Metadata> = {
+  toUnsetMetadata?: (node: GraphNode<Id>) => Metadata,
+  toMockMetadata?: (node: GraphNode<Id>, totalConnectionsFollowed: number) => Metadata,
+  kind?: 'directed acyclic' | 'multitree' | 'arborescence'
+}
 
 export type DirectedAcyclicFns<
   Id extends string,
   Metadata
 > = Expand<GraphFns<Id, Metadata, GraphEdge<Id, Metadata>> & {
   toTree: (options?: { entry?: Id }) => GraphTreeNode<Id>[],
-  toCommonAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => GraphCommonAncestor<Id>[],
+  createCommonAncestors: (a: GraphNode<Id>) => (b: GraphNode<Id>) => GraphCommonAncestor<Id>[],
+  createPredicateAncestor: (node: GraphNode<Id>) => (ancestor: GraphNode<Id>) => boolean,
   toTraversals: (node: GraphNode<Id>) => GraphTraversal<Id, Metadata>[],
   walk: (
     stepEffect: (
@@ -29,16 +37,23 @@ export type DirectedAcyclicFns<
   toPath: (state: GraphState<Id, Metadata>) => GraphNode<Id>[],
 }>
 
+export const defaultOptions: CreateDirectedAcyclicFnsOptions<string, any> = {
+  toUnsetMetadata: () => 0,
+  toMockMetadata: (node, totalConnectionsFollowed) => totalConnectionsFollowed,
+  kind: 'directed acyclic',
+}
+
 export function createDirectedAcyclicFns<
   Id extends string,
   Metadata
 > (
-  nodes: GraphNode<Id>[],
-  edges: GraphEdge<Id, Metadata>[],
-  toUnsetMetadata: ((node: GraphNode<Id>) => Metadata),
-  toMockMetadata: (node: GraphNode<Id>, totalConnectionsFollowed: number) => Metadata,
+  graph: Graph<Id, Metadata>,
+  options: CreateDirectedAcyclicFnsOptions<Id, Metadata> = {},
 ): DirectedAcyclicFns<Id, Metadata> {
-  const unsetState = {} as GraphState<Id, Metadata>
+  const { nodes, edges } = graph,
+        { toUnsetMetadata, toMockMetadata, kind } = { ...defaultOptions, ...options },
+        unsetState = {} as GraphState<Id, Metadata> 
+
   for (const node of nodes) {
     unsetState[node] = {
       status: 'unset',
@@ -84,44 +99,58 @@ export function createDirectedAcyclicFns<
     return tree
   }
 
-  const toCommonAncestors: DirectedAcyclicFns<Id, Metadata>['toCommonAncestors'] = (a, b) => {
-    const aTraversals = toTraversals(a),
-          bTraversals = toTraversals(b),
-          commonAncestors: GraphCommonAncestor<Id>[] = []
+  const createCommonAncestors: DirectedAcyclicFns<Id, Metadata>['createCommonAncestors'] = a => {
+    const aTraversals = toTraversals(a)
 
-    for (const { path: aPath } of aTraversals) {
-      for (const { path: bPath } of bTraversals) {
-        for (let aPathIndex = aPath.length - 1; aPathIndex >= 0; aPathIndex--) {
-          for (let bPathIndex = bPath.length - 1; bPathIndex >= 0; bPathIndex--) {
-            if (
-              aPath[aPathIndex] === bPath[bPathIndex]
-              && ![a, b].includes(aPath[aPathIndex])
-            ) {
-              commonAncestors.push({
-                node: aPath[aPathIndex],
-                distances: {
-                  [a]: aPath.length - aPathIndex - 1,
-                  [b]: bPath.length - bPathIndex - 1,
-                },
-              } as GraphCommonAncestor<Id>)
+    return b => {
+      const bTraversals = toTraversals(b),
+            commonAncestors: GraphCommonAncestor<Id>[] = []
+
+      for (const { path: aPath } of aTraversals) {
+        for (const { path: bPath } of bTraversals) {
+          for (let aPathIndex = aPath.length - 1; aPathIndex >= 0; aPathIndex--) {
+            for (let bPathIndex = bPath.length - 1; bPathIndex >= 0; bPathIndex--) {
+              if (
+                aPath[aPathIndex] === bPath[bPathIndex]
+                && ![a, b].includes(aPath[aPathIndex])
+              ) {
+                commonAncestors.push({
+                  node: aPath[aPathIndex],
+                  distances: {
+                    [a]: aPath.length - aPathIndex - 1,
+                    [b]: bPath.length - bPathIndex - 1,
+                  },
+                } as GraphCommonAncestor<Id>)
+              }
             }
           }
         }
       }
+  
+      return commonAncestors
     }
+  }
 
-    return commonAncestors
+  const createPredicateAncestor: DirectedAcyclicFns<Id, Metadata>['createPredicateAncestor'] = descendant => {
+    const traversals = toTraversals(descendant),
+          paths = createMap<GraphTraversal<Id, Metadata>, Id[]>(
+            traversal => toPath(traversal.state)
+          )(traversals)
+
+    return ancestor => some<Id[]>(path => path.includes(ancestor))(paths) as boolean
   }
 
   const toTraversals: DirectedAcyclicFns<Id, Metadata>['toTraversals'] = node => {
     const traversals: GraphTraversal<Id, Metadata>[] = []
     
-    walk((path, state) => {
+    walk((path, state, stop) => {
       if (path.at(-1) === node) {
         traversals.push({
           path,
           state,
         })
+
+        if (kind === 'arborescence') stop()
       }
     })
 
@@ -221,7 +250,8 @@ export function createDirectedAcyclicFns<
 
   return {
     toTree,
-    toCommonAncestors,
+    createCommonAncestors,
+    createPredicateAncestor,
     toTraversals,
     walk,
     toPath,

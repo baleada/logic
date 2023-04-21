@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { createGraphFns } from '../../src/factories/graph-fns/createGraphFns'
 import type { GraphFns } from '../../src/factories/graph-fns/createGraphFns'
-import type { GraphEdge, GraphNode } from '../../src/factories/graph-fns/types'
+import type { GraphEdge, GraphNode } from '../../src/extracted/graph'
 
 const suite = createSuite<{
   nodes: GraphNode<any>[],

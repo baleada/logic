@@ -1,8 +1,8 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { createDirectedAcyclicAsyncFns } from '../../src/factories/graph-fns/createDirectedAcyclicAsyncFns'
-import type { DirectedAcyclicAsyncFns } from '../../src/factories/graph-fns/createDirectedAcyclicAsyncFns'
-import type { GraphEdgeAsync, GraphNode } from '../../src/factories/graph-fns/types'
+import { createDirectedAcyclicAsyncFns } from '../../src/factories/createDirectedAcyclicAsyncFns'
+import type { DirectedAcyclicAsyncFns } from '../../src/factories/createDirectedAcyclicAsyncFns'
+import type { GraphEdgeAsync, GraphNode } from '../../src/extracted/graph'
 
 const suite = createSuite<{
   nodes: GraphNode<any>[],
@@ -73,12 +73,10 @@ suite.before(context => {
     },
   ]
 
-  context.directedAcyclic = createDirectedAcyclicAsyncFns(
-    context.nodes,
-    context.edges,
-    () => 0,
-    (node, totalConnectionsFollowed) => totalConnectionsFollowed,
-  )
+  context.directedAcyclic = createDirectedAcyclicAsyncFns({
+    nodes: context.nodes,
+    edges: context.edges,
+  })
 })
 
 suite('toPath(...) works', async ({ directedAcyclic }) => {
@@ -203,16 +201,16 @@ suite('toTraversals works', async ({ directedAcyclic }) => {
   })()
 })
 
-suite('toCommonAncestors works', async ({ directedAcyclic }) => {
+suite('createCommonAncestors works', async ({ directedAcyclic }) => {
   await (async () => {
-    const value = await directedAcyclic.toCommonAncestors('a', 'b'),
+    const value = await (await directedAcyclic.createCommonAncestors('a'))('b'),
           expected = []
 
     assert.equal(value, expected)
   })()
   
   await (async () => {
-    const value = await directedAcyclic.toCommonAncestors('b', 'e'),
+    const value = await (await directedAcyclic.createCommonAncestors('b'))('e'),
           expected = [
             { node: 'a', distances: { b: 1, e: 2 } },
           ]
@@ -221,7 +219,7 @@ suite('toCommonAncestors works', async ({ directedAcyclic }) => {
   })()
 
   await (async () => {
-    const value = await directedAcyclic.toCommonAncestors('d', 'g'),
+    const value = await (await directedAcyclic.createCommonAncestors('d'))('g'),
           expected = [
             { node: 'a', distances: { d: 2, g: 2 } },
             { node: 'a', distances: { d: 1, g: 2 } },
@@ -229,6 +227,30 @@ suite('toCommonAncestors works', async ({ directedAcyclic }) => {
 
     assert.equal(value, expected)
   })
+})
+
+suite('createPredicateAncestor works', async ({ directedAcyclic }) => {
+  await (async () => {
+    const value = await (await directedAcyclic.createPredicateAncestor('d'))('a'),
+          expected = true
+
+    assert.equal(value, expected)
+  })()
+  
+  // Handles non-shortest path
+  await (async () => {
+    const value = await (await directedAcyclic.createPredicateAncestor('d'))('b'),
+          expected = true
+
+    assert.equal(value, expected)
+  })()
+  
+  await (async () => {
+    const value = await (await directedAcyclic.createPredicateAncestor('d'))('c'),
+          expected = false
+
+    assert.equal(value, expected)
+  })()
 })
 
 suite('toTree works', async ({ directedAcyclic }) => {

@@ -15,8 +15,7 @@ const external = [
         .input([
           'src/classes/index.ts',
           'src/pipes/index.ts',
-          // 'src/factories/recognizeable-effects/index.ts',
-          'src/factories/graph-fns/index.ts',
+          'src/factories/index.ts',
         ])
         .external(external)
         .resolve()

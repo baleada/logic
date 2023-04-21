@@ -1,23 +1,29 @@
-import { find } from 'lazy-collections'
-import { createFindAsync } from '../../pipes'
-import type { Expand } from '../../extracted'
-import type { GraphFns } from './createGraphFns'
-import { createGraphFns } from './createGraphFns'
+import { find, some } from 'lazy-collections'
+import { createFindAsync, createMapAsync } from '../pipes'
+import type { Expand } from '../extracted'
 import type {
+  GraphAsync,
   GraphNode,
   GraphEdgeAsync,
   GraphState,
   GraphTraversal,
   GraphCommonAncestor,
   GraphTreeNode,
-} from './types'
+} from '../extracted'
+import type { GraphFns } from './createGraphFns'
+import { createGraphFns } from './createGraphFns'
+import { defaultOptions } from './createDirectedAcyclicFns'
+import type { CreateDirectedAcyclicFnsOptions } from './createDirectedAcyclicFns'
+
+export type CreateDirectedAcyclicAsyncFnsOptions<Id extends string, Metadata> = CreateDirectedAcyclicFnsOptions<Id, Metadata>
 
 export type DirectedAcyclicAsyncFns<
   Id extends string,
   Metadata
   > = Expand<GraphFns<Id, Metadata, GraphEdgeAsync<Id, Metadata>> & {
     toTree: (options?: { entry?: Id }) => Promise<GraphTreeNode<Id>[]>,
-  toCommonAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => Promise<GraphCommonAncestor<Id>[]>,
+  createCommonAncestors: (a: GraphNode<Id>) => Promise<(b: GraphNode<Id>) => Promise<GraphCommonAncestor<Id>[]>>,
+  createPredicateAncestor: (node: GraphNode<Id>) => Promise<(ancestor: GraphNode<Id>) => boolean>,
   toTraversals: (node: GraphNode<Id>) => Promise<GraphTraversal<Id, Metadata>[]>,
   walk: (
     stepEffect: (
@@ -38,12 +44,13 @@ export function createDirectedAcyclicAsyncFns<
   Id extends string,
   Metadata
 > (
-  nodes: GraphNode<Id>[],
-  edges: GraphEdgeAsync<Id, Metadata>[],
-  toUnsetMetadata: ((node: GraphNode<Id>) => Metadata),
-  toMockMetadata: (node: GraphNode<Id>, totalConnectionsFollowed: number) => Metadata,
+  graph: GraphAsync<Id, Metadata>,
+  options: CreateDirectedAcyclicAsyncFnsOptions<Id, Metadata> = {},
 ): DirectedAcyclicAsyncFns<Id, Metadata> {
-  const unsetState = {} as GraphState<Id, Metadata>
+  const { nodes, edges } = graph,
+        { toUnsetMetadata, toMockMetadata, kind } = { ...defaultOptions, ...options },
+        unsetState = {} as GraphState<Id, Metadata>
+
   for (const node of nodes) {
     unsetState[node] = {
       status: 'unset',
@@ -89,44 +96,58 @@ export function createDirectedAcyclicAsyncFns<
     return tree
   }
 
-  const toCommonAncestors: DirectedAcyclicAsyncFns<Id, Metadata>['toCommonAncestors'] = async (a, b) => {
-    const aTraversals = await toTraversals(a),
-          bTraversals = await toTraversals(b),
-          commonAncestors: GraphCommonAncestor<Id>[] = []
+  const createCommonAncestors: DirectedAcyclicAsyncFns<Id, Metadata>['createCommonAncestors'] = async a => {
+    const aTraversals = await toTraversals(a)
 
-    for (const { path: aPath } of aTraversals) {
-      for (const { path: bPath } of bTraversals) {
-        for (let aPathIndex = aPath.length - 1; aPathIndex >= 0; aPathIndex--) {
-          for (let bPathIndex = bPath.length - 1; bPathIndex >= 0; bPathIndex--) {
-            if (
-              aPath[aPathIndex] === bPath[bPathIndex]
-              && ![a, b].includes(aPath[aPathIndex])
-            ) {
-              commonAncestors.push({
-                node: aPath[aPathIndex],
-                distances: {
-                  [a]: aPath.length - aPathIndex - 1,
-                  [b]: bPath.length - bPathIndex - 1,
-                },
-              } as GraphCommonAncestor<Id>)
+    return async b => {
+      const bTraversals = await toTraversals(b),
+            commonAncestors: GraphCommonAncestor<Id>[] = []
+
+      for (const { path: aPath } of aTraversals) {
+        for (const { path: bPath } of bTraversals) {
+          for (let aPathIndex = aPath.length - 1; aPathIndex >= 0; aPathIndex--) {
+            for (let bPathIndex = bPath.length - 1; bPathIndex >= 0; bPathIndex--) {
+              if (
+                aPath[aPathIndex] === bPath[bPathIndex]
+                && ![a, b].includes(aPath[aPathIndex])
+              ) {
+                commonAncestors.push({
+                  node: aPath[aPathIndex],
+                  distances: {
+                    [a]: aPath.length - aPathIndex - 1,
+                    [b]: bPath.length - bPathIndex - 1,
+                  },
+                } as GraphCommonAncestor<Id>)
+              }
             }
           }
         }
       }
-    }
 
-    return commonAncestors
+      return commonAncestors
+    }
+  }
+
+  const createPredicateAncestor: DirectedAcyclicAsyncFns<Id, Metadata>['createPredicateAncestor'] = async descendant => {
+    const traversals = await toTraversals(descendant),
+          paths = createMapAsync<GraphTraversal<Id, Metadata>, Id[]>(
+            async traversal => await toPath(traversal.state)
+          )(traversals)
+
+    return ancestor => some<Id[]>(path => path.includes(ancestor))(paths) as boolean
   }
 
   const toTraversals: DirectedAcyclicAsyncFns<Id, Metadata>['toTraversals'] = async node => {
     const traversals: GraphTraversal<Id, Metadata>[] = []
     
-    await walk((path, state) => {
+    await walk((path, state, stop) => {
       if (path.at(-1) === node) {
         traversals.push({
           path,
           state,
         })
+
+        if (kind === 'arborescence') stop()
       }
     })
 
@@ -208,7 +229,7 @@ export function createDirectedAcyclicAsyncFns<
     while (getLastOutdegree() > 0 && getLastStatus() === 'set') {
       const outgoing = toOutgoing(path.at(-1)),
             edge = await createFindAsync<GraphEdgeAsync<Id, Metadata>>(
-              ({ predicateTraversable }) => predicateTraversable(state)
+              async ({ predicateTraversable }) => await predicateTraversable(state)
             )(outgoing)
   
       path.push(edge.to)
@@ -220,14 +241,18 @@ export function createDirectedAcyclicAsyncFns<
   const {
     toIndegree,
     toOutdegree,
-    toIncoming,
-    toOutgoing,
+    toIncoming: toIncomingSync,
+    toOutgoing: toOutgoingSync,
     toEntry,
   } = createGraphFns(nodes, edges)
 
+  const toIncoming = toIncomingSync as unknown as (id: Id) => GraphEdgeAsync<Id, Metadata>[]
+  const toOutgoing = toOutgoingSync as unknown as (id: Id) => GraphEdgeAsync<Id, Metadata>[]
+
   return {
     toTree,
-    toCommonAncestors,
+    createCommonAncestors,
+    createPredicateAncestor,
     toTraversals,
     walk,
     toPath,

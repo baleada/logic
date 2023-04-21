@@ -1,10 +1,10 @@
 import { slice, find, pipe } from 'lazy-collections'
-import { createFilter } from '../../pipes'
+import { createFilter } from '../pipes'
 import type {
   GraphNode,
   GraphEdge,
   GraphEdgeAsync,
-} from './types'
+} from '../extracted'
 
 export type GraphFns<
   Id extends string,

@@ -197,7 +197,7 @@ export type { Direction } from './toDirection'
 export { toHookApi } from './toHookApi'
 export type { HookApi } from './toHookApi'
 
-export { toName } from './toName'
+export { fromCodeToName as toName } from './fromCodeToName'
 
 export { toMousePoint, toTouchMovePoint, toTouchEndPoint } from './toPoints'
 
@@ -218,6 +218,28 @@ export { storePointerTimeMetadata } from './storePointerTimeMetadata'
 export type { PointerTimeMetadata } from './storePointerTimeMetadata'
 
 
-// Mixed
+// Objects
 export { narrowKeycombo } from './keycombo'
 export type { KeycomboItem } from './keycombo'
+
+export {
+  defineGraph,
+  defineGraphNodes,
+  defineGraphEdges,
+  defineGraphAsync,
+  defineGraphEdgesAsync,
+} from './graph'
+export type {
+  Graph,
+  GraphNode,
+  GraphEdge,
+  GraphAsync,
+  GraphEdgeAsync,
+  GraphState,
+  GraphTraversal,
+  GraphCommonAncestor,
+  GraphTreeNode,
+} from './graph'
+
+export { defineAssociativeArray } from './associativeArray'
+export type { AssociativeArray } from './associativeArray'
