@@ -1,39 +1,37 @@
-import { filter, find, pipe, some, toArray } from 'lazy-collections'
+import { filter, pipe, some, toArray } from 'lazy-collections'
 import { at, includes } from '../extracted'
 import type {
-  Graph,
+  AsyncGraph,
   GraphNode,
-  GraphEdge,
+  AsyncGraphEdge,
   GraphState,
   GraphStep,
   GraphCommonAncestor,
   GraphTreeNode,
-  AsyncGraph,
 } from '../extracted'
+import { createFindAsync } from './createFindAsync'
 import {
   createToOutdegree,
   createToOutgoing,
 } from './graph'
 import type {
-  GraphGeneratorFn,
-  GraphNodeGeneratorFn,
-  GraphStateFn,
-  GraphNodeTupleFn,
-  GraphNodeTupleGeneratorFn,
-  GraphTreeFn,
-  GraphFn,
-  AsyncGraphGeneratorFn,
+  GraphStateAsyncFn,
+  GraphNodeTupleAsyncGeneratorFn,
+  AsyncGraphFn,
+  AsyncGraphAsyncGeneratorFn,
+  GraphNodeAsyncGeneratorFn,
+  GraphNodeTupleAsyncFn,
 } from './types'
-import { createPredicateRoot } from './graph'
+import { createToRoots, createFindInTree } from './directed-acyclic'
 
-// TODO: root option, multiple roots
+// // TODO: root option, multiple roots
 export function createToTree<
   Id extends string,
   Metadata
->(options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}): GraphFn<Id, Metadata, GraphTreeNode<Id>[]> {
+>(options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}): AsyncGraphFn<Id, Metadata, GraphTreeNode<Id>[]> {
   const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
 
-  return function toTree (directedAcyclic) {
+  return async function toTree (directedAcyclic) {
     const firstRoot = pipe(
             createToRoots<Id, Metadata, typeof directedAcyclic>(),
             at(0),
@@ -45,7 +43,7 @@ export function createToTree<
       children: [],
     })
 
-    for (const { path } of toSteps(directedAcyclic)) {
+    for await (const { path } of toSteps(directedAcyclic)) {
       const node = path.at(-1),
             parent = path.at(-2)
 
@@ -64,26 +62,15 @@ export function createToTree<
   }
 }
 
-export function createFindInTree<Id extends string> (node: GraphNode<Id>): GraphTreeFn<Id, GraphTreeNode<Id>> {
-  return tree => {
-    for (const treeNode of tree) {
-      if (treeNode.node === node) return treeNode
-
-      const found = createFindInTree(node)(treeNode.children)
-      if (found) return found
-    }
-  }
-}
-
 export function createToCommonAncestors<
   Id extends string,
   Metadata
-> (directedAcyclic: Graph<Id, Metadata>): GraphNodeTupleGeneratorFn<Id, GraphCommonAncestor<Id>> {
+> (directedAcyclic: AsyncGraph<Id, Metadata>): GraphNodeTupleAsyncGeneratorFn<Id, GraphCommonAncestor<Id>> {
   const toNodeSteps = createToNodeSteps(directedAcyclic)
 
-  return function* (a, b) {
-    for (const { path: aPath } of toNodeSteps(a)) {
-      for (const { path: bPath } of toNodeSteps(b)) {
+  return async function* (a, b) {
+    for await (const { path: aPath } of toNodeSteps(a)) {
+      for await (const { path: bPath } of toNodeSteps(b)) {
         for (let aPathIndex = aPath.length - 1; aPathIndex >= 0; aPathIndex--) {
           for (let bPathIndex = bPath.length - 1; bPathIndex >= 0; bPathIndex--) {
             if (
@@ -108,11 +95,11 @@ export function createToCommonAncestors<
 export function createPredicateAncestor<
   Id extends string,
   Metadata
-> (directedAcyclic: Graph<Id, Metadata>): GraphNodeTupleFn<Id, boolean> {
+> (directedAcyclic: AsyncGraph<Id, Metadata>): GraphNodeTupleAsyncFn<Id, boolean> {
   const toNodeSteps = createToNodeSteps(directedAcyclic)
 
-  return function (descendant, ancestor) {
-    return pipe(
+  return async function (descendant, ancestor) {
+    return await pipe(
       toNodeSteps,
       some<GraphStep<Id, Metadata>>(({ path }) => includes(ancestor)(path))
     )(descendant)
@@ -123,13 +110,13 @@ export function createToNodeSteps<
   Id extends string,
   Metadata
 > (
-  directedAcyclic: Graph<Id, Metadata>,
+  directedAcyclic: AsyncGraph<Id, Metadata>,
   options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}
-): GraphNodeGeneratorFn<Id, GraphStep<Id, Metadata>> {
+): GraphNodeAsyncGeneratorFn<Id, GraphStep<Id, Metadata>> {
   const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
 
-  return function* (node) {
-    yield* pipe(
+  return async function* (node) {
+    yield* await pipe(
       toSteps,
       filter(({ path }) => path.at(-1) === node),
     )(directedAcyclic)
@@ -157,10 +144,10 @@ export function createToSteps<
   Metadata
 > (
   options: CreateToStepsOptions<Id, Metadata> = {}
-): GraphGeneratorFn<Id, Metadata, GraphStep<Id, Metadata>> {
+): AsyncGraphAsyncGeneratorFn<Id, Metadata, GraphStep<Id, Metadata>> {
   const { toUnsetMetadata, toMockMetadata, root, kind } = { ...defaultCreateToStepsOptions, ...options } as CreateToStepsOptions<Id, Metadata>  
 
-  return function* (directedAcyclic) {    
+  return async function* (directedAcyclic) {    
     const { nodes } = directedAcyclic,
           toOutdegree = createToOutdegree(directedAcyclic),
           toPath = createToPath(directedAcyclic),
@@ -183,21 +170,21 @@ export function createToSteps<
 
     let location = root || at<GraphNode<Id>>(0)(roots)
 
-    const path = toPath(state)
+    const path = await toPath(state)
 
     yield { path, state: JSON.parse(JSON.stringify(state)) }
 
-    function* toStep (): Generator<GraphStep<Id, Metadata>> {  
+    async function* toStep (): AsyncGenerator<GraphStep<Id, Metadata>> {  
       if (predicateExhausted(location)) {
         if (includes(location)(roots)) return
   
         state[location].status = 'unset'
         state[location].metadata = toUnsetMetadata(location)
   
-        const path = toPath(state)
+        const path = await toPath(state)
         location = path.at(-2)
   
-        yield* toStep()
+        yield* await toStep()
         return
       }
       
@@ -206,7 +193,7 @@ export function createToSteps<
       state[location].status = 'set'
       state[location].metadata = toMockMetadata(location, totalConnectionsFollowedByNode[location])
       
-      const path = toPath(state)      
+      const path = await toPath(state)      
   
       yield { path, state: JSON.parse(JSON.stringify(state)) }
   
@@ -216,10 +203,10 @@ export function createToSteps<
   
       if (toOutdegree(newLocation) > 0) location = newLocation
   
-      yield* toStep()
+      yield* await toStep()
     }
   
-    yield* toStep()
+    yield* await toStep()
   }
 }
 
@@ -227,7 +214,7 @@ export function createToSteps<
 export function createToPath<
   Id extends string,
   Metadata
-> (directedAcyclic: Graph<Id, Metadata>): GraphStateFn<Id, Metadata, GraphNode<Id>[]> {
+> (directedAcyclic: AsyncGraph<Id, Metadata>): GraphStateAsyncFn<Id, Metadata, GraphNode<Id>[]> {
   const toOutdegree = createToOutdegree<Id, Metadata, typeof directedAcyclic>(directedAcyclic),
         toOutgoing = createToOutgoing<Id, Metadata, typeof directedAcyclic>(directedAcyclic),
         firstRoot = pipe<typeof directedAcyclic>(
@@ -235,41 +222,23 @@ export function createToPath<
           at(0)
         )(directedAcyclic) as GraphNode<Id>
 
-  return state => {
+  return async state => {
     const path = [firstRoot],
           getLastOutdegree = () => toOutdegree(path.at(-1)),
           getLastStatus = () => state[path.at(-1)].status
 
     while (getLastOutdegree() > 0 && getLastStatus() === 'set') {
-      const edge = pipe(
+      const edge = await pipe(
               toOutgoing,
-              find<GraphEdge<Id, Metadata>>(
-                ({ predicateTraversable }) => predicateTraversable(state)
-              ),
-            )(path.at(-1)) as GraphEdge<Id, Metadata>
+              toArray(),
+              createFindAsync<AsyncGraphEdge<Id, Metadata>>(
+                async ({ predicateTraversable }) => await predicateTraversable(state)
+              )
+            )(path.at(-1)) as AsyncGraphEdge<Id, Metadata>
 
       path.push(edge.to)
     }
 
     return path
-  }
-}
-
-export function createToRoots<
-  Id extends string,
-  Metadata,
-  GraphType extends Graph<Id, Metadata> | AsyncGraph<Id, Metadata> = Graph<Id, Metadata>
-> (options: { kind?: 'directed acyclic' | 'arborescence' } = {}): (
-  GraphType extends AsyncGraph<Id, Metadata>
-    ? AsyncGraphGeneratorFn<Id, Metadata, GraphNode<Id>>
-    : GraphGeneratorFn<Id, Metadata, GraphNode<Id>>
- ) {
-  return function* (directedAcyclic) {
-    const { nodes } = directedAcyclic
-
-    for (const node of nodes) {
-      if (createPredicateRoot(directedAcyclic)(node)) yield node
-      if (options.kind === 'arborescence') break
-    }
   }
 }

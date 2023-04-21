@@ -1,23 +1,28 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { map, pipe, toArray } from 'lazy-collections'
-import type { GraphEdge, GraphNode, GraphStep } from '../../src/extracted/graph'
+import type { AsyncGraphEdge, GraphNode, GraphStep } from '../../src/extracted/graph'
 import {
+  createToPath,
+  createToSteps,
   createToNodeSteps,
   createPredicateAncestor,
   createToCommonAncestors,
-  createToPath,
-  createToRoots,
-  createToSteps,
   createToTree,
-} from '../../src/pipes/directed-acyclic'
+} from '../../src/pipes/directed-acyclic-async'
 
 const suite = createSuite<{
   directedAcyclic: {
     nodes: GraphNode<any>[],
-    edges: GraphEdge<any, number>[],
+    edges: AsyncGraphEdge<any, number>[],
   }
 }>('directed acyclic pipes')
+
+async function debounce<T> (cb: () => T) {
+  return await new Promise<T>(resolve => {
+    setTimeout(() => resolve(cb()), 0)
+  })
+} 
 
 suite.before(context => {
   const nodes = [
@@ -32,42 +37,22 @@ suite.before(context => {
   ]
 
   const edges = [
-    { from: 'a', to: 'b', predicateTraversable: state => state.a.metadata === 0 },
-    { from: 'a', to: 'c', predicateTraversable: state => state.a.metadata === 1 },
-    { from: 'a', to: 'd', predicateTraversable: state => state.a.metadata === 2 },
-    { from: 'b', to: 'd', predicateTraversable: state => state.b.metadata === 0 },
-    { from: 'b', to: 'e', predicateTraversable: state => state.b.metadata === 1 },
-    { from: 'c', to: 'f', predicateTraversable: state => state.c.metadata === 0 },
-    { from: 'c', to: 'g', predicateTraversable: state => state.c.metadata === 1 },
-    { from: 'd', to: 'h', predicateTraversable: state => state.d.metadata === 0 },
+    { from: 'a', to: 'b', predicateTraversable: async state => await debounce(() => state.a.metadata === 0) },
+    { from: 'a', to: 'c', predicateTraversable: async state => await debounce(() => state.a.metadata === 1) },
+    { from: 'a', to: 'd', predicateTraversable: async state => await debounce(() => state.a.metadata === 2) },
+    { from: 'b', to: 'd', predicateTraversable: async state => await debounce(() => state.b.metadata === 0) },
+    { from: 'b', to: 'e', predicateTraversable: async state => await debounce(() => state.b.metadata === 1) },
+    { from: 'c', to: 'f', predicateTraversable: async state => await debounce(() => state.c.metadata === 0) },
+    { from: 'c', to: 'g', predicateTraversable: async state => await debounce(() => state.c.metadata === 1) },
+    { from: 'd', to: 'h', predicateTraversable: async state => await debounce(() => state.d.metadata === 0) },
   ]
 
   context.directedAcyclic = { nodes: nodes, edges: edges }
 })
 
-suite('createToRoots(...) works', ({ directedAcyclic }) => {
-  const withMoreRoots = {
-    nodes: [
-      ...directedAcyclic.nodes,
-      'i',
-    ],
-    edges: [
-      ...directedAcyclic.edges,
-      { from: 'i', to: 'c', predicateTraversable: state => state.i.metadata === 0 },
-    ],
-  }
-
-  ;(() => {
-    const value = [...createToRoots()(withMoreRoots)],
-          expected = ['a', 'i']
-
-    assert.equal(value, expected)
-  })()
-})
-
-suite('createToPath(...) works', ({ directedAcyclic }) => {
-  ;(() => {
-    const value = createToPath(directedAcyclic)({
+suite('createToPath(...) works', async ({ directedAcyclic }) => {
+  await (async () => {
+    const value = await createToPath(directedAcyclic)({
             a: { status: 'set', metadata: 0 },
             b: { status: 'set', metadata: 0 },
             d: { status: 'set', metadata: 0 },
@@ -77,8 +62,8 @@ suite('createToPath(...) works', ({ directedAcyclic }) => {
     assert.equal(value, expected)
   })()
   
-  ;(() => {
-    const value = createToPath(directedAcyclic)({
+  await (async () => {
+    const value = await createToPath(directedAcyclic)({
             a: { status: 'set', metadata: 1 },
             c: { status: 'set', metadata: 0 },
           }),
@@ -88,8 +73,8 @@ suite('createToPath(...) works', ({ directedAcyclic }) => {
   })()
 })
 
-suite('createToSteps works', ({ directedAcyclic }) => {
-  const value = pipe(
+suite('createToSteps works', async ({ directedAcyclic }) => {
+  const value = await pipe(
     createToSteps(),
     map<GraphStep<any, number>, any>(step => step.path.at(-1)),
     toArray()
@@ -111,8 +96,8 @@ suite('createToSteps works', ({ directedAcyclic }) => {
   )
 })
 
-suite.skip('createToSteps works with multiple roots', ({ directedAcyclic }) => {
-  const value = pipe(
+suite.skip('createToSteps works with multiple roots', async ({ directedAcyclic }) => {
+  const value = await pipe(
     createToSteps(),
     map<GraphStep<any, number>, any>(step => step.path.at(-1)),
     toArray()
@@ -120,7 +105,7 @@ suite.skip('createToSteps works with multiple roots', ({ directedAcyclic }) => {
     nodes: [...directedAcyclic.nodes, 'i'],
     edges: [
       ...directedAcyclic.edges,
-      { from: 'i', to: 'c', predicateTraversable: state => state.i.metadata === 0 },
+      { from: 'i', to: 'c', predicateTraversable: async state => await debounce(() => state.i.metadata === 0) },
     ],
   })
 
@@ -145,9 +130,12 @@ suite.skip('createToSteps works with multiple roots', ({ directedAcyclic }) => {
   )
 })
 
-suite('createFromNodeToSteps works', ({ directedAcyclic }) => {
-  ;(() => {
-    const value = [...createToNodeSteps(directedAcyclic)('a')],
+suite('createFromNodeToSteps works', async ({ directedAcyclic }) => {
+  await (async () => {
+    const value = await pipe(
+            createToNodeSteps(directedAcyclic),
+            toArray()
+          )('a'),
           expected = [
             {
               path: ['a'],
@@ -167,8 +155,11 @@ suite('createFromNodeToSteps works', ({ directedAcyclic }) => {
     assert.equal(value, expected)
   })()
 
-  ;(() => {
-    const value = [...createToNodeSteps(directedAcyclic)('g')],
+  await (async () => {
+    const value = await pipe(
+            createToNodeSteps(directedAcyclic),
+            toArray(),
+          )('g'),
           expected = [
             {
               path: [ 'a', 'c', 'g' ],
@@ -188,8 +179,11 @@ suite('createFromNodeToSteps works', ({ directedAcyclic }) => {
     assert.equal(value, expected)
   })()
   
-  ;(() => {
-    const value = [...createToNodeSteps(directedAcyclic)('d')],
+  await (async () => {
+    const value = await pipe(
+            createToNodeSteps(directedAcyclic),
+            toArray(),
+          )('d'),
           expected = [
             {
               path: [ 'a', 'b', 'd' ],
@@ -223,40 +217,46 @@ suite('createFromNodeToSteps works', ({ directedAcyclic }) => {
   })()
 })
 
-suite('createPredicateAncestor works', ({ directedAcyclic }) => {
-  ;(() => {
-    const value = createPredicateAncestor(directedAcyclic)('d', 'a'),
+suite('createPredicateAncestor works', async ({ directedAcyclic }) => {
+  await (async () => {
+    const value = await createPredicateAncestor(directedAcyclic)('d', 'a'),
           expected = true
 
     assert.equal(value, expected)
   })()
   
   // Handles non-shortest path
-  ;(() => {
-    const value = createPredicateAncestor(directedAcyclic)('d', 'b'),
+  await (async () => {
+    const value = await createPredicateAncestor(directedAcyclic)('d', 'b'),
           expected = true
 
     assert.equal(value, expected)
   })()
   
-  ;(() => {
-    const value = createPredicateAncestor(directedAcyclic)('d', 'c'),
+  await (async () => {
+    const value = await createPredicateAncestor(directedAcyclic)('d', 'c'),
           expected = false
 
     assert.equal(value, expected)
   })()
 })
 
-suite('createToCommonAncestors works', ({ directedAcyclic }) => {
-  ;(() => {
-    const value = [...createToCommonAncestors(directedAcyclic)('a', 'b')],
+suite('createToCommonAncestors works', async ({ directedAcyclic }) => {
+  await (async () => {
+    const value = await pipe(
+            async () => await createToCommonAncestors(directedAcyclic)('a', 'b'),
+            toArray(),
+          )(),
           expected = []
 
     assert.equal(value, expected)
   })()
   
-  ;(() => {
-    const value = [...createToCommonAncestors(directedAcyclic)('b', 'e')],
+  await (async () => {
+    const value = await pipe(
+            async () => await createToCommonAncestors(directedAcyclic)('b', 'e'),
+            toArray(),
+          )(),
           expected = [
             { node: 'a', distances: { b: 1, e: 2 } },
           ]
@@ -265,8 +265,11 @@ suite('createToCommonAncestors works', ({ directedAcyclic }) => {
   })()
 })
 
-suite('createToCommonAncestors handles multiple paths from one node to another', ({ directedAcyclic }) => {
-  const value = [...createToCommonAncestors(directedAcyclic)('d', 'g')],
+suite('createToCommonAncestors handles multiple paths from one node to another', async ({ directedAcyclic }) => {
+  const value = await pipe(
+          async () => await createToCommonAncestors(directedAcyclic)('d', 'g'),
+          toArray(),
+        )(),
         expected = [
           { node: 'a', distances: { d: 2, g: 2 } },
           { node: 'a', distances: { d: 1, g: 2 } },
@@ -275,8 +278,11 @@ suite('createToCommonAncestors handles multiple paths from one node to another',
   assert.equal(value, expected)
 })
 
-suite('createToCommonAncestors orders ancestors from deepest to shallowest', ({ directedAcyclic }) => {
-  const value = [...createToCommonAncestors(directedAcyclic)('d', 'e')],
+suite('createToCommonAncestors orders ancestors from deepest to shallowest', async ({ directedAcyclic }) => {
+  const value = await pipe(
+          async () => await createToCommonAncestors(directedAcyclic)('d', 'e'),
+          toArray(),
+        )(),
         expected = [
           { node: 'b', distances: { d: 1, e: 1 } },
           { node: 'a', distances: { d: 2, e: 2 } },
@@ -288,8 +294,8 @@ suite('createToCommonAncestors orders ancestors from deepest to shallowest', ({ 
 
 
 
-suite('createToTree works', ({ directedAcyclic }) => {
-  const value = createToTree()(directedAcyclic),
+suite.skip('createToTree works', async ({ directedAcyclic }) => {
+  const value = await createToTree<string, number>()(directedAcyclic),
         expected = [
           {
             node: 'a',

@@ -227,15 +227,15 @@ export {
   defineGraph,
   defineGraphNodes,
   defineGraphEdges,
-  defineGraphAsync,
+  defineAsyncGraph,
   defineGraphEdgesAsync,
 } from './graph'
 export type {
   Graph,
   GraphNode as GraphNode,
   GraphEdge,
-  GraphAsync,
-  GraphEdgeAsync,
+  AsyncGraph,
+  AsyncGraphEdge,
   GraphState,
   GraphStep,
   GraphCommonAncestor,

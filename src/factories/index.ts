@@ -1,34 +1,21 @@
 // GRAPH FNS
 export {
   defineGraph,
-  defineGraphVertexs,
+  defineGraphNodes,
   defineGraphEdges,
-  defineGraphAsync,
+  defineAsyncGraph,
   defineGraphEdgesAsync,
 } from '../extracted'
 export type {
   Graph,
-  GraphVertex,
+  GraphNode,
   GraphEdge,
   GraphState,
-  GraphTraversal,
   GraphCommonAncestor,
   GraphTreeNode,
-  GraphAsync,
-  GraphEdgeAsync,
+  AsyncGraph,
+  AsyncGraphEdge,
 } from '../extracted'
-
-export { createDirectedAcyclicFns } from './createDirectedAcyclicFns'
-export type { DirectedAcyclicFns } from './createDirectedAcyclicFns'
-
-export { createDirectedAcyclicAsyncFns } from './createDirectedAcyclicAsyncFns'
-export type { DirectedAcyclicAsyncFns } from './createDirectedAcyclicAsyncFns'
-
-export { createDecisionTreeFns } from './createDecisionTreeFns'
-export type { DecisionTreeMetadata } from './createDecisionTreeFns'
-
-export { createGraphFns } from './createGraphFns'
-export type { GraphFns } from './createGraphFns'
 
 
 // UNCATEGORIZED STRUCTURES

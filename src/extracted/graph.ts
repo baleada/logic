@@ -58,12 +58,12 @@ export function defineGraphEdges<Id extends string, Metadata> (edges: GraphEdge<
   return edges
 }
 
-export type GraphAsync<Id extends string, Metadata> = {
+export type AsyncGraph<Id extends string, Metadata> = {
   nodes: GraphNode<Id>[],
-  edges: GraphEdgeAsync<Id, Metadata>[],
+  edges: AsyncGraphEdge<Id, Metadata>[],
 }
 
-export type GraphEdgeAsync<
+export type AsyncGraphEdge<
   Id extends string,
   Metadata
 > = {
@@ -72,13 +72,13 @@ export type GraphEdgeAsync<
   predicateTraversable: (metadata: GraphState<Id, Metadata>) => Promise<boolean>
 }
 
-export function defineGraphAsync<Id extends string, Metadata> (
+export function defineAsyncGraph<Id extends string, Metadata> (
   nodes: GraphNode<Id>[],
-  edges: GraphEdgeAsync<Id, Metadata>[]
+  edges: AsyncGraphEdge<Id, Metadata>[]
 ) {
   return { nodes, edges }
 }
 
-export function defineGraphEdgesAsync<Id extends string, Metadata> (edges: GraphEdgeAsync<Id, Metadata>[]) {
+export function defineGraphEdgesAsync<Id extends string, Metadata> (edges: AsyncGraphEdge<Id, Metadata>[]) {
   return edges
 }
