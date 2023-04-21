@@ -1,9 +1,9 @@
 import { readdirSync, readFileSync } from 'fs'
 import * as AnimateableExports from '../src/classes/Animateable'
+import * as BroadcastableExports from '../src/classes/Broadcastable'
 import * as CompleteableExports from '../src/classes/Completeable'
 import * as CopyableExports from '../src/classes/Copyable'
 import * as DelayableExports from '../src/classes/Delayable'
-import * as DispatchableExports from '../src/classes/Dispatchable'
 import * as FetchableExports from '../src/classes/Fetchable'
 import * as FullscreenableExports from '../src/classes/Fullscreenable'
 import * as GrantableExports from '../src/classes/Grantable'
@@ -21,10 +21,10 @@ function checkTestCoverage () {
   const pipes = Object.keys(pipeExports)
   const allExports = Object.keys({
     ...AnimateableExports,
+    ...BroadcastableExports,
     ...CompleteableExports,
     ...CopyableExports,
     ...DelayableExports,
-    ...DispatchableExports,
     ...FetchableExports,
     ...FullscreenableExports,
     ...GrantableExports,
