@@ -9,8 +9,6 @@ import {
   map,
   unique,
   reduce,
-  every,
-  join,
 } from 'lazy-collections'
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
@@ -323,7 +321,8 @@ export function createRename<Key, Value> (from: Key, to: Key): MapFunction<Key, 
 // OBJECT
 export type ObjectFunction<Key extends string | number | symbol, Value, Returned> = (transform: Record<Key, Value>) => Returned
 
-// Preferable to Object.entries for type safety
+// Preferable to Object.entries for better type inference on objects
+// with no risk of keys being added dynamically
 export function createToEntries<Key extends string | number | symbol, Value> (): ObjectFunction<Key, Value, [Key, Value][]> {
   return object => {
     const entries = []
@@ -333,6 +332,20 @@ export function createToEntries<Key extends string | number | symbol, Value> ():
     }
 
     return entries
+  }
+}
+
+// Preferable to Object.keys for better type inference on objects
+// with no risk of keys being added dynamically
+export function createToKeys<Key extends string | number | symbol> (): ObjectFunction<Key, any, [Key, any][]> {
+  return object => {
+    const keys = []
+
+    for (const key in object) {
+      keys.push(key)
+    }
+
+    return keys
   }
 }
 

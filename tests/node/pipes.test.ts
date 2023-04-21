@@ -24,6 +24,7 @@ import {
   createDetermine,
   createRename,
   createToEntries,
+  createToKeys,
   Pipeable,
 } from '../../src/pipes'
 
@@ -341,10 +342,17 @@ suite(`createRename({ from, to }) renames 'from' name to 'to' name`, ({ map }) =
 
 
 // OBJECT
-suite(`createToEntries() transform object into entries`, ({ object }) => {
+suite(`createToEntries() transforms object into entries`, ({ object }) => {
   const value = createToEntries<string, string>()(object)
 
   assert.equal(value, [['one', 'value'], ['two', 'value']])
+})
+
+// createToKeys
+suite(`createToKeys() transforms object into keys`, ({ object }) => {
+  const value = createToKeys<string>()(object)
+
+  assert.equal(value, ['one', 'two'])
 })
 
 
