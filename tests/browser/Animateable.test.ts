@@ -21,7 +21,7 @@ suite.before(context => {
 
 suite('initial playbackRate is 1', async ({ puppeteer: { page }, keyframes }) => {
   const value = await page.evaluate((keyframes: AnimateableKeyframe[]) => {
-    const instance = new (window as unknown as WithGlobals).Logic.Animateable(keyframes)
+    const instance = new window.Logic.Animateable(keyframes)
     return instance.playbackRate
   }, keyframes)
 
@@ -30,7 +30,7 @@ suite('initial playbackRate is 1', async ({ puppeteer: { page }, keyframes }) =>
 
 suite('assignment sets the playback rate', async ({ puppeteer: { page }, keyframes }) => {
   const value = await page.evaluate((keyframes: AnimateableKeyframe[]) => {
-    const instance = new (window as unknown as WithGlobals).Logic.Animateable(keyframes)
+    const instance = new window.Logic.Animateable(keyframes)
     instance.playbackRate = 2
     return instance.playbackRate
   }, keyframes)
@@ -40,7 +40,7 @@ suite('assignment sets the playback rate', async ({ puppeteer: { page }, keyfram
 
 suite('setPlaybackRate sets the playback rate', async ({ puppeteer: { page }, keyframes }) => {
   const value = await page.evaluate((keyframes: AnimateableKeyframe[]) => {
-    const instance = new (window as unknown as WithGlobals).Logic.Animateable(keyframes)
+    const instance = new window.Logic.Animateable(keyframes)
     return instance.setPlaybackRate(2).playbackRate
   }, keyframes)
 
@@ -49,7 +49,7 @@ suite('setPlaybackRate sets the playback rate', async ({ puppeteer: { page }, ke
 
 suite('status is "ready" after construction', async ({ puppeteer: { page }, keyframes }) => {
   const value = await page.evaluate((keyframes: AnimateableKeyframe[]) => {
-    const instance = new (window as unknown as WithGlobals).Logic.Animateable(keyframes)
+    const instance = new window.Logic.Animateable(keyframes)
     return instance.status
   }, keyframes)
 

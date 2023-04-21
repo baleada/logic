@@ -1,11 +1,11 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { ensurePointercombo } from '../../src/extracted'
+import { narrowPointercombo } from '../../src/extracted'
 
-const suite = createSuite('ensurePointercombo')
+const suite = createSuite('narrowPointercombo')
 
-suite(`ensures keycombo`, () => {
-  const value = ensurePointercombo('shift+cmd+pointerdown'),
+suite(`narrows keycombo`, () => {
+  const value = narrowPointercombo('shift+cmd+pointerdown'),
         expected = [
           'shift',
           'cmd',

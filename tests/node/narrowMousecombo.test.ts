@@ -1,11 +1,11 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { ensureMousecombo } from '../../src/extracted'
+import { narrowMousecombo } from '../../src/extracted'
 
-const suite = createSuite('ensureMousecombo')
+const suite = createSuite('narrowMousecombo')
 
-suite(`ensures keycombo`, () => {
-  const value = ensureMousecombo('shift+cmd+click'),
+suite(`narrows keycombo`, () => {
+  const value = narrowMousecombo('shift+cmd+click'),
         expected = [
           'shift',
           'cmd',

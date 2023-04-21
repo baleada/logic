@@ -9,7 +9,7 @@ const suite = withPuppeteer(
 
 suite('stores the state', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithGlobals).Logic.Shareable({ url: 'https://baleada.dev '})
+          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev '})
           return instance.state
         }),
         expected = { url: 'https://baleada.dev '}
@@ -19,7 +19,7 @@ suite('stores the state', async ({ puppeteer: { page } }) => {
 
 suite('assignment sets the state', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithGlobals).Logic.Shareable({ url: 'https://baleada.dev '})
+          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev '})
           instance.state = { url: 'https://alexvipond.dev '}
           return instance.state
         }),
@@ -30,7 +30,7 @@ suite('assignment sets the state', async ({ puppeteer: { page } }) => {
 
 suite('setState sets the state', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithGlobals).Logic.Shareable({ url: 'https://baleada.dev '})
+          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev '})
           instance.setState({ url: 'https://alexvipond.dev '})
           return instance.state
         }),
@@ -41,7 +41,7 @@ suite('setState sets the state', async ({ puppeteer: { page } }) => {
 
 suite('status is "ready" after construction', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new (window as unknown as WithGlobals).Logic.Shareable({ url: 'https://baleada.dev '})
+          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev '})
           return instance.status
         }),
         expected = 'ready'
