@@ -364,6 +364,85 @@ suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page
   reloadNext()
 })
 
+suite(`listen(...) calls effect when recognizeable status is recognized`, async ({ puppeteer: { reloadNext, page } }) => {
+  await page.evaluate(async () => {
+    const instance = new window.Logic.Listenable('recognizeable' as 'keydown', {
+      recognizeable: {
+        effects: {
+          keydown: (event, { recognized }) => {
+            recognized()
+          },
+        }
+      }
+    })
+    window.testState = 0
+    instance.listen(() => {
+      window.testState++
+    })
+  })
+
+  await page.keyboard.down('B')
+  await page.keyboard.down('B')
+  await page.keyboard.down('B')
+
+  const value = await page.evaluate(() => {
+          return window.testState
+        }),
+        expected = 3
+
+  assert.is(value, expected)
+
+  reloadNext()
+})
+
+suite(`listen(...) only calls effect once when recognizeable status is recognized until ready`, async ({ puppeteer: { reloadNext, page } }) => {
+  await page.evaluate(async () => {
+    const instance = new window.Logic.Listenable('recognizeable' as 'keydown' | 'keyup', {
+      recognizeable: {
+        effects: {
+          keydown: (event, { recognizedUntilReady }) => {
+            recognizedUntilReady()
+          },
+          keyup: (event, { ready }) => {
+            ready()
+          }
+        }
+      }
+    })
+    window.testState = 0
+    instance.listen(() => {
+      window.testState++
+    })
+  })
+
+  await page.keyboard.down('B')
+  await page.keyboard.down('B')
+  await page.keyboard.down('B')
+
+  await (async () => {
+    const value = await page.evaluate(() => {
+      return window.testState
+    }),
+    expected = 1
+
+    assert.is(value, expected)
+  })()
+
+  await page.keyboard.up('B')
+  await page.keyboard.down('B')
+
+  await (async () => {
+    const value = await page.evaluate(() => {
+      return window.testState
+    }),
+    expected = 2
+
+    assert.is(value, expected)
+  })()
+  
+  reloadNext()
+})
+
 suite(`stop(...) handles observations`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
