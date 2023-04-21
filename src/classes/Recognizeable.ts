@@ -7,7 +7,6 @@ import { createSlice, createConcat } from '../pipes'
 import {
   ListenableSupportedType,
   ListenEffectParam,
-  ListenEffectApi,
 } from './Listenable'
 
 export type RecognizeableOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
@@ -28,7 +27,7 @@ export type RecognizeableEffectApi<Type extends ListenableSupportedType, Metadat
   denied: () => void,
   getSequence: () => ListenEffectParam<Type>[],
   onRecognized: (sequenceItem: ListenEffectParam<Type>) => any,
-} & ListenEffectApi<Type>
+}
     
 export type RecognizeableStatus = 'recognized' | 'recognizing' | 'denied' | 'ready'
 
@@ -101,7 +100,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     return this
   }
 
-  recognize (sequenceItem: ListenEffectParam<Type>, api: ListenEffectApi<Type>, { onRecognized }: RecognizeOptions<Type, Metadata> = {}) {
+  recognize (sequenceItem: ListenEffectParam<Type>, { onRecognized }: RecognizeOptions<Type, Metadata> = {}) {
     this.recognizing()
 
     const type = this.toType(sequenceItem),
@@ -116,7 +115,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     this.effectApi.getSequence = () => newSequence
     this.effectApi.onRecognized = onRecognized || (() => {})
 
-    this.effects.get(type)?.(sequenceItem, { ...api, ...this.effectApi })
+    this.effects.get(type)?.(sequenceItem, { ...this.effectApi })
       
     switch (this.status) {
       case 'denied':

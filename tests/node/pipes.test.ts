@@ -6,7 +6,7 @@ import {
   createForEachAsync,
   createMapAsync,
   createFilterAsync,
-  createDelete,
+  createRemove,
   createInsert,
   createReorder,
   createSwap,
@@ -54,7 +54,7 @@ suite(`async reduces`, async ({ array }) => {
             }, 0)
           })
 
-          return await createReduceAsync(
+          return await createReduceAsync<string, number>(
             async value => value + (await asyncReduceStub(1)),
             0,
           )(array)
@@ -66,7 +66,7 @@ suite(`async reduces`, async ({ array }) => {
 
 suite(`reduces`, ({ array }) => {
   const value = (array => {
-          return createReduce(
+          return createReduce<string, number>(
             value => value + 1,
             0,
           )(array)
@@ -203,25 +203,25 @@ suite(`createSort() sorts the array`, ({ array }) => {
   assert.equal(value, ['aguacate', 'frijoles', 'huevito', 'mantequilla', 'tortilla'])
 })
 
-suite(`createDelete({ index }) removes the item at index from the array`, ({ array }) => {
+suite(`createRemove({ index }) removes the item at index from the array`, ({ array }) => {
   const value = (array => {
-    return createDelete<string>(2)(array)
+    return createRemove<string>(2)(array)
   })(array)
 
   assert.equal(value, ['tortilla', 'frijoles', 'aguacate', 'huevito'])
 })
 
-// suite(`createDelete({ item }) removes item from the array`, ({ array }) => {
+// suite(`createRemove({ item }) removes item from the array`, ({ array }) => {
 //   const value = (array => {
-//     return createDelete<string>({ item: 'mantequilla' })(array)
+//     return createRemove<string>({ item: 'mantequilla' })(array)
 //   })(array)
 
 //   assert.equal(value, ['tortilla', 'frijoles', 'aguacate', 'huevito'])
 // })
 
-// suite(`createDelete({ index, item }) ignores item and removes the item at index from the array`, ({ array }) => {
+// suite(`createRemove({ index, item }) ignores item and removes the item at index from the array`, ({ array }) => {
 //   const value = (array => {
-//     return createDelete<string>({ index: 0, item: 'mantequilla' })(array)
+//     return createRemove<string>({ index: 0, item: 'mantequilla' })(array)
 //   })(array)
 
 //   assert.equal(value, ['frijoles', 'mantequilla', 'aguacate', 'huevito'])
@@ -491,5 +491,9 @@ suite(`createDetermine(...) falls back to first potentiality if chance is lower 
 
   assert.is(value, expected)
 })
+
+// createMatchesKeycombo -> eventMatchesKeycombo.test.ts
+// createMatchesMousecombo -> eventMatchesMousecombo.test.ts
+// createMatchesPointercombo -> eventMatchesPointercombo.test.ts
 
 suite.run()
