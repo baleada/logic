@@ -23,7 +23,7 @@ export { createMap } from './createMap'
 
 export { createMapAsync } from './createMapAsync'
 
-export { createPredicateEqual } from './createPredicateEqual'
+export { createEqual } from './createEqual'
 
 export { createReduce } from './createReduce'
 
@@ -47,15 +47,15 @@ export { createSort } from './createSort'
 
 export { createSwap } from './createSwap'
 
-export { createToEntries } from './createToEntries'
+export { createEntries } from './createEntries'
 
-export { createToEvery } from './createToEvery'
+export { createEvery } from './createEvery'
 
-export { createToFocusable } from './createToFocusable'
-export type { CreateToFocusableOptions } from './createToFocusable'
+export { createFocusable } from './createFocusable'
+export type { CreateFocusableOptions as CreateToFocusableOptions } from './createFocusable'
 
-export { createToKeys } from './createToKeys'
+export { createKeys } from './createKeys'
 
-export { createToSome } from './createToSome'
+export { createSome } from './createSome'
 
 export { createUnique } from './createUnique'

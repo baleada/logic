@@ -22,11 +22,11 @@ import { createClip } from '../../src/pipes/createClip'
 import { createClamp } from '../../src/pipes/createClamp'
 import { createDetermine } from '../../src/pipes/createDetermine'
 import { createRename } from '../../src/pipes/createRename'
-import { createToEntries } from '../../src/pipes/createToEntries'
-import { createToKeys } from '../../src/pipes/createToKeys'
-import { createToSome } from '../../src/pipes/createToSome'
-import { createToEvery } from '../../src/pipes/createToEvery'
-import { createPredicateEqual } from '../../src/pipes/createPredicateEqual'
+import { createEntries } from '../../src/pipes/createEntries'
+import { createKeys } from '../../src/pipes/createKeys'
+import { createSome } from '../../src/pipes/createSome'
+import { createEvery } from '../../src/pipes/createEvery'
+import { createEqual } from '../../src/pipes/createEqual'
 
 type Context = {
   array: string[],
@@ -342,41 +342,41 @@ suite(`createRename({ from, to }) renames 'from' name to 'to' name`, ({ map }) =
 
 
 // OBJECT
-suite(`createToEntries() transforms object into entries`, ({ object }) => {
-  const value = createToEntries<string, string>()(object)
+suite(`createEntries() transforms object into entries`, ({ object }) => {
+  const value = createEntries<string, string>()(object)
 
   assert.equal(value, [['one', 'value'], ['two', 'value']])
 })
 
-suite(`createToKeys() transforms object into keys`, ({ object }) => {
-  const value = createToKeys<string>()(object)
+suite(`createKeys() transforms object into keys`, ({ object }) => {
+  const value = createKeys<string>()(object)
 
   assert.equal(value, ['one', 'two'])
 })
 
-suite(`createToSome() transforms object into some`, ({ object }) => {
+suite(`createSome() transforms object into some`, ({ object }) => {
   ;(() => {
-    const value = createToSome<string, string>((key, value) => key && value)(object)
+    const value = createSome<string, string>((key, value) => key && value)(object)
 
     assert.ok(value)
   })()
 
   ;(() => {
-    const value = createToSome<string, string>((key, value) => key && !value)(object)
+    const value = createSome<string, string>((key, value) => key && !value)(object)
 
     assert.not.ok(value)
   })()
 })
 
-suite(`createToEvery() transforms object into every`, ({ object }) => {
+suite(`createEvery() transforms object into every`, ({ object }) => {
   ;(() => {
-    const value = createToEvery<string, string>((key, value) => key && value)(object)
+    const value = createEvery<string, string>((key, value) => key && value)(object)
 
     assert.ok(value)
   })()
 
   ;(() => {
-    const value = createToEvery<string, string>((key, value) => key && !value)(object)
+    const value = createEvery<string, string>((key, value) => key && !value)(object)
 
     assert.not.ok(value)
   })()
@@ -531,23 +531,23 @@ suite(`createDetermine(...) falls back to first potentiality if chance is lower 
 
 
 // ANY
-suite(`createPredicateEqual(...) predicates equality`, () => {
+suite(`createEqual(...) predicates equality`, () => {
   ;(() => {
-    const value = createPredicateEqual(1)(1),
+    const value = createEqual(1)(1),
           expected = true
 
     assert.is(value, expected)
   })()
   
   ;(() => {
-    const value = createPredicateEqual(1)(2),
+    const value = createEqual(1)(2),
           expected = false
 
     assert.is(value, expected)
   })()
   
   ;(() => {
-    const value = createPredicateEqual({ hello: 'world' })({ hello: 'world' }),
+    const value = createEqual({ hello: 'world' })({ hello: 'world' }),
           expected = true
 
     assert.is(value, expected)

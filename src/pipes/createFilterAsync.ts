@@ -1,5 +1,4 @@
 import type { ArrayFunctionAsync } from './types'
-
 import { createMapAsync } from './createMapAsync'
 import { createFilter } from './createFilter'
 

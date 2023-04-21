@@ -1,8 +1,8 @@
 import type { ObjectFunction } from './types'
+
 // Preferable to Object.entries for better type inference on objects
 // with no risk of keys being added dynamically
-
-export function createToEntries<Key extends string | number | symbol, Value>(): ObjectFunction<Key, Value, [Key, Value][]> {
+export function createEntries<Key extends string | number | symbol, Value>(): ObjectFunction<Key, Value, [Key, Value][]> {
   return object => {
     const entries = [];
 

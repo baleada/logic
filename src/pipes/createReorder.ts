@@ -1,9 +1,8 @@
 import type { ArrayFunction } from './types'
-
 import { predicateObject } from '../extracted'
 import { createConcat } from './createConcat'
-
 import { createSlice } from './createSlice'
+
 export function createReorder<Item>(
   from: { start: number; itemCount: number; } | number,
   to: number

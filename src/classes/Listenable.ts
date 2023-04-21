@@ -13,7 +13,7 @@ import {
   predicateModified,
   predicateFunction,
 } from '../extracted'
-import { createExceptAndOnlyEffect } from "../extracted"
+import { createExceptAndOnlyEffect } from '../extracted'
 import type {
   ListenableModifier,
   ListenableModifierAlias,
