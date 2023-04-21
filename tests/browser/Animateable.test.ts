@@ -1,7 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
-import type { WithGlobals } from '../fixtures/types'
 import type { AnimateableKeyframe } from '../../src/classes'
 
 type Context = {

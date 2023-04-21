@@ -1,7 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
-import type { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
   createSuite('Recognizeable')
@@ -38,7 +37,7 @@ suite(`setSequence sets the sequence`, async ({ puppeteer: { page } }) => {
 suite(`first recognize(sequenceItem) sets status to recognizing`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new window.Logic.Recognizeable([])
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
     return instance.status
   })
 
@@ -59,7 +58,7 @@ suite(`recognize(sequenceItem) calls effect`, async ({ puppeteer: { page } }) =>
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
     
     return effectWasCalled
   })
@@ -78,7 +77,7 @@ suite(`effect API recognized() sets status`, async ({ puppeteer: { page } }) => 
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
     
     
     return instance.status
@@ -98,7 +97,7 @@ suite(`effect API denied() sets status`, async ({ puppeteer: { page } }) => {
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
     
     
     return instance.status
@@ -120,7 +119,7 @@ suite(`effect API getSequence() gets the new sequence`, async ({ puppeteer: { pa
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
     
     return {
       fromInstance: JSON.stringify(instance.sequence),
@@ -144,7 +143,7 @@ suite(`effect API getStatus() gets status`, async ({ puppeteer: { page } }) => {
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
     
     return {
       fromInstance: instance.status,
@@ -168,7 +167,7 @@ suite(`effect API getMetadata() gets metadata`, async ({ puppeteer: { page } }) 
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
     
     return {
       fromInstance: JSON.stringify(instance.metadata),
@@ -192,7 +191,7 @@ suite(`effect API getMetadata() is a reference to metadata`, async ({ puppeteer:
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
 
     // Mutating the getMetadata return value should affect the instance's metadata
     metadata.stub = 'stub'
@@ -217,7 +216,7 @@ suite(`effect API setMetadata() sets metadata`, async ({ puppeteer: { page } }) 
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
     
     return instance.metadata
   })
@@ -239,7 +238,7 @@ suite(`effect API onRecognized() performs side effect`, async ({ puppeteer: { pa
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false }, { onRecognized })
+    instance.recognize(new MouseEvent('click'), { onRecognized })
     
     return onRecognizedStatus
   })
@@ -260,7 +259,7 @@ suite(`effect API sequenceItem accesses sequenceItem`, async ({ puppeteer: { pag
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { is: () => false })
+    instance.recognize(new MouseEvent('click'))
     
     return result
   })
@@ -280,7 +279,7 @@ suite(`status is 'ready' after construction`, async ({ puppeteer: { page } }) =>
 suite(`status is 'recognizing' after recognize(...) is called at least once and effects did not call recognized or denied`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
     return new window.Logic.Recognizeable([])
-      .recognize(new MouseEvent('click'), { is: () => false })
+      .recognize(new MouseEvent('click'))
       .status
   })
 
