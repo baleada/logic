@@ -12,7 +12,7 @@ let listenable: Listenable<KeyreleaseType, KeyreleaseMetadata>
 onMounted(() => {
   listenable = new Listenable<KeyreleaseType, KeyreleaseMetadata>(
     'recognizeable' as KeyreleaseType, 
-    { recognizeable: { effects: createKeyrelease(['A', 'B']) } }
+    { recognizeable: { effects: createKeyrelease(['shift+A', 'shift+ctrl+A']) } }
   )
 
   window.testState = { listenable: listenable.listen(() => {

@@ -145,6 +145,8 @@ export function createKeyrelease (
     // BUILDING VALID KEYCOMBO
     if (preventsDefaultUnlessDenied) event.preventDefault()
 
+    localStatus = 'recognizing'
+
     cleanup()
     storeKeyboardTimeMetadata(
       event,
@@ -160,13 +162,14 @@ export function createKeyrelease (
     const {
             getStatus,
             getMetadata,
+            denied,
           } = api,
           metadata = getMetadata(),
           name = toName(event.code)          
                 
     // SHOULD BLOCK EVENT
     if (['denied', 'recognized'].includes(localStatus)) {
-      api[localStatus]()
+      if (localStatus === 'denied') denied()
       if (predicateValid(name)) statuses[name] = 'up'
       else delete statuses[name]
 
