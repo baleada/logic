@@ -6,6 +6,9 @@ export { Broadcastable } from './Broadcastable'
 export type { BroadcastableOptions, BroadcastableStatus } from './Broadcastable'
 export { toMessageListenParams } from './Broadcastable'
 
+export { Compareable } from './Compareable'
+export type { CompareableOptions, CompareableStatus } from './Compareable'
+
 export { Completeable } from './Completeable'
 export type { CompleteableOptions, CompleteableStatus, CompleteOptions } from './Completeable'
 
@@ -20,7 +23,7 @@ export type { DrawableState, DrawableOptions, DrawableStatus } from './Drawable'
 export { toD, toFlattenedD } from './Drawable'
 
 export { Fetchable } from './Fetchable'
-export type { FetchableOptions, FetchableStatus, FetchOptions, FetchOptionsApi } from './Fetchable'
+export type { FetchableOptions, FetchableStatus } from './Fetchable'
 
 export { Fullscreenable } from './Fullscreenable'
 export type { FullscreenableGetElement, FullscreenableOptions, FullscreenableStatus } from './Fullscreenable'
