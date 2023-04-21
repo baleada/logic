@@ -6,7 +6,7 @@ export type GraphEdge<
 > = {
   from: Id,
   to: Id,
-  predicateTraversable: (metadata: GraphState<Id, Metadata>) => boolean
+  predicateTraversable: (state: GraphState<Id, Metadata>) => boolean
 }
 
 export type GraphState<
@@ -31,6 +31,11 @@ export type GraphTraversal<
 export type GraphSharedAncestor<Id extends string> = {
   node: GraphNode<Id>,
   distances: Record<GraphNode<Id>, number>
+}
+
+export type GraphTreeNode<Id extends string> = {
+  node: GraphNode<Id>,
+  children: GraphTreeNode<Id>[],
 }
 
 export function defineGraphNodes<Id extends string> (nodes: GraphNode<Id>[]) {

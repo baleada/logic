@@ -6,12 +6,14 @@ import type {
   GraphState,
   GraphTraversal,
   GraphSharedAncestor,
+  GraphTreeNode,
 } from './types'
 
 export type DirectedAcyclicFns<
   Id extends string,
   Metadata
 > = {
+  toTree: (options?: { entry?: Id }) => GraphTreeNode<Id>[],
   toSharedAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => GraphSharedAncestor<Id>[],
   toTraversals: (node: GraphNode<Id>) => GraphTraversal<Id, Metadata>[],
   walk: (
@@ -44,6 +46,44 @@ export function createDirectedAcyclicFns<
       status: 'unset',
       metadata: toUnsetMetadata(node),
     }
+  }
+
+  const toTree: DirectedAcyclicFns<Id, Metadata>['toTree'] = (options = {}) => {
+    const { entry } = options,
+          tree: GraphTreeNode<Id>[] = [
+            {
+              node: entry || toEntry(),
+              children: [],
+            },
+          ],
+          createFindInTree = (node: GraphNode<Id>) => {
+            return (tree: GraphTreeNode<Id>[]) => {
+              for (const treeNode of tree) {
+                if (treeNode.node === node) return treeNode
+
+                const found = createFindInTree(node)(treeNode.children)
+                if (found) return found
+              }
+            }
+          }
+
+    walk(path => {
+      const node = path.at(-1),
+            parent = path.at(-2)
+
+      if (parent) {
+        const parentTreeNode = createFindInTree(parent)(tree)
+        // console.log({ parentTreeNode })
+        if (parentTreeNode) {
+          parentTreeNode.children.push({
+            node,
+            children: [],
+          })
+        }
+      }
+    })
+
+    return tree
   }
 
   const toSharedAncestors: DirectedAcyclicFns<Id, Metadata>['toSharedAncestors'] = (a, b) => {
@@ -98,8 +138,7 @@ export function createDirectedAcyclicFns<
           },
           totalConnectionsFollowedByNode = {} as Record<GraphNode<Id>, number>
   
-    let location = entry
-      || find<GraphNode<Id>>(node => toIndegree(node) === 0)(nodes) as GraphNode<Id>
+    let location = entry || toEntry()
     let status: 'walking' | 'stopped' = 'walking'
 
     const path = toPath(unsetState)
@@ -179,9 +218,11 @@ export function createDirectedAcyclicFns<
     toOutdegree,
     toIncoming,
     toOutgoing,
+    toEntry,
   } = createGraphFns(nodes, edges)
 
   return {
+    toTree,
     toSharedAncestors,
     toTraversals,
     walk,

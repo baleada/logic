@@ -1,3 +1,4 @@
+import { slice, find, pipe } from 'lazy-collections'
 import { createFilter } from '../../pipes'
 import type {
   GraphNode,
@@ -14,6 +15,7 @@ export type GraphFns<
   toOutdegree: (id: Id) => number,
   toIncoming: (id: Id) => Edge[],
   toOutgoing: (id: Id) => Edge[],
+  toEntry: (options?: { begin?: number }) => Id,
 }
 
 export function createGraphFns<
@@ -40,10 +42,19 @@ export function createGraphFns<
     return createFilter<typeof edges[0]>(({ from }) => from === node)(edges)
   }
 
+  const toEntry: GraphFns<Id, Metadata, Edge>['toEntry'] = (options = {}) => {
+    const { begin = 0 } = options
+    return pipe(
+      slice(begin),
+      find<GraphNode<Id>>(node => toIndegree(node) === 0),
+    )(nodes) as GraphNode<Id>
+  }
+
   return {
     toIndegree,
     toOutdegree,
     toIncoming,
     toOutgoing,
+    toEntry,
   }
 }
