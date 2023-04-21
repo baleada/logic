@@ -1,68 +1,70 @@
-export { createClamp } from './createClamp'
+// ANY
+export { createClone, createEqual } from './any'
 
-export { createClip } from './createClip'
 
-export { createClone } from './createClone'
+// ARRAY
+export {
+  createConcat,
+  createFilter,
+  createInsert,
+  createMap,
+  createReduce,
+  createRemove,
+  createReorder,
+  createReplace,
+  createReverse,
+  createSlice,
+  createSort,
+  createSwap,
+  createUnique,
+} from './array'
 
-export { createConcat } from './createConcat'
 
-export { createDetermine } from './createDetermine'
-export type { Potentiality } from './createDetermine'
+// ARRAY ASYNC
+export {
+  createFilterAsync,
+  createFindAsync,
+  createFindIndexAsync,
+  createForEachAsync,
+  createMapAsync,
+  createReduceAsync,
+} from './array-async'
 
-export { createFilter } from './createFilter'
 
-export { createFilterAsync } from './createFilterAsync'
+// STRING
+export {
+  createClip,
+  createSlug,
+} from './string'
 
-export { createFindAsync } from './createFindAsync'
 
-export { createFindIndexAsync } from './createFindIndexAsync'
+// NUMBER
+export {
+  createClamp,
+  createDetermine,
+} from './number'
+export type { Potentiality } from './number'
 
-export { createForEachAsync } from './createForEachAsync'
 
-export { createInsert } from './createInsert'
+// OBJECT
+export {
+  createEntries,
+  createKeys,
+  createEvery,
+  createSome,
+} from './object'
 
-export { createList } from './createList'
 
-export { createMap } from './createMap'
+// MAP
+export {
+  createRename,
+} from './map'
 
-export { createMapAsync } from './createMapAsync'
 
-export { createEqual } from './createEqual'
+// ELEMENT
+export { createFocusable } from './element'
+export type { CreateFocusableOptions as CreateToFocusableOptions } from './element'
 
-export { createReduce } from './createReduce'
-
-export { createReduceAsync } from './createReduceAsync'
-
-export { createRemove } from './createRemove'
-
-export { createRename } from './createRename'
-
-export { createReorder } from './createReorder'
-
-export { createReplace } from './createReplace'
-
-export { createReverse } from './createReverse'
-
-export { createSlice } from './createSlice'
-
-export { createSlug } from './createSlug'
-
-export { createSort } from './createSort'
-
-export { createSwap } from './createSwap'
-
-export { createEntries } from './createEntries'
-
-export { createEvery } from './createEvery'
-
-export { createFocusable } from './createFocusable'
-export type { CreateFocusableOptions as CreateToFocusableOptions } from './createFocusable'
-
-export { createKeys } from './createKeys'
-
-export { createSome } from './createSome'
-
-export { createUnique } from './createUnique'
 
 // GRAPH
 export {
@@ -139,3 +141,12 @@ export type {
 export {
   createFind as createTreeFind,
 } from './tree'
+
+
+// MISC
+export { createList } from './createList'
+export { createToGraph } from './createToGraph'
+export type {
+  ToGraphYielded,
+  CreateToGraphOptions,
+} from './createToGraph'

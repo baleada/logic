@@ -9,7 +9,7 @@ import type {
   GraphCommonAncestor,
   GraphTreeNode,
 } from '../extracted'
-import { createFindAsync } from './createFindAsync'
+import { createFindAsync } from './array-async'
 import {
   createToOutdegree,
   createToOutgoing,

@@ -1,10 +1,18 @@
 import {
   pipe,
-  slice, find,
+  slice,
+  find,
   reduce,
 } from 'lazy-collections'
-import { createMap } from './createMap'
+import { createMap } from './array'
 import type { NumberFn } from './types'
+
+export function createClamp(min: number, max: number): NumberFn<number> {
+  return number => {
+    const maxed = Math.max(number, min)
+    return Math.min(maxed, max)
+  }
+}
 
 export type Potentiality<Outcome> = { outcome: Outcome, probability: number }
 

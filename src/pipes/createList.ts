@@ -3,5 +3,5 @@ import clsx from 'clsx'
 import type { ManyFn } from './types'
 
 export function createList (): ManyFn<ClassValue, string> {
-  return (...many) => clsx(...many)
+  return (...classValues) => clsx(...classValues)
 }
