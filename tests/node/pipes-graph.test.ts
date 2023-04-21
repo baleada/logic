@@ -1,17 +1,17 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { createGraphFns } from '../../src/factories/graph-fns/createGraphFns'
-import type { GraphFns } from '../../src/factories/graph-fns/createGraphFns'
 import type { GraphEdge, GraphNode } from '../../src/extracted/graph'
+import { createToIncoming, createToIndegree, createToOutdegree, createToOutgoing } from '../../src/pipes/graph'
 
 const suite = createSuite<{
-  nodes: GraphNode<any>[],
-  edges: GraphEdge<any, any>[],
-  graphFns: GraphFns<string, number, any>,
-}>('createGraphFns')
+  graph: {
+    nodes: GraphNode<any>[],
+    edges: GraphEdge<any, number>[],
+  }
+}>('graph node pipes')
 
 suite.before(context => {
-  context.nodes = [
+  const nodes = [
     'y',
     'a',
     'b',
@@ -22,7 +22,7 @@ suite.before(context => {
     'g',
   ]
 
-  context.edges = [
+  const edges = [
     { from: 'y', to: 'z', predicateTraversable: state => state.y.metadata === 0 },
     { from: 'a', to: 'b', predicateTraversable: state => state.a.metadata === 0 },
     { from: 'a', to: 'c', predicateTraversable: state => state.a.metadata === 1 },
@@ -33,22 +33,19 @@ suite.before(context => {
     { from: 'c', to: 'g', predicateTraversable: state => state.c.metadata === 1 },
   ]
 
-  context.graphFns = createGraphFns(
-    context.nodes,
-    context.edges,
-  )
+  context.graph = { nodes, edges }
 })
 
-suite('toIncoming(...) works', ({ graphFns }) => {
+suite('createToIncoming(...) works', ({ graph }) => {
   ;(() => {
-    const value = graphFns.toIncoming('a'),
+    const value = [...createToIncoming(graph)('a')],
           expected = []
 
     assert.equal(value, expected)
   })()
   
   ;(() => {
-    const value = graphFns.toIncoming('b')
+    const value = [...createToIncoming(graph)('b')]
 
     assert.is(value.length, 1)
     for (const { to } of value) {
@@ -57,9 +54,9 @@ suite('toIncoming(...) works', ({ graphFns }) => {
   })()
 })
 
-suite('toOutgoing(...) works', ({ graphFns }) => {
+suite('createToOutgoing(...) works', ({ graph }) => {
   ;(() => {
-    const value = graphFns.toOutgoing('a')
+    const value = [...createToOutgoing(graph)('a')]
     
     assert.is(value.length, 3)
     for (const { from } of value) {
@@ -68,56 +65,40 @@ suite('toOutgoing(...) works', ({ graphFns }) => {
   })()
   
   ;(() => {
-    const value = graphFns.toOutgoing('g'),
+    const value = [...createToOutgoing(graph)('g')],
           expected = []
 
     assert.equal(value, expected)
   })()
 })
 
-suite('toIndegree(...) works', ({ graphFns }) => {
+suite('createToIndegree(...) works', ({ graph }) => {
   ;(() => {
-    const value = graphFns.toIndegree('a'),
+    const value = createToIndegree(graph)('a'),
           expected = 0
 
     assert.is(value, expected)
   })()
   
   ;(() => {
-    const value = graphFns.toIndegree('b'),
+    const value = createToIndegree(graph)('b'),
           expected = 1
 
     assert.is(value, expected)
   })()
 })
 
-suite('toOutdegree(...) works', ({ graphFns }) => {
+suite('createToOutdegree(...) works', ({ graph }) => {
   ;(() => {
-    const value = graphFns.toOutdegree('a'),
+    const value = createToOutdegree(graph)('a'),
           expected = 3
 
     assert.is(value, expected)
   })()
   
   ;(() => {
-    const value = graphFns.toOutdegree('g'),
+    const value = createToOutdegree(graph)('g'),
           expected = 0
-
-    assert.is(value, expected)
-  })()
-})
-
-suite('toEntry(...) works', ({ graphFns }) => {
-  ;(() => {
-    const value = graphFns.toEntry(),
-          expected = 'y'
-
-    assert.is(value, expected)
-  })()
-
-  ;(() => {
-    const value = graphFns.toEntry({ begin: 1 }),
-          expected = 'a'
 
     assert.is(value, expected)
   })()

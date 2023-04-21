@@ -184,6 +184,7 @@ export {
   predicateObject,
 } from './predicates'
 
+export { at, includes, length } from './lazy-collections'
 
 // RECOGNIZEABLE EFFECTS
 // Pipes
@@ -224,19 +225,19 @@ export type { KeycomboItem } from './keycombo'
 
 export {
   defineGraph,
-  defineGraphVertexs,
+  defineGraphNodes,
   defineGraphEdges,
   defineGraphAsync,
   defineGraphEdgesAsync,
 } from './graph'
 export type {
   Graph,
-  GraphVertex as GraphVertex,
+  GraphNode as GraphNode,
   GraphEdge,
   GraphAsync,
   GraphEdgeAsync,
   GraphState,
-  GraphTraversal,
+  GraphStep,
   GraphCommonAncestor,
   GraphTreeNode,
 } from './graph'

@@ -1,11 +1,11 @@
-export function createToGraph (toChildren: (vertex: any) => any[]) {
+export function createToGraph (toChildren: (node: any) => any[]) {
   return root => {
     const nodes = ['0'],
           nodeMeta = { ['0']: root },
           edges = []
   
-    function traverse(vertex: any, parent: string) {
-      const children = toChildren(vertex) || []
+    function step (node: any, parent: string) {
+      const children = toChildren(node) || []
 
       for (const child of children) {
         const id = `${nodes.length}`
@@ -14,11 +14,11 @@ export function createToGraph (toChildren: (vertex: any) => any[]) {
         nodeMeta[id] = child
         edges.push({ from: parent, to: id })
 
-        traverse(child, id)
+        step(child, id)
       }
     }
   
-    traverse(root, '0')
+    step(root, '0')
   
     return { nodes, edges }
   }

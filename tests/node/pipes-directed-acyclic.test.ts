@@ -1,17 +1,26 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { createDirectedAcyclicFns } from '../../src/factories/createDirectedAcyclicFns'
-import type { DirectedAcyclicFns } from '../../src/factories/createDirectedAcyclicFns'
-import type { GraphEdge, GraphVertex } from '../../src/extracted/graph'
+import { map, pipe, toArray } from 'lazy-collections'
+import type { GraphEdge, GraphNode, GraphStep } from '../../src/extracted/graph'
+import {
+  createToNodeSteps,
+  createPredicateAncestor,
+  createToCommonAncestors,
+  createToPath,
+  createToRoots,
+  createToSteps,
+  createToTree,
+} from '../../src/pipes/directed-acyclic'
 
 const suite = createSuite<{
-  nodes: GraphVertex<any>[],
-  edges: GraphEdge<any, any>[],
-  directedAcyclic: DirectedAcyclicFns<string, number>,
-}>('createDirectedAcyclicFns')
+  directedAcyclic: {
+    nodes: GraphNode<any>[],
+    edges: GraphEdge<any, number>[],
+  }
+}>('directed acyclic pipes')
 
 suite.before(context => {
-  context.nodes = [
+  const nodes = [
     'a',
     'b',
     'c',
@@ -22,7 +31,7 @@ suite.before(context => {
     'h',
   ]
 
-  context.edges = [
+  const edges = [
     { from: 'a', to: 'b', predicateTraversable: state => state.a.metadata === 0 },
     { from: 'a', to: 'c', predicateTraversable: state => state.a.metadata === 1 },
     { from: 'a', to: 'd', predicateTraversable: state => state.a.metadata === 2 },
@@ -33,15 +42,32 @@ suite.before(context => {
     { from: 'd', to: 'h', predicateTraversable: state => state.d.metadata === 0 },
   ]
 
-  context.directedAcyclic = createDirectedAcyclicFns({
-    nodes: context.nodes,
-    edges: context.edges,
-  })
+  context.directedAcyclic = { nodes: nodes, edges: edges }
 })
 
-suite('toPath(...) works', ({ directedAcyclic }) => {
+suite('createToRoots(...) works', ({ directedAcyclic }) => {
+  const withMoreRoots = {
+    nodes: [
+      ...directedAcyclic.nodes,
+      'i',
+    ],
+    edges: [
+      ...directedAcyclic.edges,
+      { from: 'i', to: 'c', predicateTraversable: state => state.i.metadata === 0 },
+    ],
+  }
+
   ;(() => {
-    const value = directedAcyclic.toPath({
+    const value = [...createToRoots()(withMoreRoots)],
+          expected = ['a', 'i']
+
+    assert.equal(value, expected)
+  })()
+})
+
+suite('createToPath(...) works', ({ directedAcyclic }) => {
+  ;(() => {
+    const value = createToPath(directedAcyclic)({
             a: { status: 'set', metadata: 0 },
             b: { status: 'set', metadata: 0 },
             d: { status: 'set', metadata: 0 },
@@ -52,7 +78,7 @@ suite('toPath(...) works', ({ directedAcyclic }) => {
   })()
   
   ;(() => {
-    const value = directedAcyclic.toPath({
+    const value = createToPath(directedAcyclic)({
             a: { status: 'set', metadata: 1 },
             c: { status: 'set', metadata: 0 },
           }),
@@ -62,10 +88,12 @@ suite('toPath(...) works', ({ directedAcyclic }) => {
   })()
 })
 
-suite('walk works', ({ directedAcyclic }) => {
-  const value = [] as string[]
-
-  directedAcyclic.walk(path => value.push(path.at(-1)))  
+suite('createToSteps works', ({ directedAcyclic }) => {
+  const value = pipe(
+    createToSteps(),
+    map<GraphStep<any, number>, any>(step => step.path.at(-1)),
+    toArray()
+  )(directedAcyclic)
 
   assert.equal(
     value,
@@ -83,12 +111,46 @@ suite('walk works', ({ directedAcyclic }) => {
   )
 })
 
-suite('toTraversals works', ({ directedAcyclic }) => {
+suite.skip('createToSteps works with multiple roots', ({ directedAcyclic }) => {
+  const value = pipe(
+    createToSteps(),
+    map<GraphStep<any, number>, any>(step => step.path.at(-1)),
+    toArray()
+  )({
+    nodes: [...directedAcyclic.nodes, 'i'],
+    edges: [
+      ...directedAcyclic.edges,
+      { from: 'i', to: 'c', predicateTraversable: state => state.i.metadata === 0 },
+    ],
+  })
+
+  assert.equal(
+    value,
+    [
+      'a',
+      'b',
+      'd',
+      'h',
+      'e',
+      'c',
+      'f',
+      'g',
+      'd',
+      'i',
+      'c',
+      'f',
+      'g',
+      'd',
+    ]
+  )
+})
+
+suite('createFromNodeToSteps works', ({ directedAcyclic }) => {
   ;(() => {
-    const value = directedAcyclic.toTraversals('a'),
+    const value = [...createToNodeSteps(directedAcyclic)('a')],
           expected = [
             {
-              path: [ 'a' ],
+              path: ['a'],
               state: {
                 a: { status: 'unset', metadata: 0 },
                 b: { status: 'unset', metadata: 0 },
@@ -106,7 +168,7 @@ suite('toTraversals works', ({ directedAcyclic }) => {
   })()
 
   ;(() => {
-    const value = directedAcyclic.toTraversals('g'),
+    const value = [...createToNodeSteps(directedAcyclic)('g')],
           expected = [
             {
               path: [ 'a', 'c', 'g' ],
@@ -127,7 +189,7 @@ suite('toTraversals works', ({ directedAcyclic }) => {
   })()
   
   ;(() => {
-    const value = directedAcyclic.toTraversals('d'),
+    const value = [...createToNodeSteps(directedAcyclic)('d')],
           expected = [
             {
               path: [ 'a', 'b', 'd' ],
@@ -161,50 +223,9 @@ suite('toTraversals works', ({ directedAcyclic }) => {
   })()
 })
 
-suite('createCommonAncestors works', ({ directedAcyclic }) => {
-  ;(() => {
-    const value = directedAcyclic.createCommonAncestors('a')('b'),
-          expected = []
-
-    assert.equal(value, expected)
-  })()
-  
-  ;(() => {
-    const value = directedAcyclic.createCommonAncestors('b')('e'),
-          expected = [
-            { node: 'a', distances: { b: 1, e: 2 } },
-          ]
-
-    assert.equal(value, expected)
-  })()
-
-  // Handles multiple paths from one node to another
-  ;(() => {
-    const value = directedAcyclic.createCommonAncestors('d')('g'),
-          expected = [
-            { node: 'a', distances: { d: 2, g: 2 } },
-            { node: 'a', distances: { d: 1, g: 2 } },
-          ]
-
-    assert.equal(value, expected)
-  })()
-  
-  // Ancestors are ordered from deepest to shallowest
-  ;(() => {
-    const value = directedAcyclic.createCommonAncestors('d')('e'),
-          expected = [
-            { node: 'b', distances: { d: 1, e: 1 } },
-            { node: 'a', distances: { d: 2, e: 2 } },
-            { node: 'a', distances: { d: 1, e: 2 } },
-          ]
-
-    assert.equal(value, expected)
-  })()
-})
-
 suite('createPredicateAncestor works', ({ directedAcyclic }) => {
   ;(() => {
-    const value = directedAcyclic.createPredicateAncestor('d')('a'),
+    const value = createPredicateAncestor(directedAcyclic)(['d', 'a']),
           expected = true
 
     assert.equal(value, expected)
@@ -212,22 +233,63 @@ suite('createPredicateAncestor works', ({ directedAcyclic }) => {
   
   // Handles non-shortest path
   ;(() => {
-    const value = directedAcyclic.createPredicateAncestor('d')('b'),
+    const value = createPredicateAncestor(directedAcyclic)(['d', 'b']),
           expected = true
 
     assert.equal(value, expected)
   })()
   
   ;(() => {
-    const value = directedAcyclic.createPredicateAncestor('d')('c'),
+    const value = createPredicateAncestor(directedAcyclic)(['d', 'c']),
           expected = false
 
     assert.equal(value, expected)
   })()
 })
 
-suite('toTree works', ({ directedAcyclic }) => {
-  const value = directedAcyclic.toTree(),
+suite('createToCommonAncestors works', ({ directedAcyclic }) => {
+  ;(() => {
+    const value = [...createToCommonAncestors(directedAcyclic)(['a', 'b'])],
+          expected = []
+
+    assert.equal(value, expected)
+  })()
+  
+  ;(() => {
+    const value = [...createToCommonAncestors(directedAcyclic)(['b', 'e'])],
+          expected = [
+            { node: 'a', distances: { b: 1, e: 2 } },
+          ]
+
+    assert.equal(value, expected)
+  })()
+})
+
+suite('createToCommonAncestors handles multiple paths from one node to another', ({ directedAcyclic }) => {
+  const value = [...createToCommonAncestors(directedAcyclic)(['d', 'g'])],
+        expected = [
+          { node: 'a', distances: { d: 2, g: 2 } },
+          { node: 'a', distances: { d: 1, g: 2 } },
+        ]
+
+  assert.equal(value, expected)
+})
+
+suite('createToCommonAncestors orders ancestors from deepest to shallowest', ({ directedAcyclic }) => {
+  const value = [...createToCommonAncestors(directedAcyclic)(['d', 'e'])],
+        expected = [
+          { node: 'b', distances: { d: 1, e: 1 } },
+          { node: 'a', distances: { d: 2, e: 2 } },
+          { node: 'a', distances: { d: 1, e: 2 } },
+        ]
+
+  assert.equal(value, expected)
+})
+
+
+
+suite('createToTree works', ({ directedAcyclic }) => {
+  const value = createToTree()(directedAcyclic),
         expected = [
           {
             node: 'a',
