@@ -23,6 +23,7 @@ import {
   narrowPointercombo,
   predicateFocusable
 } from './extracted'
+import equal from 'fast-deep-equal'
 
 // REDUCE
 export function createReduceAsync<Item, Accumulator> (
@@ -393,27 +394,37 @@ export function createMatchesPointercombo (pointercombo: string): EventFunction<
 // HTMLELEMENT
 export type ElementFunction<El extends HTMLElement, Returned> = (element: El) => Returned
 
-export function createToFocusable (order: 'first' | 'last', elementIsCandidate?: boolean): ElementFunction<HTMLElement, HTMLElement | undefined> {
+export function createToFocusable (order: 'first' | 'last', options: { elementIsCandidate?: boolean } = {}): ElementFunction<HTMLElement, HTMLElement | undefined> {
+  const { elementIsCandidate = false } = options
+
   return element => {
     if (elementIsCandidate && predicateFocusable(element)) return element
 
     switch (order) {
       case 'first':
         for (let i = 0; i < element.children.length; i++) {
-          const focusable = createToFocusable(order, true)(element.children[i] as HTMLElement);
+          const focusable = createToFocusable(order, { elementIsCandidate: true })(element.children[i] as HTMLElement);
           if (focusable) return focusable;
         }
         
         break
       case 'last':
         for (let i = element.children.length - 1; i > -1; i--) {
-          const focusable = createToFocusable(order, true)(element.children[i] as HTMLElement);
+          const focusable = createToFocusable(order, { elementIsCandidate: true })(element.children[i] as HTMLElement);
           if (focusable) return focusable;
         }
 
         break
     }
   }
+}
+
+
+// ANY
+export type AnyFunction<Returned> = (param: any) => Returned
+
+export function createPredicateEqual (any: any): AnyFunction<boolean> {
+  return param => equal(any, param)
 }
 
 

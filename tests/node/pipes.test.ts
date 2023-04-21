@@ -27,6 +27,7 @@ import {
   createToKeys,
   createToSome,
   createToEvery,
+  createPredicateEqual,
   Pipeable,
 } from '../../src/pipes'
 
@@ -531,8 +532,29 @@ suite(`createDetermine(...) falls back to first potentiality if chance is lower 
   assert.is(value, expected)
 })
 
-// createMatchesKeycombo -> eventMatchesKeycombo.test.ts
-// createMatchesMousecombo -> eventMatchesMousecombo.test.ts
-// createMatchesPointercombo -> eventMatchesPointercombo.test.ts
+
+// ANY
+suite(`createPredicateEqual(...) predicates equality`, () => {
+  ;(() => {
+    const value = createPredicateEqual(1)(1),
+          expected = true
+
+    assert.is(value, expected)
+  })()
+  
+  ;(() => {
+    const value = createPredicateEqual(1)(2),
+          expected = false
+
+    assert.is(value, expected)
+  })()
+  
+  ;(() => {
+    const value = createPredicateEqual({ hello: 'world' })({ hello: 'world' }),
+          expected = true
+
+    assert.is(value, expected)
+  })()
+})
 
 suite.run()
