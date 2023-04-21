@@ -1,5 +1,7 @@
 import { find } from 'lazy-collections'
 import { createFindAsync } from '../../pipes'
+import type { Expand } from '../../extracted'
+import type { GraphFns } from './createGraphFns'
 import { createGraphFns } from './createGraphFns'
 import type {
   GraphNode,
@@ -7,12 +9,14 @@ import type {
   GraphState,
   GraphTraversal,
   GraphSharedAncestor,
+  GraphTreeNode,
 } from './types'
 
-export type DirectedAcyclicFns<
+export type DirectedAcyclicAsyncFns<
   Id extends string,
   Metadata
-> = {
+  > = Expand<GraphFns<Id, Metadata, GraphEdgeAsync<Id, Metadata>> & {
+    toTree: (options?: { entry?: Id }) => Promise<GraphTreeNode<Id>[]>,
   toSharedAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => Promise<GraphSharedAncestor<Id>[]>,
   toTraversals: (node: GraphNode<Id>) => Promise<GraphTraversal<Id, Metadata>[]>,
   walk: (
@@ -28,7 +32,7 @@ export type DirectedAcyclicFns<
   toOutdegree: (id: Id) => number,
   toIncoming: (id: Id) => GraphEdgeAsync<Id, Metadata>[],
   toOutgoing: (id: Id) => GraphEdgeAsync<Id, Metadata>[],
-}
+}>
 
 export function createDirectedAcyclicAsyncFns<
   Id extends string,
@@ -38,7 +42,7 @@ export function createDirectedAcyclicAsyncFns<
   edges: GraphEdgeAsync<Id, Metadata>[],
   toUnsetMetadata: ((node: GraphNode<Id>) => Metadata),
   toMockMetadata: (node: GraphNode<Id>, totalConnectionsFollowed: number) => Metadata,
-): DirectedAcyclicFns<Id, Metadata> {
+): DirectedAcyclicAsyncFns<Id, Metadata> {
   const unsetState = {} as GraphState<Id, Metadata>
   for (const node of nodes) {
     unsetState[node] = {
@@ -47,7 +51,45 @@ export function createDirectedAcyclicAsyncFns<
     }
   }
 
-  const toSharedAncestors: DirectedAcyclicFns<Id, Metadata>['toSharedAncestors'] = async (a, b) => {
+  const toTree: DirectedAcyclicAsyncFns<Id, Metadata>['toTree'] = async (options = {}) => {
+    const { entry } = options,
+          tree: GraphTreeNode<Id>[] = [
+            {
+              node: entry || toEntry(),
+              children: [],
+            },
+          ],
+          createFindInTree = (node: GraphNode<Id>) => {
+            return (tree: GraphTreeNode<Id>[]) => {
+              for (const treeNode of tree) {
+                if (treeNode.node === node) return treeNode
+
+                const found = createFindInTree(node)(treeNode.children)
+                if (found) return found
+              }
+            }
+          }
+
+    await walk(path => {
+      const node = path.at(-1),
+            parent = path.at(-2)
+
+      if (parent) {
+        const parentTreeNode = createFindInTree(parent)(tree)
+        // console.log({ parentTreeNode })
+        if (parentTreeNode) {
+          parentTreeNode.children.push({
+            node,
+            children: [],
+          })
+        }
+      }
+    })
+
+    return tree
+  }
+
+  const toSharedAncestors: DirectedAcyclicAsyncFns<Id, Metadata>['toSharedAncestors'] = async (a, b) => {
     const aTraversals = await toTraversals(a),
           bTraversals = await toTraversals(b),
           sharedAncestors: GraphSharedAncestor<Id>[] = []
@@ -76,7 +118,7 @@ export function createDirectedAcyclicAsyncFns<
     return sharedAncestors
   }
 
-  const toTraversals: DirectedAcyclicFns<Id, Metadata>['toTraversals'] = async node => {
+  const toTraversals: DirectedAcyclicAsyncFns<Id, Metadata>['toTraversals'] = async node => {
     const traversals: GraphTraversal<Id, Metadata>[] = []
     
     await walk((path, state) => {
@@ -91,7 +133,7 @@ export function createDirectedAcyclicAsyncFns<
     return traversals
   }
 
-  const walk: DirectedAcyclicFns<Id, Metadata>['walk'] = async (stepEffect, options = {}) => {
+  const walk: DirectedAcyclicAsyncFns<Id, Metadata>['walk'] = async (stepEffect, options = {}) => {
     const { entry } = options,
           state: GraphState<Id, Metadata> = JSON.parse(JSON.stringify(unsetState)),
           stop = () => {
@@ -154,7 +196,7 @@ export function createDirectedAcyclicAsyncFns<
     await step()
   }
 
-  const toPath: DirectedAcyclicFns<Id, Metadata>['toPath'] = async state => {
+  const toPath: DirectedAcyclicAsyncFns<Id, Metadata>['toPath'] = async state => {
     const path = [
             find<GraphNode<Id>>(
               node => toIndegree(node) === 0
@@ -180,9 +222,11 @@ export function createDirectedAcyclicAsyncFns<
     toOutdegree,
     toIncoming,
     toOutgoing,
+    toEntry,
   } = createGraphFns(nodes, edges)
 
   return {
+    toTree,
     toSharedAncestors,
     toTraversals,
     walk,
@@ -191,5 +235,6 @@ export function createDirectedAcyclicAsyncFns<
     toOutdegree,
     toIncoming,
     toOutgoing,
+    toEntry,
   }
 }
