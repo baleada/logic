@@ -21,7 +21,7 @@ export class Delayable {
     this.animateable = new Animateable(
       [
         { progress: 0, properties: { progress: 0 } },
-        { progress: 1, properties: { progress: 1 } }
+        { progress: 1, properties: { progress: 1 } },
       ],
       {
         duration: options?.delay ?? defaultOptions.delay,
@@ -154,8 +154,8 @@ export class Delayable {
             properties: {
               progress: {
                 progress: { time: 1, animation: 1 },
-                interpolated: 1
-              }
+                interpolated: 1,
+              },
             },
             timestamp,
           })

@@ -5,5 +5,5 @@ export function createUnique<Item>(): ArrayFunction<Item, Item[]> {
   return array => pipe(
     unique(),
     toArray()
-  )(array) as Item[];
+  )(array) as Item[]
 }

@@ -1,5 +1,5 @@
-import { Resolveable } from './Resolveable'
 import { predicateFunction } from '../extracted'
+import { Resolveable } from './Resolveable'
 
 export type FetchableOptions = Record<never, never>
 
@@ -146,7 +146,7 @@ function withJson (data: Record<any, any>) {
   return {
     body: JSON.stringify(data),
     headers: {
-      'Accept': 'application/json' as const,
+      Accept: 'application/json' as const,
       'Content-Type': 'application/json' as const,
     },
   }

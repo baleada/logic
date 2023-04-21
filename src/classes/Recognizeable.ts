@@ -3,7 +3,7 @@ import {
   predicateNumber,
 } from '../extracted'
 import { createConcat, createSlice } from '../pipes'
-import {
+import type {
   ListenableSupportedType,
   ListenEffectParam,
 } from './Listenable'
@@ -38,7 +38,7 @@ export type RecognizeableStatus = 'recognized'
   | 'recognized until ready'
   | 'denied until ready'
 
-export type RecognizeOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
+export type RecognizeOptions<Type extends ListenableSupportedType> = {
   onRecognized?: (sequenceItem: ListenEffectParam<Type>) => any,
 }
 
@@ -116,7 +116,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     return this
   }
 
-  recognize (sequenceItem: ListenEffectParam<Type>, { onRecognized }: RecognizeOptions<Type, Metadata> = {}) {
+  recognize (sequenceItem: ListenEffectParam<Type>, { onRecognized }: RecognizeOptions<Type> = {}) {
     if (!this.status.includes('until ready')) this.recognizing()
 
     const type = this.toType(sequenceItem),

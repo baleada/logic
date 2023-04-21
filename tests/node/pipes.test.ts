@@ -27,6 +27,7 @@ import { createKeys } from '../../src/pipes/createKeys'
 import { createSome } from '../../src/pipes/createSome'
 import { createEvery } from '../../src/pipes/createEvery'
 import { createEqual } from '../../src/pipes/createEqual'
+import { createClone } from '../../src/pipes/createClone'
 
 type Context = {
   array: string[],
@@ -47,9 +48,9 @@ suite.before(context => {
 })
 
 // ARRAY
-suite(`async reduces`, async ({ array }) => {
+suite('async reduces', async ({ array }) => {
   const value = await (async array => {
-          const asyncReduceStub = (number: number): Promise<number> => new Promise(function(resolve, reject) {
+          const asyncReduceStub = (number: number): Promise<number> => new Promise(resolve => {
             setTimeout(function() {
               resolve(number)
             }, 0)
@@ -65,7 +66,7 @@ suite(`async reduces`, async ({ array }) => {
   assert.is(value, expected)
 })
 
-suite(`reduces`, ({ array }) => {
+suite('reduces', ({ array }) => {
   const value = (array => {
           return createReduce<string, number>(
             value => value + 1,
@@ -77,9 +78,9 @@ suite(`reduces`, ({ array }) => {
   assert.is(value, expected)
 })
 
-suite(`async filters`, async () => {
+suite('async filters', async () => {
   const value = await (async () => {
-          const asyncConditionStub: (item: number) => Promise<boolean> = item => new Promise(function(resolve, reject) {
+          const asyncConditionStub: (item: number) => Promise<boolean> = item => new Promise(resolve => {
                   setTimeout(item => {
                     resolve(item % 2 === 0)
                   }, 0, item)
@@ -93,10 +94,10 @@ suite(`async filters`, async () => {
   assert.equal(value, expected)
 })
 
-suite(`async forEaches`, async () => {
+suite('async forEaches', async () => {
   const value = await (async () => {
           const forEachResponseStub = 'stub',
-                withForEachSuccessStub: (() => Promise<string>) = () => new Promise(function(resolve, reject) {
+                withForEachSuccessStub: (() => Promise<string>) = () => new Promise(resolve => {
                   setTimeout(function() {
                     resolve(forEachResponseStub)
                   }, 0)
@@ -123,10 +124,10 @@ suite(`async forEaches`, async () => {
   assert.equal(value, expected)
 })
 
-suite(`async maps`, async () => {
+suite('async maps', async () => {
   const value = await (async () => {
           const mapResponseStub = 'stub',
-                withMapSuccessStub: () => Promise<string> = () => new Promise(function(resolve, reject) {
+                withMapSuccessStub: () => Promise<string> = () => new Promise(resolve => {
                   setTimeout(function() {
                     resolve(mapResponseStub)
                   }, 0)
@@ -146,7 +147,7 @@ suite(`async maps`, async () => {
   assert.equal(value, expected)
 })
 
-suite(`createSlice({ from, to }) slices the array from 'from' to 'to'`, ({ array }) => {
+suite('createSlice({ from, to }) slices the array from \'from\' to \'to\'', ({ array }) => {
   const value = (array => {
     return createSlice<string>(1, 4)(array)
   })(array)
@@ -154,7 +155,7 @@ suite(`createSlice({ from, to }) slices the array from 'from' to 'to'`, ({ array
   assert.equal(value, ['frijoles', 'mantequilla', 'aguacate'])
 })
 
-suite(`createSlice({ from }) slices the array from 'from' to end`, ({ array }) => {
+suite('createSlice({ from }) slices the array from \'from\' to end', ({ array }) => {
   const value = (array => {
     return createSlice<string>(1)(array)
   })(array)
@@ -162,7 +163,7 @@ suite(`createSlice({ from }) slices the array from 'from' to end`, ({ array }) =
   assert.equal(value, ['frijoles', 'mantequilla', 'aguacate', 'huevito'])
 })
 
-suite(`createMap(map) maps the array`, ({ array }) => {
+suite('createMap(map) maps the array', ({ array }) => {
   const value = (array => {
     return createMap<string, number>((_, index) => index)(array)
   })(array)
@@ -170,7 +171,7 @@ suite(`createMap(map) maps the array`, ({ array }) => {
   assert.equal(value, [0, 1, 2, 3, 4])
 })
 
-suite(`createFilter(filter) filters the array`, ({ array }) => {
+suite('createFilter(filter) filters the array', ({ array }) => {
   const value = (array => {
     return createFilter<string>(item => item.endsWith('a'))(array)
   })(array)
@@ -178,7 +179,7 @@ suite(`createFilter(filter) filters the array`, ({ array }) => {
   assert.equal(value, ['tortilla', 'mantequilla'])
 })
 
-suite(`createConcat(...arrays) concatenates the arrays`, ({ array }) => {
+suite('createConcat(...arrays) concatenates the arrays', ({ array }) => {
   const value = (array => {
     return createConcat(array, array)(array)
   })(array)
@@ -186,7 +187,7 @@ suite(`createConcat(...arrays) concatenates the arrays`, ({ array }) => {
   assert.equal(value, [...array, ...array, ...array])
 })
 
-suite(`createReverse() reverses the array`, ({ array }) => {
+suite('createReverse() reverses the array', ({ array }) => {
   const value = (array => {
     return createReverse<string>()(array)
   })(array)
@@ -194,17 +195,40 @@ suite(`createReverse() reverses the array`, ({ array }) => {
   assert.equal(value, ['huevito', 'aguacate', 'mantequilla', 'frijoles', 'tortilla'])
 })
 
-suite(`createSort() sorts the array`, ({ array }) => {
+suite('createSort() sorts the array', ({ array }) => {
+  const value = createSort<string>()(array)
+
+  assert.equal(
+    value,
+    [
+      'aguacate',
+      'frijoles',
+      'huevito',
+      'mantequilla',
+      'tortilla',
+    ]
+  )
+})
+
+suite('createSort() accepts optional compare', ({ array }) => {
   const value = createSort<string>((a, b) => {
-    if (a > b) return 1
-    if (a < b) return -1
+    if (a > b) return -1
+    if (a < b) return 1
     return 0
   })(array)
 
-  assert.equal(value, ['aguacate', 'frijoles', 'huevito', 'mantequilla', 'tortilla'])
+  assert.equal(
+    value, [
+      'tortilla',
+      'mantequilla',
+      'huevito',
+      'frijoles',
+      'aguacate',
+    ]
+  )
 })
 
-suite(`createRemove({ index }) removes the item at index from the array`, ({ array }) => {
+suite('createRemove({ index }) removes the item at index from the array', ({ array }) => {
   const value = (array => {
     return createRemove<string>(2)(array)
   })(array)
@@ -228,7 +252,7 @@ suite(`createRemove({ index }) removes the item at index from the array`, ({ arr
 //   assert.equal(value, ['frijoles', 'mantequilla', 'aguacate', 'huevito'])
 // })
 
-suite(`createInsert({ item, index }) inserts the item at index`, ({ array }) => {
+suite('createInsert({ item, index }) inserts the item at index', ({ array }) => {
   const value = (array => {
     return createInsert('baleada', 2)(array)
   })(array)
@@ -244,7 +268,7 @@ suite(`createInsert({ item, index }) inserts the item at index`, ({ array }) => 
 //   assert.equal(value, ['tortilla', 'frijoles', 'baleada', 'toolkit', 'mantequilla', 'aguacate', 'huevito'])
 // })
 
-suite(`createReorder({ from: index, to: index }) moves 'from' index forward to 'to' index`, ({ array }) => {
+suite('createReorder({ from: index, to: index }) moves \'from\' index forward to \'to\' index', ({ array }) => {
   const value = (array => {
     return createReorder<string>(1, 3)(array)
   })(array)
@@ -252,7 +276,7 @@ suite(`createReorder({ from: index, to: index }) moves 'from' index forward to '
   assert.equal(value, ['tortilla', 'mantequilla', 'aguacate', 'frijoles', 'huevito'])
 })
 
-suite(`createReorder({ from: index, to: index }) moves 'from' index backward to 'to' index`, ({ array }) => {
+suite('createReorder({ from: index, to: index }) moves \'from\' index backward to \'to\' index', ({ array }) => {
   const value = (array => {
     return createReorder<string>(3, 1)(array)
   })(array)
@@ -260,7 +284,7 @@ suite(`createReorder({ from: index, to: index }) moves 'from' index backward to 
   assert.equal(value, ['tortilla', 'aguacate', 'frijoles', 'mantequilla', 'huevito'])
 })
 
-suite(`createReorder({ from: { start, itemCount = 1 }, to: index }) moves item from 'start' forward to 'to' index`, ({ array }) => {
+suite('createReorder({ from: { start, itemCount = 1 }, to: index }) moves item from \'start\' forward to \'to\' index', ({ array }) => {
   const value = (array => {
     return createReorder<string>(
       { start: 0, itemCount: 1 },
@@ -271,7 +295,7 @@ suite(`createReorder({ from: { start, itemCount = 1 }, to: index }) moves item f
   assert.equal(value, ['frijoles', 'tortilla', 'mantequilla', 'aguacate', 'huevito'])
 })
 
-suite(`createReorder({ from: { start, itemCount != 0 }, to: index }) moves 'itemCount' items from 'start' to 'to' index`, ({ array }) => {
+suite('createReorder({ from: { start, itemCount != 0 }, to: index }) moves \'itemCount\' items from \'start\' to \'to\' index', ({ array }) => {
   const value = (array => {
     return createReorder<string>(
       { start: 0, itemCount: 2 },
@@ -282,7 +306,7 @@ suite(`createReorder({ from: { start, itemCount != 0 }, to: index }) moves 'item
   assert.equal(value, ['mantequilla', 'tortilla', 'frijoles', 'aguacate', 'huevito'])
 })
 
-suite(`createSwap({ indices }) swaps the item at the first index with the item at the second index`, ({ array }) => {
+suite('createSwap({ indices }) swaps the item at the first index with the item at the second index', ({ array }) => {
   const value1 = (array => {
     return createSwap<string>([0, 4])(array)
   })(array)
@@ -308,7 +332,7 @@ suite(`createSwap({ indices }) swaps the item at the first index with the item a
   )
 })
 
-suite(`createReplace({ item, index }) replaces the item at index with a new item`, ({ array }) => {
+suite('createReplace({ item, index }) replaces the item at index with a new item', ({ array }) => {
   const value = (array => {
     return createReplace(2, 'baleada')(array)
   })(array)
@@ -316,7 +340,7 @@ suite(`createReplace({ item, index }) replaces the item at index with a new item
   assert.equal(value, ['tortilla', 'frijoles', 'baleada', 'aguacate', 'huevito'])
 })
 
-suite(`createUnique() removes duplicates`, ({ array }) => {
+suite('createUnique() removes duplicates', () => {
   const value = (() => {
     return createUnique<string>()(['baleada', 'baleada', 'toolkit', 'toolkit'])
   })()
@@ -326,13 +350,13 @@ suite(`createUnique() removes duplicates`, ({ array }) => {
 
 
 // MAP
-suite(`createRename({ from, to }) renames 'from' name to 'to' name`, ({ map }) => {
+suite('createRename({ from, to }) renames \'from\' name to \'to\' name', ({ map }) => {
   const value = (mapAsArray => {
     const value = createRename<string, string>('one', 'uno')(new Map(mapAsArray))
 
     return {
       isMap: value instanceof Map,
-      array: [...value]
+      array: [...value],
     }
   })([...map])
 
@@ -342,19 +366,19 @@ suite(`createRename({ from, to }) renames 'from' name to 'to' name`, ({ map }) =
 
 
 // OBJECT
-suite(`createEntries() transforms object into entries`, ({ object }) => {
+suite('createEntries() transforms object into entries', ({ object }) => {
   const value = createEntries<string, string>()(object)
 
   assert.equal(value, [['one', 'value'], ['two', 'value']])
 })
 
-suite(`createKeys() transforms object into keys`, ({ object }) => {
+suite('createKeys() transforms object into keys', ({ object }) => {
   const value = createKeys<string>()(object)
 
   assert.equal(value, ['one', 'two'])
 })
 
-suite(`createSome() transforms object into some`, ({ object }) => {
+suite('createSome() transforms object into some', ({ object }) => {
   ;(() => {
     const value = createSome<string, string>((key, value) => key && value)(object)
 
@@ -368,7 +392,7 @@ suite(`createSome() transforms object into some`, ({ object }) => {
   })()
 })
 
-suite(`createEvery() transforms object into every`, ({ object }) => {
+suite('createEvery() transforms object into every', ({ object }) => {
   ;(() => {
     const value = createEvery<string, string>((key, value) => key && value)(object)
 
@@ -386,7 +410,7 @@ suite(`createEvery() transforms object into every`, ({ object }) => {
 
 
 // STRING
-suite(`createClip(text) clips text from a string`, ({ string }) => {
+suite('createClip(text) clips text from a string', ({ string }) => {
   const value = (string => {
           return createClip('Baleada: ')(string)
         })(string),
@@ -395,7 +419,7 @@ suite(`createClip(text) clips text from a string`, ({ string }) => {
   assert.is(value, expected)
 })
 
-suite(`createClip(regularExpression) clips regularExpression from a string`, ({ string }) => {
+suite('createClip(regularExpression) clips regularExpression from a string', ({ string }) => {
   const value = (string => {
           return createClip(/^Baleada: /)(string)
         })(string),
@@ -404,7 +428,7 @@ suite(`createClip(regularExpression) clips regularExpression from a string`, ({ 
   assert.is(value, expected)
 })
 
-suite(`createSlug(...) slugs strings`, () => {
+suite('createSlug(...) slugs strings', () => {
   const value1 = (() => {
     return createSlug()('I ♥ Dogs')
   })()
@@ -426,12 +450,12 @@ suite(`createSlug(...) slugs strings`, () => {
   assert.is(value4, 'ya-lyublyu-edinorogov')
 })
 
-suite(`createSlug(...) respects options`, () => {
+suite('createSlug(...) respects options', () => {
   const value = (() => {
     return createSlug({
       customReplacements: [
-        ['@', 'at']
-      ]
+        ['@', 'at'],
+      ],
     })('Foo@unicorn')
   })()
   
@@ -440,7 +464,7 @@ suite(`createSlug(...) respects options`, () => {
 
 
 // NUMBER
-suite(`createClamp({ min, max }) handles number between min and max`, ({ number }) => {
+suite('createClamp({ min, max }) handles number between min and max', ({ number }) => {
   const value = (number => {
     return createClamp(0, 100)(number)
   })(number)
@@ -448,7 +472,7 @@ suite(`createClamp({ min, max }) handles number between min and max`, ({ number 
   assert.is(value, 42)
 })
 
-suite(`createClamp({ min, max }) handles number below min`, ({ number }) => {
+suite('createClamp({ min, max }) handles number below min', ({ number }) => {
   const value = (number => {
     return createClamp(50, 100)(number)
   })(number)
@@ -456,7 +480,7 @@ suite(`createClamp({ min, max }) handles number below min`, ({ number }) => {
   assert.is(value, 50)
 })
 
-suite(`createClamp({ min, max }) handles number above max`, ({ number }) => {
+suite('createClamp({ min, max }) handles number above max', ({ number }) => {
   const value = (number => {
     return createClamp(0, 36)(number)
   })(number)
@@ -464,50 +488,50 @@ suite(`createClamp({ min, max }) handles number above max`, ({ number }) => {
   assert.is(value, 36)
 })
 
-suite(`createDetermine(...) determines outcome`, () => {
+suite('createDetermine(...) determines outcome', () => {
   const potentialities = [
     { outcome: 1, probability: 1 },
     { outcome: 2, probability: 1 },
     { outcome: 3, probability: 1 },
     { outcome: 4, probability: 1 },
-  ];
+  ]
   
-  (() => {
+  ;(() => {
     const value = createDetermine(potentialities)(0),
           expected = 1
 
     assert.is(value, expected)
-  })();
+  })()
 
-  (() => {
+  ;(() => {
     const value = createDetermine(potentialities)(1),
           expected = 2
 
     assert.is(value, expected)
-  })();
+  })()
 
-  (() => {
+  ;(() => {
     const value = createDetermine(potentialities)(2),
           expected = 3
 
     assert.is(value, expected)
-  })();
+  })()
 
-  (() => {
+  ;(() => {
     const value = createDetermine(potentialities)(3),
           expected = 4
 
     assert.is(value, expected)
-  })();
+  })()
 })
 
-suite(`createDetermine(...) falls back to final potentiality if chance is greater than or equal to total probability`, () => {
+suite('createDetermine(...) falls back to final potentiality if chance is greater than or equal to total probability', () => {
   const potentialities = [
     { outcome: 1, probability: 1 },
     { outcome: 2, probability: 1 },
     { outcome: 3, probability: 1 },
     { outcome: 4, probability: 1 },
-  ];
+  ]
   
   const value = createDetermine(potentialities)(4),
         expected = 4
@@ -515,13 +539,13 @@ suite(`createDetermine(...) falls back to final potentiality if chance is greate
   assert.is(value, expected)
 })
 
-suite(`createDetermine(...) falls back to first potentiality if chance is lower than 0`, () => {
+suite('createDetermine(...) falls back to first potentiality if chance is lower than 0', () => {
   const potentialities = [
     { outcome: 1, probability: 1 },
     { outcome: 2, probability: 1 },
     { outcome: 3, probability: 1 },
     { outcome: 4, probability: 1 },
-  ];
+  ]
   
   const value = createDetermine(potentialities)(-1),
         expected = 1
@@ -531,7 +555,7 @@ suite(`createDetermine(...) falls back to first potentiality if chance is lower 
 
 
 // ANY
-suite(`createEqual(...) predicates equality`, () => {
+suite('createEqual(...) predicates equality', () => {
   ;(() => {
     const value = createEqual(1)(1),
           expected = true
@@ -552,6 +576,14 @@ suite(`createEqual(...) predicates equality`, () => {
 
     assert.is(value, expected)
   })()
+})
+
+suite(`createClone(...) deep clones`, () => {
+  const object = { hello: 'world' },
+        value = createClone()(object),
+        expected = { hello: 'world' }
+
+  assert.equal(value, expected)  
 })
 
 suite.run()

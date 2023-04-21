@@ -4,10 +4,10 @@ export function createEvery<Key extends string | number | symbol, Value>(predica
   return object => {
     for (const key in object) {
       if (!predicate(key, object[key])) {
-        return false;
+        return false
       }
     }
 
-    return true;
-  };
+    return true
+  }
 }

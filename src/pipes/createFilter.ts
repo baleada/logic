@@ -5,5 +5,5 @@ export function createFilter<Item>(predicate: (item: Item, index: number) => boo
   return array => pipe(
     filter(predicate),
     toArray()
-  )(array) as Item[];
+  )(array) as Item[]
 }

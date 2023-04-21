@@ -8,13 +8,12 @@ import {
   reverse,
   toArray,
 } from 'lazy-collections'
-import { Listenable } from './Listenable'
 import {
   predicateFunction,
   predicateUndefined,
   predicateNumber,
   predicateString,
-  predicateArray
+  predicateArray,
 } from '../extracted'
 import {
   createConcat,
@@ -22,6 +21,7 @@ import {
   createSlice,
   createReduce,
 } from '../pipes'
+import { Listenable } from './Listenable'
 
 export type AnimateableKeyframe = {
   progress: number,
@@ -843,7 +843,7 @@ export function createGetEaseables (fromKeyframeToControlPoints: FromKeyframeToC
                         end = index === propertyKeyframes.length - 1 ? 2 : propertyKeyframes[index + 1].progress,
                         hasCustomTiming = !!keyframe.timing,
                         toAnimationProgress = index === propertyKeyframes.length - 1
-                          ? timeProgress => 1
+                          ? () => 1
                           : createToAnimationProgress(fromKeyframeToControlPoints({ keyframe, index, propertyKeyframes }))
 
                   propertyEaseables.push({
@@ -851,7 +851,7 @@ export function createGetEaseables (fromKeyframeToControlPoints: FromKeyframeToC
                     value: { previous, next },
                     progress: { start, end },
                     hasCustomTiming,
-                    toAnimationProgress
+                    toAnimationProgress,
                   })
                   
                   return propertyEaseables
@@ -863,7 +863,7 @@ export function createGetEaseables (fromKeyframeToControlPoints: FromKeyframeToC
                 property,
                 value: { previous: propertyEaseables[0].value.previous, next: propertyEaseables[0].value.previous },
                 progress: { start: -1, end: propertyEaseables[0].progress.start },
-                toAnimationProgress: timeProgress => 1,
+                toAnimationProgress: () => 1,
                 hasCustomTiming: false,
               }
         

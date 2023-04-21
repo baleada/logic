@@ -1,6 +1,6 @@
 import { join } from 'lazy-collections'
-import { ElementFunction } from './types'
 import type { DeepRequired } from '../extracted'
+import type { ElementFunction } from './types'
 
 export type CreateFocusableOptions = {
   elementIsCandidate?: boolean,
@@ -25,7 +25,7 @@ const defaultOptions: DeepRequired<CreateFocusableOptions> = {
     'video[controls]',
     '[contenteditable]',
     '[tabindex]:not([disabled])',
-  ]) as string
+  ]) as string,
 } 
 
 export function createFocusable (
@@ -41,15 +41,15 @@ export function createFocusable (
     switch (order) {
       case 'first':
         for (let i = 0; i < element.children.length; i++) {
-          const focusable = createFocusable(order, { elementIsCandidate: true })(element.children[i] as HTMLElement);
-          if (focusable) return focusable;
+          const focusable = createFocusable(order, { elementIsCandidate: true })(element.children[i] as HTMLElement)
+          if (focusable) return focusable
         }
         
         break
       case 'last':
         for (let i = element.children.length - 1; i > -1; i--) {
-          const focusable = createFocusable(order, { elementIsCandidate: true })(element.children[i] as HTMLElement);
-          if (focusable) return focusable;
+          const focusable = createFocusable(order, { elementIsCandidate: true })(element.children[i] as HTMLElement)
+          if (focusable) return focusable
         }
 
         break

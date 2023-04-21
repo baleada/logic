@@ -14,7 +14,7 @@ export type DrawableStatus = 'ready' | 'drawing' | 'drawn'
 const defaultOptions: DrawableOptions = {
   toD: stroke => stroke.length === 0
     ? ''
-    : toD(stroke)
+    : toD(stroke),
 }
 
 export class Drawable {

@@ -6,8 +6,11 @@ export type {
   GraphTraversal,
 } from './types'
 
-export { createDirectedAcyclic } from './createDirectedAcyclic'
-export type { DirectedAcyclic } from './createDirectedAcyclic'
+export { createDirectedAcyclicFns } from './createDirectedAcyclicFns'
+export type { DirectedAcyclicFns } from './createDirectedAcyclicFns'
 
-export { createDecisionTree } from './createDecisionTree'
-export type { DecisionTreeMetadata } from './createDecisionTree'
+export { createDecisionTreeFns } from './createDecisionTreeFns'
+export type { DecisionTreeMetadata } from './createDecisionTreeFns'
+
+export { createGraphFns } from './createGraphFns'
+export type { GraphFns } from './createGraphFns'

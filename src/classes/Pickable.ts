@@ -1,6 +1,11 @@
-import { find } from 'lazy-collections'
 import {
-  Pipeable,
+  find,
+  pipe,
+  slice,
+  concat,
+  toArray,
+} from 'lazy-collections'
+import {
   createConcat,
   createMap,
   createFilter,
@@ -95,13 +100,13 @@ export class Pickable<Item> {
   pick (indexOrIndices: number | number[], options: PickOptions = {}) {
     const { replace, allowsDuplicates } = { ...defaultPickOptions, ...options }
     
-    this.computedPicks = new Pipeable(indexOrIndices).pipe(
+    this.computedPicks = pipe(
       narrowIndices,
       this.toPossiblePicks,
       (possiblePicks: number[]) => {
-        if (replace === 'all') {
-          return allowsDuplicates ? possiblePicks : toUnique(possiblePicks)
-        }
+        if (replace === 'all') return allowsDuplicates
+          ? possiblePicks
+          : toUnique(possiblePicks)
 
         const maybeWithoutDuplicates = allowsDuplicates
           ? possiblePicks
@@ -125,10 +130,11 @@ export class Pickable<Item> {
               return createSlice<number>(maybeWithoutDuplicates.length - this.picks.length)(maybeWithoutDuplicates)
             }
 
-            return new Pipeable(this.picks).pipe(
-              createSlice<number>(maybeWithoutDuplicates.length),
-              createConcat<number>(maybeWithoutDuplicates)
-            )
+            return pipe(
+              slice(maybeWithoutDuplicates.length),
+              array => concat(array, maybeWithoutDuplicates),
+              toArray(),
+            )(this.picks)
           case 'lifo': 
             if (maybeWithoutDuplicates.length === 0) {
               return this.picks
@@ -142,13 +148,14 @@ export class Pickable<Item> {
               return createSlice<number>(0, maybeWithoutDuplicates.length - this.picks.length + 1)(maybeWithoutDuplicates)
             }
 
-            return new Pipeable(this.picks).pipe(
-              createSlice<number>(0, this.picks.length - maybeWithoutDuplicates.length),
-              createConcat<number>(maybeWithoutDuplicates)
-            )
+            return pipe(
+              slice(0, this.picks.length - maybeWithoutDuplicates.length - 1),
+              array => concat(array, maybeWithoutDuplicates),
+              toArray(),
+            )(this.picks)
         }
       }
-    )
+    )(indexOrIndices)
 
     this.computedFirst = Math.min(...this.picks)
     this.computedLast = Math.max(...this.picks)

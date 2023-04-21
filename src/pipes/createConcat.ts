@@ -5,5 +5,5 @@ export function createConcat<Item>(...arrays: Item[][]): ArrayFunction<Item, Ite
   return array => pipe(
     concat(array, ...arrays),
     toArray<Item>()
-  )() as Item[];
+  )() as Item[]
 }

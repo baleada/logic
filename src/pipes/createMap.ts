@@ -5,5 +5,5 @@ export function createMap<Item, Transformed = Item>(transform: (item: Item, inde
   return array => pipe(
     map(transform),
     toArray()
-  )(array) as Transformed[];
+  )(array) as Transformed[]
 }

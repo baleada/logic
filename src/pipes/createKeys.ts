@@ -4,12 +4,12 @@ import type { ObjectFunction } from './types'
 // with no risk of keys being added dynamically
 export function createKeys<Key extends string | number | symbol>(): ObjectFunction<Key, any, Key[]> {
   return object => {
-    const keys = [];
+    const keys = []
 
     for (const key in object) {
-      keys.push(key);
+      keys.push(key)
     }
 
-    return keys;
-  };
+    return keys
+  }
 }

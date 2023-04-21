@@ -1,4 +1,4 @@
-import type { Listenable, ListenEffect } from './Listenable'
+import type { Listenable } from './Listenable'
 
 export type BroadcastableOptions = {
   name?: string
@@ -85,6 +85,6 @@ export function toMessageListenParams<State> (
 ): Parameters<Listenable<'message'>['listen']> {
     return [
       effect,
-      { target: instance.channel }
+      { target: instance.channel },
     ]
 }
