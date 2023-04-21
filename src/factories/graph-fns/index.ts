@@ -1,11 +1,20 @@
-export { defineGraphNodes, defineGraphEdges } from './types'
+export {
+  defineGraph,
+  defineGraphNodes,
+  defineGraphEdges,
+  defineGraphAsync,
+  defineGraphEdgesAsync,
+} from './types'
 export type {
+  Graph,
   GraphNode,
   GraphEdge,
   GraphState,
   GraphTraversal,
-  GraphSharedAncestor,
+  GraphCommonAncestor,
   GraphTreeNode,
+  GraphAsync,
+  GraphEdgeAsync,
 } from './types'
 
 export { createDirectedAcyclicFns } from './createDirectedAcyclicFns'

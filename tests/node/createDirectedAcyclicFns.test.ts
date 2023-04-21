@@ -163,16 +163,16 @@ suite('toTraversals works', ({ directedAcyclic }) => {
   })()
 })
 
-suite('toSharedAncestors works', ({ directedAcyclic }) => {
+suite('toCommonAncestors works', ({ directedAcyclic }) => {
   ;(() => {
-    const value = directedAcyclic.toSharedAncestors('a', 'b'),
+    const value = directedAcyclic.toCommonAncestors('a', 'b'),
           expected = []
 
     assert.equal(value, expected)
   })()
   
   ;(() => {
-    const value = directedAcyclic.toSharedAncestors('b', 'e'),
+    const value = directedAcyclic.toCommonAncestors('b', 'e'),
           expected = [
             { node: 'a', distances: { b: 1, e: 2 } },
           ]
@@ -180,15 +180,28 @@ suite('toSharedAncestors works', ({ directedAcyclic }) => {
     assert.equal(value, expected)
   })()
 
+  // Handles multiple paths from one node to another
   ;(() => {
-    const value = directedAcyclic.toSharedAncestors('d', 'g'),
+    const value = directedAcyclic.toCommonAncestors('d', 'g'),
           expected = [
             { node: 'a', distances: { d: 2, g: 2 } },
             { node: 'a', distances: { d: 1, g: 2 } },
           ]
 
     assert.equal(value, expected)
-  })
+  })()
+  
+  // Ancestors are ordered from deepest to shallowest
+  ;(() => {
+    const value = directedAcyclic.toCommonAncestors('d', 'e'),
+          expected = [
+            { node: 'b', distances: { d: 1, e: 1 } },
+            { node: 'a', distances: { d: 2, e: 2 } },
+            { node: 'a', distances: { d: 1, e: 2 } },
+          ]
+
+    assert.equal(value, expected)
+  })()
 })
 
 suite('toTree works', ({ directedAcyclic }) => {

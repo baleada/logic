@@ -8,7 +8,7 @@ import type {
   GraphEdgeAsync,
   GraphState,
   GraphTraversal,
-  GraphSharedAncestor,
+  GraphCommonAncestor,
   GraphTreeNode,
 } from './types'
 
@@ -17,7 +17,7 @@ export type DirectedAcyclicAsyncFns<
   Metadata
   > = Expand<GraphFns<Id, Metadata, GraphEdgeAsync<Id, Metadata>> & {
     toTree: (options?: { entry?: Id }) => Promise<GraphTreeNode<Id>[]>,
-  toSharedAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => Promise<GraphSharedAncestor<Id>[]>,
+  toCommonAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => Promise<GraphCommonAncestor<Id>[]>,
   toTraversals: (node: GraphNode<Id>) => Promise<GraphTraversal<Id, Metadata>[]>,
   walk: (
     stepEffect: (
@@ -89,10 +89,10 @@ export function createDirectedAcyclicAsyncFns<
     return tree
   }
 
-  const toSharedAncestors: DirectedAcyclicAsyncFns<Id, Metadata>['toSharedAncestors'] = async (a, b) => {
+  const toCommonAncestors: DirectedAcyclicAsyncFns<Id, Metadata>['toCommonAncestors'] = async (a, b) => {
     const aTraversals = await toTraversals(a),
           bTraversals = await toTraversals(b),
-          sharedAncestors: GraphSharedAncestor<Id>[] = []
+          commonAncestors: GraphCommonAncestor<Id>[] = []
 
     for (const { path: aPath } of aTraversals) {
       for (const { path: bPath } of bTraversals) {
@@ -102,20 +102,20 @@ export function createDirectedAcyclicAsyncFns<
               aPath[aPathIndex] === bPath[bPathIndex]
               && ![a, b].includes(aPath[aPathIndex])
             ) {
-              sharedAncestors.push({
+              commonAncestors.push({
                 node: aPath[aPathIndex],
                 distances: {
                   [a]: aPath.length - aPathIndex - 1,
                   [b]: bPath.length - bPathIndex - 1,
                 },
-              } as GraphSharedAncestor<Id>)
+              } as GraphCommonAncestor<Id>)
             }
           }
         }
       }
     }
 
-    return sharedAncestors
+    return commonAncestors
   }
 
   const toTraversals: DirectedAcyclicAsyncFns<Id, Metadata>['toTraversals'] = async node => {
@@ -227,7 +227,7 @@ export function createDirectedAcyclicAsyncFns<
 
   return {
     toTree,
-    toSharedAncestors,
+    toCommonAncestors,
     toTraversals,
     walk,
     toPath,

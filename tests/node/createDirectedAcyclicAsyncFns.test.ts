@@ -203,16 +203,16 @@ suite('toTraversals works', async ({ directedAcyclic }) => {
   })()
 })
 
-suite('toSharedAncestors works', async ({ directedAcyclic }) => {
+suite('toCommonAncestors works', async ({ directedAcyclic }) => {
   await (async () => {
-    const value = await directedAcyclic.toSharedAncestors('a', 'b'),
+    const value = await directedAcyclic.toCommonAncestors('a', 'b'),
           expected = []
 
     assert.equal(value, expected)
   })()
   
   await (async () => {
-    const value = await directedAcyclic.toSharedAncestors('b', 'e'),
+    const value = await directedAcyclic.toCommonAncestors('b', 'e'),
           expected = [
             { node: 'a', distances: { b: 1, e: 2 } },
           ]
@@ -221,7 +221,7 @@ suite('toSharedAncestors works', async ({ directedAcyclic }) => {
   })()
 
   await (async () => {
-    const value = await directedAcyclic.toSharedAncestors('d', 'g'),
+    const value = await directedAcyclic.toCommonAncestors('d', 'g'),
           expected = [
             { node: 'a', distances: { d: 2, g: 2 } },
             { node: 'a', distances: { d: 1, g: 2 } },

@@ -7,7 +7,7 @@ import type {
   GraphEdge,
   GraphState,
   GraphTraversal,
-  GraphSharedAncestor,
+  GraphCommonAncestor,
   GraphTreeNode,
 } from './types'
 
@@ -16,7 +16,7 @@ export type DirectedAcyclicFns<
   Metadata
 > = Expand<GraphFns<Id, Metadata, GraphEdge<Id, Metadata>> & {
   toTree: (options?: { entry?: Id }) => GraphTreeNode<Id>[],
-  toSharedAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => GraphSharedAncestor<Id>[],
+  toCommonAncestors: (a: GraphNode<Id>, b: GraphNode<Id>) => GraphCommonAncestor<Id>[],
   toTraversals: (node: GraphNode<Id>) => GraphTraversal<Id, Metadata>[],
   walk: (
     stepEffect: (
@@ -84,10 +84,10 @@ export function createDirectedAcyclicFns<
     return tree
   }
 
-  const toSharedAncestors: DirectedAcyclicFns<Id, Metadata>['toSharedAncestors'] = (a, b) => {
+  const toCommonAncestors: DirectedAcyclicFns<Id, Metadata>['toCommonAncestors'] = (a, b) => {
     const aTraversals = toTraversals(a),
           bTraversals = toTraversals(b),
-          sharedAncestors: GraphSharedAncestor<Id>[] = []
+          commonAncestors: GraphCommonAncestor<Id>[] = []
 
     for (const { path: aPath } of aTraversals) {
       for (const { path: bPath } of bTraversals) {
@@ -97,20 +97,20 @@ export function createDirectedAcyclicFns<
               aPath[aPathIndex] === bPath[bPathIndex]
               && ![a, b].includes(aPath[aPathIndex])
             ) {
-              sharedAncestors.push({
+              commonAncestors.push({
                 node: aPath[aPathIndex],
                 distances: {
                   [a]: aPath.length - aPathIndex - 1,
                   [b]: bPath.length - bPathIndex - 1,
                 },
-              } as GraphSharedAncestor<Id>)
+              } as GraphCommonAncestor<Id>)
             }
           }
         }
       }
     }
 
-    return sharedAncestors
+    return commonAncestors
   }
 
   const toTraversals: DirectedAcyclicFns<Id, Metadata>['toTraversals'] = node => {
@@ -221,7 +221,7 @@ export function createDirectedAcyclicFns<
 
   return {
     toTree,
-    toSharedAncestors,
+    toCommonAncestors,
     toTraversals,
     walk,
     toPath,

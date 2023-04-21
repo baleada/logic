@@ -1,3 +1,8 @@
+export type Graph<Id extends string, Metadata> = {
+  nodes: GraphNode<Id>[],
+  edges: GraphEdge<Id, Metadata>[],
+}
+
 export type GraphNode<Id extends string> = Id
 
 export type GraphEdge<
@@ -28,7 +33,7 @@ export type GraphTraversal<
   state: GraphState<Id, Metadata>
 }
 
-export type GraphSharedAncestor<Id extends string> = {
+export type GraphCommonAncestor<Id extends string> = {
   node: GraphNode<Id>,
   distances: Record<GraphNode<Id>, number>
 }
@@ -36,6 +41,13 @@ export type GraphSharedAncestor<Id extends string> = {
 export type GraphTreeNode<Id extends string> = {
   node: GraphNode<Id>,
   children: GraphTreeNode<Id>[],
+}
+
+export function defineGraph<Id extends string, Metadata> (
+  nodes: GraphNode<Id>[],
+  edges: GraphEdge<Id, Metadata>[]
+) {
+  return { nodes, edges }
 }
 
 export function defineGraphNodes<Id extends string> (nodes: GraphNode<Id>[]) {
@@ -46,6 +58,11 @@ export function defineGraphEdges<Id extends string, Metadata> (edges: GraphEdge<
   return edges
 }
 
+export type GraphAsync<Id extends string, Metadata> = {
+  nodes: GraphNode<Id>[],
+  edges: GraphEdgeAsync<Id, Metadata>[],
+}
+
 export type GraphEdgeAsync<
   Id extends string,
   Metadata
@@ -53,6 +70,13 @@ export type GraphEdgeAsync<
   from: Id,
   to: Id,
   predicateTraversable: (metadata: GraphState<Id, Metadata>) => Promise<boolean>
+}
+
+export function defineGraphAsync<Id extends string, Metadata> (
+  nodes: GraphNode<Id>[],
+  edges: GraphEdgeAsync<Id, Metadata>[]
+) {
+  return { nodes, edges }
 }
 
 export function defineGraphEdgesAsync<Id extends string, Metadata> (edges: GraphEdgeAsync<Id, Metadata>[]) {
