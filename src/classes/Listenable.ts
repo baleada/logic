@@ -6,13 +6,13 @@ import {
 import { Recognizeable } from './Recognizeable'
 import type { RecognizeableOptions } from './Recognizeable'
 import {
-  isNumber,
+  predicateNumber,
   toKey,
   fromComboItemNameToType,
   toModifier,
-  isModified,
+  predicateModified,
   createExceptAndOnlyEffect,
-  isFunction,
+  predicateFunction,
 } from '../extracted'
 import type {
   ListenableModifier,
@@ -224,7 +224,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
   private mediaQueryListen (effect: ListenEffect<'(_)'>, options: ListenOptions<'(_)'>) {
     const target = window.matchMedia(this.type)
 
-    if (isFunction(options.instantEffect)) {
+    if (predicateFunction(options.instantEffect)) {
       (options.instantEffect as ListenOptions<'(_)'>['instantEffect'])(target)
     }
 
@@ -262,12 +262,12 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
   }
   private documentEventListen (effect: ListenEffect<'visibilitychange'>, options: ListenOptions<'visibilitychange'>) {
     // Override the target option with document
-    const ensuredOptions = {
+    const narrowedOptions = {
       ...options,
       target: document,
     }
     
-    this.eventListen(effect, ensuredOptions)
+    this.eventListen(effect, narrowedOptions)
   }
   private eventListen<EventType extends ListenableSupportedEventType> (effect: ListenEffect<EventType>, options: ListenOptions<EventType>) {
     const { exceptAndOnlyEffect, effectOptions } = toAddEventListenerParams(this.type as EventType, effect, options),
@@ -298,7 +298,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
         // and shouldn't use web APIs during construction.
         break
       default:
-        const stoppables: ListenableActive<Type>[] = [...this.active].filter(active => !target || ('target' in active ? active.target === target : false)), // Normally would use .isSameNode() here, but it needs to support MediaQueryLists too
+        const stoppables: ListenableActive<Type>[] = [...this.active].filter(active => !target || ('target' in active ? active.target === target : false)),
               shouldUpdateStatus = stoppables.length === this.active.size
         
         for (const stoppable of stoppables) {
@@ -338,7 +338,7 @@ function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive
     return
   }
   
-  if (isNumber(stoppable.id)) {
+  if (predicateNumber(stoppable.id)) {
     const { target, id } = stoppable as ListenableActive<'idle'>
     target.cancelIdleCallback(id)
     return
@@ -454,8 +454,8 @@ export function eventMatchesKeycombo (event: KeyboardEvent, keycombo: Listenable
         }
 
         return name.startsWith('!')
-          ? !isModified({ event, alias: name.slice(1) })
-          : isModified({ event, alias: name })
+          ? !predicateModified({ event, alias: name.slice(1) })
+          : predicateModified({ event, alias: name })
     }
   })(keycombo) as boolean
 }
@@ -534,9 +534,9 @@ export function eventMatchesMousecombo (event: MouseEvent, Mousecombo: string[])
   return every<string>(name => (
     fromComboItemNameToType(name) === 'click'
     ||
-    (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))
+    (name.startsWith('!') && !predicateModified({ alias: name.slice(1), event }))
     ||
-    (!name.startsWith('!') && isModified({ alias: name, event }))
+    (!name.startsWith('!') && predicateModified({ alias: name, event }))
   ))(Mousecombo) as boolean
 }
 
@@ -544,9 +544,9 @@ export function eventMatchesPointercombo (event: PointerEvent, pointercombo: str
   return every<string>(name => (
     fromComboItemNameToType(name) === 'pointer'
     ||
-    (name.startsWith('!') && !isModified({ alias: name.slice(1), event }))
+    (name.startsWith('!') && !predicateModified({ alias: name.slice(1), event }))
     ||
-    (!name.startsWith('!') && isModified({ alias: name, event }))
+    (!name.startsWith('!') && predicateModified({ alias: name, event }))
   ))(pointercombo) as boolean
 }
 

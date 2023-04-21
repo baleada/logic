@@ -6,7 +6,7 @@ import {
   reduce,
 } from 'lazy-collections'
 import { Listenable } from './Listenable'
-import { isFunction, isUndefined, isNumber, isString, isArray } from '../extracted'
+import { predicateFunction, predicateUndefined, predicateNumber, predicateString, predicateArray } from '../extracted'
 import {
   createSlice,
   createMap,
@@ -191,14 +191,14 @@ export class Animateable {
   private duration: number
   private totalTimeInvisible: number
   setPlaybackRate (playbackRate: number) {
-    const ensuredPlaybackRate = Math.max(0, playbackRate) // negative playback rate is not supported
-    this.computedPlaybackRate = ensuredPlaybackRate
-    this.duration = (1 / ensuredPlaybackRate) * this.initialDuration
+    const narrowedPlaybackRate = Math.max(0, playbackRate) // negative playback rate is not supported
+    this.computedPlaybackRate = narrowedPlaybackRate
+    this.duration = (1 / narrowedPlaybackRate) * this.initialDuration
 
     switch (this.status) {
       case 'playing':
       case 'reversing': 
-        this.totalTimeInvisible = (1 / ensuredPlaybackRate) * this.totalTimeInvisible
+        this.totalTimeInvisible = (1 / narrowedPlaybackRate) * this.totalTimeInvisible
         this.seek(this.progress.time)
         
         break
@@ -642,33 +642,33 @@ export class Animateable {
 
     this.computedIterations = iterations
 
-    let ensuredTimeProgress: number, effect: AnimateFrameEffect
+    let narrowedTimeProgress: number, effect: AnimateFrameEffect
 
     if (this.alternates) {
       if (naiveIterationProgress <= .5) {
-        ensuredTimeProgress = naiveIterationProgress * 2
+        narrowedTimeProgress = naiveIterationProgress * 2
 
         switch (this.alternateCache.status) {
           case 'playing':
             this.cancelAnimate()
-            this.seekCache = { timeProgress: ensuredTimeProgress }
+            this.seekCache = { timeProgress: narrowedTimeProgress }
             this.sought()
 
-            effect = isFunction(naiveEffect) ? naiveEffect : this.playCache.effect
+            effect = predicateFunction(naiveEffect) ? naiveEffect : this.playCache.effect
             this.play(effect, this.playCache.options)
 
             break
           case 'reversing':
             this.cancelAnimate()
-            this.seekCache = { timeProgress: ensuredTimeProgress }
+            this.seekCache = { timeProgress: narrowedTimeProgress }
             this.sought()
 
-            effect = isFunction(naiveEffect) ? naiveEffect : this.reverseCache.effect
+            effect = predicateFunction(naiveEffect) ? naiveEffect : this.reverseCache.effect
             this.reverse(effect, this.reverseCache.options)
 
             break
           default:
-            this.seekCache = { timeProgress: ensuredTimeProgress }
+            this.seekCache = { timeProgress: narrowedTimeProgress }
             this.sought()
 
             effect = naiveEffect
@@ -677,28 +677,28 @@ export class Animateable {
             break
         }
       } else {
-        ensuredTimeProgress = (naiveIterationProgress - .5) * 2
+        narrowedTimeProgress = (naiveIterationProgress - .5) * 2
         switch (this.alternateCache.status) {
           case 'playing':
             this.cancelAnimate()
-            this.seekCache = { timeProgress: ensuredTimeProgress }
+            this.seekCache = { timeProgress: narrowedTimeProgress }
             this.sought()
 
-            effect = isFunction(naiveEffect) ? naiveEffect : this.reverseCache.effect
+            effect = predicateFunction(naiveEffect) ? naiveEffect : this.reverseCache.effect
             this.reverse(effect, this.reverseCache.options)
 
             break
           case 'reversing':
             this.cancelAnimate()
-            this.seekCache = { timeProgress: ensuredTimeProgress }
+            this.seekCache = { timeProgress: narrowedTimeProgress }
             this.sought()
 
-            effect = isFunction(naiveEffect) ? naiveEffect : this.playCache.effect
+            effect = predicateFunction(naiveEffect) ? naiveEffect : this.playCache.effect
             this.play(effect, this.playCache.options)
 
             break
           default:
-            this.seekCache = { timeProgress: ensuredTimeProgress }
+            this.seekCache = { timeProgress: narrowedTimeProgress }
             this.sought()
 
             effect = naiveEffect
@@ -711,29 +711,29 @@ export class Animateable {
         }
       }
     } else {
-      ensuredTimeProgress = naiveIterationProgress
+      narrowedTimeProgress = naiveIterationProgress
 
       switch (this.status) {
         case 'playing':
           this.cancelAnimate()
-          this.seekCache = { timeProgress: ensuredTimeProgress }
+          this.seekCache = { timeProgress: narrowedTimeProgress }
           this.sought()
 
-          effect = isFunction(naiveEffect) ? naiveEffect : this.playCache.effect
+          effect = predicateFunction(naiveEffect) ? naiveEffect : this.playCache.effect
           this.play(effect, this.playCache.options)
 
           break
         case 'reversing':
           this.cancelAnimate()
-          this.seekCache = { timeProgress: ensuredTimeProgress }
+          this.seekCache = { timeProgress: narrowedTimeProgress }
           this.sought()
 
-          effect = isFunction(naiveEffect) ? naiveEffect : this.reverseCache.effect
+          effect = predicateFunction(naiveEffect) ? naiveEffect : this.reverseCache.effect
           this.reverse(effect, this.reverseCache.options)
 
           break
         default:
-          this.seekCache = { timeProgress: ensuredTimeProgress }
+          this.seekCache = { timeProgress: narrowedTimeProgress }
           this.sought()
 
           effect = naiveEffect
@@ -918,15 +918,15 @@ export function toInterpolated (
   },
   options: AnimateOptions['interpolate'] = {}
 ) {
-  if (isUndefined(previous)) {
+  if (predicateUndefined(previous)) {
     return next
   }
 
-  if (isNumber(previous) && isNumber(next)) {
+  if (predicateNumber(previous) && predicateNumber(next)) {
     return (next  - previous) * progress + previous
   }
 
-  if (isString(previous) && isString(next)) {
+  if (predicateString(previous) && predicateString(next)) {
     return mix(
       options.colorModel,
       {
@@ -937,7 +937,7 @@ export function toInterpolated (
     ).toRgb().toRgbString()
   }
 
-  if (isArray(previous) && isArray(next)) {
+  if (predicateArray(previous) && predicateArray(next)) {
     const exactSliceEnd = (next.length - previous.length) * progress + previous.length,
     nextIsLonger = next.length > previous.length,
     sliceEnd = nextIsLonger ? Math.floor(exactSliceEnd) : Math.ceil(exactSliceEnd),

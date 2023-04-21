@@ -1,6 +1,6 @@
 import { find } from 'lazy-collections'
 import { createMap, createFilter, createConcat, Pipeable, createSlice, createUnique } from "../pipes"
-import { isUndefined } from '../extracted'
+import { predicateUndefined } from '../extracted'
 
 export type PickableOptions = {
   initialPicks?: number | number[],
@@ -89,7 +89,7 @@ export class Pickable<Item> {
     const { replace, allowsDuplicates } = { ...defaultPickOptions, ...options }
     
     this.computedPicks = new Pipeable(indexOrIndices).pipe(
-      ensureIndices,
+      narrowIndices,
       this.toPossiblePicks,
       (possiblePicks: number[]) => {
         if (replace === 'all') {
@@ -155,7 +155,7 @@ export class Pickable<Item> {
   }
 
   omit (indexOrIndices?: number | number[], options: { reference?: 'array' | 'picks' } = { reference: 'array' }) {
-    if (isUndefined(indexOrIndices)) {
+    if (predicateUndefined(indexOrIndices)) {
       this.computedPicks = []
       this.computedFirst = undefined
       this.computedLast = undefined
@@ -164,12 +164,12 @@ export class Pickable<Item> {
       return this
     }
 
-    const omits = ensureIndices(indexOrIndices)
+    const omits = narrowIndices(indexOrIndices)
 
     this.computedPicks = createFilter<number>((pick, index) =>
       options.reference === 'array'
-        ? isUndefined(find(omit => pick === omit)(omits))
-        : isUndefined(find(omit => index === omit)(omits))
+        ? predicateUndefined(find(omit => pick === omit)(omits))
+        : predicateUndefined(find(omit => index === omit)(omits))
     )(this.computedPicks)
     this.computedFirst = Math.min(...this.picks)
     this.computedLast = Math.max(...this.picks)
@@ -183,7 +183,7 @@ export class Pickable<Item> {
   }
 }
 
-function ensureIndices (indexOrIndices: number | number[]): number[] {
+function narrowIndices (indexOrIndices: number | number[]): number[] {
   return Array.isArray(indexOrIndices)
     ? indexOrIndices
     : [indexOrIndices]

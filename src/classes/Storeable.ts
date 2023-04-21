@@ -1,6 +1,6 @@
 import {
-  isNull,
-  isString,
+  predicateNull,
+  predicateString,
   domIsAvailable,
 } from '../extracted'
 
@@ -35,7 +35,7 @@ export class Storeable<String extends string> {
     this.computedStatus = 'ready'
 
     if (domIsAvailable()) {
-      if (isNull(this.storage.getItem(this.computedStatusKey))) {
+      if (predicateNull(this.storage.getItem(this.computedStatusKey))) {
         this.storeStatus()
       }
     }
@@ -50,7 +50,7 @@ export class Storeable<String extends string> {
   get status () {
     if (domIsAvailable()) {
       const storedStatus = this.storage.getItem(this.computedStatusKey)
-      if (this.computedStatus !== storedStatus && isString(storedStatus)) {
+      if (this.computedStatus !== storedStatus && predicateString(storedStatus)) {
         this.computedStatus = (storedStatus as 'ready' | 'constructing' | 'stored' | 'errored' | 'removed')
       }
     }
