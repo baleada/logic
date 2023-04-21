@@ -5,7 +5,6 @@ import {
   toArray,
   pipe,
 } from 'lazy-collections'
-import { Pipeable, createMap } from '../pipes'
 
 export type { DeepRequired, Expand } from './types'
 
@@ -69,13 +68,6 @@ const keysByName: Record<ListenableKeyAlias, ListenableKey> = {
 export type ListenableKeycomboItem = {
   name: string,
   type: ListenableComboItemType | 'custom'
-}
-
-export function narrowKeycombo (type: string): ListenableKeycomboItem[] {
-  return new Pipeable(type).pipe(
-    toCombo,
-    createMap<string, ListenableKeycomboItem>(name => ({ name, type: fromComboItemNameToType(name) }))
-  ) as ListenableKeycomboItem[]
 }
 
 // export type ListenableMousecomboItem = ListenableModifier | ListenableModifierAlias | 'click'
@@ -191,3 +183,41 @@ export {
   predicateString,
   predicateObject,
 } from './predicates'
+
+
+// RECOGNIZEABLE EFFECTS
+// Pipes
+export { createPredicateKeycomboDown as createKeycomboIsDown } from './createKeycomboIsDown'
+export type { KeyStatus, KeyStatuses } from './createKeycomboIsDown'
+
+// Transforms
+export { toDirection } from './toDirection'
+export type { Direction } from './toDirection'
+
+export { toHookApi } from './toHookApi'
+export type { HookApi } from './toHookApi'
+
+export { toName } from './toName'
+
+export { toMousePoint, toTouchMovePoint, toTouchEndPoint } from './toPoints'
+
+export { toPolarCoordinates } from './toPolarCoordinates'
+export type { PolarCoordinates } from './toPolarCoordinates'
+
+// Store
+export { storeKeyboardTimeMetadata } from './storeKeyboardTimeMetadata'
+export type { KeyboardTimeMetadata } from './storeKeyboardTimeMetadata'
+
+export { storePointerStartMetadata } from './storePointerStartMetadata'
+export type { PointerStartMetadata } from './storePointerStartMetadata'
+
+export { storePointerMoveMetadata } from './storePointerMoveMetadata'
+export type { PointerMoveMetadata } from './storePointerMoveMetadata'
+
+export { storePointerTimeMetadata } from './storePointerTimeMetadata'
+export type { PointerTimeMetadata } from './storePointerTimeMetadata'
+
+
+// Mixed
+export { narrowKeycombo } from './keycombo'
+export type { KeycomboItem } from './keycombo'
