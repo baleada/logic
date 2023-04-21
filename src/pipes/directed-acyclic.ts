@@ -20,11 +20,11 @@ import type {
   GraphStateFn,
   GraphNodeTupleFn,
   GraphNodeTupleGeneratorFn,
-  GraphTreeFn,
   GraphFn,
   AsyncGraphGeneratorFn,
 } from './types'
 import { createPredicateRoot } from './graph'
+import { createFind as createTreeFind } from './tree'
 
 // TODO: root option, multiple roots
 export function createToTree<
@@ -50,7 +50,7 @@ export function createToTree<
             parent = path.at(-2)
 
       if (parent) {
-        const parentTreeNode = createFindInTree(parent)(tree)
+        const parentTreeNode = createTreeFind(parent)(tree)
         if (parentTreeNode) {
           parentTreeNode.children.push({
             node,
@@ -61,17 +61,6 @@ export function createToTree<
     }
 
     return tree
-  }
-}
-
-export function createFindInTree<Id extends string> (node: GraphNode<Id>): GraphTreeFn<Id, GraphTreeNode<Id>> {
-  return tree => {
-    for (const treeNode of tree) {
-      if (treeNode.node === node) return treeNode
-
-      const found = createFindInTree(node)(treeNode.children)
-      if (found) return found
-    }
   }
 }
 

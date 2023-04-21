@@ -22,7 +22,9 @@ import type {
   GraphNodeAsyncGeneratorFn,
   GraphNodeTupleAsyncFn,
 } from './types'
-import { createToRoots, createFindInTree } from './directed-acyclic'
+import type { CreateToStepsOptions as CreateDirectedAcyclicToStepsOptions } from './directed-acyclic'
+import { createToRoots, defaultCreateToStepsOptions } from './directed-acyclic'
+import { createFind as createTreeFind } from './tree'
 
 // // TODO: root option, multiple roots
 export function createToTree<
@@ -48,7 +50,7 @@ export function createToTree<
             parent = path.at(-2)
 
       if (parent) {
-        const parentTreeNode = createFindInTree(parent)(tree)
+        const parentTreeNode = createTreeFind(parent)(tree)
         if (parentTreeNode) {
           parentTreeNode.children.push({
             node,
@@ -123,21 +125,7 @@ export function createToNodeSteps<
   }
 }
 
-export type CreateToStepsOptions<
-  Id extends string,
-  Metadata
-> = {
-  root?: GraphNode<Id>,
-  toMockMetadata?: (node: GraphNode<Id>, totalConnectionsFollowed: number) => Metadata,
-  toUnsetMetadata?: (node: GraphNode<Id>) => Metadata,
-  kind?: 'directed acyclic' | 'arborescence'
-}
-
-export const defaultCreateToStepsOptions: CreateToStepsOptions<string, any> = {
-  toUnsetMetadata: () => 0,
-  toMockMetadata: (node, totalConnectionsFollowed) => totalConnectionsFollowed,
-  kind: 'directed acyclic',
-}
+export type CreateToStepsOptions<Id extends string, Metadata> = CreateDirectedAcyclicToStepsOptions<Id, Metadata>
 
 export function createToSteps<
   Id extends string,

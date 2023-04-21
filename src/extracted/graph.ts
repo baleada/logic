@@ -79,6 +79,6 @@ export function defineAsyncGraph<Id extends string, Metadata> (
   return { nodes, edges }
 }
 
-export function defineGraphEdgesAsync<Id extends string, Metadata> (edges: AsyncGraphEdge<Id, Metadata>[]) {
+export function defineAsyncGraphEdges<Id extends string, Metadata> (edges: AsyncGraphEdge<Id, Metadata>[]) {
   return edges
 }

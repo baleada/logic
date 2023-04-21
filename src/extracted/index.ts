@@ -228,7 +228,7 @@ export {
   defineGraphNodes,
   defineGraphEdges,
   defineAsyncGraph,
-  defineGraphEdgesAsync,
+  defineAsyncGraphEdges,
 } from './graph'
 export type {
   Graph,

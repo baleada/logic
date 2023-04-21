@@ -16,7 +16,7 @@ const suite = createSuite<{
     nodes: GraphNode<any>[],
     edges: AsyncGraphEdge<any, number>[],
   }
-}>('directed acyclic pipes')
+}>('async directed acyclic pipes')
 
 async function debounce<T> (cb: () => T) {
   return await new Promise<T>(resolve => {

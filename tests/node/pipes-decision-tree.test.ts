@@ -1,17 +1,18 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { createDecisionTreeFns } from '../../src/factories/createDecisionTreeFns'
-import type { DecisionTreeFns } from '../../src/factories/createDecisionTreeFns'
-import type { GraphEdge, GraphNode } from '../../src/extracted/graph'
+import { map, pipe, toArray } from 'lazy-collections'
+import type { GraphEdge, GraphNode, GraphStep } from '../../src/extracted/graph'
+import { createToSteps } from '../../src/pipes/decision-tree'
 
 const suite = createSuite<{
-  nodes: GraphNode<any>[],
-  edges: GraphEdge<any, any>[],
-  decisionTree: DecisionTreeFns<string>,
-}>('createDecisionTreeFns')
+  decisionTree: {
+    nodes: GraphNode<any>[],
+    edges: GraphEdge<any, number>[],
+  }
+}>('decision tree pipes')
 
 suite.before(context => {
-  context.nodes = [
+  const nodes = [
     'a',
     'b',
     'c',
@@ -21,7 +22,7 @@ suite.before(context => {
     'g',
   ]
 
-  context.edges = [
+  const edges = [
     { from: 'a', to: 'b', predicateTraversable: state => state.a.metadata === false },
     { from: 'a', to: 'c', predicateTraversable: state => state.a.metadata === true },
     { from: 'b', to: 'd', predicateTraversable: state => state.b.metadata === false },
@@ -30,16 +31,15 @@ suite.before(context => {
     { from: 'c', to: 'g', predicateTraversable: state => state.c.metadata === true },
   ]
 
-  context.decisionTree = createDecisionTreeFns({
-    nodes: context.nodes,
-    edges: context.edges,
-  })
+  context.decisionTree = { nodes, edges }
 })
 
-suite('walk prioritizes false branches by default', ({ decisionTree }) => {
-  const value = [] as string[]
-
-  decisionTree.walk(path => value.push(path.at(-1)))
+suite('createToSteps prioritizes false branches by default', ({ decisionTree }) => {
+  const value = pipe(
+    createToSteps(),
+    map<GraphStep<any, number>, any>(step => step.path.at(-1)),
+    toArray()
+  )(decisionTree)
   
   assert.equal(
     value,
@@ -55,15 +55,12 @@ suite('walk prioritizes false branches by default', ({ decisionTree }) => {
   )
 })
 
-suite('walk optionally prioritizes true branches', ({ nodes, edges }) => {
-  const decisionTree = createDecisionTreeFns(
-    { nodes, edges },
-    { walkPriority: true }
-  )
-
-  const value = [] as string[]
-
-  decisionTree.walk(path => value.push(path.at(-1)))
+suite('createToSteps optionally prioritizes true branches', ({ decisionTree }) => {
+  const value = pipe(
+    createToSteps({ priorityBranch: true }),
+    map<GraphStep<any, number>, any>(step => step.path.at(-1)),
+    toArray()
+  )(decisionTree)
   
   assert.equal(
     value,
