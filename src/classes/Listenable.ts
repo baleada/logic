@@ -124,8 +124,8 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
   private computedActive: Set<ListenableActive<Type, RecognizeableMetadata>>
   constructor (type: Type, options?: ListenableOptions<Type, RecognizeableMetadata>) {
     if (type === 'recognizeable') {
-      this.computedRecognizeable = new Recognizeable<Type, RecognizeableMetadata>([], options?.recognizeable || {})
-      this.recognizeableEffectsKeys = Object.keys(options?.recognizeable?.effects || {}) as Type[]
+      this.computedRecognizeable = new Recognizeable<Type, RecognizeableMetadata>([], options?.recognizeable)
+      this.recognizeableEffectsKeys = Object.keys(options?.recognizeable?.effects) as Type[]
     }    
 
     this.computedActive = new Set()

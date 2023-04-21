@@ -16,7 +16,7 @@ const defaultOptions: CompareableOptions = {
 export class Compareable {
   constructor (string: string, options: CompareableOptions = {}) {
     const locales = options.locales || defaultOptions.locales,
-          collatorOptions = { ...defaultOptions.collator, ...(options.collator || {}) },
+          collatorOptions = { ...defaultOptions.collator, ...(options.collator) },
           key = locales + pipe(
             createEntries(),
             sort((a, b) => a[0] < b[0] ? -1 : 1),

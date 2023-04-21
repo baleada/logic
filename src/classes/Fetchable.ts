@@ -102,7 +102,7 @@ export class Fetchable {
           ...options,
           signal: this.abortController.signal,
           hooks: {
-            ...options.hooks || {},
+            ...options.hooks,
             beforeRetry: [
               ...options.hooks?.beforeRetry || [],
               ({ retryCount }) => {
