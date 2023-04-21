@@ -72,10 +72,12 @@
     "@snigo.dev/color": "^0.0.6",
     "@types/dompurify": "^2.4.0",
     "bezier-easing": "^2.1.0",
+    "clsx": "^1.2.1",
     "dequal": "^2.0.3",
     "dompurify": "^2.4.1",
     "fast-fuzzy": "^1.12.0",
     "klona": "^2.0.6",
+    "ky": "^0.33.3",
     "lazy-collections": "^0.10.0",
     "perfect-freehand": "^1.2.0",
     "polygon-clipping": "^0.15.3"

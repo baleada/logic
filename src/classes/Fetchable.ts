@@ -1,11 +1,17 @@
+import ky from 'ky'
+import type { Options as KyOptions } from 'ky'
 import { predicateFunction } from '../extracted'
 import { Resolveable } from './Resolveable'
 
-export type FetchableOptions = Record<never, never>
+export type FetchableOptions = {
+  ky?: KyOptions | ((api: ToKyOptionsApi) => KyOptions)
+}
 
-export type FetchableStatus = 'ready' | 'fetching' | 'fetched' | 'aborted' | 'errored'
+type ToKyOptionsApi = {
+  stop: typeof ky['stop'],
+}
 
-export type FetchOptions = RequestInit | ((api: FetchOptionsApi) => RequestInit)
+export type FetchableStatus = 'ready' | 'fetching' | 'fetched' | 'retrying' | 'aborted' | 'errored'
 
 export class Fetchable {
   private computedArrayBuffer: Resolveable<ArrayBuffer | undefined>
@@ -16,11 +22,13 @@ export class Fetchable {
   constructor (resource: string, options: FetchableOptions = {}) {
     this.setResource(resource)
 
-    this.computedArrayBuffer = new Resolveable(async () => 'arrayBuffer' in this.response ? await this.response.arrayBuffer() : await undefined)
-    this.computedBlob =        new Resolveable(async () => 'blob'        in this.response ? await this.response.blob()        : await undefined)
-    this.computedFormData =    new Resolveable(async () => 'formData'    in this.response ? await this.response.formData()    : await undefined)
-    this.computedJson =        new Resolveable(async () => 'json'        in this.response ? await this.response.json()        : await undefined)
-    this.computedText =        new Resolveable(async () => 'text'        in this.response ? await this.response.text()        : await undefined)
+    this.computedKy = ky.create(narrowOptions(options.ky))
+
+    this.computedArrayBuffer = new Resolveable(async () => 'arrayBuffer' in this.response ? await this.response.arrayBuffer() : undefined)
+    this.computedBlob =        new Resolveable(async () => 'blob'        in this.response ? await this.response.blob()        : undefined)
+    this.computedFormData =    new Resolveable(async () => 'formData'    in this.response ? await this.response.formData()    : undefined)
+    this.computedJson =        new Resolveable(async () => 'json'        in this.response ? await this.response.json()        : undefined)
+    this.computedText =        new Resolveable(async () => 'text'        in this.response ? await this.response.text()        : undefined)
 
     this.ready()
   }
@@ -35,6 +43,10 @@ export class Fetchable {
   set resource (resource) {
     this.setResource(resource)
   }
+  private computedKy: ReturnType<typeof ky['create']>
+  get ky () {
+    return this.computedKy
+  }
   private computedAbortController: AbortController
   get abortController () {
     if (!this.computedAbortController) {
@@ -48,6 +60,10 @@ export class Fetchable {
   }
   get response () { 
     return this.computedResponse
+  }
+  private computedRetryCount: number = 0
+  get retryCount () {
+    return this.computedRetryCount
   }
   get error () { 
     return this.computedError
@@ -76,11 +92,28 @@ export class Fetchable {
   
   private computedResponse: Response
   private computedError: Error
-  async fetch (options: FetchOptions = {}) {
+  async fetch (options: KyOptions = {}) {
     this.fetching()
 
     try {
-      this.computedResponse = await fetch(this.resource, { signal: this.abortController.signal, ...narrowOptions(options) })
+      this.computedResponse = await this.ky(
+        this.resource,
+        {
+          ...options,
+          signal: this.abortController.signal,
+          hooks: {
+            ...options.hooks || {},
+            beforeRetry: [
+              ...options.hooks?.beforeRetry || [],
+              ({ retryCount }) => {
+                this.retrying()
+                this.computedRetryCount = retryCount
+              },
+            ],
+          },
+        }
+      )
+
       this.fetched()
     } catch (error) {
       this.computedError = error as Error
@@ -94,6 +127,9 @@ export class Fetchable {
   private fetching () {
     this.computedStatus = 'fetching'
   }
+  private retrying () {
+    this.computedStatus = 'retrying'
+  }
   private fetched () {
     this.computedStatus = 'fetched'
   }
@@ -103,24 +139,28 @@ export class Fetchable {
   private errored () {
     this.computedStatus = 'errored'
   }
-  async get (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'get' })
+  async get (options: KyOptions = {}) {
+    await this.fetch({ signal: this.abortController.signal, ...options, method: 'get' })
     return this
   }
-  async patch (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'patch' })
+  async patch (options: KyOptions = {}) {
+    await this.fetch({ signal: this.abortController.signal, ...options, method: 'patch' })
     return this
   }
-  async post (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'post' })
+  async post (options: KyOptions = {}) {
+    await this.fetch({ signal: this.abortController.signal, ...options, method: 'post' })
     return this
   }
-  async put (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'put' })
+  async put (options: KyOptions = {}) {
+    await this.fetch({ signal: this.abortController.signal, ...options, method: 'put' })
     return this
   }
-  async delete (options: FetchOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...narrowOptions(options), method: 'delete' })
+  async delete (options: KyOptions = {}) {
+    await this.fetch({ signal: this.abortController.signal, ...options, method: 'delete' })
+    return this
+  }
+  async head (options: KyOptions = {}) {
+    await this.fetch({ signal: this.abortController.signal, ...options, method: 'head' })
     return this
   }
   abort () {
@@ -129,25 +169,10 @@ export class Fetchable {
   }
 }
 
-function narrowOptions (options: RequestInit | ((api: FetchOptionsApi) => RequestInit)) {
+function narrowOptions (options: FetchableOptions['ky']): KyOptions {
+  if (!options) return {}
+
   return predicateFunction(options)
-    ? options({ withJson })
+    ? options({ stop: ky.stop })
     : options
-}
-
-export type FetchOptionsApi = {
-  withJson: (data: Record<any, any>) => {
-    body: string,
-    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-  }
-}
-
-function withJson (data: Record<any, any>) {
-  return {
-    body: JSON.stringify(data),
-    headers: {
-      Accept: 'application/json' as const,
-      'Content-Type': 'application/json' as const,
-    },
-  }
 }
