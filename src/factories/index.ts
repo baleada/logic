@@ -1,5 +1,5 @@
-export { defineAssociativeArray } from '../extracted'
-export type { AssociativeArray } from '../extracted'
+export { defineAssociativeArrayEntries } from '../extracted'
+export type { AssociativeArrayEntries } from '../extracted'
 
-export { createAssociativeArrayFns } from './createAssociativeArrayFns'
-export type { AssociativeArrayFns, AssociativeArrayFnsOptions } from './createAssociativeArrayFns'
+export { createAssociativeArray } from './createAssociativeArray'
+export type { AssociativeArray, AssociativeArrayOptions } from './createAssociativeArray'

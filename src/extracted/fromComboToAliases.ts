@@ -5,7 +5,7 @@ import {
   toArray,
 } from 'lazy-collections'
 
-export function toCombo (type: string): string[] {
+export function fromComboToAliases (combo: string): string[] {
   const delimiter = '+'
   // If the delimiter is used as a character in the type,
   // two empty strings will be produced by the split.
@@ -14,6 +14,6 @@ export function toCombo (type: string): string[] {
     unique<string>(),
     map<string, string>(name => name === '' ? delimiter : name.toLowerCase()),
     toArray(),
-  )(type.split(delimiter)) as string[]
+  )(combo.split(delimiter)) as string[]
 }
 

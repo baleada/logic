@@ -1,7 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import type { AssociativeArrayFns } from '../../src/factories/createAssociativeArrayFns'
-import { createAssociativeArrayFns } from '../../src/factories/createAssociativeArrayFns'
+import type { AssociativeArrayFns } from '../../src/factories/createAssociativeArray'
+import { createAssociativeArrayFns } from '../../src/factories/createAssociativeArray'
 import { createEqual } from '../../src/pipes/any'
 import type { AssociativeArray } from '../../src/extracted'
 

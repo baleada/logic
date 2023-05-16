@@ -1,23 +1,9 @@
-import {
-  some,
-  every,
-  find,
-} from 'lazy-collections'
+import { some, find } from 'lazy-collections'
 import {
   predicateNumber,
-  toKey,
-  fromComboItemNameToType,
-  toModifier,
-  predicateModified,
   predicateFunction,
 } from '../extracted'
 import { createExceptAndOnlyEffect } from '../extracted'
-import type {
-  ListenableModifier,
-  ListenableModifierAlias,
-  ListenableKeycomboItem,
-} from '../extracted'
-import { createClip } from '../pipes'
 import type { RecognizeableOptions } from './Recognizeable'
 import { Recognizeable } from './Recognizeable'
 
@@ -417,133 +403,6 @@ export function toAddEventListenerParams<Type extends ListenableSupportedEventTy
         effectOptions: [optionsOrUseCapture: AddEventListenerOptions | boolean] = [addEventListener || useCapture]
 
   return { exceptAndOnlyEffect, effectOptions }
-}
-
-export function eventMatchesKeycombo (event: KeyboardEvent, keycombo: ListenableKeycomboItem[]): boolean {
-  return every<ListenableKeycomboItem>(({ name, type }, index) => {
-    switch (type) {
-      case 'singleCharacter':
-        if (name === '!') return event.key === '!'
-
-        const keyToTest = event.altKey && fromComboItemNameToType(event.key) === 'custom'
-          ? fromCodeToSingleCharacter(event.code)
-          : event.key.toLowerCase()
-
-        return name.startsWith('!')
-          ? keyToTest !== toKey(name.slice(1)).toLowerCase()
-          : keyToTest === toKey(name).toLowerCase()
-      case 'other':
-        if (name === '!') {
-          return event.key === '!'
-        }
-
-        return name.startsWith('!')
-          ? event.key.toLowerCase() !== toKey(name.slice(1)).toLowerCase()
-          : event.key.toLowerCase() === toKey(name).toLowerCase()
-      case 'arrow':
-        return predicatesByArrow.get(name as ListenableArrowAlias)?.({ event, name }) ?? predicatesByArrow.get('default')({ event, name })
-      case 'modifier':
-        if (index === keycombo.length - 1) {
-          return name.startsWith('!')
-            ? event.key.toLowerCase() !== toModifier(name.slice(1) as ListenableModifier | ListenableModifierAlias).toLowerCase()
-            : event.key.toLowerCase() === toModifier(name as ListenableModifier | ListenableModifierAlias).toLowerCase()
-        }
-
-        return name.startsWith('!')
-          ? !predicateModified({ event, alias: name.slice(1) })
-          : predicateModified({ event, alias: name })
-    }
-  })(keycombo) as boolean
-}
-
-export function fromCodeToSingleCharacter (code: KeyboardEvent['code']): string {
-  for (const c in aliasesByCode) {
-    if (c === code) {
-      return aliasesByCode[c]
-    }
-  }
-
-  for (const prefix of ['Key', 'Digit']) {
-    const re = new RegExp(`^${prefix}`)
-    if (re.test(code)) {
-      return createClip(re)(code).toLowerCase()
-    }
-  }
-
-  // This will likely fail silently
-  return code
-}
-
-const aliasesByCode = {
-  Backquote: '`',
-  Minus: '-',
-  Equal: '=',
-  BracketLeft: '[',
-  BracketRight: ']',
-  Backslash: '\\',
-  Semicolon: ';',
-  Quote: '\'',
-  Comma: ',',
-  Period: '.',
-  Slash: '/',
-}
-
-type ListenableArrowAlias = 'arrow' | '!arrow' | 'vertical' | '!vertical' | 'horizontal' | '!horizontal' | 'default'
-const predicatesByArrow: Map<ListenableArrowAlias, (required: { event: KeyboardEvent, name?: string }) => boolean> = new Map([
-  [
-    'arrow',
-    ({ event }) => arrows.has(event.key.toLowerCase()),
-  ],
-  [
-    '!arrow',
-    ({ event }) => !arrows.has(event.key.toLowerCase()),
-  ],
-  [
-    'vertical',
-    ({ event }) => verticalArrows.has(event.key.toLowerCase()),
-  ],
-  [
-    '!vertical',
-    ({ event }) => !verticalArrows.has(event.key.toLowerCase()),
-  ],
-  [
-    'horizontal',
-    ({ event }) => horizontalArrows.has(event.key.toLowerCase()),
-  ],
-  [
-    '!horizontal',
-    ({ event }) => !horizontalArrows.has(event.key.toLowerCase()),
-  ],
-  [
-    'default',
-    ({ event, name }) => name.startsWith('!')
-      ? event.key.toLowerCase() !== `arrow${name.toLowerCase()}`
-      : event.key.toLowerCase() === `arrow${name.toLowerCase()}`,
-  ],
-])
-
-const arrows = new Set(['arrowup', 'arrowright', 'arrowdown', 'arrowleft'])
-const verticalArrows = new Set(['arrowup', 'arrowdown'])
-const horizontalArrows = new Set(['arrowright', 'arrowleft'])
-
-export function eventMatchesMousecombo (event: MouseEvent, Mousecombo: string[]): boolean {
-  return every<string>(name => (
-    fromComboItemNameToType(name) === 'click'
-    ||
-    (name.startsWith('!') && !predicateModified({ alias: name.slice(1), event }))
-    ||
-    (!name.startsWith('!') && predicateModified({ alias: name, event }))
-  ))(Mousecombo) as boolean
-}
-
-export function eventMatchesPointercombo (event: PointerEvent, pointercombo: string[]): boolean {
-  return every<string>(name => (
-    fromComboItemNameToType(name) === 'pointer'
-    ||
-    (name.startsWith('!') && !predicateModified({ alias: name.slice(1), event }))
-    ||
-    (!name.startsWith('!') && predicateModified({ alias: name, event }))
-  ))(pointercombo) as boolean
 }
 
 const observerAssertionsByType: Record<string, (observer: unknown) => boolean> = {

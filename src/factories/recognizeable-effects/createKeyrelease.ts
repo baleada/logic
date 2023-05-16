@@ -1,32 +1,30 @@
 import {
   filter,
   sort,
-  flatMap,
   map,
   pipe,
   toArray,
   unique,
-  findIndex,
+  some,
+  flatMap,
+  includes,
 } from 'lazy-collections'
 import type { RecognizeableEffect, RecognizeableStatus } from '../../classes'
 import {
-  createSome,
-  createMap,
-  createReduce,
-} from '../../pipes'
-import {
   toHookApi,
   storeKeyboardTimeMetadata,
-  narrowKeycombo,
-  createKeycomboIsDown,
-  toName,
+  createPredicateKeycomboDown,
+  createKeyStatuses,
+  fromComboToAliases,
+  fromEventToAliases,
+  fromEventToKeyStatusKey,
+  fromComboToAliasesLength,
 } from '../../extracted'
 import type {
   HookApi,
   KeyboardTimeMetadata,
-  KeycomboItem,
-  KeyStatus,
   KeyStatuses,
+  CreatePredicateKeycomboDownOptions,
 } from '../../extracted'
 
 export type KeyreleaseType = 'keydown' | 'keyup'
@@ -38,6 +36,8 @@ export type KeyreleaseMetadata = {
 export type KeyreleaseOptions = {
   minDuration?: number,
   preventsDefaultUnlessDenied?: boolean,
+  toKey?: CreatePredicateKeycomboDownOptions['toKey'],
+  toAliases?: (event: KeyboardEvent) => string[],
   onDown?: KeyreleaseHook,
   onUp?: KeyreleaseHook,
 }
@@ -49,70 +49,82 @@ export type KeyreleaseHookApi = HookApi<KeyreleaseType, KeyreleaseMetadata>
 const defaultOptions: KeyreleaseOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
+  toKey: undefined,
+  toAliases: fromEventToAliases,
 }
 
 export function createKeyrelease (
   keycomboOrKeycombos: string | string[],
   options: KeyreleaseOptions = {}
 ) {
-  const { minDuration, preventsDefaultUnlessDenied, onDown, onUp } = { ...defaultOptions, ...options },
-        narrowedKeycombos = Array.isArray(keycomboOrKeycombos)
-          ? createMap<string, KeycomboItem[]>(narrowKeycombo)(keycomboOrKeycombos)
-          : [narrowKeycombo(keycomboOrKeycombos)],
-        validNames = pipe<typeof narrowedKeycombos>(
-          flatMap<typeof narrowedKeycombos[0], KeycomboItem['name'][]>(
-            keycombo => createMap<KeycomboItem, KeycomboItem['name']>(item => item.name)(keycombo)
-          ),
+  const {
+          minDuration,
+          preventsDefaultUnlessDenied,
+          toKey,
+          toAliases,
+          onDown,
+          onUp,
+        } = { ...defaultOptions, ...options },
+        narrowedKeycombos = Array.isArray(keycomboOrKeycombos) ? keycomboOrKeycombos : [keycomboOrKeycombos],
+        createPredicateKeycomboDownOptions = toKey ? { toKey } : {},
+        downPredicatesByKeycombo = (() => {
+          const predicates: [string, ReturnType<typeof createPredicateKeycomboDown>][] = []
+
+          for (const keycombo of narrowedKeycombos) {
+            predicates.push([
+              keycombo,
+              createPredicateKeycomboDown(
+                keycombo,
+                createPredicateKeycomboDownOptions
+              ),
+            ])
+          }
+
+          return predicates
+        })(),
+        validAliases = pipe<typeof narrowedKeycombos>(
+          flatMap<typeof narrowedKeycombos[0], string[]>(fromComboToAliases),
           unique(),
           toArray(),
         )(narrowedKeycombos) as string[],
-        getDownCombos = () => (
-          pipe(
-            filter<KeycomboItem[]>(keycombo => createKeycomboIsDown(keycombo)(statuses)),
-            sort<KeycomboItem[]>((keycomboA, keycomboB) => keycomboB.length - keycomboA.length),
-            toArray()
-          )(narrowedKeycombos) as typeof narrowedKeycombos
-        ),
-        getType = (keycombo: KeycomboItem[]) => {
-          if (typeof keycomboOrKeycombos === 'string') return keycomboOrKeycombos
+        getDownCombos = () => pipe(
+          filter<typeof downPredicatesByKeycombo[0]>(([, predicate]) => predicate(statuses)),
+          map<typeof downPredicatesByKeycombo[0], [string, string[]]>(([keycombo]) => [keycombo, fromComboToAliases(keycombo)]),
+          sort<string>(([,aliasesA], [,aliasesB]) => aliasesB.length - aliasesA.length),
+          map<string[], string>(([keycombo]) => keycombo),
+          toArray()
+        )(downPredicatesByKeycombo) as typeof narrowedKeycombos,
+        predicateValid = (event: KeyboardEvent) => {
+          const aliases = toAliases(event)
 
-          const index = findIndex<KeycomboItem[]>(
-            k => k === keycombo
-          )(narrowedKeycombos) as number
-
-          return keycomboOrKeycombos[index]
+          return some<typeof validAliases[0]>(
+            validAlias => includes<string>(validAlias)(aliases) as boolean
+          )(validAliases) as boolean
         },
-        predicateValid = (name: string) => validNames.includes(name),
         getPressed = () => pipe(
-          filter<KeycomboItem[]>(keycombo => createKeycomboIsDown(keycombo)(statuses)),
-          map<KeycomboItem[], string>(getType),
-          toArray(),
-        )(narrowedKeycombos) as string[],
+          filter<typeof downPredicatesByKeycombo[0]>(([, predicate]) => predicate(statuses)),
+          map<typeof downPredicatesByKeycombo[0], string>(([keycombo]) => keycombo),
+          toArray()
+        )(downPredicatesByKeycombo) as string[],
         cleanup = () => {
           window.cancelAnimationFrame(request)
         },
-        statuses = createReduce<string, KeyStatuses>(
-          (statuses, name) => {
-            statuses[name] = 'up'
-            return statuses
-          },
-          {}
-        )(validNames)
+        statuses = createKeyStatuses()
 
   let request: number
   let localStatus: RecognizeableStatus
 
   const keydown: RecognizeableEffect<KeyreleaseType, KeyreleaseMetadata> = (event, api) => {
     const { denied, getStatus } = api,
-          name = toName(event.code)          
+          key = fromEventToKeyStatusKey(event)
 
-    // SHOULD BLOCK EVENT
-    if (statuses[name] === 'down') {
+    // REPEATED KEYDOWN
+    if (statuses.toValue(key) === 'down') {
       onDown?.(toHookApi(api))
       return
     }
 
-    statuses[name] = 'down'
+    statuses.set(key, 'down')
 
     // ALREADY DENIED
     if (localStatus === 'denied') {
@@ -122,7 +134,7 @@ export function createKeyrelease (
     }
 
     // NOT BUILDING VALID COMBO
-    if (!predicateValid(name)) {
+    if (!predicateValid(event)) {
       denied()
       localStatus = getStatus()
       onDown?.(toHookApi(api))
@@ -133,8 +145,8 @@ export function createKeyrelease (
 
     // TOO MANY VALID KEYS PRESSED
     if (
-      downCombos.length
-      && downCombos[0].length === downCombos[1]?.length
+      downCombos.length > 1
+      && fromComboToAliasesLength(downCombos[0]) === fromComboToAliasesLength(downCombos[1])
     ) {
       denied()
       localStatus = getStatus()
@@ -151,7 +163,7 @@ export function createKeyrelease (
     storeKeyboardTimeMetadata(
       event,
       api,
-      () => downCombos.length && getPressed().includes(getType(downCombos[0])),
+      () => downCombos.length && getPressed().includes(downCombos[0]),
       newRequest => request = newRequest,
     )
 
@@ -165,21 +177,22 @@ export function createKeyrelease (
             denied,
           } = api,
           metadata = getMetadata(),
-          name = toName(event.code)          
+          key = fromEventToKeyStatusKey(event)
                 
     // SHOULD BLOCK EVENT
     if (['denied', 'recognized'].includes(localStatus)) {
       if (localStatus === 'denied') denied()
-      if (predicateValid(name)) statuses[name] = 'up'
-      else delete statuses[name]
+      if (predicateValid(event)) statuses.set(key, 'up')
+      else statuses.delete(key)
 
-      if (!predicateSomeKeyIsDown(statuses)) localStatus = 'recognizing'
+      if (!predicateSomeKeyDown(statuses)) localStatus = 'recognizing'
       onUp?.(toHookApi(api))
       return
     }
 
     const downCombos = getDownCombos()
-    statuses[name] = 'up'
+    console.log(downCombos)
+    statuses.set(key, 'up')
 
     // RELEASING PARTIAL COMBO
     if (!downCombos.length) {
@@ -194,11 +207,11 @@ export function createKeyrelease (
 
     if (status === 'recognized') {
       localStatus = status
-      metadata.released = getType(downCombos[0])
+      metadata.released = downCombos[0]
     }
 
     if (preventsDefaultUnlessDenied) event.preventDefault()
-    if (!predicateSomeKeyIsDown(statuses)) localStatus = 'recognizing'
+    if (!predicateSomeKeyDown(statuses)) localStatus = 'recognizing'
     onUp?.(toHookApi(api))
   }
 
@@ -220,4 +233,4 @@ export function createKeyrelease (
   }
 }
 
-const predicateSomeKeyIsDown = createSome<KeycomboItem['name'], KeyStatus>((name, status) => status === 'down')
+const predicateSomeKeyDown = (statuses: KeyStatuses) => includes<string>('down')(statuses.toValues()) as boolean
