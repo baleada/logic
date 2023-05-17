@@ -262,11 +262,11 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
   private addEventListeners<EventType extends ListenableSupportedEventType> (eventListeners: ListenableActiveEventId<EventType>[], options: ListenOptions<EventType>) {
     const { target = document } = options
 
-    eventListeners.forEach(eventListener => {
+    for (const eventListener of eventListeners) {
       target.addEventListener(eventListener[0], eventListener[1], eventListener[2])
       // @ts-ignore
       this.active.add({ target, id: eventListener })
-    })
+    }
   }
   private listening () {
     this.computedStatus = 'listening'

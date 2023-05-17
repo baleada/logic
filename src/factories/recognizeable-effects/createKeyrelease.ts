@@ -26,8 +26,9 @@ import type {
   KeyStatuses,
   CreatePredicateKeycomboDownOptions,
 } from '../../extracted'
+import { createFilter } from '../../pipes'
 
-export type KeyreleaseType = 'keydown' | 'keyup'
+export type KeyreleaseType = 'keydown' | 'keyup' | 'visibilitychange'
 
 export type KeyreleaseMetadata = {
   released: string,
@@ -40,6 +41,7 @@ export type KeyreleaseOptions = {
   toAliases?: (event: KeyboardEvent) => string[],
   onDown?: KeyreleaseHook,
   onUp?: KeyreleaseHook,
+  onVisibilityChange?: KeyreleaseHook,
 }
 
 export type KeyreleaseHook = (api: KeyreleaseHookApi) => any
@@ -64,8 +66,13 @@ export function createKeyrelease (
           toAliases,
           onDown,
           onUp,
+          onVisibilityChange,
         } = { ...defaultOptions, ...options },
-        narrowedKeycombos = Array.isArray(keycomboOrKeycombos) ? keycomboOrKeycombos : [keycomboOrKeycombos],
+        narrowedKeycombos = createFilter<string>(
+          keycombo => !some<string>(
+            alias => includes(alias)(unsupportedAliases) as boolean
+          )(fromComboToAliases(keycombo))
+        )(Array.isArray(keycomboOrKeycombos) ? keycomboOrKeycombos : [keycomboOrKeycombos]),
         createPredicateKeycomboDownOptions = toKey ? { toKey } : {},
         downPredicatesByKeycombo = (() => {
           const predicates: [string, ReturnType<typeof createPredicateKeycomboDown>][] = []
@@ -114,7 +121,7 @@ export function createKeyrelease (
   let request: number
   let localStatus: RecognizeableStatus
 
-  const keydown: RecognizeableEffect<KeyreleaseType, KeyreleaseMetadata> = (event, api) => {
+  const keydown: RecognizeableEffect<'keydown', KeyreleaseMetadata> = (event, api) => {
     const { denied, getStatus } = api,
           key = fromEventToKeyStatusKey(event)
 
@@ -137,6 +144,7 @@ export function createKeyrelease (
     if (!predicateValid(event)) {
       denied()
       localStatus = getStatus()
+      if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
       onDown?.(toHookApi(api))
       return
     }
@@ -227,10 +235,25 @@ export function createKeyrelease (
     if (localStatus !== 'recognized') recognized()
   }
 
+  const visibilitychange: RecognizeableEffect<'visibilitychange', KeyreleaseMetadata> = (event, api) => {
+    if (document.visibilityState === 'hidden') {
+      statuses.clear()
+      localStatus = 'recognizing'
+      cleanup()
+    }
+
+    onVisibilityChange?.(toHookApi(api))
+  }
+
   return {
     keydown,
     keyup,
+    visibilitychange,
   }
 }
+
+// MacOS doesn't fire keyup while meta is still pressed
+const unsupportedAliases = ['meta', 'command', 'cmd']
+const unsupportedKeys = ['Meta']
 
 const predicateSomeKeyDown = (statuses: KeyStatuses) => includes<string>('down')(statuses.toValues()) as boolean

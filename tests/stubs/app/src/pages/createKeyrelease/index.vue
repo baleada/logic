@@ -8,11 +8,10 @@ import { Listenable } from '../../../../../../src/classes/Listenable';
 import { createKeyrelease, KeyreleaseType, KeyreleaseMetadata } from '../../../../../../src/factories/recognizeable-effects/createKeyrelease';
 
 let listenable: Listenable<KeyreleaseType, KeyreleaseMetadata>
-
 onMounted(() => {
   listenable = new Listenable<KeyreleaseType, KeyreleaseMetadata>(
     'recognizeable' as KeyreleaseType, 
-    { recognizeable: { effects: createKeyrelease(['a', 'shift', 'a+b', 'shift+a', 'shift+opt+a']) } }
+    { recognizeable: { effects: createKeyrelease(['a', 'shift+a', 'shift+opt+a']) } }
   )
 
   window.testState = { listenable: listenable.listen(() => {
