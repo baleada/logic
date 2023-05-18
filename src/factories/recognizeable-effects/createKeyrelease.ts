@@ -14,6 +14,7 @@ import {
   toHookApi,
   storeKeyboardTimeMetadata,
   createPredicateKeycomboDown,
+  createPredicateKeycomboMatch,
   createKeyStatuses,
   fromComboToAliases,
   fromEventToAliases,
@@ -25,6 +26,7 @@ import type {
   KeyboardTimeMetadata,
   KeyStatuses,
   CreatePredicateKeycomboDownOptions,
+  CreatePredicateKeycomboMatchOptions,
 } from '../../extracted'
 import { createFilter } from '../../pipes'
 
@@ -38,7 +40,7 @@ export type KeyreleaseOptions = {
   minDuration?: number,
   preventsDefaultUnlessDenied?: boolean,
   toKey?: CreatePredicateKeycomboDownOptions['toKey'],
-  toAliases?: (event: KeyboardEvent) => string[],
+  toAliases?: CreatePredicateKeycomboMatchOptions['toAliases'],
   onDown?: KeyreleaseHook,
   onUp?: KeyreleaseHook,
   onVisibilityChange?: KeyreleaseHook,
@@ -85,6 +87,19 @@ export function createKeyrelease (
                 createPredicateKeycomboDownOptions
               ),
             ])
+          }
+
+          return predicates
+        })(),
+        createPredicateKeycomboMatchOptions = toAliases ? { ...createPredicateKeycomboDownOptions, toAliases } : createPredicateKeycomboDownOptions,
+        matchPredicatesByKeycombo = (() => {
+          const predicates: { [keycombo: string]: ReturnType<typeof createPredicateKeycomboMatch> } = {}
+
+          for (const keycombo of narrowedKeycombos) {
+            predicates[keycombo] = createPredicateKeycomboMatch(
+                keycombo,
+                createPredicateKeycomboMatchOptions
+            )
           }
 
           return predicates
@@ -190,7 +205,8 @@ export function createKeyrelease (
     // SHOULD BLOCK EVENT
     if (['denied', 'recognized'].includes(localStatus)) {
       if (localStatus === 'denied') denied()
-      if (predicateValid(event)) statuses.set(key, 'up')
+      
+      if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
       else statuses.delete(key)
 
       if (!predicateSomeKeyDown(statuses)) localStatus = 'recognizing'
@@ -199,11 +215,11 @@ export function createKeyrelease (
     }
 
     const downCombos = getDownCombos()
-    console.log(downCombos)
-    statuses.set(key, 'up')
+    const matches = matchPredicatesByKeycombo[downCombos[0]]?.(statuses)
+    statuses.delete(key)
 
     // RELEASING PARTIAL COMBO
-    if (!downCombos.length) {
+    if (!downCombos.length || !matches) {
       onUp?.(toHookApi(api))
       return
     }

@@ -391,4 +391,46 @@ suite('handles arrays of overlapping combos', async ({ playwright: { page } }) =
   await page.evaluate(() => window.testState.listenable.stop())
 })
 
+suite('releasing a partial combo does not recognize a smaller overlapping combos', async ({ playwright: { page } }) => {
+  await page.evaluate(async () => {
+    const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
+      'recognizeable' as KeyreleaseTypes,
+      { recognizeable: { effects: window.Logic.createKeyrelease(['a', 'shift+opt+a']) } }
+    )
+
+    window.testState = {
+      count: 0,
+      listenable: listenable.listen(() => {
+        window.testState.count++
+      }),
+    }
+  })
+
+  await page.keyboard.down('A')
+  await page.waitForTimeout(20)
+  await page.keyboard.down('Shift')
+  await page.waitForTimeout(20)
+  await page.keyboard.up('Shift')
+  await page.waitForTimeout(20)
+
+  await (async () => {
+    const value = await page.evaluate(() => window.testState.count),
+          expected = 0
+
+    assert.is(value, expected)
+  })()
+
+  await page.keyboard.up('A')
+  await page.waitForTimeout(20)
+
+  await (async () => {
+    const value = await page.evaluate(() => window.testState.count),
+          expected = 1
+
+    assert.is(value, expected)
+  })()
+
+  await page.evaluate(() => window.testState.listenable.stop())
+})
+
 suite.run()

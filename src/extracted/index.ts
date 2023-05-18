@@ -21,6 +21,9 @@ export { toLength } from './lazy-collections'
 export { createPredicateKeycomboDown } from './createPredicateKeycomboDown'
 export type { CreatePredicateKeycomboDownOptions } from './createPredicateKeycomboDown'
 
+export { createPredicateKeycomboMatch } from './createPredicateKeycomboMatch'
+export type { CreatePredicateKeycomboMatchOptions } from './createPredicateKeycomboMatch'
+
 // Factories
 export { createKeyStatuses } from './createKeyStatuses'
 export type { KeyStatuses, KeyStatusKey, KeyStatus, KeyStatusesOptions } from './createKeyStatuses'

@@ -1,9 +1,9 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { createPredicateKeycomboDown } from '../../src/extracted/createPredicateKeycomboDown'
+import { createPredicateKeycomboMatch } from '../../src/extracted/createPredicateKeycomboMatch'
 import { createKeyStatuses } from '../../src/extracted/createKeyStatuses'
 
-const suite = createSuite('createPredicateKeycomboDown')
+const suite = createSuite('createPredicateKeycomboMatch')
 
 suite('predicates arrows', () => {
   {
@@ -12,7 +12,7 @@ suite('predicates arrows', () => {
               [{ code: 'ArrowUp' }, 'down'],
             ],
           }),
-          value = createPredicateKeycomboDown('up')(statuses)
+          value = createPredicateKeycomboMatch('up')(statuses)
 
     assert.ok(value)
   }
@@ -23,7 +23,7 @@ suite('predicates arrows', () => {
               [{ code: 'ArrowRight' }, 'down'],
             ],
           }),
-          value = createPredicateKeycomboDown('right')(statuses)
+          value = createPredicateKeycomboMatch('right')(statuses)
 
     assert.ok(value)
   }
@@ -34,7 +34,7 @@ suite('predicates arrows', () => {
               [{ code: 'ArrowDown' }, 'down'],
             ],
           }),
-          value = createPredicateKeycomboDown('down')(statuses)
+          value = createPredicateKeycomboMatch('down')(statuses)
 
     assert.ok(value)
   }
@@ -45,7 +45,7 @@ suite('predicates arrows', () => {
               [{ code: 'ArrowLeft' }, 'down'],
             ],
           }),
-          value = createPredicateKeycomboDown('left')(statuses)
+          value = createPredicateKeycomboMatch('left')(statuses)
 
     assert.ok(value)
   }
@@ -57,7 +57,7 @@ suite('predicates digits', () => {
             [{ code: 'Digit0' }, 'down'],
           ],
         }),
-        value = createPredicateKeycomboDown('0')(statuses)
+        value = createPredicateKeycomboMatch('0')(statuses)
 
   assert.ok(value)
 })
@@ -68,7 +68,7 @@ suite('predicates lowercase letters', () => {
             [{ code: 'KeyA' }, 'down'],
           ],
         }),
-        value = createPredicateKeycomboDown('a')(statuses)
+        value = createPredicateKeycomboMatch('a')(statuses)
 
   assert.ok(value)
 })
@@ -79,7 +79,7 @@ suite('predicates uppercase letters', () => {
             [{ code: 'KeyA' }, 'down'],
           ],
         }),
-        value = createPredicateKeycomboDown('A')(statuses)
+        value = createPredicateKeycomboMatch('A')(statuses)
 
   assert.ok(value)
 })
@@ -92,7 +92,7 @@ suite('predicates alt', () => {
   })
 
   for (const alias of ['alt', 'opt', 'option']) {
-    const value = createPredicateKeycomboDown(alias)(statuses)
+    const value = createPredicateKeycomboMatch(alias)(statuses)
     
     assert.ok(value, alias)
   }
@@ -106,7 +106,7 @@ suite('predicates control', () => {
   })
 
   for (const alias of ['ctrl', 'control']) {
-    const value = createPredicateKeycomboDown(alias)(statuses)
+    const value = createPredicateKeycomboMatch(alias)(statuses)
     
     assert.ok(value, alias)
   }
@@ -120,7 +120,7 @@ suite('predicates meta', () => {
   })
 
   for (const alias of ['meta', 'cmd', 'command']) {
-    const value = createPredicateKeycomboDown(alias)(statuses)
+    const value = createPredicateKeycomboMatch(alias)(statuses)
     
     assert.ok(value, alias)
   }
@@ -134,7 +134,7 @@ suite('predicates shift', () => {
   })
 
   for (const alias of ['shift']) {
-    const value = createPredicateKeycomboDown(alias)(statuses)
+    const value = createPredicateKeycomboMatch(alias)(statuses)
     
     assert.ok(value, alias)
   }
@@ -146,25 +146,30 @@ suite('predicates fn', () => {
             [{ code: 'F1' }, 'down'],
           ],
         }),
-        value = createPredicateKeycomboDown('f1')(statuses)
+        value = createPredicateKeycomboMatch('f1')(statuses)
 
   assert.ok(value)
 })
 
-suite('supports custom alias transformer', () => {
+suite('supports custom alias and key transformer', () => {
   const statuses = createKeyStatuses({
           initial: [
             [{ key: 'á', code: 'KeyA' }, 'down'],
             [{ key: 'Alt', code: 'AltLeft' }, 'down'],
           ],
         }),
-        value = createPredicateKeycomboDown(
+        value = createPredicateKeycomboMatch(
           'å',
           {
             toKey: alias => {
               return alias === 'å'
                 ? { code: 'KeyA' }
                 : {}
+            },
+            toAliases: key => {
+              return key.code === 'KeyA'
+                ? ['å']
+                : []
             },
           }
         )(statuses)
