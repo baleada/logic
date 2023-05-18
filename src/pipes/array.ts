@@ -92,14 +92,8 @@ export function createReorder<Item>(
   }
 }
 
-export function createReplace<Item>(index: number, item: Item): ArrayFn<Item, Item[]> {
-  return array => {
-    return createConcat<Item>(
-      createSlice<Item>(0, index)(array),
-      [item],
-      createSlice<Item>(index + 1)(array)
-    )([])
-  }
+export function createReplace<Item>(index: number, replacement: Item): ArrayFn<Item, Item[]> {
+  return createMap<Item, Item>((item, i) => i === index ? replacement : item)
 }
 
 export function createReverse<Item>(): ArrayFn<Item, Item[]> {
