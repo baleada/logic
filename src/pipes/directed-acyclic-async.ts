@@ -1,5 +1,4 @@
-import { filter, pipe, some, toArray } from 'lazy-collections'
-import { at, includes } from '../extracted'
+import { filter, pipe, some, toArray, at, includes } from 'lazy-collections'
 import type {
   AsyncGraph,
   GraphNode,
@@ -103,7 +102,7 @@ export function createPredicateAncestor<
   return async function (descendant, ancestor) {
     return await pipe(
       toNodeSteps,
-      some<GraphStep<Id, Metadata>>(({ path }) => includes(ancestor)(path))
+      some<GraphStep<Id, Metadata>>(({ path }) => includes(ancestor)(path) as boolean)
     )(descendant)
   }
 }
@@ -156,7 +155,7 @@ export function createToSteps<
       }
     }
 
-    let location = root || at<GraphNode<Id>>(0)(roots)
+    let location = root || at(0)(roots) as GraphNode<Id>
 
     const path = await toPath(state)
 
