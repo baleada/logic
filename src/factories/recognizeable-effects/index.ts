@@ -85,15 +85,6 @@
 //   KeypressHookApi,
 // } from './createKeypress'
 
-export { createKeyrelease } from './createKeyrelease'
-export type {
-  KeyreleaseTypes,
-  KeyreleaseMetadata,
-  KeyreleaseOptions,
-  KeyreleaseHook,
-  KeyreleaseHookApi,
-} from './createKeyrelease'
-
 // export { createKonami } from './createKonami'
 // export type {
 //   KonamiTypes,

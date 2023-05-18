@@ -2,9 +2,9 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import type {
-  KeyreleaseTypes,
+  KeyreleaseType,
   KeyreleaseMetadata,
-} from '../../src/factories/recognizeable-effects'
+} from '../../src/factories'
 import type { RecognizeableStatus } from '../../src/classes'
 
 const suite = withPlaywright(
@@ -12,21 +12,15 @@ const suite = withPlaywright(
 )
 
 // TODO
-// single letter
-// multiple letters
-// single modifier
-// multiple modifiers
-// modifier + letter
-// special characters
-// partially down combo stuff
 // meta is blocked
+// visibilitychange
 // releasing invalid partial combo doesn't trigger smaller combo
 
 for (const key of ['A', 'Shift', ',']) {
   suite('recognizes keyrelease', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
-      const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-        'recognizeable' as KeyreleaseTypes, 
+      const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+        'recognizeable' as KeyreleaseType, 
         { recognizeable: { effects: window.Logic.createKeyrelease(key) } }
       )
   
@@ -50,8 +44,8 @@ for (const key of ['A', 'Shift', ',']) {
 for (const key of ['A', 'Shift', ',']) {
   suite('recognizes keyrelease only once', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
-      const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-        'recognizeable' as KeyreleaseTypes, 
+      const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+        'recognizeable' as KeyreleaseType, 
         { recognizeable: { effects: window.Logic.createKeyrelease(key) } }
       )
   
@@ -80,8 +74,8 @@ for (const key of ['A', 'Shift', ',']) {
 for (const key of ['A', 'Shift', ',']) {
   suite('respects minDuration option', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
-      const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-        'recognizeable' as KeyreleaseTypes, 
+      const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+        'recognizeable' as KeyreleaseType, 
         { recognizeable: { effects: window.Logic.createKeyrelease(key, { minDuration: 100 }) } }
       )
 
@@ -110,8 +104,8 @@ for (const key of ['A', 'Shift', ',']) {
 
 suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-      'recognizeable' as KeyreleaseTypes, 
+    const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+      'recognizeable' as KeyreleaseType, 
       { recognizeable: { effects: window.Logic.createKeyrelease(['A', 'B']) } }
     )
 
@@ -143,8 +137,8 @@ suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
 
 suite('stores most recently released keycombo', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-      'recognizeable' as KeyreleaseTypes, 
+    const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+      'recognizeable' as KeyreleaseType, 
       { recognizeable: { effects: window.Logic.createKeyrelease(['A', 'B']) } }
     )
 
@@ -169,8 +163,8 @@ suite('stores most recently released keycombo', async ({ playwright: { page } })
 for (const key of ['A', 'Shift', ',']) {
   suite('denies until all combos are released if non-matching keycombo happened', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
-      const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-        'recognizeable' as KeyreleaseTypes, 
+      const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+        'recognizeable' as KeyreleaseType, 
         { recognizeable: { effects: window.Logic.createKeyrelease([key, 'B']) } }
       )
   
@@ -217,8 +211,8 @@ for (const key of ['A', 'Shift', ',']) {
 
 suite('only recognizes when first key of combo goes up', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-      'recognizeable' as KeyreleaseTypes,
+    const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+      'recognizeable' as KeyreleaseType,
       { recognizeable: { effects: window.Logic.createKeyrelease('A+B') } }
     )
 
@@ -259,8 +253,8 @@ suite('only recognizes when first key of combo goes up', async ({ playwright: { 
 
 suite('does not require all keys to be released before re-recognizing', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-      'recognizeable' as KeyreleaseTypes,
+    const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+      'recognizeable' as KeyreleaseType,
       { recognizeable: { effects: window.Logic.createKeyrelease('A+B') } }
     )
 
@@ -303,8 +297,8 @@ suite('does not require all keys to be released before re-recognizing', async ({
 
 suite('handles arrays of overlapping combos', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-      'recognizeable' as KeyreleaseTypes,
+    const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+      'recognizeable' as KeyreleaseType,
       { recognizeable: { effects: window.Logic.createKeyrelease(['a', 'shift+a', 'shift+opt+a']) } }
     )
 
@@ -393,8 +387,8 @@ suite('handles arrays of overlapping combos', async ({ playwright: { page } }) =
 
 suite('releasing a partial combo does not recognize a smaller overlapping combos', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<KeyreleaseTypes, KeyreleaseMetadata>(
-      'recognizeable' as KeyreleaseTypes,
+    const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
+      'recognizeable' as KeyreleaseType,
       { recognizeable: { effects: window.Logic.createKeyrelease(['a', 'shift+opt+a']) } }
     )
 

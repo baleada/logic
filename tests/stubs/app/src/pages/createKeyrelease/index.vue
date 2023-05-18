@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue'
 import { Listenable } from '../../../../../../src/classes/Listenable';
-import { createKeyrelease, KeyreleaseType, KeyreleaseMetadata } from '../../../../../../src/factories/recognizeable-effects/createKeyrelease';
+import { createKeyrelease, KeyreleaseType, KeyreleaseMetadata } from '../../../../../../src/factories/createKeyrelease';
 
 let listenable: Listenable<KeyreleaseType, KeyreleaseMetadata>
 onMounted(() => {

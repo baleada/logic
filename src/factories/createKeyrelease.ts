@@ -9,7 +9,7 @@ import {
   flatMap,
   includes,
 } from 'lazy-collections'
-import type { RecognizeableEffect, RecognizeableStatus } from '../../classes'
+import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
 import {
   toHookApi,
   storeKeyboardTimeMetadata,
@@ -20,15 +20,15 @@ import {
   fromEventToAliases,
   fromEventToKeyStatusKey,
   fromComboToAliasesLength,
-} from '../../extracted'
+} from '../extracted'
 import type {
   HookApi,
   KeyboardTimeMetadata,
   KeyStatuses,
   CreatePredicateKeycomboDownOptions,
   CreatePredicateKeycomboMatchOptions,
-} from '../../extracted'
-import { createFilter } from '../../pipes'
+} from '../extracted'
+import { createFilter } from '../pipes'
 
 export type KeyreleaseType = 'keydown' | 'keyup' | 'visibilitychange'
 

@@ -1,7 +1,7 @@
 import { find } from 'lazy-collections'
 import { createMatchesKeycombo as createMatches, createMap } from "@baleada/logic"
 import type { RecognizeableEffect } from "@baleada/logic"
-import type { KeyreleaseMetadata } from './createKeyrelease'
+import type { KeyreleaseMetadata } from '../createKeyrelease'
 import { toHookApi, storeKeyboardTimeMetadata } from '@extracted'
 import type { HookApi, KeyboardTimeMetadata } from '@extracted'
 
