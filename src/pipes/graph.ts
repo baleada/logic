@@ -1,5 +1,5 @@
 import { pipe, filter } from 'lazy-collections'
-import { length } from '../extracted'
+import { toLength } from '../extracted'
 import type { Graph, AsyncGraph, GraphEdge, AsyncGraphEdge } from '../extracted'
 import type { GraphNodeFn, GraphNodeGeneratorFn } from './types'
 
@@ -11,7 +11,7 @@ export function createToIndegree<
   const toIncoming = createToIncoming(graph)
   return node => pipe(
     toIncoming,
-    length(),
+    toLength(),
   )(node)
 }
 
@@ -23,7 +23,7 @@ export function createToOutdegree<
   const toOutgoing = createToOutgoing(graph)
   return node => pipe(
     toOutgoing,
-    length(),
+    toLength(),
   )(node)
 }
 
