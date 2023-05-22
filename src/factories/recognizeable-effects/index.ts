@@ -16,24 +16,6 @@
 //   TouchesHookApi,
 // } from './createTouches'
 
-// export { createTouchpress } from './createTouchpress'
-// export type {
-//   TouchpressTypes,
-//   TouchpressMetadata,
-//   TouchpressOptions,
-//   TouchpressHook,
-//   TouchpressHookApi,
-// } from './createTouchpress'
-
-// export { createTouchrelease } from './createTouchrelease'
-// export type {
-//   TouchreleaseTypes,
-//   TouchreleaseMetadata,
-//   TouchreleaseOptions,
-//   TouchreleaseHook,
-//   TouchreleaseHookApi,
-// } from './createTouchrelease'
-
 // export { createTouchrotate } from './createTouchrotate'
 // export type {
 //   TouchrotateTypes,

@@ -1,6 +1,6 @@
-import type { ListenEffectParam, RecognizeableEffect, RecognizeableOptions } from '@baleada/logic'
-import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '@extracted'
-import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '@extracted'
+import type { RecognizeableEffect, RecognizeableOptions } from '../classes'
+import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
+import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
 /*
  * touchrelease is defined as a single touchstart that:
@@ -45,7 +45,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}): Recogniz
           onStart,
           onCancel,
           onMove,
-          onEnd
+          onEnd,
         } = { ...defaultOptions, ...options },
         cleanup = () => {
           window.cancelAnimationFrame(request)

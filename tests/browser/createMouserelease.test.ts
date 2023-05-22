@@ -85,7 +85,7 @@ suite('respects minDistance option', async ({ playwright: { page, reloadNext } }
   reloadNext()
 })
 
-suite.skip('respects minVelocity option', async ({ playwright: { page, reloadNext } }) => {
+suite.skip('respects minVelocity option', async () => {
   // TODO: can't quite get test to work. Feature was manually tested.
 })
 
