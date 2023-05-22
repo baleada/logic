@@ -16,7 +16,7 @@ suite('doesn\'t guard when except and only are empty', async ({ puppeteer: { pag
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
-    window.testState.effect = window.Logic_extracted.createExceptAndOnlyEffect(
+    window.testState.effect = window.Logic.createExceptAndOnlyEffect(
       'click',
       () => window.testState.value++,
       {}
@@ -39,7 +39,7 @@ suite('doesn\'t guard for non-element targets when except and only are empty', a
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
-    window.testState.effect = window.Logic_extracted.createExceptAndOnlyEffect(
+    window.testState.effect = window.Logic.createExceptAndOnlyEffect(
       'click',
       () => window.testState.value++,
       {}
@@ -62,7 +62,7 @@ suite('guards against except when only is empty', async ({ puppeteer: { page } }
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
-    window.testState.effect = window.Logic_extracted.createExceptAndOnlyEffect(
+    window.testState.effect = window.Logic.createExceptAndOnlyEffect(
       'click',
       () => window.testState.value++,
       { except: ['body'] }
@@ -85,7 +85,7 @@ suite('overrides except with only', async ({ puppeteer: { page } }) => {
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
-    window.testState.effect = window.Logic_extracted.createExceptAndOnlyEffect(
+    window.testState.effect = window.Logic.createExceptAndOnlyEffect(
       'click',
       () => window.testState.value++,
       { only: ['body'], except: ['body'] }
@@ -108,7 +108,7 @@ suite('guards against mismatches with only', async ({ puppeteer: { page } }) => 
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
-    window.testState.effect = window.Logic_extracted.createExceptAndOnlyEffect(
+    window.testState.effect = window.Logic.createExceptAndOnlyEffect(
       'click',
       () => window.testState.value++,
       { only: ['.stub'] }

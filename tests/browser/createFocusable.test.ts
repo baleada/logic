@@ -7,30 +7,30 @@ const suite = withPuppeteer(
 )
 
 // ELEMENT
-suite(`createFocusable('first') finds first focusable`, async ({ puppeteer: { page } }) => {
+suite('createFocusable(\'first\') finds first focusable', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createFocusable')
-  await page.waitForSelector(`div`)
+  await page.waitForSelector('div')
 
   const value = await page.evaluate(async () => {
-          return window.Logic_pipes.createFocusable('first')(window.testState.element1.value)?.id
+          return window.Logic.createFocusable('first')(window.testState.element1.value)?.id
         }),
         expected = 'first'
 
   assert.is(value, expected)
 })
 
-suite(`createFocusable('last') finds last focusable`, async ({ puppeteer: { page } }) => {
+suite('createFocusable(\'last\') finds last focusable', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          return window.Logic_pipes.createFocusable('last')(window.testState.element1.value)?.id
+          return window.Logic.createFocusable('last')(window.testState.element1.value)?.id
         }),
         expected = 'last'
 
   assert.is(value, expected)
 })
 
-suite(`createFocusable(...) returns undefined when no focusable`, async ({ puppeteer: { page } }) => {
+suite('createFocusable(...) returns undefined when no focusable', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          return window.Logic_pipes.createFocusable('first')(window.testState.element2.value)?.id
+          return window.Logic.createFocusable('first')(window.testState.element2.value)?.id
         }),
         expected = undefined
 

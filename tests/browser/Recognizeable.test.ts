@@ -461,8 +461,6 @@ suite('includes all desired keys in effect API', async ({ puppeteer: { page } })
           'setMetadata',
           'recognized',
           'denied',
-          'recognizedUntilReady',
-          'deniedUntilReady',
           'ready',
           'getSequence',
           'onRecognized',

@@ -4,22 +4,19 @@ import { withPlaywright } from '@baleada/prepare'
 import type {
   MousepressTypes,
   MousepressMetadata,
-  MousepressOptions,
-  MousepressHook,
-  MousepressHookApi
-} from '../../src/factories/recognizeable-effects'
+} from '../../src/factories'
 import type { Listenable } from '../../src/classes/Listenable'
 
 const suite = withPlaywright(
   createSuite('mousepress')
 )
 
-suite(`recognizes mousepress`, async ({ playwright: { page, reloadNext } }) => {
+suite('recognizes mousepress', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
       'recognizeable' as MousepressTypes, 
       { recognizeable: { effects: window.Logic.createMousepress() } }
-    );
+    )
 
     window.testState = { listenable: listenable.listen(() => {}) }
   })
@@ -35,12 +32,12 @@ suite(`recognizes mousepress`, async ({ playwright: { page, reloadNext } }) => {
   reloadNext()
 })
 
-suite(`respects minDuration option`, async ({ playwright: { page, reloadNext } }) => {
+suite('respects minDuration option', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
       'recognizeable' as MousepressTypes, 
       { recognizeable: { effects: window.Logic.createMousepress({ minDuration: 1000 }) } }
-    );
+    )
 
     window.testState = { listenable: listenable.listen(() => {}) }
   })
@@ -58,12 +55,12 @@ suite(`respects minDuration option`, async ({ playwright: { page, reloadNext } }
   reloadNext()
 })
 
-suite(`respects minDistance option`, async ({ playwright: { page, reloadNext } }) => {
+suite('respects minDistance option', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
       'recognizeable' as MousepressTypes,
       { recognizeable: { effects: window.Logic.createMousepress({ minDistance: 101 }) } }
-    );
+    )
     
     window.testState = { listenable: listenable.listen(() => {}) }
   })
@@ -85,14 +82,14 @@ suite(`respects minDistance option`, async ({ playwright: { page, reloadNext } }
   reloadNext()
 })
 
-suite(`calls hooks`, async ({ playwright: { page, reloadNext } }) => {
+suite('calls hooks', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     window.testState = {
       hooks: {
         onDown: false,
         onMove: false,
         onUp: false,
-      }
+      },
     }
 
     const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
@@ -103,8 +100,8 @@ suite(`calls hooks`, async ({ playwright: { page, reloadNext } }) => {
             onDown: () => window.testState.hooks.onDown = true,
             onMove: () => window.testState.hooks.onMove = true,
             onUp: () => window.testState.hooks.onUp = true,
-          })
-        }
+          }),
+        },
       }
     )
     
@@ -123,12 +120,12 @@ suite(`calls hooks`, async ({ playwright: { page, reloadNext } }) => {
   reloadNext()
 })
 
-suite(`doesn't listen for mousemove before mousedown`, async ({ playwright: { page, reloadNext } }) => {
+suite('doesn\'t listen for mousemove before mousedown', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     window.testState = {
       hooks: {
         onMove: false,
-      }
+      },
     }
 
     const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
@@ -137,8 +134,8 @@ suite(`doesn't listen for mousemove before mousedown`, async ({ playwright: { pa
         recognizeable: {
           effects: window.Logic.createMousepress({
             onMove: () => window.testState.hooks.onMove = true,
-          })
-        }
+          }),
+        },
       }
     )
     
@@ -155,13 +152,13 @@ suite(`doesn't listen for mousemove before mousedown`, async ({ playwright: { pa
   reloadNext()
 })
 
-suite(`doesn't listen for mousemove after mouseup`, async ({ playwright: { page, reloadNext } }) => {
+suite('doesn\'t listen for mousemove after mouseup', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     window.testState = {
       hooks: {
         onMove: false,
         onUp: false,
-      }
+      },
     }
 
     const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
@@ -171,8 +168,8 @@ suite(`doesn't listen for mousemove after mouseup`, async ({ playwright: { page,
           effects: window.Logic.createMousepress({
             onMove: () => window.testState.hooks.onMove = window.testState.hooks.onUp && true,
             onUp: () => window.testState.hooks.onUp = true,
-          })
-        }
+          }),
+        },
       }
     )
     

@@ -16,7 +16,7 @@ suite(`detects when DOM is not available`, async ({ puppeteer: { page } }) => {
 
 suite(`detects when DOM is available`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          return window.Logic_extracted.getDomAvailability()
+          return window.Logic.getDomAvailability()
         }),
         expected = 'available'
 
