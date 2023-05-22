@@ -7,15 +7,6 @@
 //   ClicksHookApi,
 // } from './createClicks'
 
-// export { createMouserelease } from './createMouserelease'
-// export type {
-//   MousereleaseTypes,
-//   MousereleaseMetadata,
-//   MousereleaseOptions,
-//   MousereleaseHook,
-//   MousereleaseHookApi,
-// } from './createMouserelease'
-
 // export { createTouches } from './createTouches'
 // export type {
 //   TouchesTypes,

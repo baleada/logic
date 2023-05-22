@@ -31,3 +31,12 @@ export type {
   MousepressHook,
   MousepressHookApi,
 } from './createMousepress'
+
+export { createMouserelease } from './createMouserelease'
+export type {
+  MousereleaseTypes,
+  MousereleaseMetadata,
+  MousereleaseOptions,
+  MousereleaseHook,
+  MousereleaseHookApi,
+} from './createMouserelease'
