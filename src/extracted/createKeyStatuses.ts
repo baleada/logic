@@ -36,3 +36,7 @@ export function createKeyStatuses (options: KeyStatusesOptions = {}) {
     },
   })
 }
+
+export function predicateDown (status: KeyStatus) {
+  return status === 'down'
+}

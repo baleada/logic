@@ -28,7 +28,7 @@ export function storeKeyboardTimeMetadata<
   recognize?: RecognizeableEffect<
     'keydown' | 'keyup',
     KeyboardTimeMetadata
-  >,
+  >
 ): void {
   if (!getShouldStore()) return
 

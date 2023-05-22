@@ -1,4 +1,5 @@
 import { every, pipe } from 'lazy-collections'
+import { predicateDown } from './createKeyStatuses'
 import type { KeyStatuses, KeyStatusKey } from './createKeyStatuses'
 import { fromComboToAliases } from './fromComboToAliases'
 import { fromAliasToKeyStatusKey } from './fromAliasToKeyStatusKey'
@@ -26,7 +27,7 @@ export const createPredicateKeycomboDown = (
     return every<string>(pipe(
       toKey,
       toValue,
-      value => value === 'down'
+      predicateDown,
     ))(aliases) as boolean
   }
 }

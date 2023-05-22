@@ -30,36 +30,36 @@ import type {
 } from '../extracted'
 import { createFilter } from '../pipes'
 
-export type KeyreleaseType = 'keydown' | 'keyup' | 'visibilitychange'
+export type KeypressType = 'keydown' | 'keyup' | 'visibilitychange'
 
-export type KeyreleaseMetadata = {
-  released: string,
+export type KeypressMetadata = {
+  pressed: string,
 } & KeyboardTimeMetadata
 
-export type KeyreleaseOptions = {
+export type KeypressOptions = {
   minDuration?: number,
   preventsDefaultUnlessDenied?: boolean,
   toKey?: CreatePredicateKeycomboDownOptions['toKey'],
   toAliases?: CreatePredicateKeycomboMatchOptions['toAliases'],
-  onDown?: KeyreleaseHook,
-  onUp?: KeyreleaseHook,
-  onVisibilityChange?: KeyreleaseHook,
+  onDown?: KeypressHook,
+  onUp?: KeypressHook,
+  onVisibilityChange?: KeypressHook,
 }
 
-export type KeyreleaseHook = (api: KeyreleaseHookApi) => any
+export type KeypressHook = (api: KeypressHookApi) => any
 
-export type KeyreleaseHookApi = HookApi<KeyreleaseType, KeyreleaseMetadata>
+export type KeypressHookApi = HookApi<KeypressType, KeypressMetadata>
 
-const defaultOptions: KeyreleaseOptions = {
+const defaultOptions: KeypressOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
   toKey: undefined,
   toAliases: fromEventToAliases,
 }
 
-export function createKeyrelease (
+export function createKeypress (
   keycomboOrKeycombos: string | string[],
-  options: KeyreleaseOptions = {}
+  options: KeypressOptions = {}
 ) {
   const {
           minDuration,
@@ -128,10 +128,10 @@ export function createKeyrelease (
         },
         statuses = createKeyStatuses()
 
-  let request: number,
-      localStatus: RecognizeableStatus
+  let request: number
+  let localStatus: RecognizeableStatus
 
-  const keydown: RecognizeableEffect<'keydown', KeyreleaseMetadata> = (event, api) => {
+  const keydown: RecognizeableEffect<'keydown', KeypressMetadata> = (event, api) => {
     const { denied, getStatus } = api,
           key = fromEventToKeyStatusKey(event)
 
@@ -175,6 +175,10 @@ export function createKeyrelease (
     // BUILDING VALID KEYCOMBO
     if (preventsDefaultUnlessDenied) event.preventDefault()
 
+    const { getMetadata } = api,
+          metadata = getMetadata()
+
+    metadata.pressed = downCombos[0]
     localStatus = 'recognizing'
 
     cleanup()
@@ -183,23 +187,30 @@ export function createKeyrelease (
       api,
       () => downCombos.length && getDownCombos()[0] === downCombos[0],
       newRequest => request = newRequest,
+      recognize,
     )
 
     onDown?.(toHookApi(api))
   }
 
-  const keyup: RecognizeableEffect<'keyup', KeyreleaseMetadata> = (event, api) => {
-    const {
-            getStatus,
-            getMetadata,
-            denied,
-          } = api,
-          metadata = getMetadata(),
+  const recognize: RecognizeableEffect<KeypressType, KeypressMetadata> = (event, api) => {
+    const { getMetadata, recognized } = api,
+          metadata = getMetadata()
+
+    if (metadata.duration >= minDuration) {
+      recognized()
+      localStatus = 'recognized'
+      return
+    }
+  }
+
+  const keyup: RecognizeableEffect<'keyup', KeypressMetadata> = (event, api) => {
+    const { denied } = api,
           key = fromEventToKeyStatusKey(event)
                 
     // SHOULD BLOCK EVENT
-    if (['denied', 'recognized'].includes(localStatus)) {
-      if (localStatus === 'denied') denied()
+    if (localStatus === 'denied') {
+      denied()
       
       if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
       else statuses.delete(key)
@@ -209,44 +220,31 @@ export function createKeyrelease (
       return
     }
 
-    const downCombos = getDownCombos(),
-          matches = matchPredicatesByKeycombo[downCombos[0]]?.(statuses)
     statuses.delete(key)
 
-    // RELEASING PARTIAL COMBO
-    if (!downCombos.length || !matches) {
+    const downCombos = getDownCombos(),
+          matches = matchPredicatesByKeycombo[downCombos[0]]?.(statuses)
+
+    if (downCombos.length && matches) {
+      const { getMetadata } = api,
+            metadata = getMetadata()
+
+      metadata.pressed = downCombos[0]
+
+      if (preventsDefaultUnlessDenied) event.preventDefault()
+
+      localStatus = 'recognizing'
+
       onUp?.(toHookApi(api))
       return
     }
 
-    // RELEASING FULL COMBO
-    recognize(event, api)
-
-    const status = getStatus()
-
-    if (status === 'recognized') {
-      localStatus = status
-      metadata.released = downCombos[0]
-    }
-
-    if (preventsDefaultUnlessDenied) event.preventDefault()
-    if (!predicateSomeKeyDown(statuses)) localStatus = 'recognizing'
+    denied()
+    cleanup()
     onUp?.(toHookApi(api))
   }
 
-  const recognize: RecognizeableEffect<KeyreleaseType, KeyreleaseMetadata> = (event, api) => {
-    const { getMetadata, recognized, denied } = api,
-          metadata = getMetadata()
-
-    if (metadata.duration < minDuration) {
-      denied()
-      return
-    }
-
-    if (localStatus !== 'recognized') recognized()
-  }
-
-  const visibilitychange: RecognizeableEffect<'visibilitychange', KeyreleaseMetadata> = (event, api) => {
+  const visibilitychange: RecognizeableEffect<'visibilitychange', KeypressMetadata> = (event, api) => {
     if (document.visibilityState === 'hidden') {
       statuses.clear()
       localStatus = 'recognizing'

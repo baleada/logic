@@ -154,7 +154,7 @@ suite('predicates fn', () => {
 suite('supports custom alias transformer', () => {
   const statuses = createKeyStatuses({
           initial: [
-            [{ key: 'á', code: 'KeyA' }, 'down'],
+            [{ key: 'å', code: 'KeyA' }, 'down'],
             [{ key: 'Alt', code: 'AltLeft' }, 'down'],
           ],
         }),
