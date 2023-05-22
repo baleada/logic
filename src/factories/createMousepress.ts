@@ -1,6 +1,6 @@
-import type { ListenEffectParam, RecognizeableEffect, RecognizeableOptions } from '@baleada/logic'
-import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '@extracted'
-import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '@extracted'
+import type { ListenEffectParam, RecognizeableEffect, RecognizeableOptions } from '../classes'
+import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
+import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
 /*
  * mousepress is defined as a single mousedown that:
@@ -43,7 +43,7 @@ export function createMousepress (options: MousepressOptions = {}): Recognizeabl
           onDown,
           onLeave,
           onMove,
-          onUp
+          onUp,
         } = { ...defaultOptions, ...options },
         cleanup = (event: MouseEvent) => {
           window.cancelAnimationFrame(request)

@@ -22,3 +22,12 @@ export type {
   KeyreleaseHook,
   KeyreleaseHookApi,
 } from './createKeyrelease'
+
+export { createMousepress } from './createMousepress'
+export type {
+  MousepressTypes,
+  MousepressMetadata,
+  MousepressOptions,
+  MousepressHook,
+  MousepressHookApi,
+} from './createMousepress'
