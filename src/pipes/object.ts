@@ -1,4 +1,4 @@
-import type { ObjectFn } from './types'
+type ObjectFn<Key extends string | number | symbol, Value, Returned> = (transform: Record<Key, Value>) => Returned
 
 // Preferable to Object.entries for better type inference on objects
 // with no risk of keys being added dynamically

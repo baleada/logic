@@ -1,5 +1,5 @@
 import type { GraphNode, GraphEdge } from '../extracted'
-import type { GeneratorFn } from './types'
+import type { GeneratorFn } from './generator'
 
 export type ToGraphYielded = {
   node: GraphNode<string>,

@@ -1,5 +1,6 @@
 import type { DeepRequired, Expand, Graph } from '../extracted'
-import { 
+import {
+  createToLayers as createDirectedAcyclicToLayers,
   createToTree as createDirectedAcyclicToTree,
   createToCommonAncestors as createDirectedAcyclicToCommonAncestors,
   createPredicateAncestor as createDirectedAcyclicPredicateAncestor,
@@ -7,7 +8,6 @@ import {
   createToSteps as createDirectedAcyclicToSteps,
   createToPath as createDirectedAcyclicToPath,
   createToRoots as createDirectedAcyclicToRoots,
-  defaultCreateToStepsOptions as defaultDirectedAcyclicCreateToStepsOptions,
 } from './directed-acyclic'
 import type { CreateToStepsOptions as CreateDirectedAcyclicToStepsOptions } from './directed-acyclic'
 
@@ -23,7 +23,24 @@ export type DecisionTreeMetadata = boolean
 
 export const defaultCreateToStepsOptions: DeepRequired<CreateToStepsOptions<string>> = {
   priorityBranch: false,
-  kind: defaultDirectedAcyclicCreateToStepsOptions.kind,
+  kind: 'directed acyclic',
+}
+
+export function createToLayers<Id extends string> (
+  options: { createToSteps?: CreateToStepsOptions<Id> } = {}
+) {
+  const withDefaults = {
+    ...options,
+    createToSteps: {
+      ...defaultCreateToStepsOptions,
+      ...options.createToSteps,
+    },
+  }
+
+  return createDirectedAcyclicToLayers<Id, DecisionTreeMetadata>({
+    ...withDefaults,
+    createToSteps: toCreateDirectedAcyclicToStepsOptions<Id>(withDefaults.createToSteps),
+  })
 }
 
 export function createToTree<Id extends string> (

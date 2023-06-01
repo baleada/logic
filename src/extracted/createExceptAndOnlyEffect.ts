@@ -7,7 +7,6 @@ import type {
   ListenOptions,
 } from '../classes/Listenable'
 
-
 export function createExceptAndOnlyEffect<Type extends ListenableSupportedEventType>(type: Type, effect: ListenEffect<Type>, options: ListenOptions<Type>): (param: ListenEffectParam<Type>) => void {
   const { except = [], only = [] } = options
 

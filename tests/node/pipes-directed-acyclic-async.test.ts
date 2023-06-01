@@ -9,6 +9,7 @@ import {
   createPredicateAncestor,
   createToCommonAncestors,
   createToTree,
+  createToLayers,
 } from '../../src/pipes/directed-acyclic-async'
 
 const suite = createSuite<{
@@ -292,9 +293,7 @@ suite('createToCommonAncestors orders ancestors from deepest to shallowest', asy
   assert.equal(value, expected)
 })
 
-
-
-suite.skip('createToTree works', async ({ directedAcyclic }) => {
+suite('createToTree works', async ({ directedAcyclic }) => {
   const value = await createToTree<string, number>()(directedAcyclic),
         expected = [
           {
@@ -337,6 +336,18 @@ suite.skip('createToTree works', async ({ directedAcyclic }) => {
               },
             ],
           },
+        ]
+
+  assert.equal(value, expected)
+})
+
+suite('createToLayers works', async ({ directedAcyclic }) => {
+  const value = await createToLayers()(directedAcyclic),
+        expected = [
+          ['a'],
+          ['b', 'c', 'd'],
+          ['d', 'e', 'f', 'g'],
+          ['h'],
         ]
 
   assert.equal(value, expected)

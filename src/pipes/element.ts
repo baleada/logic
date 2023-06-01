@@ -1,6 +1,7 @@
 import { join } from 'lazy-collections'
 import type { DeepRequired } from '../extracted'
-import type { ElementFn } from './types'
+
+export type ElementFn<El extends HTMLElement, Returned> = (element: El) => Returned
 
 export type CreateFocusableOptions = {
   elementIsCandidate?: boolean,

@@ -1,0 +1,1827 @@
+import type { Graph } from '../../../../../../src/pipes'
+import { defineGraphEdge } from '../../../../../../src/pipes'
+
+export const ast = {
+  type: 'Program',
+  start: 0,
+  end: 1780,
+  body: [
+    {
+      type: 'FunctionDeclaration',
+      start: 0,
+      end: 1779,
+      id: {
+        type: 'Identifier',
+        start: 9,
+        end: 22,
+        name: 'createToSteps',
+      },
+      expression: false,
+      generator: false,
+      async: false,
+      params: [
+        {
+          type: 'AssignmentPattern',
+          start: 23,
+          end: 35,
+          left: {
+            type: 'Identifier',
+            start: 23,
+            end: 30,
+            name: 'options',
+          },
+          right: {
+            type: 'ObjectExpression',
+            start: 33,
+            end: 35,
+            properties: [],
+          },
+        },
+      ],
+      body: {
+        type: 'BlockStatement',
+        start: 37,
+        end: 1779,
+        body: [
+          {
+            type: 'VariableDeclaration',
+            start: 41,
+            end: 155,
+            declarations: [
+              {
+                type: 'VariableDeclarator',
+                start: 47,
+                end: 154,
+                id: {
+                  type: 'ObjectPattern',
+                  start: 47,
+                  end: 94,
+                  properties: [
+                    {
+                      type: 'Property',
+                      start: 49,
+                      end: 64,
+                      method: false,
+                      shorthand: true,
+                      computed: false,
+                      key: {
+                        type: 'Identifier',
+                        start: 49,
+                        end: 64,
+                        name: 'toUnsetMetadata',
+                      },
+                      kind: 'init',
+                      value: {
+                        type: 'Identifier',
+                        start: 49,
+                        end: 64,
+                        name: 'toUnsetMetadata',
+                      },
+                    },
+                    {
+                      type: 'Property',
+                      start: 66,
+                      end: 80,
+                      method: false,
+                      shorthand: true,
+                      computed: false,
+                      key: {
+                        type: 'Identifier',
+                        start: 66,
+                        end: 80,
+                        name: 'toMockMetadata',
+                      },
+                      kind: 'init',
+                      value: {
+                        type: 'Identifier',
+                        start: 66,
+                        end: 80,
+                        name: 'toMockMetadata',
+                      },
+                    },
+                    {
+                      type: 'Property',
+                      start: 82,
+                      end: 86,
+                      method: false,
+                      shorthand: true,
+                      computed: false,
+                      key: {
+                        type: 'Identifier',
+                        start: 82,
+                        end: 86,
+                        name: 'root',
+                      },
+                      kind: 'init',
+                      value: {
+                        type: 'Identifier',
+                        start: 82,
+                        end: 86,
+                        name: 'root',
+                      },
+                    },
+                    {
+                      type: 'Property',
+                      start: 88,
+                      end: 92,
+                      method: false,
+                      shorthand: true,
+                      computed: false,
+                      key: {
+                        type: 'Identifier',
+                        start: 88,
+                        end: 92,
+                        name: 'kind',
+                      },
+                      kind: 'init',
+                      value: {
+                        type: 'Identifier',
+                        start: 88,
+                        end: 92,
+                        name: 'kind',
+                      },
+                    },
+                  ],
+                },
+                init: {
+                  type: 'ObjectExpression',
+                  start: 97,
+                  end: 154,
+                  properties: [
+                    {
+                      type: 'SpreadElement',
+                      start: 103,
+                      end: 133,
+                      argument: {
+                        type: 'Identifier',
+                        start: 106,
+                        end: 133,
+                        name: 'defaultCreateToStepsOptions',
+                      },
+                    },
+                    {
+                      type: 'SpreadElement',
+                      start: 139,
+                      end: 149,
+                      argument: {
+                        type: 'Identifier',
+                        start: 142,
+                        end: 149,
+                        name: 'options',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            kind: 'const',
+          },
+          {
+            type: 'ReturnStatement',
+            start: 158,
+            end: 1777,
+            argument: {
+              type: 'FunctionExpression',
+              start: 165,
+              end: 1776,
+              id: null,
+              expression: false,
+              generator: true,
+              async: false,
+              params: [
+                {
+                  type: 'Identifier',
+                  start: 176,
+                  end: 191,
+                  name: 'directedAcyclic',
+                },
+              ],
+              body: {
+                type: 'BlockStatement',
+                start: 193,
+                end: 1776,
+                body: [
+                  {
+                    type: 'VariableDeclaration',
+                    start: 199,
+                    end: 592,
+                    declarations: [
+                      {
+                        type: 'VariableDeclarator',
+                        start: 205,
+                        end: 232,
+                        id: {
+                          type: 'ObjectPattern',
+                          start: 205,
+                          end: 214,
+                          properties: [
+                            {
+                              type: 'Property',
+                              start: 207,
+                              end: 212,
+                              method: false,
+                              shorthand: true,
+                              computed: false,
+                              key: {
+                                type: 'Identifier',
+                                start: 207,
+                                end: 212,
+                                name: 'nodes',
+                              },
+                              kind: 'init',
+                              value: {
+                                type: 'Identifier',
+                                start: 207,
+                                end: 212,
+                                name: 'nodes',
+                              },
+                            },
+                          ],
+                        },
+                        init: {
+                          type: 'Identifier',
+                          start: 217,
+                          end: 232,
+                          name: 'directedAcyclic',
+                        },
+                      },
+                      {
+                        type: 'VariableDeclarator',
+                        start: 240,
+                        end: 288,
+                        id: {
+                          type: 'Identifier',
+                          start: 240,
+                          end: 251,
+                          name: 'toOutdegree',
+                        },
+                        init: {
+                          type: 'CallExpression',
+                          start: 254,
+                          end: 288,
+                          callee: {
+                            type: 'Identifier',
+                            start: 254,
+                            end: 271,
+                            name: 'createToOutdegree',
+                          },
+                          arguments: [
+                            {
+                              type: 'Identifier',
+                              start: 272,
+                              end: 287,
+                              name: 'directedAcyclic',
+                            },
+                          ],
+                          optional: false,
+                        },
+                      },
+                      {
+                        type: 'VariableDeclarator',
+                        start: 296,
+                        end: 334,
+                        id: {
+                          type: 'Identifier',
+                          start: 296,
+                          end: 302,
+                          name: 'toPath',
+                        },
+                        init: {
+                          type: 'CallExpression',
+                          start: 305,
+                          end: 334,
+                          callee: {
+                            type: 'Identifier',
+                            start: 305,
+                            end: 317,
+                            name: 'createToPath',
+                          },
+                          arguments: [
+                            {
+                              type: 'Identifier',
+                              start: 318,
+                              end: 333,
+                              name: 'directedAcyclic',
+                            },
+                          ],
+                          optional: false,
+                        },
+                      },
+                      {
+                        type: 'VariableDeclarator',
+                        start: 342,
+                        end: 407,
+                        id: {
+                          type: 'Identifier',
+                          start: 342,
+                          end: 347,
+                          name: 'roots',
+                        },
+                        init: {
+                          type: 'CallExpression',
+                          start: 350,
+                          end: 407,
+                          callee: {
+                            type: 'CallExpression',
+                            start: 350,
+                            end: 390,
+                            callee: {
+                              type: 'Identifier',
+                              start: 350,
+                              end: 354,
+                              name: 'pipe',
+                            },
+                            arguments: [
+                              {
+                                type: 'CallExpression',
+                                start: 355,
+                                end: 378,
+                                callee: {
+                                  type: 'Identifier',
+                                  start: 355,
+                                  end: 368,
+                                  name: 'createToRoots',
+                                },
+                                arguments: [
+                                  {
+                                    type: 'ObjectExpression',
+                                    start: 369,
+                                    end: 377,
+                                    properties: [
+                                      {
+                                        type: 'Property',
+                                        start: 371,
+                                        end: 375,
+                                        method: false,
+                                        shorthand: true,
+                                        computed: false,
+                                        key: {
+                                          type: 'Identifier',
+                                          start: 371,
+                                          end: 375,
+                                          name: 'kind',
+                                        },
+                                        kind: 'init',
+                                        value: {
+                                          type: 'Identifier',
+                                          start: 371,
+                                          end: 375,
+                                          name: 'kind',
+                                        },
+                                      },
+                                    ],
+                                  },
+                                ],
+                                optional: false,
+                              },
+                              {
+                                type: 'CallExpression',
+                                start: 380,
+                                end: 389,
+                                callee: {
+                                  type: 'Identifier',
+                                  start: 380,
+                                  end: 387,
+                                  name: 'toArray',
+                                },
+                                arguments: [],
+                                optional: false,
+                              },
+                            ],
+                            optional: false,
+                          },
+                          arguments: [
+                            {
+                              type: 'Identifier',
+                              start: 391,
+                              end: 406,
+                              name: 'directedAcyclic',
+                            },
+                          ],
+                          optional: false,
+                        },
+                      },
+                      {
+                        type: 'VariableDeclarator',
+                        start: 415,
+                        end: 425,
+                        id: {
+                          type: 'Identifier',
+                          start: 415,
+                          end: 420,
+                          name: 'state',
+                        },
+                        init: {
+                          type: 'ObjectExpression',
+                          start: 423,
+                          end: 425,
+                          properties: [],
+                        },
+                      },
+                      {
+                        type: 'VariableDeclarator',
+                        start: 433,
+                        end: 468,
+                        id: {
+                          type: 'Identifier',
+                          start: 433,
+                          end: 463,
+                          name: 'totalConnectionsFollowedByNode',
+                        },
+                        init: {
+                          type: 'ObjectExpression',
+                          start: 466,
+                          end: 468,
+                          properties: [],
+                        },
+                      },
+                      {
+                        type: 'VariableDeclarator',
+                        start: 476,
+                        end: 591,
+                        id: {
+                          type: 'Identifier',
+                          start: 476,
+                          end: 494,
+                          name: 'predicateExhausted',
+                        },
+                        init: {
+                          type: 'ArrowFunctionExpression',
+                          start: 497,
+                          end: 591,
+                          id: null,
+                          expression: false,
+                          generator: false,
+                          async: false,
+                          params: [
+                            {
+                              type: 'Identifier',
+                              start: 498,
+                              end: 502,
+                              name: 'node',
+                            },
+                          ],
+                          body: {
+                            type: 'BlockStatement',
+                            start: 507,
+                            end: 591,
+                            body: [
+                              {
+                                type: 'ReturnStatement',
+                                start: 517,
+                                end: 583,
+                                argument: {
+                                  type: 'BinaryExpression',
+                                  start: 524,
+                                  end: 582,
+                                  left: {
+                                    type: 'MemberExpression',
+                                    start: 524,
+                                    end: 560,
+                                    object: {
+                                      type: 'Identifier',
+                                      start: 524,
+                                      end: 554,
+                                      name: 'totalConnectionsFollowedByNode',
+                                    },
+                                    property: {
+                                      type: 'Identifier',
+                                      start: 555,
+                                      end: 559,
+                                      name: 'node',
+                                    },
+                                    computed: true,
+                                    optional: false,
+                                  },
+                                  operator: '===',
+                                  right: {
+                                    type: 'CallExpression',
+                                    start: 565,
+                                    end: 582,
+                                    callee: {
+                                      type: 'Identifier',
+                                      start: 565,
+                                      end: 576,
+                                      name: 'toOutdegree',
+                                    },
+                                    arguments: [
+                                      {
+                                        type: 'Identifier',
+                                        start: 577,
+                                        end: 581,
+                                        name: 'node',
+                                      },
+                                    ],
+                                    optional: false,
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                    kind: 'const',
+                  },
+                  {
+                    type: 'ForOfStatement',
+                    start: 597,
+                    end: 727,
+                    await: false,
+                    left: {
+                      type: 'VariableDeclaration',
+                      start: 602,
+                      end: 612,
+                      declarations: [
+                        {
+                          type: 'VariableDeclarator',
+                          start: 608,
+                          end: 612,
+                          id: {
+                            type: 'Identifier',
+                            start: 608,
+                            end: 612,
+                            name: 'node',
+                          },
+                          init: null,
+                        },
+                      ],
+                      kind: 'const',
+                    },
+                    right: {
+                      type: 'Identifier',
+                      start: 616,
+                      end: 621,
+                      name: 'nodes',
+                    },
+                    body: {
+                      type: 'BlockStatement',
+                      start: 623,
+                      end: 727,
+                      body: [
+                        {
+                          type: 'ExpressionStatement',
+                          start: 631,
+                          end: 721,
+                          expression: {
+                            type: 'AssignmentExpression',
+                            start: 631,
+                            end: 720,
+                            operator: '=',
+                            left: {
+                              type: 'MemberExpression',
+                              start: 631,
+                              end: 642,
+                              object: {
+                                type: 'Identifier',
+                                start: 631,
+                                end: 636,
+                                name: 'state',
+                              },
+                              property: {
+                                type: 'Identifier',
+                                start: 637,
+                                end: 641,
+                                name: 'node',
+                              },
+                              computed: true,
+                              optional: false,
+                            },
+                            right: {
+                              type: 'ObjectExpression',
+                              start: 645,
+                              end: 720,
+                              properties: [
+                                {
+                                  type: 'Property',
+                                  start: 655,
+                                  end: 670,
+                                  method: false,
+                                  shorthand: false,
+                                  computed: false,
+                                  key: {
+                                    type: 'Identifier',
+                                    start: 655,
+                                    end: 661,
+                                    name: 'status',
+                                  },
+                                  value: {
+                                    type: 'Literal',
+                                    start: 663,
+                                    end: 670,
+                                    value: 'unset',
+                                    raw: '"unset"',
+                                  },
+                                  kind: 'init',
+                                },
+                                {
+                                  type: 'Property',
+                                  start: 680,
+                                  end: 711,
+                                  method: false,
+                                  shorthand: false,
+                                  computed: false,
+                                  key: {
+                                    type: 'Identifier',
+                                    start: 680,
+                                    end: 688,
+                                    name: 'metadata',
+                                  },
+                                  value: {
+                                    type: 'CallExpression',
+                                    start: 690,
+                                    end: 711,
+                                    callee: {
+                                      type: 'Identifier',
+                                      start: 690,
+                                      end: 705,
+                                      name: 'toUnsetMetadata',
+                                    },
+                                    arguments: [
+                                      {
+                                        type: 'Identifier',
+                                        start: 706,
+                                        end: 710,
+                                        name: 'node',
+                                      },
+                                    ],
+                                    optional: false,
+                                  },
+                                  kind: 'init',
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    type: 'VariableDeclaration',
+                    start: 732,
+                    end: 768,
+                    declarations: [
+                      {
+                        type: 'VariableDeclarator',
+                        start: 736,
+                        end: 767,
+                        id: {
+                          type: 'Identifier',
+                          start: 736,
+                          end: 744,
+                          name: 'location',
+                        },
+                        init: {
+                          type: 'LogicalExpression',
+                          start: 747,
+                          end: 767,
+                          left: {
+                            type: 'Identifier',
+                            start: 747,
+                            end: 751,
+                            name: 'root',
+                          },
+                          operator: '||',
+                          right: {
+                            type: 'CallExpression',
+                            start: 755,
+                            end: 767,
+                            callee: {
+                              type: 'CallExpression',
+                              start: 755,
+                              end: 760,
+                              callee: {
+                                type: 'Identifier',
+                                start: 755,
+                                end: 757,
+                                name: 'at',
+                              },
+                              arguments: [
+                                {
+                                  type: 'Literal',
+                                  start: 758,
+                                  end: 759,
+                                  value: 0,
+                                  raw: '0',
+                                },
+                              ],
+                              optional: false,
+                            },
+                            arguments: [
+                              {
+                                type: 'Identifier',
+                                start: 761,
+                                end: 766,
+                                name: 'roots',
+                              },
+                            ],
+                            optional: false,
+                          },
+                        },
+                      },
+                    ],
+                    kind: 'let',
+                  },
+                  {
+                    type: 'VariableDeclaration',
+                    start: 773,
+                    end: 800,
+                    declarations: [
+                      {
+                        type: 'VariableDeclarator',
+                        start: 779,
+                        end: 799,
+                        id: {
+                          type: 'Identifier',
+                          start: 779,
+                          end: 783,
+                          name: 'path',
+                        },
+                        init: {
+                          type: 'CallExpression',
+                          start: 786,
+                          end: 799,
+                          callee: {
+                            type: 'Identifier',
+                            start: 786,
+                            end: 792,
+                            name: 'toPath',
+                          },
+                          arguments: [
+                            {
+                              type: 'Identifier',
+                              start: 793,
+                              end: 798,
+                              name: 'state',
+                            },
+                          ],
+                          optional: false,
+                        },
+                      },
+                    ],
+                    kind: 'const',
+                  },
+                  {
+                    type: 'ExpressionStatement',
+                    start: 805,
+                    end: 862,
+                    expression: {
+                      type: 'YieldExpression',
+                      start: 805,
+                      end: 861,
+                      delegate: false,
+                      argument: {
+                        type: 'ObjectExpression',
+                        start: 811,
+                        end: 861,
+                        properties: [
+                          {
+                            type: 'Property',
+                            start: 813,
+                            end: 817,
+                            method: false,
+                            shorthand: true,
+                            computed: false,
+                            key: {
+                              type: 'Identifier',
+                              start: 813,
+                              end: 817,
+                              name: 'path',
+                            },
+                            kind: 'init',
+                            value: {
+                              type: 'Identifier',
+                              start: 813,
+                              end: 817,
+                              name: 'path',
+                            },
+                          },
+                          {
+                            type: 'Property',
+                            start: 819,
+                            end: 859,
+                            method: false,
+                            shorthand: false,
+                            computed: false,
+                            key: {
+                              type: 'Identifier',
+                              start: 819,
+                              end: 824,
+                              name: 'state',
+                            },
+                            value: {
+                              type: 'CallExpression',
+                              start: 826,
+                              end: 859,
+                              callee: {
+                                type: 'MemberExpression',
+                                start: 826,
+                                end: 836,
+                                object: {
+                                  type: 'Identifier',
+                                  start: 826,
+                                  end: 830,
+                                  name: 'JSON',
+                                },
+                                property: {
+                                  type: 'Identifier',
+                                  start: 831,
+                                  end: 836,
+                                  name: 'parse',
+                                },
+                                computed: false,
+                                optional: false,
+                              },
+                              arguments: [
+                                {
+                                  type: 'CallExpression',
+                                  start: 837,
+                                  end: 858,
+                                  callee: {
+                                    type: 'MemberExpression',
+                                    start: 837,
+                                    end: 851,
+                                    object: {
+                                      type: 'Identifier',
+                                      start: 837,
+                                      end: 841,
+                                      name: 'JSON',
+                                    },
+                                    property: {
+                                      type: 'Identifier',
+                                      start: 842,
+                                      end: 851,
+                                      name: 'stringify',
+                                    },
+                                    computed: false,
+                                    optional: false,
+                                  },
+                                  arguments: [
+                                    {
+                                      type: 'Identifier',
+                                      start: 852,
+                                      end: 857,
+                                      name: 'state',
+                                    },
+                                  ],
+                                  optional: false,
+                                },
+                              ],
+                              optional: false,
+                            },
+                            kind: 'init',
+                          },
+                        ],
+                      },
+                    },
+                  },
+                  {
+                    type: 'FunctionDeclaration',
+                    start: 867,
+                    end: 1751,
+                    id: {
+                      type: 'Identifier',
+                      start: 877,
+                      end: 883,
+                      name: 'toStep',
+                    },
+                    expression: false,
+                    generator: true,
+                    async: false,
+                    params: [],
+                    body: {
+                      type: 'BlockStatement',
+                      start: 886,
+                      end: 1751,
+                      body: [
+                        {
+                          type: 'IfStatement',
+                          start: 894,
+                          end: 1197,
+                          test: {
+                            type: 'CallExpression',
+                            start: 898,
+                            end: 926,
+                            callee: {
+                              type: 'Identifier',
+                              start: 898,
+                              end: 916,
+                              name: 'predicateExhausted',
+                            },
+                            arguments: [
+                              {
+                                type: 'Identifier',
+                                start: 917,
+                                end: 925,
+                                name: 'location',
+                              },
+                            ],
+                            optional: false,
+                          },
+                          consequent: {
+                            type: 'BlockStatement',
+                            start: 928,
+                            end: 1197,
+                            body: [
+                              {
+                                type: 'IfStatement',
+                                start: 938,
+                                end: 976,
+                                test: {
+                                  type: 'CallExpression',
+                                  start: 942,
+                                  end: 967,
+                                  callee: {
+                                    type: 'CallExpression',
+                                    start: 942,
+                                    end: 960,
+                                    callee: {
+                                      type: 'Identifier',
+                                      start: 942,
+                                      end: 950,
+                                      name: 'includes',
+                                    },
+                                    arguments: [
+                                      {
+                                        type: 'Identifier',
+                                        start: 951,
+                                        end: 959,
+                                        name: 'location',
+                                      },
+                                    ],
+                                    optional: false,
+                                  },
+                                  arguments: [
+                                    {
+                                      type: 'Identifier',
+                                      start: 961,
+                                      end: 966,
+                                      name: 'roots',
+                                    },
+                                  ],
+                                  optional: false,
+                                },
+                                consequent: {
+                                  type: 'ReturnStatement',
+                                  start: 969,
+                                  end: 976,
+                                  argument: null,
+                                },
+                                alternate: null,
+                              },
+                              {
+                                type: 'ExpressionStatement',
+                                start: 985,
+                                end: 1018,
+                                expression: {
+                                  type: 'AssignmentExpression',
+                                  start: 985,
+                                  end: 1017,
+                                  operator: '=',
+                                  left: {
+                                    type: 'MemberExpression',
+                                    start: 985,
+                                    end: 1007,
+                                    object: {
+                                      type: 'MemberExpression',
+                                      start: 985,
+                                      end: 1000,
+                                      object: {
+                                        type: 'Identifier',
+                                        start: 985,
+                                        end: 990,
+                                        name: 'state',
+                                      },
+                                      property: {
+                                        type: 'Identifier',
+                                        start: 991,
+                                        end: 999,
+                                        name: 'location',
+                                      },
+                                      computed: true,
+                                      optional: false,
+                                    },
+                                    property: {
+                                      type: 'Identifier',
+                                      start: 1001,
+                                      end: 1007,
+                                      name: 'status',
+                                    },
+                                    computed: false,
+                                    optional: false,
+                                  },
+                                  right: {
+                                    type: 'Literal',
+                                    start: 1010,
+                                    end: 1017,
+                                    value: 'unset',
+                                    raw: '"unset"',
+                                  },
+                                },
+                              },
+                              {
+                                type: 'ExpressionStatement',
+                                start: 1027,
+                                end: 1080,
+                                expression: {
+                                  type: 'AssignmentExpression',
+                                  start: 1027,
+                                  end: 1079,
+                                  operator: '=',
+                                  left: {
+                                    type: 'MemberExpression',
+                                    start: 1027,
+                                    end: 1051,
+                                    object: {
+                                      type: 'MemberExpression',
+                                      start: 1027,
+                                      end: 1042,
+                                      object: {
+                                        type: 'Identifier',
+                                        start: 1027,
+                                        end: 1032,
+                                        name: 'state',
+                                      },
+                                      property: {
+                                        type: 'Identifier',
+                                        start: 1033,
+                                        end: 1041,
+                                        name: 'location',
+                                      },
+                                      computed: true,
+                                      optional: false,
+                                    },
+                                    property: {
+                                      type: 'Identifier',
+                                      start: 1043,
+                                      end: 1051,
+                                      name: 'metadata',
+                                    },
+                                    computed: false,
+                                    optional: false,
+                                  },
+                                  right: {
+                                    type: 'CallExpression',
+                                    start: 1054,
+                                    end: 1079,
+                                    callee: {
+                                      type: 'Identifier',
+                                      start: 1054,
+                                      end: 1069,
+                                      name: 'toUnsetMetadata',
+                                    },
+                                    arguments: [
+                                      {
+                                        type: 'Identifier',
+                                        start: 1070,
+                                        end: 1078,
+                                        name: 'location',
+                                      },
+                                    ],
+                                    optional: false,
+                                  },
+                                },
+                              },
+                              {
+                                type: 'VariableDeclaration',
+                                start: 1089,
+                                end: 1116,
+                                declarations: [
+                                  {
+                                    type: 'VariableDeclarator',
+                                    start: 1095,
+                                    end: 1115,
+                                    id: {
+                                      type: 'Identifier',
+                                      start: 1095,
+                                      end: 1099,
+                                      name: 'path',
+                                    },
+                                    init: {
+                                      type: 'CallExpression',
+                                      start: 1102,
+                                      end: 1115,
+                                      callee: {
+                                        type: 'Identifier',
+                                        start: 1102,
+                                        end: 1108,
+                                        name: 'toPath',
+                                      },
+                                      arguments: [
+                                        {
+                                          type: 'Identifier',
+                                          start: 1109,
+                                          end: 1114,
+                                          name: 'state',
+                                        },
+                                      ],
+                                      optional: false,
+                                    },
+                                  },
+                                ],
+                                kind: 'const',
+                              },
+                              {
+                                type: 'ExpressionStatement',
+                                start: 1125,
+                                end: 1148,
+                                expression: {
+                                  type: 'AssignmentExpression',
+                                  start: 1125,
+                                  end: 1147,
+                                  operator: '=',
+                                  left: {
+                                    type: 'Identifier',
+                                    start: 1125,
+                                    end: 1133,
+                                    name: 'location',
+                                  },
+                                  right: {
+                                    type: 'CallExpression',
+                                    start: 1136,
+                                    end: 1147,
+                                    callee: {
+                                      type: 'MemberExpression',
+                                      start: 1136,
+                                      end: 1143,
+                                      object: {
+                                        type: 'Identifier',
+                                        start: 1136,
+                                        end: 1140,
+                                        name: 'path',
+                                      },
+                                      property: {
+                                        type: 'Identifier',
+                                        start: 1141,
+                                        end: 1143,
+                                        name: 'at',
+                                      },
+                                      computed: false,
+                                      optional: false,
+                                    },
+                                    arguments: [
+                                      {
+                                        type: 'UnaryExpression',
+                                        start: 1144,
+                                        end: 1146,
+                                        operator: '-',
+                                        prefix: true,
+                                        argument: {
+                                          type: 'Literal',
+                                          start: 1145,
+                                          end: 1146,
+                                          value: 2,
+                                          raw: '2',
+                                        },
+                                      },
+                                    ],
+                                    optional: false,
+                                  },
+                                },
+                              },
+                              {
+                                type: 'ExpressionStatement',
+                                start: 1157,
+                                end: 1173,
+                                expression: {
+                                  type: 'YieldExpression',
+                                  start: 1157,
+                                  end: 1172,
+                                  delegate: true,
+                                  argument: {
+                                    type: 'CallExpression',
+                                    start: 1164,
+                                    end: 1172,
+                                    callee: {
+                                      type: 'Identifier',
+                                      start: 1164,
+                                      end: 1170,
+                                      name: 'toStep',
+                                    },
+                                    arguments: [],
+                                    optional: false,
+                                  },
+                                },
+                              },
+                              {
+                                type: 'ReturnStatement',
+                                start: 1182,
+                                end: 1189,
+                                argument: null,
+                              },
+                            ],
+                          },
+                          alternate: null,
+                        },
+                        {
+                          type: 'IfStatement',
+                          start: 1204,
+                          end: 1308,
+                          test: {
+                            type: 'UnaryExpression',
+                            start: 1208,
+                            end: 1253,
+                            operator: '!',
+                            prefix: true,
+                            argument: {
+                              type: 'BinaryExpression',
+                              start: 1210,
+                              end: 1252,
+                              left: {
+                                type: 'Identifier',
+                                start: 1210,
+                                end: 1218,
+                                name: 'location',
+                              },
+                              operator: 'in',
+                              right: {
+                                type: 'Identifier',
+                                start: 1222,
+                                end: 1252,
+                                name: 'totalConnectionsFollowedByNode',
+                              },
+                            },
+                          },
+                          consequent: {
+                            type: 'ExpressionStatement',
+                            start: 1263,
+                            end: 1308,
+                            expression: {
+                              type: 'AssignmentExpression',
+                              start: 1263,
+                              end: 1307,
+                              operator: '=',
+                              left: {
+                                type: 'MemberExpression',
+                                start: 1263,
+                                end: 1303,
+                                object: {
+                                  type: 'Identifier',
+                                  start: 1263,
+                                  end: 1293,
+                                  name: 'totalConnectionsFollowedByNode',
+                                },
+                                property: {
+                                  type: 'Identifier',
+                                  start: 1294,
+                                  end: 1302,
+                                  name: 'location',
+                                },
+                                computed: true,
+                                optional: false,
+                              },
+                              right: {
+                                type: 'Literal',
+                                start: 1306,
+                                end: 1307,
+                                value: 0,
+                                raw: '0',
+                              },
+                            },
+                          },
+                          alternate: null,
+                        },
+                        {
+                          type: 'ExpressionStatement',
+                          start: 1315,
+                          end: 1346,
+                          expression: {
+                            type: 'AssignmentExpression',
+                            start: 1315,
+                            end: 1345,
+                            operator: '=',
+                            left: {
+                              type: 'MemberExpression',
+                              start: 1315,
+                              end: 1337,
+                              object: {
+                                type: 'MemberExpression',
+                                start: 1315,
+                                end: 1330,
+                                object: {
+                                  type: 'Identifier',
+                                  start: 1315,
+                                  end: 1320,
+                                  name: 'state',
+                                },
+                                property: {
+                                  type: 'Identifier',
+                                  start: 1321,
+                                  end: 1329,
+                                  name: 'location',
+                                },
+                                computed: true,
+                                optional: false,
+                              },
+                              property: {
+                                type: 'Identifier',
+                                start: 1331,
+                                end: 1337,
+                                name: 'status',
+                              },
+                              computed: false,
+                              optional: false,
+                            },
+                            right: {
+                              type: 'Literal',
+                              start: 1340,
+                              end: 1345,
+                              value: 'set',
+                              raw: '"set"',
+                            },
+                          },
+                        },
+                        {
+                          type: 'ExpressionStatement',
+                          start: 1353,
+                          end: 1471,
+                          expression: {
+                            type: 'AssignmentExpression',
+                            start: 1353,
+                            end: 1470,
+                            operator: '=',
+                            left: {
+                              type: 'MemberExpression',
+                              start: 1353,
+                              end: 1377,
+                              object: {
+                                type: 'MemberExpression',
+                                start: 1353,
+                                end: 1368,
+                                object: {
+                                  type: 'Identifier',
+                                  start: 1353,
+                                  end: 1358,
+                                  name: 'state',
+                                },
+                                property: {
+                                  type: 'Identifier',
+                                  start: 1359,
+                                  end: 1367,
+                                  name: 'location',
+                                },
+                                computed: true,
+                                optional: false,
+                              },
+                              property: {
+                                type: 'Identifier',
+                                start: 1369,
+                                end: 1377,
+                                name: 'metadata',
+                              },
+                              computed: false,
+                              optional: false,
+                            },
+                            right: {
+                              type: 'CallExpression',
+                              start: 1380,
+                              end: 1470,
+                              callee: {
+                                type: 'Identifier',
+                                start: 1380,
+                                end: 1394,
+                                name: 'toMockMetadata',
+                              },
+                              arguments: [
+                                {
+                                  type: 'Identifier',
+                                  start: 1404,
+                                  end: 1412,
+                                  name: 'location',
+                                },
+                                {
+                                  type: 'MemberExpression',
+                                  start: 1422,
+                                  end: 1462,
+                                  object: {
+                                    type: 'Identifier',
+                                    start: 1422,
+                                    end: 1452,
+                                    name: 'totalConnectionsFollowedByNode',
+                                  },
+                                  property: {
+                                    type: 'Identifier',
+                                    start: 1453,
+                                    end: 1461,
+                                    name: 'location',
+                                  },
+                                  computed: true,
+                                  optional: false,
+                                },
+                              ],
+                              optional: false,
+                            },
+                          },
+                        },
+                        {
+                          type: 'VariableDeclaration',
+                          start: 1478,
+                          end: 1505,
+                          declarations: [
+                            {
+                              type: 'VariableDeclarator',
+                              start: 1484,
+                              end: 1504,
+                              id: {
+                                type: 'Identifier',
+                                start: 1484,
+                                end: 1488,
+                                name: 'path',
+                              },
+                              init: {
+                                type: 'CallExpression',
+                                start: 1491,
+                                end: 1504,
+                                callee: {
+                                  type: 'Identifier',
+                                  start: 1491,
+                                  end: 1497,
+                                  name: 'toPath',
+                                },
+                                arguments: [
+                                  {
+                                    type: 'Identifier',
+                                    start: 1498,
+                                    end: 1503,
+                                    name: 'state',
+                                  },
+                                ],
+                                optional: false,
+                              },
+                            },
+                          ],
+                          kind: 'const',
+                        },
+                        {
+                          type: 'ExpressionStatement',
+                          start: 1512,
+                          end: 1569,
+                          expression: {
+                            type: 'YieldExpression',
+                            start: 1512,
+                            end: 1568,
+                            delegate: false,
+                            argument: {
+                              type: 'ObjectExpression',
+                              start: 1518,
+                              end: 1568,
+                              properties: [
+                                {
+                                  type: 'Property',
+                                  start: 1520,
+                                  end: 1524,
+                                  method: false,
+                                  shorthand: true,
+                                  computed: false,
+                                  key: {
+                                    type: 'Identifier',
+                                    start: 1520,
+                                    end: 1524,
+                                    name: 'path',
+                                  },
+                                  kind: 'init',
+                                  value: {
+                                    type: 'Identifier',
+                                    start: 1520,
+                                    end: 1524,
+                                    name: 'path',
+                                  },
+                                },
+                                {
+                                  type: 'Property',
+                                  start: 1526,
+                                  end: 1566,
+                                  method: false,
+                                  shorthand: false,
+                                  computed: false,
+                                  key: {
+                                    type: 'Identifier',
+                                    start: 1526,
+                                    end: 1531,
+                                    name: 'state',
+                                  },
+                                  value: {
+                                    type: 'CallExpression',
+                                    start: 1533,
+                                    end: 1566,
+                                    callee: {
+                                      type: 'MemberExpression',
+                                      start: 1533,
+                                      end: 1543,
+                                      object: {
+                                        type: 'Identifier',
+                                        start: 1533,
+                                        end: 1537,
+                                        name: 'JSON',
+                                      },
+                                      property: {
+                                        type: 'Identifier',
+                                        start: 1538,
+                                        end: 1543,
+                                        name: 'parse',
+                                      },
+                                      computed: false,
+                                      optional: false,
+                                    },
+                                    arguments: [
+                                      {
+                                        type: 'CallExpression',
+                                        start: 1544,
+                                        end: 1565,
+                                        callee: {
+                                          type: 'MemberExpression',
+                                          start: 1544,
+                                          end: 1558,
+                                          object: {
+                                            type: 'Identifier',
+                                            start: 1544,
+                                            end: 1548,
+                                            name: 'JSON',
+                                          },
+                                          property: {
+                                            type: 'Identifier',
+                                            start: 1549,
+                                            end: 1558,
+                                            name: 'stringify',
+                                          },
+                                          computed: false,
+                                          optional: false,
+                                        },
+                                        arguments: [
+                                          {
+                                            type: 'Identifier',
+                                            start: 1559,
+                                            end: 1564,
+                                            name: 'state',
+                                          },
+                                        ],
+                                        optional: false,
+                                      },
+                                    ],
+                                    optional: false,
+                                  },
+                                  kind: 'init',
+                                },
+                              ],
+                            },
+                          },
+                        },
+                        {
+                          type: 'ExpressionStatement',
+                          start: 1576,
+                          end: 1619,
+                          expression: {
+                            type: 'UpdateExpression',
+                            start: 1576,
+                            end: 1618,
+                            operator: '++',
+                            prefix: false,
+                            argument: {
+                              type: 'MemberExpression',
+                              start: 1576,
+                              end: 1616,
+                              object: {
+                                type: 'Identifier',
+                                start: 1576,
+                                end: 1606,
+                                name: 'totalConnectionsFollowedByNode',
+                              },
+                              property: {
+                                type: 'Identifier',
+                                start: 1607,
+                                end: 1615,
+                                name: 'location',
+                              },
+                              computed: true,
+                              optional: false,
+                            },
+                          },
+                        },
+                        {
+                          type: 'VariableDeclaration',
+                          start: 1626,
+                          end: 1658,
+                          declarations: [
+                            {
+                              type: 'VariableDeclarator',
+                              start: 1632,
+                              end: 1657,
+                              id: {
+                                type: 'Identifier',
+                                start: 1632,
+                                end: 1643,
+                                name: 'newLocation',
+                              },
+                              init: {
+                                type: 'CallExpression',
+                                start: 1646,
+                                end: 1657,
+                                callee: {
+                                  type: 'MemberExpression',
+                                  start: 1646,
+                                  end: 1653,
+                                  object: {
+                                    type: 'Identifier',
+                                    start: 1646,
+                                    end: 1650,
+                                    name: 'path',
+                                  },
+                                  property: {
+                                    type: 'Identifier',
+                                    start: 1651,
+                                    end: 1653,
+                                    name: 'at',
+                                  },
+                                  computed: false,
+                                  optional: false,
+                                },
+                                arguments: [
+                                  {
+                                    type: 'UnaryExpression',
+                                    start: 1654,
+                                    end: 1656,
+                                    operator: '-',
+                                    prefix: true,
+                                    argument: {
+                                      type: 'Literal',
+                                      start: 1655,
+                                      end: 1656,
+                                      value: 1,
+                                      raw: '1',
+                                    },
+                                  },
+                                ],
+                                optional: false,
+                              },
+                            },
+                          ],
+                          kind: 'const',
+                        },
+                        {
+                          type: 'IfStatement',
+                          start: 1665,
+                          end: 1722,
+                          test: {
+                            type: 'BinaryExpression',
+                            start: 1669,
+                            end: 1697,
+                            left: {
+                              type: 'CallExpression',
+                              start: 1669,
+                              end: 1693,
+                              callee: {
+                                type: 'Identifier',
+                                start: 1669,
+                                end: 1680,
+                                name: 'toOutdegree',
+                              },
+                              arguments: [
+                                {
+                                  type: 'Identifier',
+                                  start: 1681,
+                                  end: 1692,
+                                  name: 'newLocation',
+                                },
+                              ],
+                              optional: false,
+                            },
+                            operator: '>',
+                            right: {
+                              type: 'Literal',
+                              start: 1696,
+                              end: 1697,
+                              value: 0,
+                              raw: '0',
+                            },
+                          },
+                          consequent: {
+                            type: 'ExpressionStatement',
+                            start: 1699,
+                            end: 1722,
+                            expression: {
+                              type: 'AssignmentExpression',
+                              start: 1699,
+                              end: 1721,
+                              operator: '=',
+                              left: {
+                                type: 'Identifier',
+                                start: 1699,
+                                end: 1707,
+                                name: 'location',
+                              },
+                              right: {
+                                type: 'Identifier',
+                                start: 1710,
+                                end: 1721,
+                                name: 'newLocation',
+                              },
+                            },
+                          },
+                          alternate: null,
+                        },
+                        {
+                          type: 'ExpressionStatement',
+                          start: 1729,
+                          end: 1745,
+                          expression: {
+                            type: 'YieldExpression',
+                            start: 1729,
+                            end: 1744,
+                            delegate: true,
+                            argument: {
+                              type: 'CallExpression',
+                              start: 1736,
+                              end: 1744,
+                              callee: {
+                                type: 'Identifier',
+                                start: 1736,
+                                end: 1742,
+                                name: 'toStep',
+                              },
+                              arguments: [],
+                              optional: false,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    type: 'ExpressionStatement',
+                    start: 1756,
+                    end: 1772,
+                    expression: {
+                      type: 'YieldExpression',
+                      start: 1756,
+                      end: 1771,
+                      delegate: true,
+                      argument: {
+                        type: 'CallExpression',
+                        start: 1763,
+                        end: 1771,
+                        callee: {
+                          type: 'Identifier',
+                          start: 1763,
+                          end: 1769,
+                          name: 'toStep',
+                        },
+                        arguments: [],
+                        optional: false,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    },
+  ],
+  sourceType: 'module',
+}
+
+
+export const directedAcyclic: Graph<string, number> = {
+  nodes: [],
+  edges: [],
+}
+
+function* toEdges (acornNode) {
+  const children = Array.isArray(acornNode.body)
+    ? acornNode.body
+    : (
+      acornNode.body?.body
+      || acornNode.argument?.body?.body
+      || acornNode.consequent?.body
+    )
+
+  for (const child of children || []) {
+    yield {
+      from: acornNode,
+      to: child,
+    }
+
+    yield* toEdges(child)
+  }
+}
+
+function toId (acornNode) {
+  return `${acornNode.expression?.type || acornNode.type}-${acornNode.start}-${acornNode.end}`
+}
+
+for (const { from, to } of toEdges(ast.body[0])) {
+  const fromId = toId(from),
+        _toId = toId(to)
+  
+  if (!directedAcyclic.nodes.includes(fromId)) directedAcyclic.nodes.push(fromId)
+  if (!directedAcyclic.nodes.includes(_toId)) directedAcyclic.nodes.push(_toId)
+
+  const length = directedAcyclic.edges.filter(({ from }) => from === fromId).length
+  
+  directedAcyclic.edges.push(defineGraphEdge<string, number>(
+    fromId,
+    _toId,
+    state => state[fromId].metadata === length,
+  ))
+}

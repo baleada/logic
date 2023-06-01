@@ -10,6 +10,7 @@ import {
   createToRoots,
   createToSteps,
   createToTree,
+  createToLayers,
 } from '../../src/pipes/directed-acyclic'
 
 const suite = createSuite<{
@@ -286,8 +287,6 @@ suite('createToCommonAncestors orders ancestors from deepest to shallowest', ({ 
   assert.equal(value, expected)
 })
 
-
-
 suite('createToTree works', ({ directedAcyclic }) => {
   const value = createToTree()(directedAcyclic),
         expected = [
@@ -331,6 +330,18 @@ suite('createToTree works', ({ directedAcyclic }) => {
               },
             ],
           },
+        ]
+
+  assert.equal(value, expected)
+})
+
+suite('createToLayers works', ({ directedAcyclic }) => {
+  const value = createToLayers()(directedAcyclic),
+        expected = [
+          ['a'],
+          ['b', 'c', 'd'],
+          ['d', 'e', 'f', 'g'],
+          ['h'],
         ]
 
   assert.equal(value, expected)

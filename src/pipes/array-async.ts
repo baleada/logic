@@ -1,6 +1,7 @@
 import { reduce } from 'lazy-collections'
 import { createFilter } from './array'
-import type { ArrayAsyncFn } from './types'
+
+export type ArrayAsyncFn<Item, Returned> = (array: Item[]) => Promise<Returned>
 
 export function createFilterAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncFn<Item, Item[]> {
   return async array => {

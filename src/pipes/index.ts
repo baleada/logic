@@ -78,8 +78,11 @@ export {
   defineGraph,
   defineGraphNodes,
   defineGraphEdges,
+  defineGraphNode,
+  defineGraphEdge,
   defineAsyncGraph,
   defineAsyncGraphEdges,
+  defineAsyncGraphEdge,
 } from '../extracted'
 export type {
   Graph,
@@ -96,6 +99,7 @@ export type {
 
 // DIRECTED ACYCLIC
 export {
+  createToLayers as createDirectedAcyclicToLayers,
   createToTree as createDirectedAcyclicToTree,
   createToCommonAncestors as createDirectedAcyclicToCommonAncestors,
   createPredicateAncestor as createDirectedAcyclicPredicateAncestor,
@@ -111,6 +115,7 @@ export type {
 
 // ASYNC DIRECTED ACYCLIC
 export {
+  createToLayers as createAsyncDirectedAcyclicToLayers,
   createToTree as createAsyncDirectedAcyclicToTree,
   createToCommonAncestors as createAsyncDirectedAcyclicToCommonAncestors,
   createPredicateAncestor as createAsyncDirectedAcyclicPredicateAncestor,
@@ -150,3 +155,8 @@ export type {
   ToGraphYielded,
   CreateToGraphOptions,
 } from './createToGraph'
+
+
+// KEYBOARD EVENT
+export { createPredicateKeycomboMatch } from './keyboard-event'
+export type { CreatePredicateKeycomboMatchOptions } from './keyboard-event'

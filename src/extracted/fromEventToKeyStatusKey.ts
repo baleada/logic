@@ -6,4 +6,4 @@ export function fromEventToKeyStatusKey ({ key, code }: KeyboardEvent) {
     : { code: code }
 }
 
-const modifiers = ['Alt', 'Control', 'Meta', 'Shift']
+export const modifiers = ['Alt', 'Control', 'Meta', 'Shift']

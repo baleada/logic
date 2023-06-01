@@ -1,5 +1,5 @@
 import { Compareable } from '../classes'
-import type { StringFn } from './types'
+import type { StringFn } from './string'
 
 type MatchKind = 'variant' | 'case' | 'accent'
 

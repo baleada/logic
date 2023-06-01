@@ -1,6 +1,7 @@
 import { klona } from 'klona'
 import { dequal } from 'dequal'
-import type { AnyFn } from './types'
+
+export type AnyFn<Returned> = (param: any) => Returned
 
 export function createClone<Any> (): AnyFn<Any> {
   return any => {

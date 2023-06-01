@@ -20,34 +20,43 @@ const initialMetadata: KeyboardTimeMetadata = {
 export function storeKeyboardTimeMetadata<
   Type extends 'keydown' | 'keyup',
   Metadata extends KeyboardTimeMetadata
-> (
+> ({
+  event,
+  api,
+  getTimeMetadata,
+  getShouldStore,
+  setRequest,
+  recognize,
+}: {
   event: KeyboardEvent,
-  api: Parameters<RecognizeableEffect<Type, Metadata>>[1],
+  api: Parameters<RecognizeableEffect<Type, Metadata | { played: Metadata[] }>>[1],
+  getTimeMetadata: () => Metadata,
   getShouldStore: () => boolean,
   setRequest: (request: number) => void,
   recognize?: RecognizeableEffect<
     'keydown' | 'keyup',
     KeyboardTimeMetadata
   >
-): void {
+}): void {
   if (!getShouldStore()) return
 
-  const { getMetadata, getStatus, onRecognized } = api,
-        metadata = getMetadata()
+  const { getStatus, onRecognized } = api,
+        timeMetadata = getTimeMetadata()
 
-  if (!metadata.times) metadata.times = createClone<KeyboardTimeMetadata['times']>()(initialMetadata.times)
+  if (!timeMetadata.times) timeMetadata.times = createClone<KeyboardTimeMetadata['times']>()(initialMetadata.times)
 
-  metadata.times.start = Math.round(event.timeStamp)
-  metadata.times.end = Math.round(event.timeStamp)
+  timeMetadata.times.start = Math.round(event.timeStamp)
+  timeMetadata.times.end = Math.round(event.timeStamp)
 
   const storeDuration = () => {
     const request = requestAnimationFrame(timestamp => {
       if (!getShouldStore()) return
       
-      metadata.times.end = Math.round(timestamp)
-      metadata.duration = Math.max(0, metadata.times.end - metadata.times.start)
+      timeMetadata.times.end = Math.round(timestamp)
+      timeMetadata.duration = Math.max(0, timeMetadata.times.end - timeMetadata.times.start)
       
       if (recognize) {
+        // @ts-expect-error
         recognize(event, api)
         // @ts-expect-error
         if (getStatus() === 'recognized') onRecognized(event)

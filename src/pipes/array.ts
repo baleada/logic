@@ -1,6 +1,7 @@
 import { pipe, toArray, concat, unique, filter, map, reduce, slice, sort } from 'lazy-collections'
 import { predicateObject } from '../extracted'
-import type { ArrayFn } from './types'
+
+export type ArrayFn<Item, Returned> = (array: Item[]) => Returned
 
 export function createConcat<Item>(...arrays: Item[][]): ArrayFn<Item, Item[]> {
   return array => pipe(

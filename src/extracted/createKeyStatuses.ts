@@ -1,16 +1,12 @@
+import { includes } from 'lazy-collections'
 import type { AssociativeArray, AssociativeArrayOptions } from '../factories/createAssociativeArray'
 import { createAssociativeArray } from '../factories/createAssociativeArray'
 
 export type KeyStatuses = AssociativeArray<KeyStatusKey, KeyStatus>
 
-// TODO: Don't store flags?
 export type KeyStatusKey = {
   key?: string,
   code?: string,
-  altKey?: boolean,
-  ctrlKey?: boolean,
-  metaKey?: boolean,
-  shiftKey?: boolean,
 }
 
 export type KeyStatus = 'down' | 'up'
@@ -39,4 +35,8 @@ export function createKeyStatuses (options: KeyStatusesOptions = {}) {
 
 export function predicateDown (status: KeyStatus) {
   return status === 'down'
+}
+
+export function predicateSomeKeyDown (statuses: KeyStatuses) {
+  return includes<string>('down')(statuses.toValues()) as boolean
 }

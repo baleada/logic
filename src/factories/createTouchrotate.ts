@@ -1,6 +1,6 @@
-import type { RecognizeableEffect, RecognizeableOptions } from '@baleada/logic'
-import { toHookApi, toPolarCoordinates } from '@extracted'
-import type { HookApi, PointerStartMetadata, PointerTimeMetadata, PolarCoordinates } from '@extracted'
+import type { RecognizeableEffect, RecognizeableOptions } from '../classes'
+import { toHookApi, toPolarCoordinates } from '../extracted'
+import type { HookApi, PointerStartMetadata, PointerTimeMetadata, PolarCoordinates } from '../extracted'
 
 /*
  * Rotate is defined as two touches that:
@@ -91,7 +91,7 @@ export function createTouchrotate (options: TouchrotateOptions = {}): Recognizea
         xA: metadata.touches[0].points.start.x,
         xB: metadata.touches[1].points.start.x,
         yA: metadata.touches[0].points.start.y,
-        yB: metadata.touches[1].points.start.y
+        yB: metadata.touches[1].points.start.y,
       }).angle,
       end: { radians: 0, degrees: 0 },
     }
@@ -123,7 +123,7 @@ export function createTouchrotate (options: TouchrotateOptions = {}): Recognizea
       xA: metadata.touches[0].points.end.x,
       xB: metadata.touches[1].points.end.x,
       yA: metadata.touches[0].points.end.y,
-      yB: metadata.touches[1].points.end.y
+      yB: metadata.touches[1].points.end.y,
     }).angle
 
     metadata.rotation.radians = metadata.angle.end.radians - metadata.angle.start.radians

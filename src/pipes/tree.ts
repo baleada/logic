@@ -2,7 +2,8 @@ import type {
   GraphNode,
   GraphTreeNode,
 } from '../extracted'
-import type { GraphTreeFn } from './types'
+
+export type GraphTreeFn<Id extends string, Returned> = (tree: GraphTreeNode<Id>[]) => Returned
 
 export function createFind<Id extends string> (node: GraphNode<Id>): GraphTreeFn<Id, GraphTreeNode<Id>> {
   return tree => {

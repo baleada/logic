@@ -1,7 +1,28 @@
 import { pipe, filter } from 'lazy-collections'
 import { toLength } from '../extracted'
-import type { Graph, AsyncGraph, GraphEdge, AsyncGraphEdge } from '../extracted'
-import type { GraphNodeFn, GraphNodeGeneratorFn } from './types'
+import type {
+  Graph,
+  AsyncGraph,
+  GraphNode,
+  GraphEdge,
+  GraphState,
+  AsyncGraphEdge,
+} from '../extracted'
+import type { GeneratorFn } from './generator'
+
+export type GraphFn<Id extends string, Metadata, Returned> = (graph: Graph<Id, Metadata>) => Returned
+
+export type GraphGeneratorFn<Id extends string, Metadata, Yielded> = GeneratorFn<Graph<Id, Metadata>, Yielded>
+
+export type GraphNodeFn<Id extends string, Returned> = (node: GraphNode<Id>) => Returned
+
+export type GraphNodeGeneratorFn<Id extends string, Yielded> = GeneratorFn<GraphNode<Id>, Yielded>
+
+export type GraphNodeTupleFn<Id extends string, Returned> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => Returned
+
+export type GraphNodeTupleGeneratorFn<Id extends string, Yielded> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => Generator<Yielded>
+
+export type GraphStateFn<Id extends string, Metadata, Returned> = (state: GraphState<Id, Metadata>) => Returned
 
 export function createToIndegree<
   Id extends string,

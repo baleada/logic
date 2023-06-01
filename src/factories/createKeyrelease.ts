@@ -1,34 +1,21 @@
-import {
-  filter,
-  sort,
-  map,
-  pipe,
-  toArray,
-  unique,
-  some,
-  flatMap,
-  includes,
-} from 'lazy-collections'
+import { includes } from 'lazy-collections'
 import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
 import {
   toHookApi,
   storeKeyboardTimeMetadata,
-  createPredicateKeycomboDown,
-  createPredicateKeycomboMatch,
-  createKeyStatuses,
-  fromComboToAliases,
-  fromEventToAliases,
   fromEventToKeyStatusKey,
   fromComboToAliasesLength,
+  createKeyState,
+  predicateSomeKeyDown,
+  fromAliasToKeyStatusKey,
+  fromEventToAliases,
 } from '../extracted'
 import type {
   HookApi,
   KeyboardTimeMetadata,
-  KeyStatuses,
   CreatePredicateKeycomboDownOptions,
   CreatePredicateKeycomboMatchOptions,
 } from '../extracted'
-import { createFilter } from '../pipes'
 
 export type KeyreleaseType = 'keydown' | 'keyup' | 'visibilitychange'
 
@@ -43,7 +30,7 @@ export type KeyreleaseOptions = {
   toAliases?: CreatePredicateKeycomboMatchOptions['toAliases'],
   onDown?: KeyreleaseHook,
   onUp?: KeyreleaseHook,
-  onVisibilityChange?: KeyreleaseHook,
+  onVisibilitychange?: KeyreleaseHook,
 }
 
 export type KeyreleaseHook = (api: KeyreleaseHookApi) => any
@@ -53,7 +40,7 @@ export type KeyreleaseHookApi = HookApi<KeyreleaseType, KeyreleaseMetadata>
 const defaultOptions: KeyreleaseOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
-  toKey: undefined,
+  toKey: fromAliasToKeyStatusKey,
   toAliases: fromEventToAliases,
 }
 
@@ -68,65 +55,21 @@ export function createKeyrelease (
           toAliases,
           onDown,
           onUp,
-          onVisibilityChange,
+          onVisibilitychange,
         } = { ...defaultOptions, ...options },
-        narrowedKeycombos = createFilter<string>(
-          keycombo => !some<string>(
-            alias => includes(alias)(unsupportedAliases) as boolean
-          )(fromComboToAliases(keycombo))
-        )(Array.isArray(keycomboOrKeycombos) ? keycomboOrKeycombos : [keycomboOrKeycombos]),
-        createPredicateKeycomboDownOptions = toKey ? { toKey } : {},
-        downPredicatesByKeycombo = (() => {
-          const predicates: [string, ReturnType<typeof createPredicateKeycomboDown>][] = []
-
-          for (const keycombo of narrowedKeycombos) {
-            predicates.push([
-              keycombo,
-              createPredicateKeycomboDown(
-                keycombo,
-                createPredicateKeycomboDownOptions
-              ),
-            ])
-          }
-
-          return predicates
-        })(),
-        createPredicateKeycomboMatchOptions = toAliases ? { ...createPredicateKeycomboDownOptions, toAliases } : createPredicateKeycomboDownOptions,
-        matchPredicatesByKeycombo = (() => {
-          const predicates: { [keycombo: string]: ReturnType<typeof createPredicateKeycomboMatch> } = {}
-
-          for (const keycombo of narrowedKeycombos) {
-            predicates[keycombo] = createPredicateKeycomboMatch(
-                keycombo,
-                createPredicateKeycomboMatchOptions
-            )
-          }
-
-          return predicates
-        })(),
-        validAliases = pipe<typeof narrowedKeycombos>(
-          flatMap<typeof narrowedKeycombos[0], string[]>(fromComboToAliases),
-          unique(),
-          toArray(),
-        )(narrowedKeycombos) as string[],
-        getDownCombos = () => pipe(
-          filter<typeof downPredicatesByKeycombo[0]>(([, predicate]) => predicate(statuses)),
-          map<typeof downPredicatesByKeycombo[0], [string, string[]]>(([keycombo]) => [keycombo, fromComboToAliases(keycombo)]),
-          sort<string>(([,aliasesA], [,aliasesB]) => aliasesB.length - aliasesA.length),
-          map<string[], string>(([keycombo]) => keycombo),
-          toArray()
-        )(downPredicatesByKeycombo) as typeof narrowedKeycombos,
-        predicateValid = (event: KeyboardEvent) => {
-          const aliases = toAliases(event)
-
-          return some<typeof validAliases[0]>(
-            validAlias => includes<string>(validAlias)(aliases) as boolean
-          )(validAliases) as boolean
-        },
-        cleanup = () => {
-          window.cancelAnimationFrame(request)
-        },
-        statuses = createKeyStatuses()
+        {
+          matchPredicatesByKeycombo,
+          getDownCombos,
+          predicateValid,
+          cleanup,
+          statuses,
+        } = createKeyState({
+          keycomboOrKeycombos,
+          unsupportedAliases,
+          toKey,
+          toAliases,
+          getRequest: () => request,
+        })
 
   let request: number,
       localStatus: RecognizeableStatus
@@ -150,8 +93,18 @@ export function createKeyrelease (
       return
     }
 
+    const downCombos = getDownCombos()
+
     // NOT BUILDING VALID COMBO
-    if (!predicateValid(event)) {
+    if (
+      // NOT BUILDING VALID COMBO
+      !predicateValid(event)
+      // TOO MANY VALID KEYS PRESSED
+      || (
+        downCombos.length > 1
+        && fromComboToAliasesLength(downCombos[0]) === fromComboToAliasesLength(downCombos[1])
+      )
+    ) {
       denied()
       localStatus = getStatus()
       if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
@@ -159,31 +112,21 @@ export function createKeyrelease (
       return
     }
 
-    const downCombos = getDownCombos()
-
-    // TOO MANY VALID KEYS PRESSED
-    if (
-      downCombos.length > 1
-      && fromComboToAliasesLength(downCombos[0]) === fromComboToAliasesLength(downCombos[1])
-    ) {
-      denied()
-      localStatus = getStatus()
-      onDown?.(toHookApi(api))
-      return
-    }
-
     // BUILDING VALID KEYCOMBO
     if (preventsDefaultUnlessDenied) event.preventDefault()
+
+    const { getMetadata } = api
 
     localStatus = 'recognizing'
 
     cleanup()
-    storeKeyboardTimeMetadata(
+    storeKeyboardTimeMetadata({
       event,
       api,
-      () => downCombos.length && getDownCombos()[0] === downCombos[0],
-      newRequest => request = newRequest,
-    )
+      getTimeMetadata: getMetadata,
+      getShouldStore: () => downCombos.length && getDownCombos()[0] === downCombos[0],
+      setRequest: newRequest => request = newRequest,
+    })
 
     onDown?.(toHookApi(api))
   }
@@ -243,7 +186,7 @@ export function createKeyrelease (
       return
     }
 
-    if (localStatus !== 'recognized') recognized()
+    recognized()
   }
 
   const visibilitychange: RecognizeableEffect<'visibilitychange', KeyreleaseMetadata> = (event, api) => {
@@ -253,7 +196,7 @@ export function createKeyrelease (
       cleanup()
     }
 
-    onVisibilityChange?.(toHookApi(api))
+    onVisibilitychange?.(toHookApi(api))
   }
 
   return {
@@ -266,5 +209,3 @@ export function createKeyrelease (
 // MacOS doesn't fire keyup while meta is still pressed
 const unsupportedAliases = ['meta', 'command', 'cmd']
 const unsupportedKeys = ['Meta']
-
-const predicateSomeKeyDown = (statuses: KeyStatuses) => includes<string>('down')(statuses.toValues()) as boolean

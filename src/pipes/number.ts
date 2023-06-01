@@ -5,7 +5,8 @@ import {
   reduce,
 } from 'lazy-collections'
 import { createMap } from './array'
-import type { NumberFn } from './types'
+
+export type NumberFn<Returned> = (number: number) => Returned
 
 export function createClamp(min: number, max: number): NumberFn<number> {
   return number => {

@@ -1,4 +1,11 @@
-import { filter, pipe, some, toArray, at, includes } from 'lazy-collections'
+import {
+  filter,
+  pipe,
+  some,
+  toArray,
+  at,
+  includes,
+} from 'lazy-collections'
 import type {
   AsyncGraph,
   GraphNode,
@@ -20,12 +27,33 @@ import type {
   AsyncGraphAsyncGeneratorFn,
   GraphNodeAsyncGeneratorFn,
   GraphNodeTupleAsyncFn,
-} from './types'
+} from './graph-async'
 import type { CreateToStepsOptions as CreateDirectedAcyclicToStepsOptions } from './directed-acyclic'
 import { createToRoots, defaultCreateToStepsOptions } from './directed-acyclic'
 import { createFind as createTreeFind } from './tree'
 
-// // TODO: root option, multiple roots
+export function createToLayers<
+  Id extends string,
+  Metadata
+>(options: { createToSteps?: CreateDirectedAcyclicToStepsOptions<Id, Metadata> } = {}): AsyncGraphFn<Id, Metadata, GraphNode<Id>[][]> {
+  const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
+
+  return async function toLayers (directedAcyclic) {
+    const layers: GraphNode<Id>[][] = []
+
+    for await (const { path } of toSteps(directedAcyclic)) {
+      const node = path.at(-1),
+            depth = path.length - 1
+
+      ;(layers[depth] || (layers[depth] = [])).push(node)
+    }
+
+    return layers
+  }
+}
+
+
+// TODO: root option, multiple roots
 export function createToTree<
   Id extends string,
   Metadata

@@ -1,6 +1,7 @@
 import slugify from '@sindresorhus/slugify'
 import type { Options as SlugifyOptions } from '@sindresorhus/slugify'
-import type { StringFn } from './types'
+
+export type StringFn<Returned> = (string: string) => Returned
 
 export function createClip(required: string | RegExp): StringFn<string> {
   return string => {
