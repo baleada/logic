@@ -11,7 +11,7 @@ import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, Ho
  * - ends
  */
 
-export type MousereleaseTypes = 'mousedown' | 'mouseleave' | 'mouseup'
+export type MousereleaseType = 'mousedown' | 'mouseleave' | 'mouseup'
 
 export type MousereleaseMetadata = PointerStartMetadata
   & PointerMoveMetadata
@@ -30,7 +30,7 @@ export type MousereleaseOptions = {
 
 export type MousereleaseHook = (api: MousereleaseHookApi) => any
 
-export type MousereleaseHookApi = HookApi<MousereleaseTypes, MousereleaseMetadata>
+export type MousereleaseHookApi = HookApi<MousereleaseType, MousereleaseMetadata>
 
 const defaultOptions: MousereleaseOptions = {
   minDuration: 0,
@@ -39,7 +39,7 @@ const defaultOptions: MousereleaseOptions = {
   getMousemoveTarget: (event: MouseEvent) => event.target as HTMLElement,
 }
 
-export function createMouserelease (options: MousereleaseOptions = {}): RecognizeableOptions<MousereleaseTypes, MousereleaseMetadata>['effects'] {
+export function createMouserelease (options: MousereleaseOptions = {}): RecognizeableOptions<MousereleaseType, MousereleaseMetadata>['effects'] {
   const {
           minDuration,
           minDistance,

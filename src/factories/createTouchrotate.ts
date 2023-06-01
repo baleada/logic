@@ -8,7 +8,7 @@ import type { HookApi, PointerStartMetadata, PointerTimeMetadata, PolarCoordinat
  * - change the angle by more than 0 degrees (or a minimum rotation of your choice)
  */
 
-export type TouchrotateTypes = 'touchstart' | 'touchmove' | 'touchend' | 'touchcancel'
+export type TouchrotateType = 'touchstart' | 'touchmove' | 'touchend' | 'touchcancel'
 
 export type TouchrotateMetadata = {
   touches: [Touch, Touch],
@@ -39,14 +39,14 @@ export type TouchrotateOptions = {
 
 export type TouchrotateHook = (api: TouchrotateHookApi) => any
 
-export type TouchrotateHookApi = HookApi<TouchrotateTypes, TouchrotateMetadata>
+export type TouchrotateHookApi = HookApi<TouchrotateType, TouchrotateMetadata>
 
 const defaultOptions: TouchrotateOptions = {
   minRotation: 0,
   minRotationUnit: 'degrees',
 }
 
-export function createTouchrotate (options: TouchrotateOptions = {}): RecognizeableOptions<TouchrotateTypes, TouchrotateMetadata>['effects'] {
+export function createTouchrotate (options: TouchrotateOptions = {}): RecognizeableOptions<TouchrotateType, TouchrotateMetadata>['effects'] {
   const { minRotation, minRotationUnit, onStart, onMove, onCancel, onEnd } = { ...defaultOptions, ...options },
         cache: { identifiers?: [number, number] } = {}
 

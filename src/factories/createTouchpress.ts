@@ -9,7 +9,7 @@ import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, Ho
  * - does not touchcancel or end before 0ms (or a minimum duration of your choice) has elapsed
  */
 
-export type TouchpressTypes = 'touchstart' | 'touchmove' | 'touchcancel' | 'touchend'
+export type TouchpressType = 'touchstart' | 'touchmove' | 'touchcancel' | 'touchend'
 
 export type TouchpressMetadata = PointerStartMetadata
   & PointerMoveMetadata
@@ -26,14 +26,14 @@ export type TouchpressOptions = {
 
 export type TouchpressHook = (api: TouchpressHookApi) => any
 
-export type TouchpressHookApi = HookApi<TouchpressTypes, TouchpressMetadata>
+export type TouchpressHookApi = HookApi<TouchpressType, TouchpressMetadata>
 
 const defaultOptions: TouchpressOptions = {
   minDuration: 0,
   minDistance: 0,
 }
 
-export function createTouchpress (options: TouchpressOptions = {}): RecognizeableOptions<TouchpressTypes, TouchpressMetadata>['effects'] {
+export function createTouchpress (options: TouchpressOptions = {}): RecognizeableOptions<TouchpressType, TouchpressMetadata>['effects'] {
   const {
           minDuration,
           minDistance,

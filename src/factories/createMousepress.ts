@@ -9,7 +9,7 @@ import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, Ho
  * - does not mouseleave or end before 0ms (or a minimum duration of your choice) has elapsed
  */
 
-export type MousepressTypes = 'mousedown' | 'mouseleave' | 'mouseup'
+export type MousepressType = 'mousedown' | 'mouseleave' | 'mouseup'
 
 export type MousepressMetadata = PointerStartMetadata
   & PointerMoveMetadata
@@ -27,7 +27,7 @@ export type MousepressOptions = {
 
 export type MousepressHook = (api: MousepressHookApi) => any
 
-export type MousepressHookApi = HookApi<MousepressTypes, MousepressMetadata>
+export type MousepressHookApi = HookApi<MousepressType, MousepressMetadata>
 
 const defaultOptions: MousepressOptions = {
   minDuration: 0,
@@ -35,7 +35,7 @@ const defaultOptions: MousepressOptions = {
   getMousemoveTarget: (event: MouseEvent) => event.target as HTMLElement,
 }
 
-export function createMousepress (options: MousepressOptions = {}): RecognizeableOptions<MousepressTypes, MousepressMetadata>['effects'] {
+export function createMousepress (options: MousepressOptions = {}): RecognizeableOptions<MousepressType, MousepressMetadata>['effects'] {
   const {
           minDuration,
           minDistance,

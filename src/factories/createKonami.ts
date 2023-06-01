@@ -1,19 +1,19 @@
+import type { RecognizeableOptions } from '../classes'
 import { createKeychord } from './createKeychord'
 import type {
-  KeychordTypes,
+  KeychordType,
   KeychordMetadata,
   KeychordOptions,
   KeychordHook,
-  KeychordHookApi
+  KeychordHookApi,
 } from './createKeychord'
-import { RecognizeableOptions } from '@baleada/logic'
 
-export type KonamiTypes = KeychordTypes
+export type KonamiType = KeychordType
 export type KonamiMetadata = KeychordMetadata
 export type KonamiOptions = KeychordOptions
 export type KonamiHook = KeychordHook
 export type KonamiHookApi = KeychordHookApi
 
-export function createKonami (options: KonamiOptions = {}): RecognizeableOptions<KonamiTypes, KonamiMetadata>['effects'] {
+export function createKonami (options: KonamiOptions = {}): RecognizeableOptions<KonamiType, KonamiMetadata>['effects'] {
   return createKeychord('up up down down left right left right b a enter', options)
 }

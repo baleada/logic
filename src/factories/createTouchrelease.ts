@@ -11,7 +11,7 @@ import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, Ho
  * - ends
  */
 
-export type TouchreleaseTypes = 'touchstart' | 'touchmove' | 'touchcancel' | 'touchend'
+export type TouchreleaseType = 'touchstart' | 'touchmove' | 'touchcancel' | 'touchend'
 
 export type TouchreleaseMetadata = PointerStartMetadata
   & PointerMoveMetadata
@@ -29,7 +29,7 @@ export type TouchreleaseOptions = {
 
 export type TouchreleaseHook = (api: TouchreleaseHookApi) => any
 
-export type TouchreleaseHookApi = HookApi<TouchreleaseTypes, TouchreleaseMetadata>
+export type TouchreleaseHookApi = HookApi<TouchreleaseType, TouchreleaseMetadata>
 
 const defaultOptions: TouchreleaseOptions = {
   minDuration: 0,
@@ -37,7 +37,7 @@ const defaultOptions: TouchreleaseOptions = {
   minVelocity: 0,
 }
 
-export function createTouchrelease (options: TouchreleaseOptions = {}): RecognizeableOptions<TouchreleaseTypes, TouchreleaseMetadata>['effects'] {
+export function createTouchrelease (options: TouchreleaseOptions = {}): RecognizeableOptions<TouchreleaseType, TouchreleaseMetadata>['effects'] {
   const {
           minDuration,
           minDistance,

@@ -521,7 +521,7 @@ export class Animateable {
               case 'reversing':
                 this.computedIterations += 1
 
-                if (this.iterations < this.iterationLimit || this.iterationLimit === true) {
+                if (this.iterationLimit === true || this.iterations < this.iterationLimit) {
                   this.createAnimate('reverse')(effect, options)
                 } else {
                   this.alternateCache.status = 'ready'
@@ -531,7 +531,7 @@ export class Animateable {
           } else {
             this.computedIterations += 1
 
-            if (this.iterations < this.iterationLimit || this.iterationLimit === true) {
+            if (this.iterationLimit === true || this.iterations < this.iterationLimit) {
               this.createAnimate('play')(effect, options)
             }
           }
@@ -549,7 +549,7 @@ export class Animateable {
               case 'playing':
                 this.computedIterations += 1
 
-                if (this.iterations < this.iterationLimit || this.iterationLimit === true) {
+                if (this.iterationLimit === true || this.iterations < this.iterationLimit) {
                   this.createAnimate('play')(effect, options)
                 } else {
                   this.alternateCache.status = 'ready'
@@ -563,7 +563,7 @@ export class Animateable {
           } else {
             this.computedIterations += 1
 
-            if (this.iterations < this.iterationLimit) {
+            if (this.iterationLimit === true || this.iterations < this.iterationLimit) {
               this.createAnimate('reverse')(effect, options)
             }
           }

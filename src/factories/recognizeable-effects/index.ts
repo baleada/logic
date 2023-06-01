@@ -1,6 +1,6 @@
 // export { createClicks } from './createClicks'
 // export type {
-//   ClicksTypes,
+//   ClicksType,
 //   ClicksMetadata,
 //   ClicksOptions,
 //   ClicksHook,
@@ -9,7 +9,7 @@
 
 // export { createTouches } from './createTouches'
 // export type {
-//   TouchesTypes,
+//   TouchesType,
 //   TouchesMetadata,
 //   TouchesOptions,
 //   TouchesHook,
@@ -18,7 +18,7 @@
 
 // export { createTouchrotate } from './createTouchrotate'
 // export type {
-//   TouchrotateTypes,
+//   TouchrotateType,
 //   TouchrotateMetadata,
 //   TouchrotateOptions,
 //   TouchrotateHook,
@@ -33,7 +33,7 @@
 
 // export { createKeychord } from './createKeychord'
 // export type {
-//   KeychordTypes,
+//   KeychordType,
 //   KeychordMetadata,
 //   KeychordOptions,
 //   KeychordHook,
@@ -42,7 +42,7 @@
 
 // export { createKeypress } from './createKeypress'
 // export type {
-//   KeypressTypes,
+//   KeypressType,
 //   KeypressMetadata,
 //   KeypressOptions,
 //   KeypressHook,
@@ -51,7 +51,7 @@
 
 // export { createKonami } from './createKonami'
 // export type {
-//   KonamiTypes,
+//   KonamiType,
 //   KonamiMetadata,
 //   KonamiOptions,
 //   KonamiHook,

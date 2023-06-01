@@ -1,6 +1,7 @@
-import { toHookApi, toCloned, toTouchMovePoint, toPolarCoordinates } from '@extracted'
-import type { HookApi, PointerStartMetadata, PointerTimeMetadata } from '@extracted'
-import type { RecognizeableEffect, RecognizeableOptions } from '@baleada/logic'
+import { toHookApi, toTouchMovePoint, toPolarCoordinates } from '../../extracted'
+import { createClone } from '../../pipes'
+import type { HookApi, PointerStartMetadata, PointerTimeMetadata } from '../../extracted'
+import type { RecognizeableEffect, RecognizeableOptions } from '../../classes'
 
 /*
  * touches is defined as a single touch that:
@@ -11,7 +12,7 @@ import type { RecognizeableEffect, RecognizeableOptions } from '@baleada/logic'
  * - repeats 1 time (or a minimum number of your choice), with each tap ending less than or equal to 500ms (or a maximum interval of your choice) after the previous tap ended
  */
 
-export type TouchesTypes = 'touchstart' | 'touchcancel' | 'touchmove' | 'touchend'
+export type TouchesType = 'touchstart' | 'touchcancel' | 'touchmove' | 'touchend'
 
 export type TouchesMetadata = {
   touchTotal: number,
@@ -38,7 +39,7 @@ export type TouchesOptions = {
 
 export type TouchesHook = (api: TouchesHookApi) => any
 
-export type TouchesHookApi = HookApi<TouchesTypes, TouchesMetadata>
+export type TouchesHookApi = HookApi<TouchesType, TouchesMetadata>
 
 const defaultOptions: TouchesOptions = {
   minTouches: 1,
@@ -49,17 +50,17 @@ const defaultOptions: TouchesOptions = {
 const initialTouch: Touch = {
   times: {
     start: 0,
-    end: 0
+    end: 0,
   },
   points: {
     start: { x: 0, y: 0 },
-    end: { x: 0, y: 0 }
+    end: { x: 0, y: 0 },
   },
   distance: 0,
-  interval: 0
+  interval: 0,
 }
 
-export function createTouches (options: TouchesOptions = {}): RecognizeableOptions<TouchesTypes, TouchesMetadata>['effects'] {
+export function createTouches (options: TouchesOptions = {}): RecognizeableOptions<TouchesType, TouchesMetadata>['effects'] {
   const { minTouches, maxInterval, maxDistance, onStart, onMove, onCancel, onEnd } = { ...defaultOptions, ...options }
 
   const touchstart: RecognizeableEffect<'touchstart', TouchesMetadata> = (event, api) => {
@@ -69,7 +70,7 @@ export function createTouches (options: TouchesOptions = {}): RecognizeableOptio
     metadata.touchTotal = event.touches.length
 
     if (!metadata.lastTouch) {
-      metadata.lastTouch = toCloned(initialTouch)
+      metadata.lastTouch = createClone<typeof metadata.lastTouch>()(initialTouch)
     }
     
     metadata.lastTouch.times.start = event.timeStamp
@@ -120,7 +121,7 @@ export function createTouches (options: TouchesOptions = {}): RecognizeableOptio
         : endTime - metadata.touches[metadata.touches.length - 1].times.end
       metadata.lastTouch.interval = interval
 
-      const newTap = toCloned(metadata.lastTouch)
+      const newTap = createClone<typeof metadata.lastTouch>()(metadata.lastTouch)
       metadata.touches.push(newTap)
 
       recognize(event, api)
@@ -141,7 +142,7 @@ export function createTouches (options: TouchesOptions = {}): RecognizeableOptio
       || metadata.lastTouch.interval > maxInterval
       || metadata.lastTouch.distance > maxDistance
     ) {
-      const lastTouch = toCloned(metadata.lastTouch)
+      const lastTouch = createClone<typeof metadata.lastTouch>()(initialTouch)
       denied()
       metadata.touches = [lastTouch]
       return

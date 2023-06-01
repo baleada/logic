@@ -25,7 +25,7 @@ export type {
 
 export { createMousepress } from './createMousepress'
 export type {
-  MousepressTypes,
+  MousepressType,
   MousepressMetadata,
   MousepressOptions,
   MousepressHook,
@@ -34,7 +34,7 @@ export type {
 
 export { createMouserelease } from './createMouserelease'
 export type {
-  MousereleaseTypes,
+  MousereleaseType,
   MousereleaseMetadata,
   MousereleaseOptions,
   MousereleaseHook,
@@ -43,7 +43,7 @@ export type {
 
 export { createTouchpress } from './createTouchpress'
 export type {
-  TouchpressTypes,
+  TouchpressType,
   TouchpressMetadata,
   TouchpressOptions,
   TouchpressHook,
@@ -52,7 +52,7 @@ export type {
 
 export { createTouchrelease } from './createTouchrelease'
 export type {
-  TouchreleaseTypes,
+  TouchreleaseType,
   TouchreleaseMetadata,
   TouchreleaseOptions,
   TouchreleaseHook,
