@@ -173,7 +173,6 @@ export function createKeyrelease (
     }
 
     if (preventsDefaultUnlessDenied) event.preventDefault()
-    if (!predicateSomeKeyDown(statuses)) localStatus = 'recognizing'
     onUp?.(toHookApi(api))
   }
 

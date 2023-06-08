@@ -72,10 +72,12 @@ export function createKeychord (
           toKey,
           toAliases,
           getRequest: () => request,
-        }))(narrowedKeychord)
+        }))(narrowedKeychord),
+        localStatuses = createMap<typeof keyStates[0], RecognizeableStatus>(
+          () => 'recognizing'
+        )(keyStates)
 
   let request: number,
-      localStatus: RecognizeableStatus = 'recognizing',
       playedIndex = 0
 
   const keydown: RecognizeableEffect<'keydown', KeychordMetadata> = (event, api) => {
@@ -88,10 +90,16 @@ export function createKeychord (
       return
     }
 
+    if (localStatuses[playedIndex] === 'recognized') {
+      playedIndex++
+      for (const [key, status] of keyStates[playedIndex - 1].statuses.toEntries()) {
+        keyStates[playedIndex].statuses.set(key, status)
+      }
+    }
     keyStates[playedIndex].statuses.set(key, 'down')
 
     // ALREADY DENIED
-    if (localStatus === 'denied') {
+    if (localStatuses[playedIndex] === 'denied') {
       denied()
       onDown?.(toHookApi(api))
       return
@@ -100,6 +108,8 @@ export function createKeychord (
     const { getMetadata } = api,
           metadata = getMetadata(),
           downCombos = keyStates[playedIndex].getDownCombos()
+    
+    if (playedIndex === 0) metadata.played = []
 
     if (
       // NOT BUILDING VALID COMBO
@@ -116,7 +126,7 @@ export function createKeychord (
       )
     ) {
       denied()
-      localStatus = getStatus()
+      localStatuses[playedIndex] = getStatus()
       if (includes(event.key)(unsupportedKeys) as boolean) {
         for (const { statuses } of keyStates) statuses.clear()
       }
@@ -127,7 +137,7 @@ export function createKeychord (
     // BUILDING VALID KEYCOMBO
     if (preventsDefaultUnlessDenied) event.preventDefault()
 
-    localStatus = 'recognizing'
+    localStatuses[playedIndex] = 'recognizing'
 
     keyStates[playedIndex].cleanup()
     storeKeyboardTimeMetadata({
@@ -136,10 +146,7 @@ export function createKeychord (
       getTimeMetadata: () => {
         const metadata = getMetadata()
         return (
-          (
-            metadata.played
-            || (metadata.played = [])
-          )[playedIndex]
+          metadata.played[playedIndex]
           || (metadata.played[playedIndex] = {} as KeychordMetadata['played'][0])
         )
       },
@@ -159,9 +166,9 @@ export function createKeychord (
           metadata = getMetadata(),
           key = fromEventToKeyStatusKey(event)
                 
-    // SHOULD BLOCK EVENT
-    if (['denied', 'recognized'].includes(localStatus)) {
-      if (localStatus === 'denied') denied()
+    // ALREADY ACTED ON MULTI-KEY COMBO
+    if (['denied', 'recognized'].includes(localStatuses[playedIndex])) {
+      if (localStatuses[playedIndex] === 'denied') denied()
       
       for (const { statuses } of keyStates) {
         if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
@@ -169,8 +176,14 @@ export function createKeychord (
       }
 
       if (!predicateSomeKeyDown(keyStates[playedIndex].statuses)) {
-        localStatus = 'recognizing'
-        playedIndex = 0
+        if (
+          localStatuses[playedIndex] === 'denied'
+          || (playedIndex === narrowedKeychord.length - 1 && localStatuses[playedIndex] === 'recognized')
+        ) {
+          playedIndex = 0
+          for (let i = 0; i < localStatuses.length; i++) localStatuses[i] = 'recognizing'
+          for (const { statuses } of keyStates) statuses.clear()
+        }
       }
       onUp?.(toHookApi(api))
       return
@@ -187,32 +200,14 @@ export function createKeychord (
     }
 
     // RELEASING FULL COMBO
-    const playedIndexCached = playedIndex
     recognize(event, api)
 
     const status = getStatus()
 
     if (
-      status !== 'recognized'
-      && playedIndexCached !== playedIndex
+      (status === 'recognizing' && localStatuses[playedIndex] === 'recognized')
+      || status === 'recognized'
     ) {
-      metadata.played[playedIndexCached] = {
-        ...metadata.played[playedIndexCached],
-        released: downCombos[0],
-      }
-
-      for (const [key, status] of keyStates[playedIndexCached].statuses.toEntries()) {
-        keyStates[playedIndex].statuses.set(key, status)
-      }
-
-      if (preventsDefaultUnlessDenied) event.preventDefault()
-      if (!predicateSomeKeyDown(keyStates[playedIndex].statuses)) localStatus = 'recognizing'
-      onUp?.(toHookApi(api))
-      return
-    }
-
-    if (status === 'recognized') {
-      localStatus = status
       metadata.played[playedIndex] = {
         ...metadata.played[playedIndex],
         released: downCombos[0],
@@ -220,7 +215,14 @@ export function createKeychord (
     }
 
     if (preventsDefaultUnlessDenied) event.preventDefault()
-    if (!predicateSomeKeyDown(keyStates[playedIndex].statuses)) localStatus = 'recognizing'
+    if (
+      playedIndex === narrowedKeychord.length - 1
+      && !predicateSomeKeyDown(keyStates[playedIndex].statuses)
+    ) {
+      playedIndex = 0
+      for (let i = 0; i < localStatuses.length; i++) localStatuses[i] = 'recognizing'
+      for (const { statuses } of keyStates) statuses.clear()
+    }
     onUp?.(toHookApi(api))
   }
 
@@ -235,17 +237,19 @@ export function createKeychord (
     
     if (playedIndex === narrowedKeychord.length - 1) {
       recognized()
+      localStatuses[playedIndex] = 'recognized'
       return
     }
 
-    playedIndex++
+    localStatuses[playedIndex] = 'recognized'
   }
 
   const visibilitychange: RecognizeableEffect<'visibilitychange', KeychordMetadata> = (event, api) => {
     if (document.visibilityState === 'hidden') {
       for (const { statuses } of keyStates) statuses.clear()
-      localStatus = 'recognizing'
+      localStatuses[playedIndex] = 'recognizing'
       keyStates[playedIndex].cleanup()
+      playedIndex = 0
     }
 
     onVisibilitychange?.(toHookApi(api))

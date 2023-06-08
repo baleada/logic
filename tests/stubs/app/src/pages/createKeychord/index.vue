@@ -11,7 +11,7 @@ let listenable: Listenable<KeychordType, KeychordMetadata>
 onMounted(() => {
   listenable = new Listenable<KeychordType, KeychordMetadata>(
     'recognizeable' as KeychordType, 
-    { recognizeable: { effects: createKeychord('a s d f') } }
+    { recognizeable: { effects: createKeychord('alt+a alt+s alt+d alt+f') } }
   )
 
   window.testState = { listenable: listenable.listen(() => {
