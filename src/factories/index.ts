@@ -32,6 +32,15 @@ export type {
   KeychordHookApi,
 } from './createKeychord'
 
+export { createKonami } from './createKonami'
+export type {
+  KonamiType,
+  KonamiMetadata,
+  KonamiOptions,
+  KonamiHook,
+  KonamiHookApi,
+} from './createKonami'
+
 export { createMousepress } from './createMousepress'
 export type {
   MousepressType,

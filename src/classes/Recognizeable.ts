@@ -24,9 +24,6 @@ export type RecognizeableEffectApi<Type extends ListenableSupportedType, Metadat
   setMetadata: (metadata: Metadata) => void,
   recognized: () => void,
   denied: () => void,
-  enable: (type: Type) => void,
-  disable: (type: Type) => void,
-  getAbility: (type: Type) => 'enabled' | 'disabled',
   getSequence: () => ListenEffectParam<Type>[],
   onRecognized: (sequenceItem: ListenEffectParam<Type>) => any,
 }
