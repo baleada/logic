@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import type {
-  KonamiTypes,
+  KonamiType,
   KonamiMetadata,
   KonamiOptions,
   KonamiHook,
@@ -15,8 +15,8 @@ const suite = withPlaywright(
 
 suite(`recognizes Konami code`, async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<KonamiTypes, KonamiMetadata>(
-      'recognizeable' as KonamiTypes, 
+    const listenable = new window.Logic.Listenable<KonamiType, KonamiMetadata>(
+      'recognizeable' as KonamiType, 
       { recognizeable: { effects: window.Logic.createKonami() } }
     );
 

@@ -7,9 +7,7 @@ import {
   fromComboToAliases,
   fromAliasToKeyStatusKey,
 } from '../extracted'
-import type {
-  KeyStatusKey,
-} from '../extracted'
+import type { KeyStatusKey } from '../extracted'
 
 export type KeyboardEventFn<Returned> = (keyboardEvent: KeyboardEvent) => Returned
 
@@ -18,7 +16,7 @@ export type CreatePredicateKeycomboMatchOptions = {
 }
 
 const defaultOptions: CreatePredicateKeycomboMatchOptions = {
-  toKey: fromAliasToKeyStatusKey,
+  toKey: alias => fromAliasToKeyStatusKey(alias),
 }
 
 export const createPredicateKeycomboMatch = (

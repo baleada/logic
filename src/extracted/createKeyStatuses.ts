@@ -1,6 +1,6 @@
 import { includes } from 'lazy-collections'
-import type { AssociativeArray, AssociativeArrayOptions } from '../factories/createAssociativeArray'
-import { createAssociativeArray } from '../factories/createAssociativeArray'
+import type { AssociativeArray, AssociativeArrayOptions } from '../factories'
+import { createAssociativeArray } from '../factories'
 
 export type KeyStatuses = AssociativeArray<KeyStatusKey, KeyStatus>
 

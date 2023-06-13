@@ -4,9 +4,6 @@ import { withPlaywright } from '@baleada/prepare'
 import type {
   KeychordType,
   KeychordMetadata,
-  KeychordOptions,
-  KeychordHook,
-  KeychordHookApi,
 } from '../../src/factories'
 
 const suite = withPlaywright(

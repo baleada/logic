@@ -40,8 +40,8 @@ export type KeyreleaseHookApi = HookApi<KeyreleaseType, KeyreleaseMetadata>
 const defaultOptions: KeyreleaseOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
-  toKey: fromAliasToKeyStatusKey,
-  toAliases: fromEventToAliases,
+  toKey: alias => fromAliasToKeyStatusKey(alias),
+  toAliases: event => fromEventToAliases(event as KeyboardEvent),
 }
 
 export function createKeyrelease (

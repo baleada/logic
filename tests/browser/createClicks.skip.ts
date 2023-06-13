@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import type {
-  ClicksTypes,
+  ClicksType,
   ClicksMetadata,
   ClicksOptions,
   ClicksHook,
@@ -16,8 +16,8 @@ const suite = withPlaywright(
 
 suite(`recognizes clicks`, async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<ClicksTypes, ClicksMetadata>(
-      'recognizeable' as ClicksTypes, 
+    const listenable = new window.Logic.Listenable<ClicksType, ClicksMetadata>(
+      'recognizeable' as ClicksType, 
       { recognizeable: { effects: window.Logic.createClicks() } }
     );
 
@@ -27,7 +27,7 @@ suite(`recognizes clicks`, async ({ playwright: { page, reloadNext } }) => {
   await page.mouse.down()
   await page.mouse.up()
   
-  const value = await page.evaluate(() => (window.testState.listenable as Listenable<ClicksTypes, ClicksMetadata>).recognizeable.status),
+  const value = await page.evaluate(() => (window.testState.listenable as Listenable<ClicksType, ClicksMetadata>).recognizeable.status),
         expected = 'recognized'
 
   assert.is(value, expected)

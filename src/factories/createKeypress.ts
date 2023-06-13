@@ -40,8 +40,8 @@ export type KeypressHookApi = HookApi<KeypressType, KeypressMetadata>
 const defaultOptions: KeypressOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
-  toKey: fromAliasToKeyStatusKey,
-  toAliases: fromEventToAliases,
+  toKey: alias => fromAliasToKeyStatusKey(alias),
+  toAliases: event => fromEventToAliases(event as KeyboardEvent),
 }
 
 export function createKeypress (

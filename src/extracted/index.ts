@@ -1,22 +1,6 @@
 export type { DeepRequired, Expand } from './types'
 
-export { createExceptAndOnlyEffect } from './createExceptAndOnlyEffect'
-
-export { getDomAvailability } from './getDomAvailability'
-
-export {
-  predicateArray,
-  predicateUndefined,
-  predicateFunction,
-  predicateNull,
-  predicateNumber,
-  predicateString,
-  predicateObject,
-} from './predicates'
-
-export { toLength } from './lazy-collections'
-
-// // RECOGNIZEABLE EFFECTS
+// RECOGNIZEABLE EFFECTS
 // Pipes
 export { createPredicateKeycomboDown } from './createPredicateKeycomboDown'
 export type { CreatePredicateKeycomboDownOptions } from './createPredicateKeycomboDown'
@@ -66,7 +50,7 @@ export { storePointerTimeMetadata } from './storePointerTimeMetadata'
 export type { PointerTimeMetadata } from './storePointerTimeMetadata'
 
 
-// Objects
+// OBJECTS
 export {
   defineGraph,
   defineGraphNodes,
@@ -91,3 +75,21 @@ export type {
 
 export { defineAssociativeArrayEntries } from './associative-array'
 export type { AssociativeArrayEntries } from './associative-array'
+
+
+// MULTIPLE CONCERNS
+export { createExceptAndOnlyEffect } from './createExceptAndOnlyEffect'
+
+export { getDomAvailability } from './getDomAvailability'
+
+export {
+  predicateArray,
+  predicateUndefined,
+  predicateFunction,
+  predicateNull,
+  predicateNumber,
+  predicateString,
+  predicateObject,
+} from './predicates'
+
+export { toLength } from './lazy-collections'

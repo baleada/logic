@@ -15,7 +15,7 @@ import {
   createKeyStatuses,
   fromComboToAliases,
 } from '../extracted'
-import { createFilter } from '../pipes/array'
+import { createFilter } from '../pipes'
 
 export function createKeyState (
   {

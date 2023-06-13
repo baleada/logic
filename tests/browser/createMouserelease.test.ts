@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import type {
-  MousereleaseTypes,
+  MousereleaseType,
   MousereleaseMetadata,
 } from '../../src/factories'
 import type { Listenable } from '../../src/classes/Listenable'
@@ -13,8 +13,8 @@ const suite = withPlaywright(
 
 suite('recognizes mouserelease', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<MousereleaseTypes, MousereleaseMetadata>(
-      'recognizeable' as MousereleaseTypes,
+    const listenable = new window.Logic.Listenable<MousereleaseType, MousereleaseMetadata>(
+      'recognizeable' as MousereleaseType,
       { recognizeable: { effects: window.Logic.createMouserelease() } }
     )
 
@@ -35,8 +35,8 @@ suite('recognizes mouserelease', async ({ playwright: { page, reloadNext } }) =>
 
 suite('respects minDuration option', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<MousereleaseTypes, MousereleaseMetadata>(
-      'recognizeable' as MousereleaseTypes, 
+    const listenable = new window.Logic.Listenable<MousereleaseType, MousereleaseMetadata>(
+      'recognizeable' as MousereleaseType, 
       { recognizeable: { effects: window.Logic.createMouserelease({ minDuration: 1000 }) } }
     )
 
@@ -46,12 +46,12 @@ suite('respects minDuration option', async ({ playwright: { page, reloadNext } }
   await page.mouse.down()
   await page.waitForTimeout(500)
   
-  const recognizing = await page.evaluate(() => (window.testState.listenable as Listenable<MousereleaseTypes, MousereleaseMetadata>).recognizeable.status)  
+  const recognizing = await page.evaluate(() => (window.testState.listenable as Listenable<MousereleaseType, MousereleaseMetadata>).recognizeable.status)  
   assert.is(recognizing, 'recognizing')
 
   await page.waitForTimeout(1000)
   await page.mouse.up()
-  const recognized = await page.evaluate(() => (window.testState.listenable as Listenable<MousereleaseTypes, MousereleaseMetadata>).recognizeable.status)
+  const recognized = await page.evaluate(() => (window.testState.listenable as Listenable<MousereleaseType, MousereleaseMetadata>).recognizeable.status)
   assert.is(recognized, 'recognized')
 
   reloadNext()
@@ -59,8 +59,8 @@ suite('respects minDuration option', async ({ playwright: { page, reloadNext } }
 
 suite('respects minDistance option', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<MousereleaseTypes, MousereleaseMetadata>(
-      'recognizeable' as MousereleaseTypes,
+    const listenable = new window.Logic.Listenable<MousereleaseType, MousereleaseMetadata>(
+      'recognizeable' as MousereleaseType,
       { recognizeable: { effects: window.Logic.createMouserelease({ minDistance: 101 }) } }
     )
     
@@ -99,8 +99,8 @@ suite('calls hooks', async ({ playwright: { page, reloadNext } }) => {
       },
     }
 
-    const listenable = new window.Logic.Listenable<MousereleaseTypes, MousereleaseMetadata>(
-      'recognizeable' as MousereleaseTypes,
+    const listenable = new window.Logic.Listenable<MousereleaseType, MousereleaseMetadata>(
+      'recognizeable' as MousereleaseType,
       {
         recognizeable: {
           effects: window.Logic.createMouserelease({
@@ -135,8 +135,8 @@ suite('doesn\'t listen for mousemove before mousedown', async ({ playwright: { p
       },
     }
 
-    const listenable = new window.Logic.Listenable<MousereleaseTypes, MousereleaseMetadata>(
-      'recognizeable' as MousereleaseTypes,
+    const listenable = new window.Logic.Listenable<MousereleaseType, MousereleaseMetadata>(
+      'recognizeable' as MousereleaseType,
       {
         recognizeable: {
           effects: window.Logic.createMouserelease({
@@ -168,8 +168,8 @@ suite('doesn\'t listen for mousemove after mouseup', async ({ playwright: { page
       },
     }
 
-    const listenable = new window.Logic.Listenable<MousereleaseTypes, MousereleaseMetadata>(
-      'recognizeable' as MousereleaseTypes,
+    const listenable = new window.Logic.Listenable<MousereleaseType, MousereleaseMetadata>(
+      'recognizeable' as MousereleaseType,
       {
         recognizeable: {
           effects: window.Logic.createMouserelease({

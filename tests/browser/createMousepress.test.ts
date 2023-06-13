@@ -2,19 +2,19 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import type {
-  MousepressTypes,
+  MousepressType,
   MousepressMetadata,
 } from '../../src/factories'
 import type { Listenable } from '../../src/classes/Listenable'
 
 const suite = withPlaywright(
-  createSuite('mousepress')
+  createSuite('createMousepress')
 )
 
 suite('recognizes mousepress', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
-      'recognizeable' as MousepressTypes, 
+    const listenable = new window.Logic.Listenable<MousepressType, MousepressMetadata>(
+      'recognizeable' as MousepressType, 
       { recognizeable: { effects: window.Logic.createMousepress() } }
     )
 
@@ -24,7 +24,7 @@ suite('recognizes mousepress', async ({ playwright: { page, reloadNext } }) => {
   await page.mouse.down()
   await page.waitForTimeout(10)
   
-  const value = await page.evaluate(() => (window.testState.listenable as Listenable<MousepressTypes, MousepressMetadata>).recognizeable.status),
+  const value = await page.evaluate(() => (window.testState.listenable as Listenable<MousepressType, MousepressMetadata>).recognizeable.status),
         expected = 'recognized'
 
   assert.is(value, expected)
@@ -34,22 +34,22 @@ suite('recognizes mousepress', async ({ playwright: { page, reloadNext } }) => {
 
 suite('respects minDuration option', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
-      'recognizeable' as MousepressTypes, 
-      { recognizeable: { effects: window.Logic.createMousepress({ minDuration: 1000 }) } }
+    const listenable = new window.Logic.Listenable<MousepressType, MousepressMetadata>(
+      'recognizeable' as MousepressType, 
+      { recognizeable: { effects: window.Logic.createMousepress({ minDuration: 100 }) } }
     )
 
     window.testState = { listenable: listenable.listen(() => {}) }
   })
 
   await page.mouse.down()
-  await page.waitForTimeout(500)
+  await page.waitForTimeout(50)
   
-  const recognizing = await page.evaluate(() => (window.testState.listenable as Listenable<MousepressTypes, MousepressMetadata>).recognizeable.status)  
+  const recognizing = await page.evaluate(() => (window.testState.listenable as Listenable<MousepressType, MousepressMetadata>).recognizeable.status)  
   assert.is(recognizing, 'recognizing')
 
-  await page.waitForTimeout(1000)
-  const recognized = await page.evaluate(() => (window.testState.listenable as Listenable<MousepressTypes, MousepressMetadata>).recognizeable.status)
+  await page.waitForTimeout(100)
+  const recognized = await page.evaluate(() => (window.testState.listenable as Listenable<MousepressType, MousepressMetadata>).recognizeable.status)
   assert.is(recognized, 'recognized')
 
   reloadNext()
@@ -57,8 +57,8 @@ suite('respects minDuration option', async ({ playwright: { page, reloadNext } }
 
 suite('respects minDistance option', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
-      'recognizeable' as MousepressTypes,
+    const listenable = new window.Logic.Listenable<MousepressType, MousepressMetadata>(
+      'recognizeable' as MousepressType,
       { recognizeable: { effects: window.Logic.createMousepress({ minDistance: 101 }) } }
     )
     
@@ -72,9 +72,8 @@ suite('respects minDistance option', async ({ playwright: { page, reloadNext } }
   assert.is(from, 'recognizing')
   
   await page.mouse.up()
-  await page.mouse.move(0, 0)
   await page.mouse.down()
-  await page.mouse.move(0, 101)
+  await page.mouse.move(0, 201)
   
   const to = await page.evaluate(() => window.testState.listenable.recognizeable.status)
   assert.is(to, 'recognized')
@@ -92,8 +91,8 @@ suite('calls hooks', async ({ playwright: { page, reloadNext } }) => {
       },
     }
 
-    const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
-      'recognizeable' as MousepressTypes,
+    const listenable = new window.Logic.Listenable<MousepressType, MousepressMetadata>(
+      'recognizeable' as MousepressType,
       {
         recognizeable: {
           effects: window.Logic.createMousepress({
@@ -128,8 +127,8 @@ suite('doesn\'t listen for mousemove before mousedown', async ({ playwright: { p
       },
     }
 
-    const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
-      'recognizeable' as MousepressTypes,
+    const listenable = new window.Logic.Listenable<MousepressType, MousepressMetadata>(
+      'recognizeable' as MousepressType,
       {
         recognizeable: {
           effects: window.Logic.createMousepress({
@@ -161,8 +160,8 @@ suite('doesn\'t listen for mousemove after mouseup', async ({ playwright: { page
       },
     }
 
-    const listenable = new window.Logic.Listenable<MousepressTypes, MousepressMetadata>(
-      'recognizeable' as MousepressTypes,
+    const listenable = new window.Logic.Listenable<MousepressType, MousepressMetadata>(
+      'recognizeable' as MousepressType,
       {
         recognizeable: {
           effects: window.Logic.createMousepress({

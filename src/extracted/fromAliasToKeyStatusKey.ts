@@ -71,7 +71,7 @@ const codesByAlias = {
   camera: 'Camera',
 }
 
-export const keysByAlias = {
+const keysByAlias = {
   alt: 'Alt',
   opt: 'Alt',
   option: 'Alt',

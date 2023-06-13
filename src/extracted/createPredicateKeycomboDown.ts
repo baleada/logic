@@ -10,7 +10,7 @@ export type CreatePredicateKeycomboDownOptions = {
 }
 
 const defaultOptions: CreatePredicateKeycomboDownOptions = {
-  toKey: fromAliasToKeyStatusKey,
+  toKey: alias => fromAliasToKeyStatusKey(alias),
 }
 
 export const createPredicateKeycomboDown = (

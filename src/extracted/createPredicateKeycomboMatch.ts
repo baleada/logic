@@ -12,8 +12,8 @@ export type CreatePredicateKeycomboMatchOptions = CreatePredicateKeycomboDownOpt
 }
 
 const defaultOptions: CreatePredicateKeycomboMatchOptions = {
-  toKey: fromAliasToKeyStatusKey,
-  toAliases: fromEventToAliases,
+  toKey: alias => fromAliasToKeyStatusKey(alias),
+  toAliases: event => fromEventToAliases(event as KeyboardEvent),
 }
 
 export const createPredicateKeycomboMatch = (

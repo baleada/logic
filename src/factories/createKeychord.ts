@@ -47,8 +47,8 @@ const defaultOptions: KeychordOptions = {
   minDuration: 0,
   maxInterval: 5000, // VS Code default
   preventsDefaultUnlessDenied: true,
-  toKey: fromAliasToKeyStatusKey,
-  toAliases: fromEventToAliases,
+  toKey: alias => fromAliasToKeyStatusKey(alias),
+  toAliases: event => fromEventToAliases(event as KeyboardEvent),
 }
 
 export function createKeychord (
