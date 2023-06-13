@@ -23,6 +23,15 @@ export type {
   KeyreleaseHookApi,
 } from './createKeyrelease'
 
+export { createKeychord } from './createKeychord'
+export type {
+  KeychordType,
+  KeychordMetadata,
+  KeychordOptions,
+  KeychordHook,
+  KeychordHookApi,
+} from './createKeychord'
+
 export { createMousepress } from './createMousepress'
 export type {
   MousepressType,
