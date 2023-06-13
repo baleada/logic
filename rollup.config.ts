@@ -1,15 +1,19 @@
 import { configureable } from '@baleada/prepare'
 
 const external = [
-        'bezier-easing',
-        '@snigo.dev/color',
-        'fast-fuzzy',
+        /@babel\/runtime/,
         '@sindresorhus/slugify',
-        'dompurify',
+        '@snigo.dev/color',
+        'bezier-easing',
+        'clsx',
+        'dequal',
+        /dompurify/,
+        'fast-fuzzy',
+        'klona',
+        'ky',
+        'lazy-collections',
         'perfect-freehand',
         'polygon-clipping',
-        'lazy-collections',
-        /@babel\/runtime/,
       ],
       shared = new configureable.Rollup()
         .input([
@@ -29,7 +33,7 @@ const external = [
         .cjs({ file: 'lib/index.cjs' })
         .configure(),
       dts = new configureable.Rollup()
-        .input(['types/classes.d.ts', 'types/pipes.d.ts'])
+        .input(['types/classes/index.d.ts', 'types/pipes/index.d.ts', 'types/factories/index.d.ts'])
         .external([
           ...external,
           '@types/resize-observer-browser',
