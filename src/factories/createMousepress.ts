@@ -75,6 +75,8 @@ export function createMousepress (options: MousepressOptions = {}): Recognizeabl
   }
 
   const mousemove: RecognizeableEffect<'mousemove', MousepressMetadata> = (event, api) => {
+    const { pushSequence } = api 
+    pushSequence(event)
     storePointerMoveMetadata(event, api)
     recognize(event, api)
 

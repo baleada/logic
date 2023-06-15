@@ -1,8 +1,4 @@
-import {
-  predicateArray,
-  predicateNumber,
-} from '../extracted'
-import { createConcat, createSlice } from '../pipes'
+import { predicateArray } from '../extracted'
 import type {
   ListenableSupportedType,
   ListenEffectParam,
@@ -25,6 +21,7 @@ export type RecognizeableEffectApi<Type extends ListenableSupportedType, Metadat
   recognized: () => void,
   denied: () => void,
   getSequence: () => ListenEffectParam<Type>[],
+  pushSequence: (sequenceItem: ListenEffectParam<Type>) => void,
   onRecognized: (sequenceItem: ListenEffectParam<Type>) => any,
 }
     
@@ -107,15 +104,23 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     this.recognizing()
 
     const type = this.toType(sequenceItem),
-          excess = predicateNumber(this.maxSequenceLength)
-            ? Math.max(0, this.sequence.length - this.maxSequenceLength)
-            : 0,
-          newSequence = createConcat(
-            createSlice<ListenEffectParam<Type>>(excess)(this.sequence),
-            [sequenceItem]
-          )([])
+          pushSequence = (sequenceItem: ListenEffectParam<Type>) => {
+            newSequence.push(sequenceItem)
+            if (
+              this.maxSequenceLength !== true
+              && newSequence.length > this.maxSequenceLength
+            ) {
+              newSequence.shift()
+            }
+          },
+          newSequence: ListenEffectParam<Type>[] = []
+
+    for (let i = 0; i < this.sequence.length; i++) {
+      pushSequence(this.sequence[i])
+    }
           
     this.effectApi.getSequence = () => newSequence
+    this.effectApi.pushSequence = pushSequence
     this.effectApi.onRecognized = onRecognized || (() => {})
 
     this.effects[type]?.(sequenceItem, { ...this.effectApi })

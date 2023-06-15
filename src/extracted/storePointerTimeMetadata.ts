@@ -33,7 +33,7 @@ export function storePointerTimeMetadata<
     PointerTimeMetadata & PointerMoveMetadata
   >,
 ): void {
-  const { getMetadata, getStatus, onRecognized } = api,
+  const { getSequence, getMetadata, getStatus, onRecognized } = api,
         metadata = getMetadata()
 
   if (!metadata.times) {
@@ -53,8 +53,9 @@ export function storePointerTimeMetadata<
         const durationFromPrevious = Math.max(0, metadata.times.end - previousTime)
         metadata.velocity = metadata.distance.straight.fromPrevious / durationFromPrevious
         
+        const event = getSequence().at(-1)
+
         recognize?.(event, api)
-        // @ts-expect-error
         if (getStatus() === 'recognized') onRecognized(event)
 
         storeDuration()

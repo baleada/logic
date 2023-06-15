@@ -188,4 +188,25 @@ suite('doesn\'t listen for mousemove after mouseup', async ({ playwright: { page
   reloadNext()
 })
 
+suite('adds mousemove to sequence', async ({ playwright: { page, reloadNext } }) => {
+  await page.evaluate(async () => {
+    const listenable = new window.Logic.Listenable<MousepressType, MousepressMetadata>(
+      'recognizeable' as MousepressType, 
+      { recognizeable: { effects: window.Logic.createMousepress() } }
+    )
+
+    window.testState = { listenable: listenable.listen(() => {}) }
+  })
+
+  await page.mouse.down()
+  await page.mouse.move(0, 100)
+  
+  const value = await page.evaluate(() => (window.testState.listenable as Listenable<MousepressType, MousepressMetadata>).recognizeable.sequence.at(-1).type),
+        expected = 'mousemove'
+
+  assert.is(value, expected)
+
+  reloadNext()
+})
+
 suite.run()
