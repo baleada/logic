@@ -115,9 +115,11 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
           },
           newSequence: ListenEffectParam<Type>[] = []
 
-    for (let i = 0; i < this.sequence.length; i++) {
-      pushSequence(this.sequence[i])
+    for (const sequenceItem of this.sequence) {
+      pushSequence(sequenceItem)
     }
+
+    pushSequence(sequenceItem)
           
     this.effectApi.getSequence = () => newSequence
     this.effectApi.pushSequence = pushSequence

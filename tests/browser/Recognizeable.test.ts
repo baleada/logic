@@ -463,10 +463,46 @@ suite('includes all desired keys in effect API', async ({ puppeteer: { page } })
           'denied',
           'ready',
           'getSequence',
+          'pushSequence',
           'onRecognized',
         ]
 
   assert.equal(value, expected)
+})
+
+suite('respects maxSequenceLength', async ({ puppeteer: { page } }) => {
+  await (async () => {
+    const value = await page.evaluate(() => {
+            const instance = new window.Logic.Recognizeable(
+              [],
+              {
+                effects: {
+                  click: () => {},
+                },
+                maxSequenceLength: 1,
+              }
+            )
+            
+            instance.recognize(new MouseEvent('click'))
+        
+            window.testState = { instance }
+        
+            return instance.sequence.length
+          }),
+          expected = 1
+          
+  
+    assert.is(value, expected)
+  })()
+
+  const value = await page.evaluate(() => {
+          return window.testState.instance
+            .recognize(new MouseEvent('click'))
+            .sequence.length
+        }),
+        expected = 1
+
+  assert.is(value, expected)
 })
 
 suite.run()
