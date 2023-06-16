@@ -20,6 +20,14 @@ suite('createPredicateKeycomboMatch predicates keys', () => {
 
     assert.is(value, expected)
   }
+  
+  {
+    const event = { code: 'KeyA', shiftKey: true } as KeyboardEvent,
+          value = createPredicateKeycomboMatch('a')(event),
+          expected = false
+
+    assert.is(value, expected)
+  }
 
   {
     const event = { code: 'KeyA', shiftKey: true, metaKey: true } as KeyboardEvent,
