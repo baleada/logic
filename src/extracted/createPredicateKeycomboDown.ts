@@ -1,35 +1,33 @@
 import { every, map, pipe } from 'lazy-collections'
-import { predicateDown } from './createKeyStatuses'
 import type { KeyStatusKey } from './createKeyStatuses'
 import { fromComboToAliases } from './fromComboToAliases'
-import { fromAliasToKeyStatusKey } from './fromAliasToKeyStatusKey'
+import { fromAliasToDownKeys } from './fromAliasToDownKeys'
 import type { KeyStatusFunction } from './types'
 
 export type CreatePredicateKeycomboDownOptions = {
-  toKey?: (alias: string) => KeyStatusKey,
+  toDownKeys?: (alias: string) => KeyStatusKey[],
 }
 
 const defaultOptions: CreatePredicateKeycomboDownOptions = {
-  toKey: alias => fromAliasToKeyStatusKey(alias),
+  toDownKeys: alias => fromAliasToDownKeys(alias),
 }
 
 export const createPredicateKeycomboDown = (
   keycombo: string,
   options: CreatePredicateKeycomboDownOptions = {},
 ): KeyStatusFunction<boolean> => {
-  const { toKey } = { ...defaultOptions, ...options },
-        keys = pipe(
+  const { toDownKeys } = { ...defaultOptions, ...options },
+        downKeys = pipe<string>(
           fromComboToAliases,
-          map<string, KeyStatusKey>(toKey),
-        )(keycombo)
+          map<string, KeyStatusKey[]>(toDownKeys),
+        )(keycombo) as KeyStatusKey[][]
 
   return statuses => {
-    const { toValue } = statuses
+    const predicateAliasEntriesDown = every<KeyStatusKey>(
+            key => statuses.toValue(key) === 'down'
+          ) as (aliasDownKeys: KeyStatusKey[]) => boolean
 
-    return every<string>(pipe(
-      toValue,
-      predicateDown,
-    ))(keys) as boolean
+    return every<KeyStatusKey[]>(predicateAliasEntriesDown)(downKeys) as boolean
   }
 }
 

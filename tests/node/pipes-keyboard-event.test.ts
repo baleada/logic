@@ -44,6 +44,38 @@ suite('createPredicateKeycomboMatch predicates keys', () => {
 
     assert.is(value, expected)
   }
+  
+  {
+    const event = { code: 'Backquote', shiftKey: false } as KeyboardEvent,
+          value = createPredicateKeycomboMatch('`')(event),
+          expected = true
+
+    assert.is(value, expected, `\`: ${JSON.stringify(event)}`)
+  }
+  
+  {
+    const event = { code: 'Backquote', shiftKey: true } as KeyboardEvent,
+          value = createPredicateKeycomboMatch('`')(event),
+          expected = false
+
+    assert.is(value, expected, `\`: ${JSON.stringify(event)}`)
+  }
+  
+  {
+    const event = { code: 'Backquote', shiftKey: false } as KeyboardEvent,
+          value = createPredicateKeycomboMatch('~')(event),
+          expected = false
+
+    assert.is(value, expected, `\~: ${JSON.stringify(event)}`)
+  }
+  
+  {
+    const event = { code: 'Backquote', shiftKey: true } as KeyboardEvent,
+          value = createPredicateKeycomboMatch('~')(event),
+          expected = true
+
+    assert.is(value, expected, `\~: ${JSON.stringify(event)}`)
+  }
 })
 
 suite('createPredicateKeycomboMatch predicates modifiers', () => {

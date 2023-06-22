@@ -161,10 +161,10 @@ suite('supports custom alias transformer', () => {
         value = createPredicateKeycomboDown(
           'å',
           {
-            toKey: alias => {
+            toDownKeys: alias => {
               return alias === 'å'
-                ? { code: 'KeyA' }
-                : {}
+                ? [{ code: 'KeyA' }]
+                : []
             },
           }
         )(statuses)

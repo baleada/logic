@@ -7,7 +7,7 @@ import {
   fromComboToAliasesLength,
   createKeyState,
   predicateSomeKeyDown,
-  fromAliasToKeyStatusKey,
+  fromAliasToDownKeys,
   fromEventToAliases,
 } from '../extracted'
 import type {
@@ -32,7 +32,7 @@ export type KeychordOptions = {
   minDuration?: number,
   maxInterval?: number,
   preventsDefaultUnlessDenied?: boolean,
-  toKey?: CreatePredicateKeycomboDownOptions['toKey'],
+  toDownKeys?: CreatePredicateKeycomboDownOptions['toDownKeys'],
   toAliases?: CreatePredicateKeycomboMatchOptions['toAliases'],
   onDown?: KeychordHook,
   onUp?: KeychordHook,
@@ -47,7 +47,7 @@ const defaultOptions: KeychordOptions = {
   minDuration: 0,
   maxInterval: 5000, // VS Code default
   preventsDefaultUnlessDenied: true,
-  toKey: alias => fromAliasToKeyStatusKey(alias),
+  toDownKeys: alias => fromAliasToDownKeys(alias),
   toAliases: event => fromEventToAliases(event as KeyboardEvent),
 }
 
@@ -59,7 +59,7 @@ export function createKeychord (
           minDuration,
           maxInterval,
           preventsDefaultUnlessDenied,
-          toKey,
+          toDownKeys,
           toAliases,
           onDown,
           onUp,
@@ -69,11 +69,11 @@ export function createKeychord (
         keyStates = createMap<string, ReturnType<typeof createKeyState>>(keycombo => createKeyState({
           keycomboOrKeycombos: keycombo,
           unsupportedAliases,
-          toKey,
+          toDownKeys,
           toAliases,
           getRequest: () => request,
         }))(narrowedKeychord),
-        localStatuses = createMap<typeof keyStates[0], RecognizeableStatus>(
+        localStatuses = createMap<typeof keyStates[number], RecognizeableStatus>(
           () => 'recognizing'
         )(keyStates)
 

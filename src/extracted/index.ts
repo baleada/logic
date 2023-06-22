@@ -9,7 +9,7 @@ export { createPredicateKeycomboMatch } from './createPredicateKeycomboMatch'
 export type { CreatePredicateKeycomboMatchOptions } from './createPredicateKeycomboMatch'
 
 // Factories
-export { createKeyStatuses, predicateSomeKeyDown, predicateDown } from './createKeyStatuses'
+export { createKeyStatuses, predicateSomeKeyDown } from './createKeyStatuses'
 export type { KeyStatuses, KeyStatusKey, KeyStatus, KeyStatusesOptions } from './createKeyStatuses'
 
 export { createKeyState } from './createKeyState'
@@ -23,7 +23,7 @@ export { fromEventToAliases } from './fromEventToAliases'
 
 export { fromEventToKeyStatusKey, modifiers } from './fromEventToKeyStatusKey'
 
-export { fromAliasToKeyStatusKey } from './fromAliasToKeyStatusKey'
+export { fromAliasToDownKeys } from './fromAliasToDownKeys'
 
 export { toDirection } from './toDirection'
 export type { Direction } from './toDirection'

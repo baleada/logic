@@ -36,14 +36,14 @@ export function createAssociativeArray<Key extends any, Value extends any> (
   const toValue: AssociativeArray<Key, Value>['toValue'] = key => {
     const predicateKey = createPredicateKey(key)
 
-    return find<typeof entries[0]>(
+    return find<typeof entries[number]>(
       ([candidate]) => predicateKey(candidate)
     )(entries)?.[1]
   }
 
   const set: AssociativeArray<Key, Value>['set'] = (key, value) => {
     const predicateKey = createPredicateKey(key),
-          index = findIndex<typeof entries[0]>(
+          index = findIndex<typeof entries[number]>(
             ([candidate]) => predicateKey(candidate)
           )(entries) as number
 
@@ -58,7 +58,7 @@ export function createAssociativeArray<Key extends any, Value extends any> (
   const predicateHas: AssociativeArray<Key, Value>['predicateHas'] = key => {
     const predicateKey = createPredicateKey(key)
 
-    return findIndex<typeof entries[0]>(
+    return findIndex<typeof entries[number]>(
       ([candidate]) => predicateKey(candidate)
     )(entries) !== -1
   }
@@ -69,7 +69,7 @@ export function createAssociativeArray<Key extends any, Value extends any> (
 
   const del: AssociativeArray<Key, Value>['delete'] = key => {
     const predicateKey = createPredicateKey(key),
-          index = findIndex<typeof entries[0]>(
+          index = findIndex<typeof entries[number]>(
             ([candidate]) => predicateKey(candidate)
           )(entries) as number
 
@@ -83,11 +83,11 @@ export function createAssociativeArray<Key extends any, Value extends any> (
   }
 
   const toKeys: AssociativeArray<Key, Value>['toKeys'] = () => {
-    return createMap<typeof entries[0], Key>(([key]) => key)(entries)
+    return createMap<typeof entries[number], Key>(([key]) => key)(entries)
   }
 
   const toValues: AssociativeArray<Key, Value>['toValues'] = () => {
-    return createMap<typeof entries[0], Value>(([, value]) => value)(entries)
+    return createMap<typeof entries[number], Value>(([, value]) => value)(entries)
   }
 
   const toEntries: AssociativeArray<Key, Value>['toEntries'] = () => {

@@ -1,8 +1,7 @@
 import { every, includes, map, pipe, some } from 'lazy-collections'
-import { predicateDown } from './createKeyStatuses'
 import type { KeyStatusKey , KeyStatus } from './createKeyStatuses'
 import { fromComboToAliases } from './fromComboToAliases'
-import { fromAliasToKeyStatusKey } from './fromAliasToKeyStatusKey'
+import { fromAliasToDownKeys } from './fromAliasToDownKeys'
 import { fromEventToAliases } from './fromEventToAliases'
 import type { CreatePredicateKeycomboDownOptions } from './createPredicateKeycomboDown'
 import type { KeyStatusFunction } from './types'
@@ -12,7 +11,7 @@ export type CreatePredicateKeycomboMatchOptions = CreatePredicateKeycomboDownOpt
 }
 
 const defaultOptions: CreatePredicateKeycomboMatchOptions = {
-  toKey: alias => fromAliasToKeyStatusKey(alias),
+  toDownKeys: alias => fromAliasToDownKeys(alias),
   toAliases: event => fromEventToAliases(event as KeyboardEvent),
 }
 
@@ -20,23 +19,23 @@ export const createPredicateKeycomboMatch = (
   keycombo: string,
   options: CreatePredicateKeycomboMatchOptions = {},
 ): KeyStatusFunction<boolean> => {
-  const { toKey, toAliases } = { ...defaultOptions, ...options },
+  const { toDownKeys, toAliases } = { ...defaultOptions, ...options },
         aliases = fromComboToAliases(keycombo),
-        keys = map<string, KeyStatusKey>(toKey)(aliases)
+        downKeys = map<string, KeyStatusKey[]>(toDownKeys)(aliases)
 
   return statuses => {
-    const { toValue } = statuses
+    const predicateAliasDown = every<KeyStatusKey>(
+            key => statuses.toValue(key) === 'down'
+          ) as (aliasDownKeys: KeyStatusKey[]) => boolean
 
     return (
-      every<KeyStatusKey>(pipe(
-        toValue,
-        predicateDown,
-      ))(keys) as boolean
+      every<KeyStatusKey[]>(predicateAliasDown)(downKeys) as boolean
       && every<[KeyStatusKey, KeyStatus]>(
         ([key, value]) => value === 'up'
-          || some(
-            alias => includes(alias)(aliases) as boolean
-          )(toAliases(key as KeyboardEvent)) as boolean
+          || pipe<KeyboardEvent>(
+            toAliases,
+            some(alias => includes(alias)(aliases) as boolean),
+          )(key as KeyboardEvent)
       )(statuses.toEntries()) as boolean
     )
   }

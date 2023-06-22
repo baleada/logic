@@ -1,3 +1,4 @@
+
 import { includes } from 'lazy-collections'
 import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
 import {
@@ -7,7 +8,7 @@ import {
   fromComboToAliasesLength,
   createKeyState,
   predicateSomeKeyDown,
-  fromAliasToKeyStatusKey,
+  fromAliasToDownKeys,
   fromEventToAliases,
 } from '../extracted'
 import type {
@@ -26,7 +27,7 @@ export type KeypressMetadata = {
 export type KeypressOptions = {
   minDuration?: number,
   preventsDefaultUnlessDenied?: boolean,
-  toKey?: CreatePredicateKeycomboDownOptions['toKey'],
+  toDownKeys?: CreatePredicateKeycomboDownOptions['toDownKeys'],
   toAliases?: CreatePredicateKeycomboMatchOptions['toAliases'],
   onDown?: KeypressHook,
   onUp?: KeypressHook,
@@ -40,7 +41,7 @@ export type KeypressHookApi = HookApi<KeypressType, KeypressMetadata>
 const defaultOptions: KeypressOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
-  toKey: alias => fromAliasToKeyStatusKey(alias),
+  toDownKeys: alias => fromAliasToDownKeys(alias),
   toAliases: event => fromEventToAliases(event as KeyboardEvent),
 }
 
@@ -51,7 +52,7 @@ export function createKeypress (
   const {
           minDuration,
           preventsDefaultUnlessDenied,
-          toKey,
+          toDownKeys,
           toAliases,
           onDown,
           onUp,
@@ -66,7 +67,7 @@ export function createKeypress (
         } = createKeyState({
           keycomboOrKeycombos,
           unsupportedAliases,
-          toKey,
+          toDownKeys,
           toAliases,
           getRequest: () => request,
         })

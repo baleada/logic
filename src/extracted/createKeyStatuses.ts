@@ -33,10 +33,6 @@ export function createKeyStatuses (options: KeyStatusesOptions = {}) {
   })
 }
 
-export function predicateDown (status: KeyStatus) {
-  return status === 'down'
-}
-
 export function predicateSomeKeyDown (statuses: KeyStatuses) {
   return includes<string>('down')(statuses.toValues()) as boolean
 }

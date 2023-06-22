@@ -21,13 +21,13 @@ export function createKeyState (
   {
     keycomboOrKeycombos,
     unsupportedAliases,
-    toKey,
+    toDownKeys,
     toAliases,
     getRequest,
   }: {
     keycomboOrKeycombos: string | string[],
     unsupportedAliases: string[],
-    toKey: Parameters<typeof createPredicateKeycomboDown>[1]['toKey'],
+    toDownKeys: Parameters<typeof createPredicateKeycomboDown>[1]['toDownKeys'],
     toAliases: Parameters<typeof createPredicateKeycomboMatch>[1]['toAliases'],
     getRequest: () => number,
   }
@@ -37,7 +37,7 @@ export function createKeyState (
             alias => includes(alias)(unsupportedAliases) as boolean
           )(fromComboToAliases(keycombo))
         )(Array.isArray(keycomboOrKeycombos) ? keycomboOrKeycombos : [keycomboOrKeycombos]),
-        createPredicateKeycomboDownOptions = { toKey },
+        createPredicateKeycomboDownOptions = { toDownKeys },
         downPredicatesByKeycombo = (() => {
           const predicates: [string, ReturnType<typeof createPredicateKeycomboDown>][] = []
 
@@ -67,13 +67,13 @@ export function createKeyState (
           return predicates
         })(),
         validAliases = pipe<typeof narrowedKeycombos>(
-          flatMap<typeof narrowedKeycombos[0], string[]>(fromComboToAliases),
+          flatMap<typeof narrowedKeycombos[number], string[]>(fromComboToAliases),
           unique(),
           toArray(),
         )(narrowedKeycombos) as string[],
         getDownCombos = () => pipe(
-          filter<typeof downPredicatesByKeycombo[0]>(([, predicate]) => predicate(statuses)),
-          map<typeof downPredicatesByKeycombo[0], [string, string[]]>(([keycombo]) => [keycombo, fromComboToAliases(keycombo)]),
+          filter<typeof downPredicatesByKeycombo[number]>(([, predicate]) => predicate(statuses)),
+          map<typeof downPredicatesByKeycombo[number], [string, string[]]>(([keycombo]) => [keycombo, fromComboToAliases(keycombo)]),
           sort<string>(([,aliasesA], [,aliasesB]) => aliasesB.length - aliasesA.length),
           map<string[], string>(([keycombo]) => keycombo),
           toArray()
@@ -81,7 +81,7 @@ export function createKeyState (
         predicateValid = (event: KeyboardEvent) => {
           const aliases = toAliases(event)
 
-          return some<typeof validAliases[0]>(
+          return some<typeof validAliases[number]>(
             validAlias => includes<string>(validAlias)(aliases) as boolean
           )(validAliases) as boolean
         },

@@ -7,7 +7,7 @@ import {
   fromComboToAliasesLength,
   createKeyState,
   predicateSomeKeyDown,
-  fromAliasToKeyStatusKey,
+  fromAliasToDownKeys,
   fromEventToAliases,
 } from '../extracted'
 import type {
@@ -26,7 +26,7 @@ export type KeyreleaseMetadata = {
 export type KeyreleaseOptions = {
   minDuration?: number,
   preventsDefaultUnlessDenied?: boolean,
-  toKey?: CreatePredicateKeycomboDownOptions['toKey'],
+  toDownKeys?: CreatePredicateKeycomboDownOptions['toDownKeys'],
   toAliases?: CreatePredicateKeycomboMatchOptions['toAliases'],
   onDown?: KeyreleaseHook,
   onUp?: KeyreleaseHook,
@@ -40,7 +40,7 @@ export type KeyreleaseHookApi = HookApi<KeyreleaseType, KeyreleaseMetadata>
 const defaultOptions: KeyreleaseOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
-  toKey: alias => fromAliasToKeyStatusKey(alias),
+  toDownKeys: alias => fromAliasToDownKeys(alias),
   toAliases: event => fromEventToAliases(event as KeyboardEvent),
 }
 
@@ -51,7 +51,7 @@ export function createKeyrelease (
   const {
           minDuration,
           preventsDefaultUnlessDenied,
-          toKey,
+          toDownKeys,
           toAliases,
           onDown,
           onUp,
@@ -66,7 +66,7 @@ export function createKeyrelease (
         } = createKeyState({
           keycomboOrKeycombos,
           unsupportedAliases,
-          toKey,
+          toDownKeys,
           toAliases,
           getRequest: () => request,
         })

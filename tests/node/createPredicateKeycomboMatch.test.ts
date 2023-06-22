@@ -162,10 +162,10 @@ suite.skip('supports custom alias and key transformer', () => {
         value = createPredicateKeycomboMatch(
           'å',
           {
-            toKey: alias => {
+            toDownKeys: alias => {
               return alias === 'å'
-                ? { code: 'KeyA' }
-                : {}
+                ? [{ code: 'KeyA' }]
+                : []
             },
             toAliases: key => {
               return key.code === 'KeyA'

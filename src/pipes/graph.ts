@@ -65,7 +65,7 @@ export function createToIncoming<
     : GraphEdge<Id, Metadata>
   
   return function* (node) {
-    yield * filter<typeof edges[0]>(
+    yield * filter<typeof edges[number]>(
       ({ to }) => to === node
     )(edges) as Iterable<GraphEdgeType>
   }
@@ -88,7 +88,7 @@ export function createToOutgoing<
     : GraphEdge<Id, Metadata>
   
   return function* (node) {
-    yield * filter<typeof edges[0]>(
+    yield * filter<typeof edges[number]>(
       ({ from }) => from === node
     )(edges) as Iterable<GraphEdgeType>
   }
