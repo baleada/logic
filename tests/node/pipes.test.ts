@@ -23,11 +23,8 @@ import { createClip } from '../../src/pipes/string'
 import { createClamp } from '../../src/pipes/number'
 import { createDetermine } from '../../src/pipes/number'
 import { createRename } from '../../src/pipes/map'
-import { createEntries } from '../../src/pipes/object'
-import { createKeys } from '../../src/pipes/object'
-import { createSome } from '../../src/pipes/object'
-import { createEvery } from '../../src/pipes/object'
 import { createEqual } from '../../src/pipes/any'
+import { createDeepEqual } from '../../src/pipes/any'
 import { createClone } from '../../src/pipes/any'
 
 type Context = {
@@ -35,7 +32,6 @@ type Context = {
   number: number,
   string: string,
   map: Map<string, string>,
-  object: Record<string, string>,
 }
 
 const suite = createSuite<Context>('pipes')
@@ -45,7 +41,6 @@ suite.before(context => {
   context.number = 42
   context.string = 'Baleada: a toolkit for building web apps'
   context.map = new Map([['one', 'value'], ['two', 'value']])
-  context.object = { one: 'value', two: 'value' }
 })
 
 // ARRAY
@@ -366,50 +361,6 @@ suite('createRename({ from, to }) renames \'from\' name to \'to\' name', ({ map 
 })
 
 
-// OBJECT
-suite('createEntries() transforms object into entries', ({ object }) => {
-  const value = createEntries<string, string>()(object)
-
-  assert.equal(value, [['one', 'value'], ['two', 'value']])
-})
-
-suite('createKeys() transforms object into keys', ({ object }) => {
-  const value = createKeys<string>()(object)
-
-  assert.equal(value, ['one', 'two'])
-})
-
-suite('createSome() transforms object into some', ({ object }) => {
-  ;(() => {
-    const value = createSome<string, string>((key, value) => key && value)(object)
-
-    assert.ok(value)
-  })()
-
-  ;(() => {
-    const value = createSome<string, string>((key, value) => key && !value)(object)
-
-    assert.not.ok(value)
-  })()
-})
-
-suite('createEvery() transforms object into every', ({ object }) => {
-  ;(() => {
-    const value = createEvery<string, string>((key, value) => key && value)(object)
-
-    assert.ok(value)
-  })()
-
-  ;(() => {
-    const value = createEvery<string, string>((key, value) => key && !value)(object)
-
-    assert.not.ok(value)
-  })()
-})
-
-
-
-
 // STRING
 suite('createClip(text) clips text from a string', ({ string }) => {
   const value = (string => {
@@ -581,6 +532,29 @@ suite('createEqual(...) predicates equality', () => {
   
   ;(() => {
     const value = createEqual({ hello: 'world' })({ hello: 'world' }),
+          expected = false
+
+    assert.is(value, expected)
+  })()
+})
+
+suite('createDeepEqual(...) predicates equality', () => {
+  ;(() => {
+    const value = createDeepEqual(1)(1),
+          expected = true
+
+    assert.is(value, expected)
+  })()
+  
+  ;(() => {
+    const value = createDeepEqual(1)(2),
+          expected = false
+
+    assert.is(value, expected)
+  })()
+  
+  ;(() => {
+    const value = createDeepEqual({ hello: 'world' })({ hello: 'world' }),
           expected = true
 
     assert.is(value, expected)

@@ -1,9 +1,9 @@
 import { Compareable } from '../classes'
-import type { StringFn } from './string'
+import type { StringTransform } from './string'
 
 type MatchKind = 'variant' | 'case' | 'accent'
 
-export function createMatchKinds (name: string): StringFn<MatchKind[]> {
+export function createMatchKinds (name: string): StringTransform<MatchKind[]> {
   const variantSensitive = new Compareable(name, { collator: { sensitivity: 'variant' } }),
         caseSensitive = new Compareable(name, { collator: { sensitivity: 'case' } }),
         accentSensitive = new Compareable(name, { collator: { sensitivity: 'accent' } })

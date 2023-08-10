@@ -3,19 +3,19 @@ import type {
   GraphNode,
   AsyncGraph,
 } from '../extracted'
-import type { GeneratorFn } from './generator'
-import type { AsyncGeneratorFn } from './generator-async'
+import type { GeneratorTransform } from './generator'
+import type { AsyncGeneratorTransform } from './generator-async'
 
-export type AsyncGraphFn<Id extends string, Metadata, Returned> = (graph: AsyncGraph<Id, Metadata>) => Promise<Returned>
+export type AsyncGraphTransform<Id extends string, Metadata, Transformed> = (graph: AsyncGraph<Id, Metadata>) => Promise<Transformed>
 
-export type AsyncGraphGeneratorFn<Id extends string, Metadata, Yielded> = GeneratorFn<AsyncGraph<Id, Metadata>, Yielded>
+export type AsyncGraphGeneratorTransform<Id extends string, Metadata, Yielded> = GeneratorTransform<AsyncGraph<Id, Metadata>, Yielded>
 
-export type AsyncGraphAsyncGeneratorFn<Id extends string, Metadata, Yielded> = AsyncGeneratorFn<AsyncGraph<Id, Metadata>, Yielded>
+export type AsyncGraphAsyncGeneratorTransform<Id extends string, Metadata, Yielded> = AsyncGeneratorTransform<AsyncGraph<Id, Metadata>, Yielded>
 
-export type GraphNodeAsyncGeneratorFn<Id extends string, Yielded> = AsyncGeneratorFn<GraphNode<Id>, Yielded>
+export type GraphNodeAsyncGeneratorTransform<Id extends string, Yielded> = AsyncGeneratorTransform<GraphNode<Id>, Yielded>
 
-export type GraphNodeTupleAsyncFn<Id extends string, Returned> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => Promise<Returned>
+export type GraphNodeTupleAsyncTransform<Id extends string, Transformed> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => Promise<Transformed>
 
-export type GraphNodeTupleAsyncGeneratorFn<Id extends string, Yielded> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => AsyncGenerator<Yielded>
+export type GraphNodeTupleAsyncGeneratorTransform<Id extends string, Yielded> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => AsyncGenerator<Yielded>
 
-export type GraphStateAsyncFn<Id extends string, Metadata, Returned> = (state: GraphState<Id, Metadata>) => Promise<Returned>
+export type GraphStateAsyncTransform<Id extends string, Metadata, Transformed> = (state: GraphState<Id, Metadata>) => Promise<Transformed>

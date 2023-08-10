@@ -1,4 +1,4 @@
-import type { KeyStatusKey } from './createKeyStatuses'
+import type { KeyStatusKey } from './key-statuses'
 
 export function fromAliasToDownKeys (alias: string): KeyStatusKey[] {
   if (alias in keysByAlias) {

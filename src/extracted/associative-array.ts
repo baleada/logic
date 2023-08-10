@@ -1,5 +1,5 @@
-export type AssociativeArrayEntries<Key, Value> = [Key, Value][]
+export type AssociativeArray<Key, Value> = [Key, Value][]
 
-export function defineAssociativeArrayEntries<Key, Value> (entries: AssociativeArrayEntries<Key, Value>) {
-  return entries
+export function defineAssociativeArray<Key, Value> (associativeArray: AssociativeArray<Key, Value>) {
+  return associativeArray
 }

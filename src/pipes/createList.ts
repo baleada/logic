@@ -1,7 +1,7 @@
 import type { ClassValue } from 'clsx'
 import clsx from 'clsx'
-import type { ManyFn } from './many'
+import type { ManyTransform } from './many'
 
-export function createList (): ManyFn<ClassValue, string> {
+export function createList (): ManyTransform<ClassValue, string> {
   return (...classValues) => clsx(...classValues)
 }

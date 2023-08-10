@@ -1,1 +1,1 @@
-export type GeneratorFn<Parameter, Yielded> = (param: Parameter) => Generator<Yielded>
+export type GeneratorTransform<Parameter, Yielded> = (param: Parameter) => Generator<Yielded>

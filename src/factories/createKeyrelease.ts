@@ -63,6 +63,10 @@ export function createKeyrelease (
           predicateValid,
           cleanup,
           statuses,
+          toStatus,
+          setStatus,
+          clearStatuses,
+          deleteStatus,
         } = createKeyState({
           keycomboOrKeycombos,
           unsupportedAliases,
@@ -79,12 +83,12 @@ export function createKeyrelease (
           key = fromEventToKeyStatusKey(event)
 
     // REPEATED KEYDOWN
-    if (statuses.toValue(key) === 'down') {
+    if (toStatus(key) === 'down') {
       onDown?.(toHookApi(api))
       return
     }
 
-    statuses.set(key, 'down')
+    setStatus(key, 'down')
 
     // ALREADY DENIED
     if (localStatus === 'denied') {
@@ -107,7 +111,7 @@ export function createKeyrelease (
     ) {
       denied()
       localStatus = getStatus()
-      if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
+      if (includes(event.key)(unsupportedKeys) as boolean) clearStatuses()
       onDown?.(toHookApi(api))
       return
     }
@@ -144,8 +148,8 @@ export function createKeyrelease (
     if (['denied', 'recognized'].includes(localStatus)) {
       if (localStatus === 'denied') denied()
       
-      if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
-      else statuses.delete(key)
+      if (includes(event.key)(unsupportedKeys) as boolean) clearStatuses()
+      else deleteStatus(key)
 
       if (!predicateSomeKeyDown(statuses)) localStatus = 'recognizing'
       onUp?.(toHookApi(api))
@@ -154,7 +158,7 @@ export function createKeyrelease (
 
     const downCombos = getDownCombos(),
           matches = matchPredicatesByKeycombo[downCombos[0]]?.(statuses)
-    statuses.delete(key)
+    deleteStatus(key)
 
     // RELEASING PARTIAL COMBO
     if (!downCombos.length || !matches) {
@@ -190,7 +194,7 @@ export function createKeyrelease (
 
   const visibilitychange: RecognizeableEffect<'visibilitychange', KeyreleaseMetadata> = (event, api) => {
     if (document.visibilityState === 'hidden') {
-      statuses.clear()
+      clearStatuses()
       localStatus = 'recognizing'
       cleanup()
     }

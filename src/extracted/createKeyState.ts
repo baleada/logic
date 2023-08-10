@@ -12,9 +12,13 @@ import {
 import {
   createPredicateKeycomboDown,
   createPredicateKeycomboMatch,
-  createKeyStatuses,
+  createKeyStatusesValue,
+  createKeyStatusesSet,
+  createKeyStatusesClear,
+  createKeyStatusesDelete,
   fromComboToAliases,
 } from '../extracted'
+import type { KeyStatuses } from '../extracted'
 import { createFilter } from '../pipes'
 
 export function createKeyState (
@@ -88,7 +92,11 @@ export function createKeyState (
         cleanup = () => {
           window.cancelAnimationFrame(getRequest())
         },
-        statuses = createKeyStatuses()
+        statuses: KeyStatuses = [],
+        toStatus = (...params: Parameters<typeof createKeyStatusesValue>) => createKeyStatusesValue(...params)(statuses),
+        setStatus = (...params: Parameters<typeof createKeyStatusesSet>) => createKeyStatusesSet(...params)(statuses),
+        clearStatuses = (...params: Parameters<typeof createKeyStatusesClear>) => createKeyStatusesClear(...params)(statuses),
+        deleteStatus = (...params: Parameters<typeof createKeyStatusesDelete>) => createKeyStatusesDelete(...params)(statuses)
 
   return {
     narrowedKeycombos,
@@ -101,5 +109,9 @@ export function createKeyState (
     predicateValid,
     cleanup,
     statuses,
+    toStatus,
+    setStatus,
+    clearStatuses,
+    deleteStatus,
   }
 }

@@ -85,18 +85,18 @@ export function createKeychord (
           key = fromEventToKeyStatusKey(event)
 
     // REPEATED KEYDOWN
-    if (keyStates[playedIndex].statuses.toValue(key) === 'down') {
+    if (keyStates[playedIndex].toStatus(key) === 'down') {
       onDown?.(toHookApi(api))
       return
     }
 
     if (localStatuses[playedIndex] === 'recognized') {
       playedIndex++
-      for (const [key, status] of keyStates[playedIndex - 1].statuses.toEntries()) {
-        keyStates[playedIndex].statuses.set(key, status)
+      for (const [key, status] of keyStates[playedIndex - 1].statuses) {
+        keyStates[playedIndex].setStatus(key, status)
       }
     }
-    keyStates[playedIndex].statuses.set(key, 'down')
+    keyStates[playedIndex].setStatus(key, 'down')
 
     // ALREADY DENIED
     if (localStatuses[playedIndex] === 'denied') {
@@ -128,7 +128,7 @@ export function createKeychord (
       denied()
       localStatuses[playedIndex] = getStatus()
       if (includes(event.key)(unsupportedKeys) as boolean) {
-        for (const { statuses } of keyStates) statuses.clear()
+        for (const { clearStatuses } of keyStates) clearStatuses()
       }
       onDown?.(toHookApi(api))
       return
@@ -170,9 +170,9 @@ export function createKeychord (
     if (['denied', 'recognized'].includes(localStatuses[playedIndex])) {
       if (localStatuses[playedIndex] === 'denied') denied()
       
-      for (const { statuses } of keyStates) {
-        if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
-        else statuses.delete(key)
+      for (const { clearStatuses, deleteStatus } of keyStates) {
+        if (includes(event.key)(unsupportedKeys) as boolean) clearStatuses()
+        else deleteStatus(key)
       }
 
       if (!predicateSomeKeyDown(keyStates[playedIndex].statuses)) {
@@ -182,7 +182,7 @@ export function createKeychord (
         ) {
           playedIndex = 0
           for (let i = 0; i < localStatuses.length; i++) localStatuses[i] = 'recognizing'
-          for (const { statuses } of keyStates) statuses.clear()
+          for (const { clearStatuses } of keyStates) clearStatuses()
         }
       }
       onUp?.(toHookApi(api))
@@ -191,7 +191,7 @@ export function createKeychord (
 
     const downCombos = keyStates[playedIndex].getDownCombos(),
           matches = keyStates[playedIndex].matchPredicatesByKeycombo[downCombos[0]]?.(keyStates[playedIndex].statuses)
-    keyStates[playedIndex].statuses.delete(key)
+    keyStates[playedIndex].deleteStatus(key)
 
     // RELEASING PARTIAL COMBO
     if (!downCombos.length || !matches) {
@@ -221,7 +221,7 @@ export function createKeychord (
     ) {
       playedIndex = 0
       for (let i = 0; i < localStatuses.length; i++) localStatuses[i] = 'recognizing'
-      for (const { statuses } of keyStates) statuses.clear()
+      for (const { clearStatuses } of keyStates) clearStatuses()
     }
     onUp?.(toHookApi(api))
   }
@@ -246,7 +246,7 @@ export function createKeychord (
 
   const visibilitychange: RecognizeableEffect<'visibilitychange', KeychordMetadata> = (event, api) => {
     if (document.visibilityState === 'hidden') {
-      for (const { statuses } of keyStates) statuses.clear()
+      for (const { clearStatuses } of keyStates) clearStatuses()
       localStatuses[playedIndex] = 'recognizing'
       keyStates[playedIndex].cleanup()
       playedIndex = 0

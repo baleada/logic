@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { createPredicateKeycomboMatch } from '../../src/pipes/keyboard-event'
 
-const suite = createSuite('keyboard event pipes')
+const suite = createSuite('keyboard event')
 
 suite('createPredicateKeycomboMatch predicates keys', () => {
   {

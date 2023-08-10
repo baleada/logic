@@ -8,27 +8,27 @@ import type {
   GraphState,
   AsyncGraphEdge,
 } from '../extracted'
-import type { GeneratorFn } from './generator'
+import type { GeneratorTransform } from './generator'
 
-export type GraphFn<Id extends string, Metadata, Returned> = (graph: Graph<Id, Metadata>) => Returned
+export type GraphTransform<Id extends string, Metadata, Transformed> = (graph: Graph<Id, Metadata>) => Transformed
 
-export type GraphGeneratorFn<Id extends string, Metadata, Yielded> = GeneratorFn<Graph<Id, Metadata>, Yielded>
+export type GraphGeneratorTransform<Id extends string, Metadata, Yielded> = GeneratorTransform<Graph<Id, Metadata>, Yielded>
 
-export type GraphNodeFn<Id extends string, Returned> = (node: GraphNode<Id>) => Returned
+export type GraphNodeTransform<Id extends string, Transformed> = (node: GraphNode<Id>) => Transformed
 
-export type GraphNodeGeneratorFn<Id extends string, Yielded> = GeneratorFn<GraphNode<Id>, Yielded>
+export type GraphNodeGeneratorTransform<Id extends string, Yielded> = GeneratorTransform<GraphNode<Id>, Yielded>
 
-export type GraphNodeTupleFn<Id extends string, Returned> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => Returned
+export type GraphNodeTupleTransform<Id extends string, Transformed> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => Transformed
 
-export type GraphNodeTupleGeneratorFn<Id extends string, Yielded> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => Generator<Yielded>
+export type GraphNodeTupleGeneratorTransform<Id extends string, Yielded> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => Generator<Yielded>
 
-export type GraphStateFn<Id extends string, Metadata, Returned> = (state: GraphState<Id, Metadata>) => Returned
+export type GraphStateTransform<Id extends string, Metadata, Transformed> = (state: GraphState<Id, Metadata>) => Transformed
 
 export function createToIndegree<
   Id extends string,
   Metadata,
   GraphType extends Graph<Id, Metadata> | AsyncGraph<Id, Metadata>
-> (graph: GraphType): GraphNodeFn<Id, number> {
+> (graph: GraphType): GraphNodeTransform<Id, number> {
   const toIncoming = createToIncoming(graph)
   return node => pipe(
     toIncoming,
@@ -40,7 +40,7 @@ export function createToOutdegree<
   Id extends string,
   Metadata,
   GraphType extends Graph<Id, Metadata> | AsyncGraph<Id, Metadata>
-> (graph: GraphType): GraphNodeFn<Id, number> {
+> (graph: GraphType): GraphNodeTransform<Id, number> {
   const toOutgoing = createToOutgoing(graph)
   return node => pipe(
     toOutgoing,
@@ -52,7 +52,7 @@ export function createToIncoming<
   Id extends string,
   Metadata,
   GraphType extends Graph<Id, Metadata> | AsyncGraph<Id, Metadata>
-> (graph: GraphType): GraphNodeGeneratorFn<
+> (graph: GraphType): GraphNodeGeneratorTransform<
   Id,
   GraphType extends AsyncGraph<Id, Metadata>
     ? AsyncGraphEdge<Id, Metadata>
@@ -75,7 +75,7 @@ export function createToOutgoing<
   Id extends string,
   Metadata,
   GraphType extends Graph<Id, Metadata> | AsyncGraph<Id, Metadata>
-> (graph: GraphType): GraphNodeGeneratorFn<
+> (graph: GraphType): GraphNodeGeneratorTransform<
   Id,
   GraphType extends AsyncGraph<Id, Metadata>
     ? AsyncGraphEdge<Id, Metadata>
@@ -98,7 +98,7 @@ export function createPredicateRoot<
   Id extends string,
   Metadata,
   GraphType extends Graph<Id, Metadata> | AsyncGraph<Id, Metadata>
-> (graph: GraphType): GraphNodeFn<Id, boolean> {
+> (graph: GraphType): GraphNodeTransform<Id, boolean> {
   const toIndegree = createToIndegree(graph)
   return node => toIndegree(node) === 0
 }

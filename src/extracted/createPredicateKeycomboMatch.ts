@@ -1,5 +1,6 @@
 import { every, includes, map, pipe, some } from 'lazy-collections'
-import type { KeyStatusKey , KeyStatus } from './createKeyStatuses'
+import { createValue, createPredicateKey } from './key-statuses'
+import type { KeyStatuses, KeyStatusKey } from './key-statuses'
 import { fromComboToAliases } from './fromComboToAliases'
 import { fromAliasToDownKeys } from './fromAliasToDownKeys'
 import { fromEventToAliases } from './fromEventToAliases'
@@ -25,18 +26,18 @@ export const createPredicateKeycomboMatch = (
 
   return statuses => {
     const predicateAliasDown = every<KeyStatusKey>(
-            key => statuses.toValue(key) === 'down'
+            key => createValue(key, { predicateKey: createPredicateKey(key) })(statuses) === 'down'
           ) as (aliasDownKeys: KeyStatusKey[]) => boolean
 
     return (
       every<KeyStatusKey[]>(predicateAliasDown)(downKeys) as boolean
-      && every<[KeyStatusKey, KeyStatus]>(
+      && every<KeyStatuses[number]>(
         ([key, value]) => value === 'up'
           || pipe<KeyboardEvent>(
             toAliases,
             some(alias => includes(alias)(aliases) as boolean),
           )(key as KeyboardEvent)
-      )(statuses.toEntries()) as boolean
+      )(statuses) as boolean
     )
   }
 }

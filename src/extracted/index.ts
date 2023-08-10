@@ -9,8 +9,15 @@ export { createPredicateKeycomboMatch } from './createPredicateKeycomboMatch'
 export type { CreatePredicateKeycomboMatchOptions } from './createPredicateKeycomboMatch'
 
 // Factories
-export { createKeyStatuses, predicateSomeKeyDown } from './createKeyStatuses'
-export type { KeyStatuses, KeyStatusKey, KeyStatus, KeyStatusesOptions } from './createKeyStatuses'
+export {
+  createValue as createKeyStatusesValue,
+  createSet as createKeyStatusesSet,
+  createClear as createKeyStatusesClear,
+  createDelete as createKeyStatusesDelete,
+  createPredicateKey as createPredicateKeyStatusKey,
+  predicateSomeKeyDown,
+} from './key-statuses'
+export type { KeyStatuses, KeyStatusKey, KeyStatus } from './key-statuses'
 
 export { createKeyState } from './createKeyState'
 
@@ -73,8 +80,8 @@ export type {
   GraphTreeNode,
 } from './graph'
 
-export { defineAssociativeArrayEntries } from './associative-array'
-export type { AssociativeArrayEntries } from './associative-array'
+export { defineAssociativeArray } from './associative-array'
+export type { AssociativeArray } from './associative-array'
 
 
 // MULTIPLE CONCERNS

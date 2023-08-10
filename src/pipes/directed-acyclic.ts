@@ -22,21 +22,21 @@ import {
   createToOutgoing,
 } from './graph'
 import type {
-  GraphGeneratorFn,
-  GraphNodeGeneratorFn,
-  GraphStateFn,
-  GraphNodeTupleFn,
-  GraphNodeTupleGeneratorFn,
-  GraphFn,
+  GraphGeneratorTransform,
+  GraphNodeGeneratorTransform,
+  GraphStateTransform,
+  GraphNodeTupleTransform,
+  GraphNodeTupleGeneratorTransform,
+  GraphTransform,
 } from './graph'
-import type { AsyncGraphGeneratorFn } from './graph-async'
+import type { AsyncGraphGeneratorTransform } from './graph-async'
 import { createPredicateRoot } from './graph'
 import { createFind as createTreeFind } from './tree'
 
 export function createToLayers<
   Id extends string,
   Metadata
->(options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}): GraphFn<Id, Metadata, GraphNode<Id>[][]> {
+>(options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}): GraphTransform<Id, Metadata, GraphNode<Id>[][]> {
   const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
 
   return function toLayers (directedAcyclic) {
@@ -57,7 +57,7 @@ export function createToLayers<
 export function createToTree<
   Id extends string,
   Metadata
->(options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}): GraphFn<Id, Metadata, GraphTreeNode<Id>[]> {
+>(options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}): GraphTransform<Id, Metadata, GraphTreeNode<Id>[]> {
   const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
 
   return function toTree (directedAcyclic) {
@@ -94,7 +94,7 @@ export function createToTree<
 export function createToCommonAncestors<
   Id extends string,
   Metadata
-> (directedAcyclic: Graph<Id, Metadata>): GraphNodeTupleGeneratorFn<Id, GraphCommonAncestor<Id>> {
+> (directedAcyclic: Graph<Id, Metadata>): GraphNodeTupleGeneratorTransform<Id, GraphCommonAncestor<Id>> {
   const toNodeSteps = createToNodeSteps(directedAcyclic)
 
   return function* (a, b) {
@@ -124,7 +124,7 @@ export function createToCommonAncestors<
 export function createPredicateAncestor<
   Id extends string,
   Metadata
-> (directedAcyclic: Graph<Id, Metadata>): GraphNodeTupleFn<Id, boolean> {
+> (directedAcyclic: Graph<Id, Metadata>): GraphNodeTupleTransform<Id, boolean> {
   const toNodeSteps = createToNodeSteps(directedAcyclic)
 
   return function (descendant, ancestor) {
@@ -141,7 +141,7 @@ export function createToNodeSteps<
 > (
   directedAcyclic: Graph<Id, Metadata>,
   options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}
-): GraphNodeGeneratorFn<Id, GraphStep<Id, Metadata>> {
+): GraphNodeGeneratorTransform<Id, GraphStep<Id, Metadata>> {
   const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
 
   return function* (node) {
@@ -168,12 +168,13 @@ export const defaultCreateToStepsOptions: CreateToStepsOptions<string, any> = {
   kind: 'directed acyclic',
 }
 
+// TODO: Breadth-first steps
 export function createToSteps<
   Id extends string,
   Metadata
 > (
   options: CreateToStepsOptions<Id, Metadata> = {}
-): GraphGeneratorFn<Id, Metadata, GraphStep<Id, Metadata>> {
+): GraphGeneratorTransform<Id, Metadata, GraphStep<Id, Metadata>> {
   const { toUnsetMetadata, toMockMetadata, root, kind } = { ...defaultCreateToStepsOptions, ...options } as CreateToStepsOptions<Id, Metadata>  
 
   return function* (directedAcyclic) {    
@@ -243,7 +244,7 @@ export function createToSteps<
 export function createToPath<
   Id extends string,
   Metadata
-> (directedAcyclic: Graph<Id, Metadata>): GraphStateFn<Id, Metadata, GraphNode<Id>[]> {
+> (directedAcyclic: Graph<Id, Metadata>): GraphStateTransform<Id, Metadata, GraphNode<Id>[]> {
   const toOutdegree = createToOutdegree<Id, Metadata, typeof directedAcyclic>(directedAcyclic),
         toOutgoing = createToOutgoing<Id, Metadata, typeof directedAcyclic>(directedAcyclic),
         firstRoot = pipe<typeof directedAcyclic>(
@@ -277,8 +278,8 @@ export function createToRoots<
   GraphType extends Graph<Id, Metadata> | AsyncGraph<Id, Metadata> = Graph<Id, Metadata>
 > (options: { kind?: 'directed acyclic' | 'arborescence' } = {}): (
   GraphType extends AsyncGraph<Id, Metadata>
-    ? AsyncGraphGeneratorFn<Id, Metadata, GraphNode<Id>>
-    : GraphGeneratorFn<Id, Metadata, GraphNode<Id>>
+    ? AsyncGraphGeneratorTransform<Id, Metadata, GraphNode<Id>>
+    : GraphGeneratorTransform<Id, Metadata, GraphNode<Id>>
  ) {
   return function* (directedAcyclic) {
     const { nodes } = directedAcyclic

@@ -1,16 +1,16 @@
 import { reduce } from 'lazy-collections'
 import { createFilter } from './array'
 
-export type ArrayAsyncFn<Item, Returned> = (array: Item[]) => Promise<Returned>
+export type ArrayAsyncTransform<Item, Transformed> = (array: Item[]) => Promise<Transformed>
 
-export function createFilterAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncFn<Item, Item[]> {
+export function createFilterAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncTransform<Item, Item[]> {
   return async array => {
     const transformedAsync = await createMapAsync<Item, boolean>(predicate)(array)
     return createFilter<Item>((_, index) => transformedAsync[index])(array)
   }
 }
 
-export function createFindAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncFn<Item, Item | undefined> {
+export function createFindAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncTransform<Item, Item | undefined> {
   return async array => {
     for (let i = 0; i < array.length; i++) {
       const item = array[i],
@@ -20,7 +20,7 @@ export function createFindAsync<Item>(predicate: (item: Item, index: number) => 
   }
 }
 
-export function createFindIndexAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncFn<Item, number> {
+export function createFindIndexAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncTransform<Item, number> {
   return async array => {
     for (let i = 0; i < array.length; i++) {
       const item = array[i],
@@ -30,7 +30,7 @@ export function createFindIndexAsync<Item>(predicate: (item: Item, index: number
   }
 }
 
-export function createForEachAsync<Item>(forEach: (item: Item, index: number) => any): ArrayAsyncFn<Item, any> {
+export function createForEachAsync<Item>(forEach: (item: Item, index: number) => any): ArrayAsyncTransform<Item, any> {
   return async array => {
     for (let i = 0; i < array.length; i++) {
       const item = array[i]
@@ -41,7 +41,7 @@ export function createForEachAsync<Item>(forEach: (item: Item, index: number) =>
   }
 }
 
-export function createMapAsync<Item, Mapped>(transform: (item: Item, index: number) => Promise<Mapped>): ArrayAsyncFn<Item, Mapped[]> {
+export function createMapAsync<Item, Mapped>(transform: (item: Item, index: number) => Promise<Mapped>): ArrayAsyncTransform<Item, Mapped[]> {
   return async array => {
     return await createReduceAsync<Item, Mapped[]>(
       async (resolvedMaps, item, index) => {

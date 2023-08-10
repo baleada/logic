@@ -6,9 +6,9 @@ import {
 } from 'lazy-collections'
 import { createMap } from './array'
 
-export type NumberFn<Returned> = (number: number) => Returned
+export type NumberTransform<Transformed> = (number: number) => Transformed
 
-export function createClamp(min: number, max: number): NumberFn<number> {
+export function createClamp(min: number, max: number): NumberTransform<number> {
   return number => {
     const maxed = Math.max(number, min)
     return Math.min(maxed, max)
@@ -17,7 +17,7 @@ export function createClamp(min: number, max: number): NumberFn<number> {
 
 export type Potentiality<Outcome> = { outcome: Outcome, probability: number }
 
-export function createDetermine<Outcome>(potentialities: Potentiality<Outcome>[]): NumberFn<Outcome> {
+export function createDetermine<Outcome>(potentialities: Potentiality<Outcome>[]): NumberTransform<Outcome> {
   type Predicate = {
     outcome: Outcome,
     predicate: (determinant: number) => boolean,

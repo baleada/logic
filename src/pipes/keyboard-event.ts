@@ -2,15 +2,17 @@ import { every, includes, pipe, some } from 'lazy-collections'
 import {
   fromEventToKeyStatusKey,
   modifiers,
-  createKeyStatuses,
+  createKeyStatusesValue as createValue,
+  createKeyStatusesSet as createSet,
   fromComboToAliases,
   fromAliasToDownKeys,
   fromEventToAliases,
+  createPredicateKeyStatusKey,
 } from '../extracted'
-import type { KeyStatusKey, KeyStatus } from '../extracted'
+import type { KeyStatusKey, KeyStatus, KeyStatuses } from '../extracted'
 import { createMap } from './array'
 
-export type KeyboardEventFn<Returned> = (keyboardEvent: KeyboardEvent) => Returned
+export type KeyboardEventTransform<Transformed> = (keyboardEvent: KeyboardEvent) => Transformed
 
 export type CreatePredicateKeycomboMatchOptions = {
   toDownKeys?: (alias: string) => KeyStatusKey[],
@@ -25,7 +27,7 @@ const defaultOptions: CreatePredicateKeycomboMatchOptions = {
 export const createPredicateKeycomboMatch = (
   keycombo: string,
   options: CreatePredicateKeycomboMatchOptions = {},
-): KeyboardEventFn<boolean> => {
+): KeyboardEventTransform<boolean> => {
   const { toDownKeys, toAliases } = { ...defaultOptions, ...options },
         aliases = fromComboToAliases(keycombo),
         downKeys = createMap<string, KeyStatusKey[]>(toDownKeys)(aliases),
@@ -42,15 +44,15 @@ export const createPredicateKeycomboMatch = (
         })()
 
   return event => {
-    const statuses = createKeyStatuses(),
+    const statuses: KeyStatuses = [],
           predicateAliasDown = every<KeyStatusKey>(
-            key => statuses.toValue(key) === 'down'
+            key => createValue(key, { predicateKey: createPredicateKeyStatusKey(key) })(statuses) === 'down'
           ) as (entries: KeyStatusKey[]) => boolean
 
-    statuses.set(fromEventToKeyStatusKey(event), 'down')
+    createSet(fromEventToKeyStatusKey(event), 'down')(statuses)
 
     for (const modifier of modifiers) {
-      if (event[`${modifier.toLowerCase()}Key`]) statuses.set({ key: modifier }, 'down')
+      if (event[`${modifier.toLowerCase()}Key`]) createSet({ key: modifier }, 'down')(statuses)
     }
 
     const events = createMap<[KeyStatusKey, KeyStatus], KeyboardEvent>(
@@ -63,7 +65,7 @@ export const createPredicateKeycomboMatch = (
 
         return e as KeyboardEvent
       }
-    )(statuses.toEntries())    
+    )(statuses)    
 
     return (
       every<KeyStatusKey[]>(predicateAliasDown)(downKeys) as boolean

@@ -4,6 +4,7 @@ const external = [
         /@babel\/runtime/,
         '@sindresorhus/slugify',
         '@snigo.dev/color',
+        'array-shuffle',
         'bezier-easing',
         'clsx',
         'dequal',
@@ -19,6 +20,7 @@ const external = [
         .input([
           'src/classes/index.ts',
           'src/pipes/index.ts',
+          'src/links/index.ts',
           'src/factories/index.ts',
         ])
         .external(external)
@@ -33,7 +35,12 @@ const external = [
         .cjs({ file: 'lib/index.cjs' })
         .configure(),
       dts = new configureable.Rollup()
-        .input(['types/classes/index.d.ts', 'types/pipes/index.d.ts', 'types/factories/index.d.ts'])
+        .input([
+          'types/classes/index.d.ts',
+          'types/pipes/index.d.ts',
+          'types/links/index.d.ts',
+          'types/factories/index.d.ts',
+        ])
         .external([
           ...external,
           '@types/resize-observer-browser',

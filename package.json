@@ -71,6 +71,7 @@
     "@sindresorhus/slugify": "^2.2.1",
     "@snigo.dev/color": "^0.0.6",
     "@types/dompurify": "^2.4.0",
+    "array-shuffle": "^3.0.0",
     "bezier-easing": "^2.1.0",
     "clsx": "^1.2.1",
     "dequal": "^2.0.3",

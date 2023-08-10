@@ -1,5 +1,9 @@
 // ANY
-export { createClone, createEqual } from './any'
+export {
+  createClone,
+  createDeepEqual,
+  createEqual,
+} from './any'
 
 
 // ARRAY
@@ -14,6 +18,7 @@ export {
   createReplace,
   createReverse,
   createSlice,
+  createShuffle,
   createSort,
   createSwap,
   createUnique,
@@ -29,6 +34,17 @@ export {
   createMapAsync,
   createReduceAsync,
 } from './array-async'
+
+
+// ASSOCIATIVE ARRAY
+export { 
+  createValue as createAssociativeArrayValue,
+  createHas as createAssociativeArrayHas,
+  createKeys as createAssociativeArrayKeys,
+  createValues as createAssociativeArrayValues,
+} from './associative-array'
+export { defineAssociativeArray } from '../extracted'
+export type { AssociativeArray } from '../extracted'
 
 
 // STRING

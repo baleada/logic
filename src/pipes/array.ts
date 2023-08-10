@@ -1,23 +1,24 @@
+import arrayShuffle from 'array-shuffle'
 import { pipe, toArray, concat, unique, filter, map, reduce, slice, sort } from 'lazy-collections'
 import { predicateObject } from '../extracted'
 
-export type ArrayFn<Item, Returned> = (array: Item[]) => Returned
+export type ArrayTransform<Item, Transformed> = (array: Item[]) => Transformed
 
-export function createConcat<Item>(...arrays: Item[][]): ArrayFn<Item, Item[]> {
+export function createConcat<Item>(...arrays: Item[][]): ArrayTransform<Item, Item[]> {
   return array => pipe(
     concat(array, ...arrays),
     toArray<Item>()
   )() as Item[]
 }
 
-export function createFilter<Item>(predicate: (item: Item, index: number) => boolean): ArrayFn<Item, Item[]> {
+export function createFilter<Item>(predicate: (item: Item, index: number) => boolean): ArrayTransform<Item, Item[]> {
   return array => pipe(
     filter(predicate),
     toArray()
   )(array) as Item[]
 }
 
-export function createInsert<Item>(item: Item, index: number): ArrayFn<Item, Item[]> {
+export function createInsert<Item>(item: Item, index: number): ArrayTransform<Item, Item[]> {
   return array => {
     const withItems = createConcat(array, [item])([])
 
@@ -28,7 +29,7 @@ export function createInsert<Item>(item: Item, index: number): ArrayFn<Item, Ite
   }
 }
 
-export function createMap<Item, Transformed = Item>(transform: (item: Item, index: number) => Transformed): ArrayFn<Item, Transformed[]> {
+export function createMap<Item, Transformed = Item>(transform: (item: Item, index: number) => Transformed): ArrayTransform<Item, Transformed[]> {
   return array => pipe(
     map(transform),
     toArray()
@@ -42,7 +43,7 @@ export function createReduce<Item, Accumulator>(
   return array => reduce<Accumulator, Item>(accumulate, initialValue)(array) as Accumulator
 }
 
-export function createRemove<Item>(index: number): ArrayFn<Item, Item[]> {
+export function createRemove<Item>(index: number): ArrayTransform<Item, Item[]> {
   return array => {
     return createConcat(
       createSlice<Item>(0, index)(array),
@@ -54,7 +55,7 @@ export function createRemove<Item>(index: number): ArrayFn<Item, Item[]> {
 export function createReorder<Item>(
   from: { start: number; itemCount: number; } | number,
   to: number
-): ArrayFn<Item, Item[]> {
+): ArrayTransform<Item, Item[]> {
   return array => {
     const [itemsToMoveStartIndex, itemsToMoveCount] = predicateObject(from)
       ? [from.start, from.itemCount]
@@ -93,11 +94,11 @@ export function createReorder<Item>(
   }
 }
 
-export function createReplace<Item>(index: number, replacement: Item): ArrayFn<Item, Item[]> {
+export function createReplace<Item>(index: number, replacement: Item): ArrayTransform<Item, Item[]> {
   return createMap<Item, Item>((item, i) => i === index ? replacement : item)
 }
 
-export function createReverse<Item>(): ArrayFn<Item, Item[]> {
+export function createReverse<Item>(): ArrayTransform<Item, Item[]> {
   return array => {
     const reversed = []
 
@@ -109,9 +110,9 @@ export function createReverse<Item>(): ArrayFn<Item, Item[]> {
   }
 }
 
-export function createSlice<Item>(from: number, to?: number): ArrayFn<Item, Item[]> {
+export function createSlice<Item>(from: number, to?: number): ArrayTransform<Item, Item[]> {
   const toSliced = to ? slice(from, to - 1) : slice(from)
-  
+
   return array => {
     return from === to
       ? []
@@ -122,7 +123,13 @@ export function createSlice<Item>(from: number, to?: number): ArrayFn<Item, Item
   }
 }
 
-export function createSort<Item>(compare?: (itemA: Item, itemB: Item) => number): ArrayFn<Item, Item[]> {
+export function createShuffle<Item>(): ArrayTransform<Item, Item[]> {
+  return array => {
+    return arrayShuffle(array)
+  }
+}
+
+export function createSort<Item>(compare?: (itemA: Item, itemB: Item) => number): ArrayTransform<Item, Item[]> {
   return array => {
     return pipe(
       sort(compare),
@@ -131,9 +138,9 @@ export function createSort<Item>(compare?: (itemA: Item, itemB: Item) => number)
   }
 }
 
-export function createSwap<Item>(indices: [number, number]): ArrayFn<Item, Item[]> {
+export function createSwap<Item>(indices: [number, number]): ArrayTransform<Item, Item[]> {
   return array => {
-    const { 0: from, 1: to } = indices, { reorderFrom, reorderTo } = ((): { reorderFrom: ArrayFn<Item, Item[]>; reorderTo: ArrayFn<Item, Item[]>; } => {
+    const { 0: from, 1: to } = indices, { reorderFrom, reorderTo } = ((): { reorderFrom: ArrayTransform<Item, Item[]>; reorderTo: ArrayTransform<Item, Item[]>; } => {
       if (from < to) {
         return {
           reorderFrom: createReorder<Item>(from, to),
@@ -158,7 +165,7 @@ export function createSwap<Item>(indices: [number, number]): ArrayFn<Item, Item[
   }
 }
 
-export function createUnique<Item>(): ArrayFn<Item, Item[]> {
+export function createUnique<Item>(): ArrayTransform<Item, Item[]> {
   return array => pipe(
     unique(),
     toArray()

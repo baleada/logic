@@ -1,5 +1,5 @@
 import type { GraphNode, GraphEdge } from '../extracted'
-import type { GeneratorFn } from './generator'
+import type { GeneratorTransform } from './generator'
 
 export type ToGraphYielded = {
   node: GraphNode<string>,
@@ -18,7 +18,7 @@ const defaultOptions: Required<CreateToGraphOptions<any>> = {
   toChildren: node => node.children,
 }
 
-export function createToGraph<TreeNode> (options: CreateToGraphOptions<TreeNode> = {}): GeneratorFn<TreeNode[], ToGraphYielded> {
+export function createToGraph<TreeNode> (options: CreateToGraphOptions<TreeNode> = {}): GeneratorTransform<TreeNode[], ToGraphYielded> {
   const { toId, toChildren } = { ...defaultOptions, ...options }
 
   return function* (tree) {

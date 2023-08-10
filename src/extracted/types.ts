@@ -1,4 +1,4 @@
-import type { KeyStatuses } from './createKeyStatuses'
+import type { KeyStatuses } from './key-statuses'
 
 export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
 

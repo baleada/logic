@@ -1,7 +1,7 @@
 import { join } from 'lazy-collections'
 import type { DeepRequired } from '../extracted'
 
-export type ElementFn<El extends HTMLElement, Returned> = (element: El) => Returned
+export type ElementTransform<El extends HTMLElement, Transformed> = (element: El) => Transformed
 
 export type CreateFocusableOptions = {
   elementIsCandidate?: boolean,
@@ -32,7 +32,7 @@ const defaultOptions: DeepRequired<CreateFocusableOptions> = {
 export function createFocusable (
   order: 'first' | 'last',
   options: CreateFocusableOptions = {}
-): ElementFn<HTMLElement, HTMLElement | undefined> {
+): ElementTransform<HTMLElement, HTMLElement | undefined> {
   const { elementIsCandidate, tabbableSelector } = { ...defaultOptions, ...options },
         predicateFocusable = (element: HTMLElement): boolean => element.matches(tabbableSelector)
 

@@ -1,1 +1,1 @@
-export type ManyFn<Parameter, Returned> = (...params: Parameter[]) => Returned
+export type ManyTransform<Parameter, Transformed> = (...params: Parameter[]) => Transformed

@@ -64,6 +64,10 @@ export function createKeypress (
           predicateValid,
           cleanup,
           statuses,
+          toStatus,
+          setStatus,
+          clearStatuses,
+          deleteStatus,
         } = createKeyState({
           keycomboOrKeycombos,
           unsupportedAliases,
@@ -80,12 +84,12 @@ export function createKeypress (
           key = fromEventToKeyStatusKey(event)
 
     // REPEATED KEYDOWN
-    if (statuses.toValue(key) === 'down') {
+    if (toStatus(key) === 'down') {
       onDown?.(toHookApi(api))
       return
     }
 
-    statuses.set(key, 'down')
+    setStatus(key, 'down')
 
     // ALREADY DENIED
     if (localStatus === 'denied') {
@@ -108,7 +112,7 @@ export function createKeypress (
     ) {
       denied()
       localStatus = getStatus()
-      if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
+      if (includes(event.key)(unsupportedKeys) as boolean) clearStatuses()
       onDown?.(toHookApi(api))
       return
     }
@@ -154,15 +158,15 @@ export function createKeypress (
     if (localStatus === 'denied') {
       denied()
       
-      if (includes(event.key)(unsupportedKeys) as boolean) statuses.clear()
-      else statuses.delete(key)
+      if (includes(event.key)(unsupportedKeys) as boolean) clearStatuses()
+      else deleteStatus(key)
 
       if (!predicateSomeKeyDown(statuses)) localStatus = 'recognizing'
       onUp?.(toHookApi(api))
       return
     }
 
-    statuses.delete(key)
+    deleteStatus(key)
 
     const downCombos = getDownCombos(),
           matches = matchPredicatesByKeycombo[downCombos[0]]?.(statuses)
@@ -188,7 +192,7 @@ export function createKeypress (
 
   const visibilitychange: RecognizeableEffect<'visibilitychange', KeypressMetadata> = (event, api) => {
     if (document.visibilityState === 'hidden') {
-      statuses.clear()
+      clearStatuses()
       localStatus = 'recognizing'
       cleanup()
     }
