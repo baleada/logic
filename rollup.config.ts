@@ -3,12 +3,12 @@ import { configureable } from '@baleada/prepare'
 const external = [
         /@babel\/runtime/,
         '@sindresorhus/slugify',
-        '@snigo.dev/color',
         'array-shuffle',
         'bezier-easing',
         'clsx',
         'dequal',
         /dompurify/,
+        /dset/,
         'fast-fuzzy',
         'klona',
         'ky',

@@ -1,5 +1,4 @@
 import BezierEasing from 'bezier-easing'
-import { mix } from '@snigo.dev/color'
 import {
   filter,
   pipe,
@@ -10,25 +9,30 @@ import {
 } from 'lazy-collections'
 import {
   predicateFunction,
-  predicateUndefined,
-  predicateNumber,
-  predicateString,
-  predicateArray,
+  toInterpolated,
 } from '../extracted'
 import {
   createConcat,
   createFilter,
-  createSlice,
   createReduce,
+  createDeepMerge,
 } from '../pipes'
+import { defaultCreateMixOptions } from '../pipes/color'
+import type { ColorInterpolationMethod, CreateMixOptions } from '../pipes'
 import { Listenable } from './Listenable'
 
-export type AnimateableKeyframe = {
+export type AnimateableKeyframe<Value extends string | number | any[]> = {
   progress: number,
   properties: {
-    [key: string]: number | string | any[]
+    [key: string]: AnimateableValue<Value>
   },
   timing?: AnimateableTiming
+}
+
+export type AnimateableValue<Value extends string | number | any[]> = Value extends `${string} ${number}%` ? never : (Value | number | any[])
+
+export function defineAnimateableKeyframes<Value extends string | number | any[]> (keyframes: AnimateableKeyframe<Value>[]) {
+  return keyframes
 }
 
 export type AnimateableOptions = {
@@ -56,7 +60,9 @@ export type AnimateFrame = {
 
 export type AnimateOptions = {
   interpolate?: {
-    colorModel?: 'rgb' | 'hsl' | 'lab' | 'lch' | 'xyz',
+    color?: {
+      method: ColorInterpolationMethod,
+    } & CreateMixOptions
   }
 }
 
@@ -75,7 +81,16 @@ const defaultOptions: AnimateableOptions = {
   alternates: false,
 }
 
-export class Animateable {
+const defaultAnimateOptions: AnimateOptions = {
+  interpolate: {
+    color: {
+      method: 'oklch',
+      ...defaultCreateMixOptions,
+    },
+  },
+}
+
+export class Animateable<Value extends string | number | any[]> {
   private initialDuration: number
   private iterationLimit: number | true
   private alternates: boolean
@@ -89,9 +104,9 @@ export class Animateable {
   private seekCache: { timeProgress?: number }
   private alternateCache: { status: 'ready' | 'playing' | 'reversing' }
   private visibilitychange: Listenable<'visibilitychange'>
-  private getEaseables: GetEaseables
-  private getReversedEaseables: GetEaseables
-  constructor (keyframes: AnimateableKeyframe[], options: AnimateableOptions = {}) {
+  private getEaseables: GetEaseables<Value>
+  private getReversedEaseables: GetEaseables<Value>
+  constructor (keyframes: AnimateableKeyframe<Value>[], options: AnimateableOptions = {}) {
     this.initialDuration = options?.duration || defaultOptions.duration
     this.controlPoints = fromTimingToControlPoints(options?.timing || defaultOptions.timing)
     this.iterationLimit = options?.iterations || defaultOptions.iterations
@@ -170,12 +185,12 @@ export class Animateable {
     return this.computedProgress
   }
 
-  private computedKeyframes: AnimateableKeyframe[]
-  private reversedKeyframes: AnimateableKeyframe[]
+  private computedKeyframes: AnimateableKeyframe<Value>[]
+  private reversedKeyframes: AnimateableKeyframe<Value>[]
   private properties: string[]
   private easeables: Easeable[]
   private reversedEaseables: Easeable[]
-  setKeyframes (keyframes: AnimateableKeyframe[]) {
+  setKeyframes (keyframes: AnimateableKeyframe<Value>[]) {
     this.stop()
 
     // Sort by progress without mutating original
@@ -183,9 +198,9 @@ export class Animateable {
 
     this.reversedKeyframes = pipe(
       reverse(),
-      map<AnimateableKeyframe, AnimateableKeyframe>(({ progress, properties }) => ({ progress: 1 - progress, properties })),
+      map<AnimateableKeyframe<Value>, AnimateableKeyframe<Value>>(({ progress, properties }) => ({ progress: 1 - progress, properties })),
       toArray()
-    )(this.keyframes) as AnimateableKeyframe[]
+    )(this.keyframes) as AnimateableKeyframe<Value>[]
 
     this.properties = toProperties(this.keyframes)
     this.easeables = this.getEaseables({ keyframes: this.keyframes, properties: this.properties })
@@ -379,7 +394,7 @@ export class Animateable {
   private computedRequest: number
   private createAnimate (type: AnimateType): (effect: (frame?: AnimateFrame) => any, options?: AnimateOptions) => this {
     return (effect, options = {}) => {
-      const { interpolate: interpolateOptions } = options
+      const { interpolate: interpolateOptions } = createDeepMerge<AnimateOptions>(options)(defaultAnimateOptions)
 
       this.computedRequest = window.requestAnimationFrame(timestamp => {
         this.setStartTimeAndStatus(type, timestamp)
@@ -477,7 +492,7 @@ export class Animateable {
         return this.reversedToAnimationProgress.bind(this)
     }
   }
-  private getFrame (type: AnimateType, naiveTimeProgress: number, interpolateOptions: {}, timestamp: number): AnimateFrame {
+  private getFrame (type: AnimateType, naiveTimeProgress: number, interpolateOptions: AnimateOptions['interpolate'], timestamp: number): AnimateFrame {
     const easeables = (() => {
       switch (type) {
         case 'play':
@@ -820,23 +835,23 @@ export type Easeable = {
   toAnimationProgress: BezierEasing.EasingFunction
 }
 
-type GetEaseables = ({ properties, keyframes }: { properties: string[], keyframes: AnimateableKeyframe[] }) => Easeable[]
+type GetEaseables<Value extends string | number | any[]> = ({ properties, keyframes }: { properties: string[], keyframes: AnimateableKeyframe<Value>[] }) => Easeable[]
 
-type FromKeyframeToControlPoints = (
+type FromKeyframeToControlPoints<Value extends string | number | any[]> = (
   { keyframe, index, propertyKeyframes }: {
-    keyframe: AnimateableKeyframe,
+    keyframe: AnimateableKeyframe<Value>,
     index: number,
-    propertyKeyframes: AnimateableKeyframe[]
+    propertyKeyframes: AnimateableKeyframe<Value>[]
   }
 ) => AnimateableControlPoints
 
-export function createGetEaseables (fromKeyframeToControlPoints: FromKeyframeToControlPoints): GetEaseables {
+export function createGetEaseables<Value extends string | number | any[]> (fromKeyframeToControlPoints: FromKeyframeToControlPoints<Value>): GetEaseables<Value> {
   return ({ properties, keyframes }) => {
     const fromPropertiesToEasables = createReduce<string, Easeable[]>(
       (easeables: Easeable[], property: string) => {
-        const propertyKeyframes = createFilter<AnimateableKeyframe>(({ properties }) => properties.hasOwnProperty(property))(keyframes),
-              fromKeyframesToEaseables = createReduce<AnimateableKeyframe, Easeable[]>(
-                (propertyEaseables: Easeable[], keyframe: AnimateableKeyframe, index: number): Easeable[] => {
+        const propertyKeyframes = createFilter<AnimateableKeyframe<Value>>(({ properties }) => properties.hasOwnProperty(property))(keyframes),
+              fromKeyframesToEaseables = createReduce<AnimateableKeyframe<Value>, Easeable[]>(
+                (propertyEaseables: Easeable[], keyframe: AnimateableKeyframe<Value>, index: number): Easeable[] => {
                   const previous = keyframe.properties[property],
                         next = index === propertyKeyframes.length - 1 ? previous : propertyKeyframes[index + 1].properties[property],
                         start = keyframe.progress,
@@ -880,7 +895,7 @@ export function createGetEaseables (fromKeyframeToControlPoints: FromKeyframeToC
   }
 }
 
-export function toProperties (keyframes: AnimateableKeyframe[]): string[] {
+export function toProperties<Value extends string | number | any[]> (keyframes: AnimateableKeyframe<Value>[]): string[] {
   const properties = new Set<string>()
 
   for (const keyframe of keyframes) {
@@ -917,166 +932,129 @@ export function createToAnimationProgress (points: AnimateableControlPoints) {
   return BezierEasing(point1x, point1y, point2x, point2y)
 }
 
-export function toInterpolated (
-  { previous, next, progress }: {
-    previous: string | number | any[] | undefined,
-    next: string | number | any[],
-    progress: number
-  },
-  options: AnimateOptions['interpolate'] = {}
-) {
-  if (predicateUndefined(previous)) {
-    return next
-  }
-
-  if (predicateNumber(previous) && predicateNumber(next)) {
-    return (next  - previous) * progress + previous
-  }
-
-  if (predicateString(previous) && predicateString(next)) {
-    return mix(
-      options.colorModel,
-      {
-        start: previous,
-        end: next,
-        alpha: progress,
-      }
-    ).toRgb().toRgbString()
-  }
-
-  if (predicateArray(previous) && predicateArray(next)) {
-    const exactSliceEnd = (next.length - previous.length) * progress + previous.length,
-    nextIsLonger = next.length > previous.length,
-    sliceEnd = nextIsLonger ? Math.floor(exactSliceEnd) : Math.ceil(exactSliceEnd),
-    sliceTarget = nextIsLonger ? next : previous
-
-    return createSlice(0, sliceEnd)(sliceTarget)
-  }
-}
-
-export const linear: AnimateableKeyframe['timing'] = [
+export const linear: AnimateableKeyframe<any>['timing'] = [
   0   , 0   ,
   1   , 1   ,
 ]
 
 // Material Design and Tailwind
-export const materialStandard: AnimateableKeyframe['timing'] = [
+export const materialStandard: AnimateableKeyframe<any>['timing'] = [
   0.4 , 0   ,
   0.2 , 1   ,
 ]
-export const materialDecelerated: AnimateableKeyframe['timing'] = [
+export const materialDecelerated: AnimateableKeyframe<any>['timing'] = [
   0   , 0   ,
   0.2 , 1   ,
 ]
-export const materialAccelerated: AnimateableKeyframe['timing'] = [
+export const materialAccelerated: AnimateableKeyframe<any>['timing'] = [
   0.4 , 0   ,
   1   , 1   ,
 ]
 
 // Lea Verou
-export const verouEase: AnimateableKeyframe['timing'] = [
+export const verouEase: AnimateableKeyframe<any>['timing'] = [
   0.25, 0.1 ,
   0.25, 1   ,
 ]
-export const verouEaseIn: AnimateableKeyframe['timing'] = [
+export const verouEaseIn: AnimateableKeyframe<any>['timing'] = [
   0.42, 0   ,
   1   , 1   ,
 ]
-export const verouEaseOut: AnimateableKeyframe['timing'] = [
+export const verouEaseOut: AnimateableKeyframe<any>['timing'] = [
   0   , 0   ,
   0.58, 1   ,
 ]
-export const verouEaseInOut: AnimateableKeyframe['timing'] = [
+export const verouEaseInOut: AnimateableKeyframe<any>['timing'] = [
   0.42, 0   ,
   0.58, 1   ,
 ]
 
 // easings.net
-export const easingsNetInSine: AnimateableKeyframe['timing'] = [
+export const easingsNetInSine: AnimateableKeyframe<any>['timing'] = [
   0.12, 0   ,
   0.39, 0   ,
 ]
-export const easingsNetOutSine: AnimateableKeyframe['timing'] = [
+export const easingsNetOutSine: AnimateableKeyframe<any>['timing'] = [
   0.61, 1   ,
   0.88, 1   ,
 ]
-export const easingsNetInOutSine: AnimateableKeyframe['timing'] = [
+export const easingsNetInOutSine: AnimateableKeyframe<any>['timing'] = [
   0.37, 0   ,
   0.63, 1   ,
 ]
-export const easingsNetInQuad: AnimateableKeyframe['timing'] = [
+export const easingsNetInQuad: AnimateableKeyframe<any>['timing'] = [
   0.11, 0   ,
   0.5 , 0   ,
 ]
-export const easingsNetOutQuad: AnimateableKeyframe['timing'] = [
+export const easingsNetOutQuad: AnimateableKeyframe<any>['timing'] = [
   0.5 , 1   ,
   0.89, 1   ,
 ]
-export const easingsNetInOutQuad: AnimateableKeyframe['timing'] = [
+export const easingsNetInOutQuad: AnimateableKeyframe<any>['timing'] = [
   0.45, 0   ,
   0.55, 1   ,
 ]
-export const easingsNetInCubic: AnimateableKeyframe['timing'] = [
+export const easingsNetInCubic: AnimateableKeyframe<any>['timing'] = [
   0.32, 0   ,
   0.67, 0   ,
 ]
-export const easingsNetOutCubic: AnimateableKeyframe['timing'] = [
+export const easingsNetOutCubic: AnimateableKeyframe<any>['timing'] = [
   0.33, 1   ,
   0.68, 1   ,
 ]
-export const easingsNetInOutCubic: AnimateableKeyframe['timing'] = [
+export const easingsNetInOutCubic: AnimateableKeyframe<any>['timing'] = [
   0.65, 0   ,
   0.35, 1   ,
 ]
-export const easingsNetInQuart: AnimateableKeyframe['timing'] = [
+export const easingsNetInQuart: AnimateableKeyframe<any>['timing'] = [
   0.5 , 0   ,
   0.75, 0   ,
 ]
-export const easingsNetInQuint: AnimateableKeyframe['timing'] = [
+export const easingsNetInQuint: AnimateableKeyframe<any>['timing'] = [
   0.64, 0   ,
   0.78, 0   ,
 ]
-export const easingsNetOutQuint: AnimateableKeyframe['timing'] = [
+export const easingsNetOutQuint: AnimateableKeyframe<any>['timing'] = [
   0.22, 1   ,
   0.36, 1   ,
 ]
-export const easingsNetInOutQuint: AnimateableKeyframe['timing'] = [
+export const easingsNetInOutQuint: AnimateableKeyframe<any>['timing'] = [
   0.83, 0   ,
   0.17, 1   ,
 ]
-export const easingsNetInExpo: AnimateableKeyframe['timing'] = [
+export const easingsNetInExpo: AnimateableKeyframe<any>['timing'] = [
   0.7 , 0   ,
   0.84, 0   ,
 ]
-export const easingsNetOutExpo: AnimateableKeyframe['timing'] = [
+export const easingsNetOutExpo: AnimateableKeyframe<any>['timing'] = [
   0.16, 1   ,
   0.3 , 1   ,
 ]
-export const easingsNetInOutExpo: AnimateableKeyframe['timing'] = [
+export const easingsNetInOutExpo: AnimateableKeyframe<any>['timing'] = [
   0.87, 0   ,
   0.13, 1   ,
 ]
-export const easingsNetInCirc: AnimateableKeyframe['timing'] = [
+export const easingsNetInCirc: AnimateableKeyframe<any>['timing'] = [
   0.55, 0   ,
   1   , 0.45,
 ]
-export const easingsNetOutCirc: AnimateableKeyframe['timing'] = [
+export const easingsNetOutCirc: AnimateableKeyframe<any>['timing'] = [
   0   , 0.55,
   0.45, 1   ,
 ]
-export const easingsNetInOutCirc: AnimateableKeyframe['timing'] = [
+export const easingsNetInOutCirc: AnimateableKeyframe<any>['timing'] = [
   0.85, 0   ,
   0.15, 1   ,
 ]
-export const easingsNetInBack: AnimateableKeyframe['timing'] = [
+export const easingsNetInBack: AnimateableKeyframe<any>['timing'] = [
   0.36, 0   ,
   0.66,-0.56,
 ]
-export const easingsNetOutBack: AnimateableKeyframe['timing'] = [
+export const easingsNetOutBack: AnimateableKeyframe<any>['timing'] = [
   0.34, 1.56,
   0.64, 1   ,
 ]
-export const easingsNetInOutBack: AnimateableKeyframe['timing'] = [
+export const easingsNetInOutBack: AnimateableKeyframe<any>['timing'] = [
   0.68,-0.6 ,
   0.32, 1.6 ,
 ]

@@ -68,6 +68,7 @@ export {
   createKeys,
   createEvery,
   createSome,
+  createDeepMerge,
 } from './object'
 
 
@@ -79,7 +80,12 @@ export {
 
 // ELEMENT
 export { createFocusable } from './element'
-export type { CreateFocusableOptions as CreateToFocusableOptions } from './element'
+export type { CreateFocusableOptions } from './element'
+
+
+// COLOR
+export { createMix } from './color'
+export type { ColorInterpolationMethod, MixColor, CreateMixOptions } from './color'
 
 
 // GRAPH

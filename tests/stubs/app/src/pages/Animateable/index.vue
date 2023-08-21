@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { ref, defineComponent } from 'vue'
-import { Animateable, easingsNetInOutBack } from '../../../../../../src/classes'
+import { AnimateFrame, Animateable, easingsNetInOutBack } from '../../../../../../src/classes'
 
 export default defineComponent({
   setup () {
@@ -65,7 +65,7 @@ export default defineComponent({
 
     const stub = ref(null)
 
-    function frameEffect (frame) {
+    function frameEffect (frame: AnimateFrame) {
       const { properties: { translate, backgroundColor, textContent } } = frame
       stub.value.style.transform = `translateX(${translate.interpolated}%`
       stub.value.style.backgroundColor = backgroundColor.interpolated

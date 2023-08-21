@@ -1,0 +1,39 @@
+import type { AnimateOptions } from '../classes'
+import { createMix, createSlice } from '../pipes'
+import {
+  predicateUndefined,
+  predicateNumber,
+  predicateString,
+  predicateArray,
+} from './predicates'
+
+export function toInterpolated (
+  { previous, next, progress }: {
+    previous: string | number | any[] | undefined,
+    next: string | number | any[],
+    progress: number
+  },
+  options: AnimateOptions['interpolate'] = {}
+) {
+  if (predicateUndefined(previous)) {
+    return next
+  }
+
+  if (predicateNumber(previous) && predicateNumber(next)) {
+    return (next  - previous) * progress + previous
+  }
+
+  if (predicateString(previous) && predicateString(next)) {
+    const { color: { method, ...createMixOptions } } = options    
+    return createMix(method, createMixOptions)(previous, `${next} ${progress * 100}%`)
+  }
+
+  if (predicateArray(previous) && predicateArray(next)) {
+    const exactSliceEnd = (next.length - previous.length) * progress + previous.length,
+    nextIsLonger = next.length > previous.length,
+    sliceEnd = nextIsLonger ? Math.floor(exactSliceEnd) : Math.ceil(exactSliceEnd),
+    sliceTarget = nextIsLonger ? next : previous
+
+    return createSlice(0, sliceEnd)(sliceTarget)
+  }
+}

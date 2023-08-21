@@ -1,17 +1,21 @@
 // Many of these functions are preferable to Object.<something> for better type inference
 // on objects with no risk of type-unsafe keys being added dynamically
+import { merge } from 'dset/merge'
+import { createClone } from './any'
 
-type ObjectTransform<Key extends string | number | symbol, Value, Transformed> = (transform: Record<Key, Value>) => Transformed
+type ObjectTransform<Type extends Record<any, any>, Transformed> = (transform: Type) => Transformed
 
-export function createValue<Key extends string | number | symbol, Value>(key: Key): ObjectTransform<Key, Value, Value | undefined> {
+type ValueOf<Type> = Type[keyof Type]
+
+export function createValue<Type extends Record<any, any>>(key: keyof Type): ObjectTransform<Type, ValueOf<Type>> {
   return object => object[key]
 }
 
-export function createHas<Key extends string | number | symbol>(key: Key): ObjectTransform<Key, any, boolean> {
+export function createHas<Type extends Record<any, any>>(key: keyof Type): ObjectTransform<Type, boolean> {
   return object => key in object
 }
 
-export function createKeys<Key extends string | number | symbol>(): ObjectTransform<Key, any, Key[]> {
+export function createKeys<Type extends Record<any, any>>(): ObjectTransform<Type, (keyof Type)[]> {
   return object => {
     const keys = []
 
@@ -23,7 +27,7 @@ export function createKeys<Key extends string | number | symbol>(): ObjectTransf
   }
 }
 
-export function createValues<Key extends string | number | symbol, Value>(): ObjectTransform<Key, Value, Value[]> {
+export function createValues<Type extends Record<any, any>>(): ObjectTransform<Type, ValueOf<Type>[]> {
   return object => {
     const values = []
 
@@ -35,7 +39,7 @@ export function createValues<Key extends string | number | symbol, Value>(): Obj
   }
 }
 
-export function createEntries<Key extends string | number | symbol, Value>(): ObjectTransform<Key, Value, [Key, Value][]> {
+export function createEntries<Type extends Record<any, any>>(): ObjectTransform<Type, [keyof Type, ValueOf<Type>][]> {
   return object => {
     const entries = []
 
@@ -47,7 +51,7 @@ export function createEntries<Key extends string | number | symbol, Value>(): Ob
   }
 }
 
-export function createEvery<Key extends string | number | symbol, Value>(predicate: (key: Key, value: Value) => unknown): ObjectTransform<Key, Value, boolean> {
+export function createEvery<Type extends Record<any, any>>(predicate: (key: keyof Type, value: ValueOf<Type>) => unknown): ObjectTransform<Type, boolean> {
   return object => {
     for (const key in object) {
       if (!predicate(key, object[key])) {
@@ -59,12 +63,19 @@ export function createEvery<Key extends string | number | symbol, Value>(predica
   }
 }
 
-export function createSome<Key extends string | number | symbol, Value>(predicate: (key: Key, value: Value) => unknown): ObjectTransform<Key, Value, boolean> {
+export function createSome<Type extends Record<any, any>>(predicate: (key: keyof Type, value: ValueOf<Type>) => unknown): ObjectTransform<Type, boolean> {
   return object => {
     for (const key in object) {
       if (predicate(key, object[key])) return true
     }
 
     return false
+  }
+}
+
+export function createDeepMerge<Type extends Record<any, any>>(override?: Type): ObjectTransform<Type, Type> {
+  return object => {
+    const merged: Type = createClone<typeof object>()(object)
+    return merge(merged, override || {})
   }
 }

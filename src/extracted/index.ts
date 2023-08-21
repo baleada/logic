@@ -100,3 +100,5 @@ export {
 } from './predicates'
 
 export { toLength } from './lazy-collections'
+
+export { toInterpolated } from './toInterpolated'

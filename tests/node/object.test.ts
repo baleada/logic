@@ -8,6 +8,7 @@ import {
   createEntries,
   createSome,
   createEvery,
+  createDeepMerge,
 } from '../../src/pipes/object'
 import {
   createSet,
@@ -25,14 +26,14 @@ suite.before(context => {
 
 suite('createValue(...) works', ({ object }) => {
   ;(() => {
-    const value = createValue('foo')(object),
+    const value = createValue<Record<any, any>>('foo')(object),
           expected = 1
 
     assert.equal(value, expected)
   })()
 
   ;(() => {
-    const value = createValue('bar')(object),
+    const value = createValue<Record<any, any>>('bar')(object),
           expected = undefined
 
     assert.equal(value, expected)
@@ -61,14 +62,14 @@ suite('createSet(...) works', ({ object: initial }) => {
 
 suite('createHas(...) works', ({ object }) => {
   ;(() => {
-    const value = createHas('foo')(object),
+    const value = createHas<Record<any, any>>('foo')(object),
           expected = true
 
     assert.equal(value, expected)
   })()
 
   ;(() => {
-    const value = createHas('qux')(object),
+    const value = createHas<Record<any, any>>('qux')(object),
           expected = false
 
     assert.equal(value, expected)
@@ -126,14 +127,14 @@ suite('createValues(...) works', ({ object }) => {
 
 suite('createEntries() transforms object into entries', () => {
   const object: Record<string, string> = { one: 'value', two: 'value' },
-        value = createEntries<string, string>()(object)
+        value = createEntries<Record<string, string>>()(object)
 
   assert.equal(value, [['one', 'value'], ['two', 'value']])
 })
 
 suite('createKeys() transforms object into keys', () => {
   const object: Record<string, string> = { one: 'value', two: 'value' },
-        value = createKeys<string>()(object)
+        value = createKeys<Record<string, any>>()(object)
 
   assert.equal(value, ['one', 'two'])
 })
@@ -142,13 +143,13 @@ suite('createSome() transforms object into some', () => {
   const object: Record<string, string> = { one: 'value', two: 'value' }
 
   ;(() => {
-    const value = createSome<string, string>((key, value) => key && value)(object)
+    const value = createSome<Record<string, string>>((key, value) => key && value)(object)
 
     assert.ok(value)
   })()
 
   ;(() => {
-    const value = createSome<string, string>((key, value) => key && !value)(object)
+    const value = createSome<Record<string, string>>((key, value) => key && !value)(object)
 
     assert.not.ok(value)
   })()
@@ -158,16 +159,39 @@ suite('createEvery() transforms object into every', () => {
   const object: Record<string, string> = { one: 'value', two: 'value' }
 
   ;(() => {
-    const value = createEvery<string, string>((key, value) => key && value)(object)
+    const value = createEvery<Record<string, string>>((key, value) => key && value)(object)
 
     assert.ok(value)
   })()
 
   ;(() => {
-    const value = createEvery<string, string>((key, value) => key && !value)(object)
+    const value = createEvery<Record<string, string>>((key, value) => key && !value)(object)
 
     assert.not.ok(value)
   })()
+})
+
+suite('createDeepMerge() deeply merges an object with overrides', ({ object }) => {
+  {
+    const value = createDeepMerge<Record<any, any>>({ foo: 2 })(object),
+          expected = { foo: 2 }
+
+    assert.equal(value, expected)
+  }
+  
+  {
+    const value = createDeepMerge<Record<any, any>>({ foo: { bar: 1, baz: [4, 5, 6] } })({ foo: { qux: 1, baz: [1, 2, 3] } }),
+          expected = { foo: { bar: 1, baz: [4, 5, 6], qux: 1 } }
+
+    assert.equal(value, expected)
+  }
+
+  {
+    const value = createDeepMerge()(object),
+          expected = object
+
+    assert.equal(value, expected)
+  }
 })
 
 suite.run()
