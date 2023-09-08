@@ -29,6 +29,9 @@ const defaultCompleteOptions: CompleteOptions = {
   select: 'completionEnd',
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/completeable)
+ */
 export class Completeable {
   private segmentFrom: 'start' | 'selection' | 'divider'
   private segmentTo: 'end' |'selection' |'divider'
@@ -117,7 +120,6 @@ export class Completeable {
     return this
   }
 
-  // TODO: Support array of selections for multi cursor editing
   private computedSelection: { start: number, end: number, direction: 'forward' | 'backward' | 'none' }
   setSelection (selection: { start: number, end: number, direction: 'forward' | 'backward' | 'none' }) {
     this.computedSelection = selection

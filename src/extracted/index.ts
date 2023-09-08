@@ -1,12 +1,12 @@
-export type { DeepRequired, Expand } from './types'
+export type { DeepRequired } from './types'
 
 // RECOGNIZEABLE EFFECTS
 // Pipes
-export { createPredicateKeycomboDown } from './createPredicateKeycomboDown'
-export type { CreatePredicateKeycomboDownOptions } from './createPredicateKeycomboDown'
+export { createKeycomboDown } from './createKeycomboDown'
+export type { CreateKeycomboDownOptions } from './createKeycomboDown'
 
-export { createPredicateKeycomboMatch } from './createPredicateKeycomboMatch'
-export type { CreatePredicateKeycomboMatchOptions } from './createPredicateKeycomboMatch'
+export { createKeycomboMatch } from './createKeycomboMatch'
+export type { CreateKeycomboMatchOptions } from './createKeycomboMatch'
 
 // Factories
 export {
@@ -14,10 +14,10 @@ export {
   createSet as createKeyStatusesSet,
   createClear as createKeyStatusesClear,
   createDelete as createKeyStatusesDelete,
-  createPredicateKey as createPredicateKeyStatusKey,
+  createCode as createKeyStatusCode,
   predicateSomeKeyDown,
 } from './key-statuses'
-export type { KeyStatuses, KeyStatusKey, KeyStatus } from './key-statuses'
+export type { KeyStatuses, KeyStatusCode, KeyStatus } from './key-statuses'
 
 export { createKeyState } from './createKeyState'
 
@@ -28,9 +28,9 @@ export { fromComboToAliasesLength } from './fromComboToAliasesLength'
 
 export { fromEventToAliases } from './fromEventToAliases'
 
-export { fromEventToKeyStatusKey, modifiers } from './fromEventToKeyStatusKey'
+export { fromEventToKeyStatusCode, modifiers } from './fromEventToKeyStatusCode'
 
-export { fromAliasToDownKeys } from './fromAliasToDownKeys'
+export { fromAliasToDownCodes } from './fromAliasToDownCodes'
 
 export { toDirection } from './toDirection'
 export type { Direction } from './toDirection'
@@ -64,20 +64,22 @@ export {
   defineGraphEdges,
   defineGraphNode,
   defineGraphEdge,
-  defineAsyncGraph,
-  defineAsyncGraphEdges,
-  defineAsyncGraphEdge,
+  defineGraphAsync,
+  defineGraphAsyncEdges,
+  defineGraphAsyncEdge,
 } from './graph'
 export type {
   Graph,
   GraphNode as GraphNode,
   GraphEdge,
-  AsyncGraph,
-  AsyncGraphEdge,
+  GraphAsync,
+  GraphAsyncEdge,
   GraphState,
+  GraphPath,
   GraphStep,
   GraphCommonAncestor,
   GraphTreeNode,
+  GraphTree,
 } from './graph'
 
 export { defineAssociativeArray } from './associative-array'

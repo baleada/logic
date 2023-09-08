@@ -3,18 +3,18 @@ import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
 import {
   toHookApi,
   storeKeyboardTimeMetadata,
-  fromEventToKeyStatusKey,
+  fromEventToKeyStatusCode,
   fromComboToAliasesLength,
   createKeyState,
   predicateSomeKeyDown,
-  fromAliasToDownKeys,
+  fromAliasToDownCodes,
   fromEventToAliases,
 } from '../extracted'
 import type {
   HookApi,
   KeyboardTimeMetadata,
-  CreatePredicateKeycomboDownOptions,
-  CreatePredicateKeycomboMatchOptions,
+  CreateKeycomboDownOptions,
+  CreateKeycomboMatchOptions,
 } from '../extracted'
 import { createMap } from '../pipes'
 
@@ -32,8 +32,8 @@ export type KeychordOptions = {
   minDuration?: number,
   maxInterval?: number,
   preventsDefaultUnlessDenied?: boolean,
-  toDownKeys?: CreatePredicateKeycomboDownOptions['toDownKeys'],
-  toAliases?: CreatePredicateKeycomboMatchOptions['toAliases'],
+  toDownCodes?: CreateKeycomboDownOptions['toDownCodes'],
+  toAliases?: CreateKeycomboMatchOptions['toAliases'],
   onDown?: KeychordHook,
   onUp?: KeychordHook,
   onVisibilitychange?: KeychordHook,
@@ -47,8 +47,8 @@ const defaultOptions: KeychordOptions = {
   minDuration: 0,
   maxInterval: 5000, // VS Code default
   preventsDefaultUnlessDenied: true,
-  toDownKeys: alias => fromAliasToDownKeys(alias),
-  toAliases: event => fromEventToAliases(event as KeyboardEvent),
+  toDownCodes: alias => fromAliasToDownCodes(alias),
+  toAliases: code => fromEventToAliases({ code } as KeyboardEvent),
 }
 
 export function createKeychord (
@@ -59,7 +59,7 @@ export function createKeychord (
           minDuration,
           maxInterval,
           preventsDefaultUnlessDenied,
-          toDownKeys,
+          toDownCodes,
           toAliases,
           onDown,
           onUp,
@@ -69,7 +69,7 @@ export function createKeychord (
         keyStates = createMap<string, ReturnType<typeof createKeyState>>(keycombo => createKeyState({
           keycomboOrKeycombos: keycombo,
           unsupportedAliases,
-          toDownKeys,
+          toDownCodes,
           toAliases,
           getRequest: () => request,
         }))(narrowedKeychord),
@@ -82,7 +82,7 @@ export function createKeychord (
 
   const keydown: RecognizeableEffect<'keydown', KeychordMetadata> = (event, api) => {
     const { denied, getStatus } = api,
-          key = fromEventToKeyStatusKey(event)
+          key = fromEventToKeyStatusCode(event)
 
     // REPEATED KEYDOWN
     if (keyStates[playedIndex].toStatus(key) === 'down') {
@@ -164,7 +164,7 @@ export function createKeychord (
             denied,
           } = api,
           metadata = getMetadata(),
-          key = fromEventToKeyStatusKey(event)
+          key = fromEventToKeyStatusCode(event)
                 
     // ALREADY ACTED ON MULTI-KEY COMBO
     if (['denied', 'recognized'].includes(localStatuses[playedIndex])) {

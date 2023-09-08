@@ -1,5 +1,5 @@
 import type { RecognizeableEffect } from '../classes'
-import { createClone } from '../pipes'
+import { createClone } from '../pipes/any'
 import { toDirection } from './toDirection'
 import type { Direction } from './toDirection'
 import { toMousePoint, toTouchMovePoint, toTouchEndPoint } from './toPoints'

@@ -3,18 +3,18 @@ import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
 import {
   toHookApi,
   storeKeyboardTimeMetadata,
-  fromEventToKeyStatusKey,
+  fromEventToKeyStatusCode,
   fromComboToAliasesLength,
   createKeyState,
   predicateSomeKeyDown,
-  fromAliasToDownKeys,
+  fromAliasToDownCodes,
   fromEventToAliases,
 } from '../extracted'
 import type {
   HookApi,
   KeyboardTimeMetadata,
-  CreatePredicateKeycomboDownOptions,
-  CreatePredicateKeycomboMatchOptions,
+  CreateKeycomboDownOptions,
+  CreateKeycomboMatchOptions,
 } from '../extracted'
 
 export type KeyreleaseType = 'keydown' | 'keyup' | 'visibilitychange'
@@ -26,8 +26,8 @@ export type KeyreleaseMetadata = {
 export type KeyreleaseOptions = {
   minDuration?: number,
   preventsDefaultUnlessDenied?: boolean,
-  toDownKeys?: CreatePredicateKeycomboDownOptions['toDownKeys'],
-  toAliases?: CreatePredicateKeycomboMatchOptions['toAliases'],
+  toDownCodes?: CreateKeycomboDownOptions['toDownCodes'],
+  toAliases?: CreateKeycomboMatchOptions['toAliases'],
   onDown?: KeyreleaseHook,
   onUp?: KeyreleaseHook,
   onVisibilitychange?: KeyreleaseHook,
@@ -40,8 +40,8 @@ export type KeyreleaseHookApi = HookApi<KeyreleaseType, KeyreleaseMetadata>
 const defaultOptions: KeyreleaseOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
-  toDownKeys: alias => fromAliasToDownKeys(alias),
-  toAliases: event => fromEventToAliases(event as KeyboardEvent),
+  toDownCodes: alias => fromAliasToDownCodes(alias),
+  toAliases: code => fromEventToAliases({ code } as KeyboardEvent),
 }
 
 export function createKeyrelease (
@@ -51,7 +51,7 @@ export function createKeyrelease (
   const {
           minDuration,
           preventsDefaultUnlessDenied,
-          toDownKeys,
+          toDownCodes,
           toAliases,
           onDown,
           onUp,
@@ -70,7 +70,7 @@ export function createKeyrelease (
         } = createKeyState({
           keycomboOrKeycombos,
           unsupportedAliases,
-          toDownKeys,
+          toDownCodes,
           toAliases,
           getRequest: () => request,
         })
@@ -80,7 +80,7 @@ export function createKeyrelease (
 
   const keydown: RecognizeableEffect<'keydown', KeyreleaseMetadata> = (event, api) => {
     const { denied, getStatus } = api,
-          key = fromEventToKeyStatusKey(event)
+          key = fromEventToKeyStatusCode(event)
 
     // REPEATED KEYDOWN
     if (toStatus(key) === 'down') {
@@ -142,7 +142,7 @@ export function createKeyrelease (
             denied,
           } = api,
           metadata = getMetadata(),
-          key = fromEventToKeyStatusKey(event)
+          key = fromEventToKeyStatusCode(event)
                 
     // SHOULD BLOCK EVENT
     if (['denied', 'recognized'].includes(localStatus)) {

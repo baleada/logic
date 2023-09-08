@@ -5,6 +5,9 @@ export type CopyableOptions = Record<never, never>
 
 export type CopyableStatus = 'ready' | 'copying' | 'copied' | 'errored'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/copyable)
+ */
 export class Copyable {
   private computedIsClipboardText: boolean
   private copyListenable: Listenable<'copy'>

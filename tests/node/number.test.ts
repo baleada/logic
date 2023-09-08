@@ -74,7 +74,7 @@ suite('createDetermine(...) determines outcome', () => {
   })()
 })
 
-suite('createDetermine(...) falls back to final potentiality if chance is greater than or equal to total probability', () => {
+suite('createDetermine(...) falls back to final potentiality if determinant is greater than or equal to total probability', () => {
   const potentialities = [
     { outcome: 1, probability: 1 },
     { outcome: 2, probability: 1 },
@@ -88,7 +88,7 @@ suite('createDetermine(...) falls back to final potentiality if chance is greate
   assert.is(value, expected)
 })
 
-suite('createDetermine(...) falls back to first potentiality if chance is lower than 0', () => {
+suite('createDetermine(...) falls back to first potentiality if determinant is lower than 0', () => {
   const potentialities = [
     { outcome: 1, probability: 1 },
     { outcome: 2, probability: 1 },

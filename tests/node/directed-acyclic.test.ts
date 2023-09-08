@@ -3,18 +3,26 @@ import * as assert from 'uvu/assert'
 import { map, pipe, toArray } from 'lazy-collections'
 import type { GraphEdge, GraphNode, GraphStep } from '../../src/extracted/graph'
 import {
-  createToNodeSteps,
-  createPredicateAncestor,
-  createToCommonAncestors,
-  createToPath,
-  createToRoots,
-  createToSteps,
-  createToTree,
-  createToLayers,
+  createRoots,
+  createDepthFirstSteps,
+  createTree,
+  createLayers,
 } from '../../src/pipes/directed-acyclic'
+import {
+  createNodeDepthFirstSteps,
+  createAncestor,
+  createCommonAncestors,
+} from '../../src/pipes/directed-acyclic-node'
+import { createPath } from '../../src/pipes/directed-acyclic-state'
+import { createDepthPathConfig } from '../../src/factories/createDepthPathConfig'
+// import { createBreadthPathConfig } from '../../src/factories/createBreadthPathConfig'
 
 const suite = createSuite<{
-  directedAcyclic: {
+  depthFirstDirectedAcyclic: {
+    nodes: GraphNode<any>[],
+    edges: GraphEdge<any, number>[],
+  },
+  breadthFirstDirectedAcyclic: {
     nodes: GraphNode<any>[],
     edges: GraphEdge<any, number>[],
   }
@@ -32,69 +40,121 @@ suite.before(context => {
     'h',
   ]
 
-  const edges = [
-    { from: 'a', to: 'b', predicateTraversable: state => state.a.metadata === 0 },
-    { from: 'a', to: 'c', predicateTraversable: state => state.a.metadata === 1 },
-    { from: 'a', to: 'd', predicateTraversable: state => state.a.metadata === 2 },
-    { from: 'b', to: 'd', predicateTraversable: state => state.b.metadata === 0 },
-    { from: 'b', to: 'e', predicateTraversable: state => state.b.metadata === 1 },
-    { from: 'c', to: 'f', predicateTraversable: state => state.c.metadata === 0 },
-    { from: 'c', to: 'g', predicateTraversable: state => state.c.metadata === 1 },
-    { from: 'd', to: 'h', predicateTraversable: state => state.d.metadata === 0 },
+  const depthFirstEdges = [
+    { from: 'a', to: 'b', predicateShouldTraverse: state => state.a.value === 0 },
+    { from: 'a', to: 'c', predicateShouldTraverse: state => state.a.value === 1 },
+    { from: 'a', to: 'd', predicateShouldTraverse: state => state.a.value === 2 },
+    { from: 'b', to: 'd', predicateShouldTraverse: state => state.b.value === 0 },
+    { from: 'b', to: 'e', predicateShouldTraverse: state => state.b.value === 1 },
+    { from: 'c', to: 'f', predicateShouldTraverse: state => state.c.value === 0 },
+    { from: 'c', to: 'g', predicateShouldTraverse: state => state.c.value === 1 },
+    { from: 'd', to: 'h', predicateShouldTraverse: state => state.d.value === 0 },
   ]
 
-  context.directedAcyclic = { nodes: nodes, edges: edges }
+  // TODO: figure this out and apply to async
+  const breadthFirstEdges = [
+    { from: 'a', to: 'b', predicateShouldTraverse: state => state.a.value === 0 },
+    { from: 'a', to: 'c', predicateShouldTraverse: state => state.b.value === 0 },
+    { from: 'a', to: 'd', predicateShouldTraverse: state => state.c.value === 0 },
+    { from: 'b', to: 'e', predicateShouldTraverse: state => state.d.value === 0 },
+    { from: 'c', to: 'f', predicateShouldTraverse: state => state.e.value === 0 },
+    { from: 'c', to: 'g', predicateShouldTraverse: state => state.f.value === 0 },
+    { from: 'd', to: 'h', predicateShouldTraverse: state => state.g.value === 0 },
+  ]
+
+  context.depthFirstDirectedAcyclic = {
+    nodes,
+    edges: depthFirstEdges,
+  }
+
+  context.breadthFirstDirectedAcyclic = {
+    nodes,
+    edges: breadthFirstEdges,
+  }
 })
 
-suite('createToRoots(...) works', ({ directedAcyclic }) => {
+suite('createRoots(...) works', ({ depthFirstDirectedAcyclic }) => {
   const withMoreRoots = {
     nodes: [
-      ...directedAcyclic.nodes,
+      ...depthFirstDirectedAcyclic.nodes,
       'i',
     ],
     edges: [
-      ...directedAcyclic.edges,
-      { from: 'i', to: 'c', predicateTraversable: state => state.i.metadata === 0 },
+      ...depthFirstDirectedAcyclic.edges,
+      { from: 'i', to: 'c', predicateShouldTraverse: state => state.i.value === 0 },
     ],
   }
 
-  ;(() => {
-    const value = [...createToRoots()(withMoreRoots)],
+  {
+    const value = [...createRoots()(withMoreRoots)],
           expected = ['a', 'i']
 
     assert.equal(value, expected)
-  })()
+  }
 })
 
-suite('createToPath(...) works', ({ directedAcyclic }) => {
-  ;(() => {
-    const value = createToPath(directedAcyclic)({
-            a: { status: 'set', metadata: 0 },
-            b: { status: 'set', metadata: 0 },
-            d: { status: 'set', metadata: 0 },
+suite('createPath(...) works', ({ depthFirstDirectedAcyclic }) => {
+  {
+    const value = createPath(
+            depthFirstDirectedAcyclic,
+            createDepthPathConfig(depthFirstDirectedAcyclic)
+          )({
+            a: { status: 'set', value: 0 },
+            b: { status: 'set', value: 0 },
+            d: { status: 'set', value: 0 },
           }),
           expected = ['a', 'b', 'd', 'h']
 
     assert.equal(value, expected)
-  })()
+  }
   
-  ;(() => {
-    const value = createToPath(directedAcyclic)({
-            a: { status: 'set', metadata: 1 },
-            c: { status: 'set', metadata: 0 },
+  {
+    const value = createPath(
+            depthFirstDirectedAcyclic,
+            createDepthPathConfig(depthFirstDirectedAcyclic)
+          )({
+            a: { status: 'set', value: 1 },
+            c: { status: 'set', value: 0 },
           }),
           expected = ['a', 'c', 'f']
 
     assert.equal(value, expected)
-  })()
+  }
+  
+  // {
+  //   const value = createPath(
+  //           breadthFirstDirectedAcyclic,
+  //           createBreadthPathConfig(breadthFirstDirectedAcyclic)
+  //         )({
+  //           a: { status: 'set', value: 0 },
+  //           b: { status: 'set', value: 0 },
+  //           c: { status: 'set', value: 0 },
+  //         }),
+  //         expected = ['a', 'b', 'c', 'd']
+
+  //   assert.equal(value, expected)
+  // }
+  
+  // {
+  //   const value = createPath(
+  //           breadthFirstDirectedAcyclic,
+  //           createBreadthPathConfig(breadthFirstDirectedAcyclic)
+  //         )({
+  //           a: { status: 'set', value: 1 },
+  //           c: { status: 'set', value: 0 },
+  //         }),
+  //         expected = ['a', 'c', 'f']
+
+  //   assert.equal(value, expected)
+  // }
 })
 
-suite('createToSteps works', ({ directedAcyclic }) => {
+suite('createDepthFirstSteps works', ({ depthFirstDirectedAcyclic }) => {
   const value = pipe(
-    createToSteps(),
+    createDepthFirstSteps(),
     map<GraphStep<any, number>, any>(step => step.path.at(-1)),
     toArray()
-  )(directedAcyclic)
+  )(depthFirstDirectedAcyclic)
 
   assert.equal(
     value,
@@ -112,16 +172,16 @@ suite('createToSteps works', ({ directedAcyclic }) => {
   )
 })
 
-suite.skip('createToSteps works with multiple roots', ({ directedAcyclic }) => {
+suite.skip('createDepthFirstSteps works with multiple roots', ({ depthFirstDirectedAcyclic }) => {
   const value = pipe(
-    createToSteps(),
+    createDepthFirstSteps(),
     map<GraphStep<any, number>, any>(step => step.path.at(-1)),
     toArray()
   )({
-    nodes: [...directedAcyclic.nodes, 'i'],
+    nodes: [...depthFirstDirectedAcyclic.nodes, 'i'],
     edges: [
-      ...directedAcyclic.edges,
-      { from: 'i', to: 'c', predicateTraversable: state => state.i.metadata === 0 },
+      ...depthFirstDirectedAcyclic.edges,
+      { from: 'i', to: 'c', predicateShouldTraverse: state => state.i.value === 0 },
     ],
   })
 
@@ -146,128 +206,128 @@ suite.skip('createToSteps works with multiple roots', ({ directedAcyclic }) => {
   )
 })
 
-suite('createFromNodeToSteps works', ({ directedAcyclic }) => {
-  ;(() => {
-    const value = [...createToNodeSteps(directedAcyclic)('a')],
+suite.only('createFromNodeDepthFirstSteps works', ({ depthFirstDirectedAcyclic }) => {
+  {
+    const value = [...createNodeDepthFirstSteps(depthFirstDirectedAcyclic)('a')],
           expected = [
             {
               path: ['a'],
               state: {
-                a: { status: 'unset', metadata: 0 },
-                b: { status: 'unset', metadata: 0 },
-                c: { status: 'unset', metadata: 0 },
-                d: { status: 'unset', metadata: 0 },
-                e: { status: 'unset', metadata: 0 },
-                f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 },
-                h: { status: 'unset', metadata: 0 },
+                a: { status: 'unset' },
+                b: { status: 'unset' },
+                c: { status: 'unset' },
+                d: { status: 'unset' },
+                e: { status: 'unset' },
+                f: { status: 'unset' },
+                g: { status: 'unset' },
+                h: { status: 'unset' },
               },
             },
           ]
 
     assert.equal(value, expected)
-  })()
+  }
 
-  ;(() => {
-    const value = [...createToNodeSteps(directedAcyclic)('g')],
+  {
+    const value = [...createNodeDepthFirstSteps(depthFirstDirectedAcyclic)('g')],
           expected = [
             {
               path: [ 'a', 'c', 'g' ],
               state: {
-                a: { status: 'set', metadata: 1 },
-                b: { status: 'unset', metadata: 0 },
-                c: { status: 'set', metadata: 1 },
-                d: { status: 'unset', metadata: 0 },
-                e: { status: 'unset', metadata: 0 },
-                f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 },
-                h: { status: 'unset', metadata: 0 },
+                a: { status: 'set', value: 1 },
+                b: { status: 'unset' },
+                c: { status: 'set', value: 1 },
+                d: { status: 'unset' },
+                e: { status: 'unset' },
+                f: { status: 'unset' },
+                g: { status: 'unset' },
+                h: { status: 'unset' },
               },
             },
           ]
     
     assert.equal(value, expected)
-  })()
+  }
   
-  ;(() => {
-    const value = [...createToNodeSteps(directedAcyclic)('d')],
+  {
+    const value = [...createNodeDepthFirstSteps(depthFirstDirectedAcyclic)('d')],
           expected = [
             {
               path: [ 'a', 'b', 'd' ],
               state: {
-                a: { status: 'set', metadata: 0 },
-                b: { status: 'set', metadata: 0 },
-                c: { status: 'unset', metadata: 0 },
-                d: { status: 'unset', metadata: 0 },
-                e: { status: 'unset', metadata: 0 },
-                f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 },
-                h: { status: 'unset', metadata: 0 },
+                a: { status: 'set', value: 0 },
+                b: { status: 'set', value: 0 },
+                c: { status: 'unset' },
+                d: { status: 'unset' },
+                e: { status: 'unset' },
+                f: { status: 'unset' },
+                g: { status: 'unset' },
+                h: { status: 'unset' },
               },
             },
             {
               path: [ 'a', 'd' ],
               state: {
-                a: { status: 'set', metadata: 2 },
-                b: { status: 'unset', metadata: 0 },
-                c: { status: 'unset', metadata: 0 },
-                d: { status: 'unset', metadata: 0 },
-                e: { status: 'unset', metadata: 0 },
-                f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 },
-                h: { status: 'unset', metadata: 0 },
+                a: { status: 'set', value: 2 },
+                b: { status: 'unset' },
+                c: { status: 'unset' },
+                d: { status: 'unset' },
+                e: { status: 'unset' },
+                f: { status: 'unset' },
+                g: { status: 'unset' },
+                h: { status: 'unset' },
               },
             },
           ]
     
     assert.equal(value, expected)
-  })()
+  }
 })
 
-suite('createPredicateAncestor works', ({ directedAcyclic }) => {
-  ;(() => {
-    const value = createPredicateAncestor(directedAcyclic)('d', 'a'),
+suite('createAncestor works', ({ depthFirstDirectedAcyclic }) => {
+  {
+    const value = createAncestor(depthFirstDirectedAcyclic)('d', 'a'),
           expected = true
 
     assert.equal(value, expected)
-  })()
+  }
   
   // Handles non-shortest path
-  ;(() => {
-    const value = createPredicateAncestor(directedAcyclic)('d', 'b'),
+  {
+    const value = createAncestor(depthFirstDirectedAcyclic)('d', 'b'),
           expected = true
 
     assert.equal(value, expected)
-  })()
+  }
   
-  ;(() => {
-    const value = createPredicateAncestor(directedAcyclic)('d', 'c'),
+  {
+    const value = createAncestor(depthFirstDirectedAcyclic)('d', 'c'),
           expected = false
 
     assert.equal(value, expected)
-  })()
+  }
 })
 
-suite('createToCommonAncestors works', ({ directedAcyclic }) => {
-  ;(() => {
-    const value = [...createToCommonAncestors(directedAcyclic)('a', 'b')],
+suite('createCommonAncestors works', ({ depthFirstDirectedAcyclic }) => {
+  {
+    const value = [...createCommonAncestors(depthFirstDirectedAcyclic)('a', 'b')],
           expected = []
 
     assert.equal(value, expected)
-  })()
+  }
   
-  ;(() => {
-    const value = [...createToCommonAncestors(directedAcyclic)('b', 'e')],
+  {
+    const value = [...createCommonAncestors(depthFirstDirectedAcyclic)('b', 'e')],
           expected = [
             { node: 'a', distances: { b: 1, e: 2 } },
           ]
 
     assert.equal(value, expected)
-  })()
+  }
 })
 
-suite('createToCommonAncestors handles multiple paths from one node to another', ({ directedAcyclic }) => {
-  const value = [...createToCommonAncestors(directedAcyclic)('d', 'g')],
+suite('createCommonAncestors handles multiple paths from one node to another', ({ depthFirstDirectedAcyclic }) => {
+  const value = [...createCommonAncestors(depthFirstDirectedAcyclic)('d', 'g')],
         expected = [
           { node: 'a', distances: { d: 2, g: 2 } },
           { node: 'a', distances: { d: 1, g: 2 } },
@@ -276,8 +336,8 @@ suite('createToCommonAncestors handles multiple paths from one node to another',
   assert.equal(value, expected)
 })
 
-suite('createToCommonAncestors orders ancestors from deepest to shallowest', ({ directedAcyclic }) => {
-  const value = [...createToCommonAncestors(directedAcyclic)('d', 'e')],
+suite('createCommonAncestors orders ancestors from deepest to shallowest', ({ depthFirstDirectedAcyclic }) => {
+  const value = [...createCommonAncestors(depthFirstDirectedAcyclic)('d', 'e')],
         expected = [
           { node: 'b', distances: { d: 1, e: 1 } },
           { node: 'a', distances: { d: 2, e: 2 } },
@@ -287,8 +347,8 @@ suite('createToCommonAncestors orders ancestors from deepest to shallowest', ({ 
   assert.equal(value, expected)
 })
 
-suite('createToTree works', ({ directedAcyclic }) => {
-  const value = createToTree()(directedAcyclic),
+suite('createTree works', ({ depthFirstDirectedAcyclic }) => {
+  const value = createTree()(depthFirstDirectedAcyclic),
         expected = [
           {
             node: 'a',
@@ -335,8 +395,8 @@ suite('createToTree works', ({ directedAcyclic }) => {
   assert.equal(value, expected)
 })
 
-suite('createToLayers works', ({ directedAcyclic }) => {
-  const value = createToLayers()(directedAcyclic),
+suite('createLayers works', ({ depthFirstDirectedAcyclic }) => {
+  const value = createLayers()(depthFirstDirectedAcyclic),
         expected = [
           ['a'],
           ['b', 'c', 'd'],

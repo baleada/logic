@@ -1,13 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { createPredicateKeycomboMatch } from '../../src/pipes/keyboard-event'
+import { createKeycomboMatch } from '../../src/pipes/keyboard-event'
 
 const suite = createSuite('keyboard event')
 
-suite('createPredicateKeycomboMatch predicates keys', () => {
+suite('createKeycomboMatch predicates keys', () => {
   {
     const event = { code: 'KeyA' } as KeyboardEvent,
-          value = createPredicateKeycomboMatch('a')(event),
+          value = createKeycomboMatch('a')(event),
           expected = true
 
     assert.is(value, expected)
@@ -15,7 +15,7 @@ suite('createPredicateKeycomboMatch predicates keys', () => {
 
   {
     const event = { code: 'KeyB' } as KeyboardEvent,
-          value = createPredicateKeycomboMatch('a')(event),
+          value = createKeycomboMatch('a')(event),
           expected = false
 
     assert.is(value, expected)
@@ -23,7 +23,7 @@ suite('createPredicateKeycomboMatch predicates keys', () => {
   
   {
     const event = { code: 'KeyA', shiftKey: true } as KeyboardEvent,
-          value = createPredicateKeycomboMatch('a')(event),
+          value = createKeycomboMatch('a')(event),
           expected = false
 
     assert.is(value, expected)
@@ -31,7 +31,7 @@ suite('createPredicateKeycomboMatch predicates keys', () => {
 
   {
     const event = { code: 'KeyA', shiftKey: true, metaKey: true } as KeyboardEvent,
-          value = createPredicateKeycomboMatch('shift+cmd+a')(event),
+          value = createKeycomboMatch('shift+cmd+a')(event),
           expected = true
 
     assert.is(value, expected)
@@ -39,7 +39,7 @@ suite('createPredicateKeycomboMatch predicates keys', () => {
 
   {
     const event = { code: 'KeyA', shiftKey: true, metaKey: false } as KeyboardEvent,
-          value = createPredicateKeycomboMatch('shift+cmd+a')(event),
+          value = createKeycomboMatch('shift+cmd+a')(event),
           expected = false
 
     assert.is(value, expected)
@@ -47,7 +47,7 @@ suite('createPredicateKeycomboMatch predicates keys', () => {
   
   {
     const event = { code: 'Backquote', shiftKey: false } as KeyboardEvent,
-          value = createPredicateKeycomboMatch('`')(event),
+          value = createKeycomboMatch('`')(event),
           expected = true
 
     assert.is(value, expected, `\`: ${JSON.stringify(event)}`)
@@ -55,7 +55,7 @@ suite('createPredicateKeycomboMatch predicates keys', () => {
   
   {
     const event = { code: 'Backquote', shiftKey: true } as KeyboardEvent,
-          value = createPredicateKeycomboMatch('`')(event),
+          value = createKeycomboMatch('`')(event),
           expected = false
 
     assert.is(value, expected, `\`: ${JSON.stringify(event)}`)
@@ -63,45 +63,45 @@ suite('createPredicateKeycomboMatch predicates keys', () => {
   
   {
     const event = { code: 'Backquote', shiftKey: false } as KeyboardEvent,
-          value = createPredicateKeycomboMatch('~')(event),
+          value = createKeycomboMatch('~')(event),
           expected = false
 
-    assert.is(value, expected, `\~: ${JSON.stringify(event)}`)
+    assert.is(value, expected, `~: ${JSON.stringify(event)}`)
   }
   
   {
     const event = { code: 'Backquote', shiftKey: true } as KeyboardEvent,
-          value = createPredicateKeycomboMatch('~')(event),
+          value = createKeycomboMatch('~')(event),
           expected = true
 
-    assert.is(value, expected, `\~: ${JSON.stringify(event)}`)
+    assert.is(value, expected, `~: ${JSON.stringify(event)}`)
   }
 })
 
-suite('createPredicateKeycomboMatch predicates modifiers', () => {
+suite('createKeycomboMatch predicates modifiers', () => {
   {
-    const value = createPredicateKeycomboMatch('cmd')({ key: 'Meta' } as KeyboardEvent),
+    const value = createKeycomboMatch('cmd')({ code: 'MetaLeft' } as KeyboardEvent),
           expected = true
 
     assert.is(value, expected)
   }
 
   {
-    const value = createPredicateKeycomboMatch('cmd')({ key: 'Shift' } as KeyboardEvent),
+    const value = createKeycomboMatch('cmd')({ code: 'ShiftLeft' } as KeyboardEvent),
           expected = false
 
     assert.is(value, expected)
   }
   
   {
-    const value = createPredicateKeycomboMatch('shift+cmd')({ key: 'Meta', shiftKey: true } as KeyboardEvent),
+    const value = createKeycomboMatch('shift+cmd')({ code: 'MetaLeft', shiftKey: true } as KeyboardEvent),
           expected = true
 
     assert.is(value, expected)
   }
 
   {
-    const value = createPredicateKeycomboMatch('shift+cmd')({ key: 'Meta', shiftKey: false } as KeyboardEvent),
+    const value = createKeycomboMatch('shift+cmd')({ code: 'MetaLeft', shiftKey: false } as KeyboardEvent),
           expected = false
 
     assert.is(value, expected)

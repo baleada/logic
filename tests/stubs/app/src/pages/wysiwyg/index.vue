@@ -58,42 +58,42 @@ const edges = [
   {
     from: '1',
     to: '2',
-    predicateTraversable: state => state['1'].metadata === 0,
+    predicateShouldTraverse: state => state['1'].value === 0,
   },
   {
     from: '1',
     to: '3',
-    predicateTraversable: state => state['1'].metadata === 1,
+    predicateShouldTraverse: state => state['1'].value === 1,
   },
   {
     from: '1',
     to: '4',
-    predicateTraversable: state => state['1'].metadata === 2,
+    predicateShouldTraverse: state => state['1'].value === 2,
   },
   {
     from: '5',
     to: '6',
-    predicateTraversable: state => state['5'].metadata === 0,
+    predicateShouldTraverse: state => state['5'].value === 0,
   },
   {
     from: '5',
     to: '7',
-    predicateTraversable: state => state['5'].metadata === 1,
+    predicateShouldTraverse: state => state['5'].value === 1,
   },
   {
     from: '5',
     to: '8',
-    predicateTraversable: state => state['5'].metadata === 2,
+    predicateShouldTraverse: state => state['5'].value === 2,
   },
   {
     from: '9',
     to: '1',
-    predicateTraversable: state => state['9'].metadata === 0,
+    predicateShouldTraverse: state => state['9'].value === 0,
   },
   {
     from: '9',
     to: '5',
-    predicateTraversable: state => state['9'].metadata === 1,
+    predicateShouldTraverse: state => state['9'].value === 1,
   },
 ]
 
@@ -101,7 +101,7 @@ const fns = createDirectedAcyclicFns(
   nodes.map(({ id }) => `${id}`),
   edges,
   () => 0,
-  (node, totalConnectionsFollowed) => totalConnectionsFollowed,
+  (node, totalChildrenDiscovered) => totalChildrenDiscovered,
 )
 
 function WysiwygTree () {

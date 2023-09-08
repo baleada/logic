@@ -1,12 +1,12 @@
 import { getStroke } from 'perfect-freehand'
 import type { StrokeOptions } from 'perfect-freehand'
 import polygonClipping from 'polygon-clipping'
-import { createReduce } from '../pipes'
+import { join, average } from 'lazy-collections'
 
-export type DrawableState = ReturnType<typeof getStroke>
+export type DrawableStroke = ReturnType<typeof getStroke>
 
 export type DrawableOptions = {
-  toD?: (stroke: DrawableState) => string
+  toD?: (stroke: DrawableStroke) => string
 }
 
 export type DrawableStatus = 'ready' | 'drawing' | 'drawn'
@@ -17,10 +17,13 @@ const defaultOptions: DrawableOptions = {
     : toD(stroke),
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/drawable)
+ */
 export class Drawable {
   private computedD: string
   private toD: DrawableOptions['toD']
-  constructor (stroke: DrawableState, options: DrawableOptions = {}) {
+  constructor (stroke: DrawableStroke, options: DrawableOptions = {}) {
     this.toD = options?.toD || defaultOptions.toD
     this.setStroke(stroke)
     this.ready()
@@ -46,8 +49,8 @@ export class Drawable {
     return this.computedD
   }
   
-  private computedStroke: DrawableState
-  setStroke (stroke: DrawableState) {
+  private computedStroke: DrawableStroke
+  setStroke (stroke: DrawableStroke) {
     this.computedStroke = stroke
     this.computedD = this.toD(stroke)
     return this
@@ -70,23 +73,40 @@ export class Drawable {
 
 }
 
+// Adapted from https://github.com/steveruizok/perfect-freehand#rendering
 export function toD (stroke: number[][]) {
-  return createReduce<number[], string>((d, [x0, y0], index) => {
-    const [x1, y1] = stroke[(index + 1) % stroke.length]
-    return `${d} ${x0} ${y0} ${(x0 + x1) / 2} ${(y0 + y1) / 2}`
-  }, `M ${stroke[0][0]} ${stroke[0][1]} Q`)(stroke) + 'Z'
-}
+  if (stroke.length < 4) return ''
 
-export function toFlattenedD (stroke: number[][]) {
-  if (stroke.length === 0) {
-    return ''
+  let a = stroke[0]
+  let b = stroke[1]
+  const c = stroke[2]
+
+  let result = `M${a[0].toFixed(2)},${a[1].toFixed(2)} Q${b[0].toFixed(2)},${b[1].toFixed(2)} ${average()([b[0], c[0]]).toFixed(2)},${average()([b[1], c[1]]).toFixed(2)} T`
+
+  for (let i = 2; i < stroke.length - 1; i++) {
+    a = stroke[i]
+    b = stroke[i + 1]
+    result += `${average()([a[0], b[0]]).toFixed(2)},${average()([a[1], b[1]]).toFixed(2)} `
   }
 
-  const multiPolygon = polygonClipping.union([stroke as [number, number][]])
-
-  return createReduce<polygonClipping.Polygon, string>((dFromMultiPolygon, polygon) => {
-    return dFromMultiPolygon + createReduce<polygonClipping.Ring, string>((dFromRing, points) => {
-      return dFromRing + toD(points)
-    }, '')(polygon)
-  }, '')(multiPolygon)
+  return `${result}Z`
 }
+
+// Adapted from https://github.com/steveruizok/perfect-freehand#flattening
+export function toFlattenedD (stroke: number[][]) {
+  if (stroke.length === 0) return ''
+
+  const faces = polygonClipping.union([stroke] as [number, number][][])
+
+  const flattenedD: string[] = []
+
+  for (const face of faces) {
+    for (const ring of face) {
+      flattenedD.push(toD(ring))
+    }
+  }
+
+  return toSpaceSeparated(flattenedD) as string
+}
+
+const toSpaceSeparated = join(' ')

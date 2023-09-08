@@ -19,7 +19,7 @@ export { Delayable } from './Delayable'
 export type { DelayableEffect, DelayableOptions, DelayableStatus } from './Delayable'
 
 export { Drawable } from './Drawable'
-export type { DrawableState, DrawableOptions, DrawableStatus } from './Drawable'
+export type { DrawableStroke, DrawableOptions, DrawableStatus } from './Drawable'
 export { toD, toFlattenedD } from './Drawable'
 
 export { Fetchable } from './Fetchable'
@@ -44,10 +44,7 @@ export { Recognizeable } from './Recognizeable'
 export type { RecognizeableOptions, RecognizeableStatus, RecognizeableEffect, RecognizeOptions } from './Recognizeable'
 
 export { Resolveable } from './Resolveable'
-export type { ResolveableGetPromise, ResolveableOptions, ResolveableStatus } from './Resolveable'
-
-export { Sanitizeable } from './Sanitizeable'
-export type { SanitizeableOptions, SanitizeableStatus } from './Sanitizeable'
+export type { ResolveableOptions, ResolveableStatus } from './Resolveable'
 
 export { Searchable } from './Searchable'
 export type { SearchableOptions, SearchableStatus } from './Searchable'

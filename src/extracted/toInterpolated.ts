@@ -1,5 +1,6 @@
 import type { AnimateOptions } from '../classes'
-import { createMix, createSlice } from '../pipes'
+import { createMix } from '../pipes/color'
+import { createSlice } from '../pipes/array'
 import {
   predicateUndefined,
   predicateNumber,

@@ -1,8 +1,8 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { pipe, reduce } from 'lazy-collections'
-import type { ToGraphYielded } from '../../src/pipes/createToGraph'
-import { createToGraph } from '../../src/pipes/createToGraph'
+import type { ToGraphYielded } from '../../src/pipes/tree'
+import { createGraph } from '../../src/pipes/tree'
 import type { Graph } from '../../src/extracted'
 
 type TreeNode = {
@@ -12,7 +12,7 @@ type TreeNode = {
 
 const suite = createSuite<{
   tree: TreeNode[],
-}>('createToGraph')
+}>('createGraph')
 
 suite.before(context => {
   context.tree = [
@@ -55,9 +55,9 @@ suite.before(context => {
   ]
 })
 
-suite('createToGraph(...) works', ({ tree }) => {
+suite('createGraph(...) works', ({ tree }) => {
   const value = pipe(
-          createToGraph<TreeNode>({
+          createGraph<TreeNode>({
             toId: ({ node }) => node,
           })(tree),
           reduce<Graph<string, unknown>, ToGraphYielded>((graph, { node, edge }) => {

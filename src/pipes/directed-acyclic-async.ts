@@ -1,47 +1,41 @@
 import {
-  filter,
   pipe,
-  some,
   toArray,
   at,
   includes,
 } from 'lazy-collections'
 import type {
-  AsyncGraph,
   GraphNode,
-  AsyncGraphEdge,
   GraphState,
   GraphStep,
-  GraphCommonAncestor,
-  GraphTreeNode,
+  GraphTree,
+  GraphAsync,
 } from '../extracted'
-import { createFindAsync } from './array-async'
-import {
-  createToOutdegree,
-  createToOutgoing,
-} from './graph'
+import type { GraphAsyncTransform, GraphAsyncGeneratorAsyncTransform } from './graph-async'
+import { createPath } from './directed-acyclic-async-state'
 import type {
-  GraphStateAsyncTransform,
-  GraphNodeTupleAsyncGeneratorTransform,
-  AsyncGraphTransform,
-  AsyncGraphAsyncGeneratorTransform,
-  GraphNodeAsyncGeneratorTransform,
-  GraphNodeTupleAsyncTransform,
-} from './graph-async'
-import type { CreateToStepsOptions as CreateDirectedAcyclicToStepsOptions } from './directed-acyclic'
-import { createToRoots, defaultCreateToStepsOptions } from './directed-acyclic'
-import { createFind as createTreeFind } from './tree'
+  CreateStepsOptions,
+  CreateStepsConfig,
+  CreateDepthFirstStepsOptions,
+  CreateBreadthFirstStepsOptions,
+} from './directed-acyclic'
+import {
+  createRoots,
+  defaultCreateStepsOptions,
+  createConfigureDepthFirstSteps,
+  createConfigureBreadthFirstSteps,
+} from './directed-acyclic'
+import { createFind as createTreeFind } from './graph-tree'
 
-export function createToLayers<
-  Id extends string,
-  Metadata
->(options: { createToSteps?: CreateDirectedAcyclicToStepsOptions<Id, Metadata> } = {}): AsyncGraphTransform<Id, Metadata, GraphNode<Id>[][]> {
-  const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
+export function createLayers<
+  Id extends string
+>(options: { createDepthFirstSteps?: CreateStepsOptions<Id> } = {}): GraphAsyncTransform<Id, any, GraphNode<Id>[][]> {
+  const toSteps = createDepthFirstSteps<Id>(options.createDepthFirstSteps)
 
-  return async function toLayers (directedAcyclic) {
+  return async function toLayers (directedAcyclicAsync) {
     const layers: GraphNode<Id>[][] = []
 
-    for await (const { path } of toSteps(directedAcyclic)) {
+    for await (const { path } of toSteps(directedAcyclicAsync)) {
       const node = path.at(-1),
             depth = path.length - 1
 
@@ -54,25 +48,24 @@ export function createToLayers<
 
 
 // TODO: root option, multiple roots
-export function createToTree<
-  Id extends string,
-  Metadata
->(options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}): AsyncGraphTransform<Id, Metadata, GraphTreeNode<Id>[]> {
-  const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
+export function createTree<
+  Id extends string
+>(options: { createDepthFirstSteps?: CreateStepsOptions<Id> } = {}): GraphAsyncTransform<Id, any, GraphTree<Id>> {
+  const toSteps = createDepthFirstSteps<Id>(options.createDepthFirstSteps)
 
-  return async function toTree (directedAcyclic) {
+  return async function toTree (directedAcyclicAsync) {
     const firstRoot = pipe(
-            createToRoots<Id, Metadata, typeof directedAcyclic>(),
+            createRoots<Id, any, typeof directedAcyclicAsync>(),
             at(0),
-          )(directedAcyclic) as GraphNode<Id>,
-          tree: GraphTreeNode<Id>[] = []
+          )(directedAcyclicAsync) as GraphNode<Id>,
+          tree: GraphTree<Id> = []
           
     tree.push({
       node: firstRoot,
       children: [],
     })
 
-    for await (const { path } of toSteps(directedAcyclic)) {
+    for await (const { path } of toSteps(directedAcyclicAsync)) {
       const node = path.at(-1),
             parent = path.at(-2)
 
@@ -91,95 +84,52 @@ export function createToTree<
   }
 }
 
-export function createToCommonAncestors<
-  Id extends string,
-  Metadata
-> (directedAcyclic: AsyncGraph<Id, Metadata>): GraphNodeTupleAsyncGeneratorTransform<Id, GraphCommonAncestor<Id>> {
-  const toNodeSteps = createToNodeSteps(directedAcyclic)
-
-  return async function* (a, b) {
-    for await (const { path: aPath } of toNodeSteps(a)) {
-      for await (const { path: bPath } of toNodeSteps(b)) {
-        for (let aPathIndex = aPath.length - 1; aPathIndex >= 0; aPathIndex--) {
-          for (let bPathIndex = bPath.length - 1; bPathIndex >= 0; bPathIndex--) {
-            if (
-              aPath[aPathIndex] === bPath[bPathIndex]
-              && !includes(aPath[aPathIndex])([a, b])
-            ) {
-              yield {
-                node: aPath[aPathIndex],
-                distances: {
-                  [a]: aPath.length - aPathIndex - 1,
-                  [b]: bPath.length - bPathIndex - 1,
-                },
-              } as GraphCommonAncestor<Id>
-            }
-          }
-        }
-      }
-    }
-  }
+export function createDepthFirstSteps<Id extends string, StateValue = number> (
+  options: CreateDepthFirstStepsOptions<Id, StateValue> = {}
+): GraphAsyncGeneratorAsyncTransform<Id, StateValue, GraphStep<Id, StateValue>> {
+  return createSteps<Id, StateValue>(
+    createConfigureDepthFirstSteps<Id, StateValue>(options),
+    options
+  )
 }
 
-export function createPredicateAncestor<
-  Id extends string,
-  Metadata
-> (directedAcyclic: AsyncGraph<Id, Metadata>): GraphNodeTupleAsyncTransform<Id, boolean> {
-  const toNodeSteps = createToNodeSteps(directedAcyclic)
-
-  return async function (descendant, ancestor) {
-    return await pipe(
-      toNodeSteps,
-      some<GraphStep<Id, Metadata>>(({ path }) => includes(ancestor)(path) as boolean)
-    )(descendant)
-  }
+export function createBreadthFirstSteps<Id extends string, StateValue = number> (
+  options: CreateBreadthFirstStepsOptions<Id, StateValue> = {}
+): GraphAsyncGeneratorAsyncTransform<Id, StateValue, GraphStep<Id, StateValue>> {
+  return createSteps<Id, StateValue>(
+    createConfigureBreadthFirstSteps<Id, StateValue>(options),
+    options
+  )
 }
 
-export function createToNodeSteps<
+export function createSteps<
   Id extends string,
-  Metadata
+  StateValue
 > (
-  directedAcyclic: AsyncGraph<Id, Metadata>,
-  options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}
-): GraphNodeAsyncGeneratorTransform<Id, GraphStep<Id, Metadata>> {
-  const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
-
-  return async function* (node) {
-    yield* await pipe(
-      toSteps,
-      filter(({ path }) => path.at(-1) === node),
-    )(directedAcyclic)
-  }
-}
-
-export type CreateToStepsOptions<Id extends string, Metadata> = CreateDirectedAcyclicToStepsOptions<Id, Metadata>
-
-export function createToSteps<
-  Id extends string,
-  Metadata
-> (
-  options: CreateToStepsOptions<Id, Metadata> = {}
-): AsyncGraphAsyncGeneratorTransform<Id, Metadata, GraphStep<Id, Metadata>> {
-  const { toUnsetMetadata, toMockMetadata, root, kind } = { ...defaultCreateToStepsOptions, ...options } as CreateToStepsOptions<Id, Metadata>  
-
-  return async function* (directedAcyclic) {    
-    const { nodes } = directedAcyclic,
-          toOutdegree = createToOutdegree(directedAcyclic),
-          toPath = createToPath(directedAcyclic),
+  configure: (directedAcyclicAsync: GraphAsync<Id, StateValue>) => CreateStepsConfig<Id, StateValue>,
+  options: CreateStepsOptions<Id> = {}
+): GraphAsyncGeneratorAsyncTransform<Id, StateValue, GraphStep<Id, StateValue>> {
+  return async function* (directedAcyclicAsync) {
+    const {
+            getSetStateValue,
+            stepFromEffect,
+            predicateSteppable,
+            predicateExhausted,
+            createPath: createPathConfig,
+          } = configure(directedAcyclicAsync),
+          { kind, root } = { ...defaultCreateStepsOptions, ...options },
+          { nodes } = directedAcyclicAsync,
+          toPath = createPath(directedAcyclicAsync, createPathConfig),
           roots = pipe(
-            createToRoots<Id, Metadata, typeof directedAcyclic>({ kind }),
+            createRoots<Id, StateValue, typeof directedAcyclicAsync>({ kind }),
             toArray(),
-          )(directedAcyclic),
-          state = {} as GraphState<Id, Metadata>,
-          totalConnectionsFollowedByNode = {} as Record<GraphNode<Id>, number>,
-          predicateExhausted = (node: GraphNode<Id>) => {
-            return totalConnectionsFollowedByNode[node] === toOutdegree(node)
-          }
+          )(directedAcyclicAsync),
+          state = {} as GraphState<Id, StateValue>
 
     for (const node of nodes) {
       state[node] = {
         status: 'unset',
-        metadata: toUnsetMetadata(node),
+        value: undefined,
       }
     }
 
@@ -189,12 +139,12 @@ export function createToSteps<
 
     yield { path, state: JSON.parse(JSON.stringify(state)) }
 
-    async function* toStep (): AsyncGenerator<GraphStep<Id, Metadata>> {  
+    async function* toStep (): AsyncGenerator<GraphStep<Id, StateValue>> {  
       if (predicateExhausted(location)) {
         if (includes(location)(roots)) return
   
         state[location].status = 'unset'
-        state[location].metadata = toUnsetMetadata(location)
+        delete state[location].value
   
         const path = await toPath(state)
         location = path.at(-2)
@@ -203,57 +153,21 @@ export function createToSteps<
         return
       }
       
-      if (!(location in totalConnectionsFollowedByNode)) totalConnectionsFollowedByNode[location] = 0
-  
       state[location].status = 'set'
-      state[location].metadata = toMockMetadata(location, totalConnectionsFollowedByNode[location])
+      state[location].value = getSetStateValue(location)
       
       const path = await toPath(state)      
   
       yield { path, state: JSON.parse(JSON.stringify(state)) }
-  
-      totalConnectionsFollowedByNode[location]++
+      stepFromEffect(location)
   
       const newLocation = path.at(-1)
   
-      if (toOutdegree(newLocation) > 0) location = newLocation
+      if (predicateSteppable(newLocation)) location = newLocation
   
       yield* await toStep()
     }
   
     yield* await toStep()
-  }
-}
-
-// TODO: root option, multi root support
-export function createToPath<
-  Id extends string,
-  Metadata
-> (directedAcyclic: AsyncGraph<Id, Metadata>): GraphStateAsyncTransform<Id, Metadata, GraphNode<Id>[]> {
-  const toOutdegree = createToOutdegree<Id, Metadata, typeof directedAcyclic>(directedAcyclic),
-        toOutgoing = createToOutgoing<Id, Metadata, typeof directedAcyclic>(directedAcyclic),
-        firstRoot = pipe<typeof directedAcyclic>(
-          createToRoots<Id, Metadata, typeof directedAcyclic>(),
-          at(0)
-        )(directedAcyclic) as GraphNode<Id>
-
-  return async state => {
-    const path = [firstRoot],
-          getLastOutdegree = () => toOutdegree(path.at(-1)),
-          getLastStatus = () => state[path.at(-1)].status
-
-    while (getLastOutdegree() > 0 && getLastStatus() === 'set') {
-      const edge = await pipe(
-              toOutgoing,
-              toArray(),
-              createFindAsync<AsyncGraphEdge<Id, Metadata>>(
-                async ({ predicateTraversable }) => await predicateTraversable(state)
-              )
-            )(path.at(-1)) as AsyncGraphEdge<Id, Metadata>
-
-      path.push(edge.to)
-    }
-
-    return path
   }
 }

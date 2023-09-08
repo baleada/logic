@@ -13,6 +13,13 @@ type ToKyOptionsApi = {
 
 export type FetchableStatus = 'ready' | 'fetching' | 'fetched' | 'retrying' | 'aborted' | 'errored'
 
+export type FetchOptions = Omit<KyOptions, 'signal'>
+
+export type FetchMethodOptions = Omit<FetchOptions, 'method'>
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/fetchable)
+ */
 export class Fetchable {
   private computedArrayBuffer: Resolveable<ArrayBuffer | undefined>
   private computedBlob: Resolveable<Blob | undefined>
@@ -43,27 +50,24 @@ export class Fetchable {
   set resource (resource) {
     this.setResource(resource)
   }
+  get status () {
+    return this.computedStatus
+  }
   private computedKy: ReturnType<typeof ky['create']>
   get ky () {
     return this.computedKy
   }
   private computedAbortController: AbortController
   get abortController () {
-    if (!this.computedAbortController) {
-      this.computedAbortController = new AbortController()
-    }
-
+    if (!this.computedAbortController) this.computedAbortController = new AbortController()
     return this.computedAbortController
-  }
-  get status () {
-    return this.computedStatus
-  }
-  get response () { 
-    return this.computedResponse
   }
   private computedRetryCount: number = 0
   get retryCount () {
     return this.computedRetryCount
+  }
+  get response () { 
+    return this.computedResponse
   }
   get error () { 
     return this.computedError
@@ -92,7 +96,7 @@ export class Fetchable {
   
   private computedResponse: Response
   private computedError: Error
-  async fetch (options: KyOptions = {}) {
+  async fetch (options: FetchOptions = {}) {
     this.fetching()
 
     try {
@@ -139,28 +143,28 @@ export class Fetchable {
   private errored () {
     this.computedStatus = 'errored'
   }
-  async get (options: KyOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...options, method: 'get' })
+  async get (options: FetchMethodOptions = {}) {
+    await this.fetch({ ...options, method: 'get' })
     return this
   }
-  async patch (options: KyOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...options, method: 'patch' })
+  async patch (options: FetchMethodOptions = {}) {
+    await this.fetch({ ...options, method: 'patch' })
     return this
   }
-  async post (options: KyOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...options, method: 'post' })
+  async post (options: FetchMethodOptions = {}) {
+    await this.fetch({ ...options, method: 'post' })
     return this
   }
-  async put (options: KyOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...options, method: 'put' })
+  async put (options: FetchMethodOptions = {}) {
+    await this.fetch({ ...options, method: 'put' })
     return this
   }
-  async delete (options: KyOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...options, method: 'delete' })
+  async delete (options: FetchMethodOptions = {}) {
+    await this.fetch({ ...options, method: 'delete' })
     return this
   }
-  async head (options: KyOptions = {}) {
-    await this.fetch({ signal: this.abortController.signal, ...options, method: 'head' })
+  async head (options: FetchMethodOptions = {}) {
+    await this.fetch({ ...options, method: 'head' })
     return this
   }
   abort () {

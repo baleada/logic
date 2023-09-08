@@ -5,8 +5,8 @@ export type ShareableOptions = Record<never, never>
 export type ShareableStatus = 'ready' | 'sharing' | 'shared' | 'errored'
 
 export class Shareable {
-  constructor (state: ShareData, options: ShareableOptions = {}) {
-    this.setState(state)
+  constructor (shareData: ShareData, options: ShareableOptions = {}) {
+    this.setShareData(shareData)
     this.ready()
   }
   private computedStatus: ShareableStatus
@@ -14,11 +14,11 @@ export class Shareable {
     this.computedStatus = 'ready'
   }
 
-  get state () {
+  get shareData () {
     return this.computedState
   }
-  set state (state) {
-    this.setState(state)
+  set shareData (shareData) {
+    this.setShareData(shareData)
   }
   get status () {
     return this.computedStatus
@@ -33,9 +33,9 @@ export class Shareable {
   }
 
   private computedState: ShareData
-  setState (state: ShareData) {
-    this.computedState = state
-    this.computedCan = new Resolveable(async () => await navigator.canShare(state))
+  setShareData (shareData: ShareData) {
+    this.computedState = shareData
+    this.computedCan = new Resolveable(async () => await navigator.canShare(shareData))
     return this
   }
 
@@ -43,7 +43,7 @@ export class Shareable {
     this.sharing()
 
     try {
-      await navigator.share(this.state)
+      await navigator.share(this.shareData)
       this.shared()
     } catch (error) {
       this.computedError = error

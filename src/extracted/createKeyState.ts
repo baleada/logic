@@ -10,8 +10,8 @@ import {
   includes,
 } from 'lazy-collections'
 import {
-  createPredicateKeycomboDown,
-  createPredicateKeycomboMatch,
+  createKeycomboDown,
+  createKeycomboMatch,
   createKeyStatusesValue,
   createKeyStatusesSet,
   createKeyStatusesClear,
@@ -19,20 +19,20 @@ import {
   fromComboToAliases,
 } from '../extracted'
 import type { KeyStatuses } from '../extracted'
-import { createFilter } from '../pipes'
+import { createFilter } from '../pipes/array'
 
 export function createKeyState (
   {
     keycomboOrKeycombos,
     unsupportedAliases,
-    toDownKeys,
+    toDownCodes,
     toAliases,
     getRequest,
   }: {
     keycomboOrKeycombos: string | string[],
     unsupportedAliases: string[],
-    toDownKeys: Parameters<typeof createPredicateKeycomboDown>[1]['toDownKeys'],
-    toAliases: Parameters<typeof createPredicateKeycomboMatch>[1]['toAliases'],
+    toDownCodes: Parameters<typeof createKeycomboDown>[1]['toDownCodes'],
+    toAliases: Parameters<typeof createKeycomboMatch>[1]['toAliases'],
     getRequest: () => number,
   }
 ) {
@@ -41,30 +41,30 @@ export function createKeyState (
             alias => includes(alias)(unsupportedAliases) as boolean
           )(fromComboToAliases(keycombo))
         )(Array.isArray(keycomboOrKeycombos) ? keycomboOrKeycombos : [keycomboOrKeycombos]),
-        createPredicateKeycomboDownOptions = { toDownKeys },
+        createKeycomboDownOptions = { toDownCodes },
         downPredicatesByKeycombo = (() => {
-          const predicates: [string, ReturnType<typeof createPredicateKeycomboDown>][] = []
+          const predicates: [string, ReturnType<typeof createKeycomboDown>][] = []
 
           for (const keycombo of narrowedKeycombos) {
             predicates.push([
               keycombo,
-              createPredicateKeycomboDown(
+              createKeycomboDown(
                 keycombo,
-                createPredicateKeycomboDownOptions
+                createKeycomboDownOptions
               ),
             ])
           }
 
           return predicates
         })(),
-        createPredicateKeycomboMatchOptions = { ...createPredicateKeycomboDownOptions, toAliases },
+        createKeycomboMatchOptions = { ...createKeycomboDownOptions, toAliases },
         matchPredicatesByKeycombo = (() => {
-          const predicates: { [keycombo: string]: ReturnType<typeof createPredicateKeycomboMatch> } = {}
+          const predicates: { [keycombo: string]: ReturnType<typeof createKeycomboMatch> } = {}
 
           for (const keycombo of narrowedKeycombos) {
-            predicates[keycombo] = createPredicateKeycomboMatch(
+            predicates[keycombo] = createKeycomboMatch(
                 keycombo,
-                createPredicateKeycomboMatchOptions
+                createKeycomboMatchOptions
             )
           }
 
@@ -83,7 +83,7 @@ export function createKeyState (
           toArray()
         )(downPredicatesByKeycombo) as typeof narrowedKeycombos,
         predicateValid = (event: KeyboardEvent) => {
-          const aliases = toAliases(event)
+          const aliases = toAliases(event.code)
 
           return some<typeof validAliases[number]>(
             validAlias => includes<string>(validAlias)(aliases) as boolean
@@ -100,9 +100,9 @@ export function createKeyState (
 
   return {
     narrowedKeycombos,
-    createPredicateKeycomboDownOptions,
+    createKeycomboDownOptions,
     downPredicatesByKeycombo,
-    createPredicateKeycomboMatchOptions,
+    createKeycomboMatchOptions,
     matchPredicatesByKeycombo,
     validAliases,
     getDownCombos,

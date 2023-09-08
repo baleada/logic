@@ -111,6 +111,8 @@ export function createReverse<Item>(): ArrayTransform<Item, Item[]> {
 }
 
 export function createSlice<Item>(from: number, to?: number): ArrayTransform<Item, Item[]> {
+  if (from < 0 || to && to < 0) return array => array.slice(from, to)
+
   const toSliced = to ? slice(from, to - 1) : slice(from)
 
   return array => {
@@ -138,26 +140,26 @@ export function createSort<Item>(compare?: (itemA: Item, itemB: Item) => number)
   }
 }
 
-export function createSwap<Item>(indices: [number, number]): ArrayTransform<Item, Item[]> {
+export function createSwap<Item>(item1Index: number, item2Index: number): ArrayTransform<Item, Item[]> {
   return array => {
-    const { 0: from, 1: to } = indices, { reorderFrom, reorderTo } = ((): { reorderFrom: ArrayTransform<Item, Item[]>; reorderTo: ArrayTransform<Item, Item[]>; } => {
-      if (from < to) {
+    const { reorderFrom, reorderTo } = (() => {
+      if (item1Index < item2Index) {
         return {
-          reorderFrom: createReorder<Item>(from, to),
-          reorderTo: createReorder<Item>(to - 1, from),
+          reorderFrom: createReorder<Item>(item1Index, item2Index),
+          reorderTo: createReorder<Item>(item2Index - 1, item1Index),
         }
       }
 
-      if (from > to) {
+      if (item1Index > item2Index) {
         return {
-          reorderFrom: createReorder<Item>(from, to),
-          reorderTo: createReorder<Item>(to + 1, from),
+          reorderFrom: createReorder<Item>(item1Index, item2Index),
+          reorderTo: createReorder<Item>(item2Index + 1, item1Index),
         }
       }
 
       return {
-        reorderFrom: array => array,
-        reorderTo: array => array,
+        reorderFrom: (array => array) as ArrayTransform<Item, Item[]>,
+        reorderTo: (array => array) as ArrayTransform<Item, Item[]>,
       }
     })()
 

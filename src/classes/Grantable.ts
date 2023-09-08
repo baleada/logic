@@ -1,9 +1,12 @@
 export type GrantableOptions = Record<never, never>
 
-export type GrantableStatus = 'ready' | 'querying' | 'queried' | 'errored'
+export type GrantableStatus = 'ready' | 'granting' | 'granted' | 'errored'
 
-export class Grantable<DescriptorType extends PermissionDescriptor> {
-  constructor (descriptor: DescriptorType, options: GrantableOptions = {}) {
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/grantable)
+ */
+export class Grantable {
+  constructor (descriptor: PermissionDescriptor, options: GrantableOptions = {}) {
     this.setDescriptor(descriptor)
     this.ready()
   }
@@ -21,35 +24,39 @@ export class Grantable<DescriptorType extends PermissionDescriptor> {
   get permission () {
     return this.computedPermission
   }
+  get error () {
+    return this.computedError
+  }
   get status () {
     return this.computedStatus
   }
   
-  private computedDescriptor: DescriptorType
-  setDescriptor (descriptor: DescriptorType) {
+  private computedDescriptor: PermissionDescriptor
+  setDescriptor (descriptor: PermissionDescriptor) {
     this.computedDescriptor = descriptor
     return this
   }
 
-  private computedPermission: PermissionStatus | Error
-  async query () {
-    this.querying()
+  private computedPermission: PermissionStatus
+  private computedError: Error
+  async grant () {
+    this.granting()
 
     try {
       this.computedPermission = await navigator.permissions.query(this.descriptor)
-      this.queried()
+      this.granted()
     } catch (error) {
-      this.computedPermission = error as Error
+      this.computedError = error
       this.errored()
     }
 
     return this
   }  
-  private querying () {
-    this.computedStatus = 'querying'
+  private granting () {
+    this.computedStatus = 'granting'
   }
-  private queried () {
-    this.computedStatus = 'queried'
+  private granted () {
+    this.computedStatus = 'granted'
   }
   private errored () {
     this.computedStatus = 'errored'

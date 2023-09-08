@@ -34,6 +34,9 @@ const defaultPickOptions: PickOptions = {
   allowsDuplicates: false,
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/pickable)
+ */
 export class Pickable<Item> {
   constructor (array: Item[], options: PickableOptions = {}) {
     this.setArray(array)
@@ -73,9 +76,6 @@ export class Pickable<Item> {
   get newest () {
     return this.picks[this.picks.length - 1]
   }
-  get status () {
-    return this.computedStatus
-  }
   get items () {
     return this.toItems(this.picks)
   }
@@ -83,6 +83,9 @@ export class Pickable<Item> {
   computedMultiple: boolean
   get multiple () {
     return this.computedMultiple
+  }
+  get status () {
+    return this.computedStatus
   }
 
 

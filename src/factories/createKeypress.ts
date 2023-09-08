@@ -4,18 +4,18 @@ import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
 import {
   toHookApi,
   storeKeyboardTimeMetadata,
-  fromEventToKeyStatusKey,
+  fromEventToKeyStatusCode,
   fromComboToAliasesLength,
   createKeyState,
   predicateSomeKeyDown,
-  fromAliasToDownKeys,
+  fromAliasToDownCodes,
   fromEventToAliases,
 } from '../extracted'
 import type {
   HookApi,
   KeyboardTimeMetadata,
-  CreatePredicateKeycomboDownOptions,
-  CreatePredicateKeycomboMatchOptions,
+  CreateKeycomboDownOptions,
+  CreateKeycomboMatchOptions,
 } from '../extracted'
 
 export type KeypressType = 'keydown' | 'keyup' | 'visibilitychange'
@@ -27,8 +27,8 @@ export type KeypressMetadata = {
 export type KeypressOptions = {
   minDuration?: number,
   preventsDefaultUnlessDenied?: boolean,
-  toDownKeys?: CreatePredicateKeycomboDownOptions['toDownKeys'],
-  toAliases?: CreatePredicateKeycomboMatchOptions['toAliases'],
+  toDownCodes?: CreateKeycomboDownOptions['toDownCodes'],
+  toAliases?: CreateKeycomboMatchOptions['toAliases'],
   onDown?: KeypressHook,
   onUp?: KeypressHook,
   onVisibilitychange?: KeypressHook,
@@ -41,8 +41,8 @@ export type KeypressHookApi = HookApi<KeypressType, KeypressMetadata>
 const defaultOptions: KeypressOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
-  toDownKeys: alias => fromAliasToDownKeys(alias),
-  toAliases: event => fromEventToAliases(event as KeyboardEvent),
+  toDownCodes: alias => fromAliasToDownCodes(alias),
+  toAliases: code => fromEventToAliases({ code } as KeyboardEvent),
 }
 
 export function createKeypress (
@@ -52,7 +52,7 @@ export function createKeypress (
   const {
           minDuration,
           preventsDefaultUnlessDenied,
-          toDownKeys,
+          toDownCodes,
           toAliases,
           onDown,
           onUp,
@@ -71,7 +71,7 @@ export function createKeypress (
         } = createKeyState({
           keycomboOrKeycombos,
           unsupportedAliases,
-          toDownKeys,
+          toDownCodes,
           toAliases,
           getRequest: () => request,
         })
@@ -81,7 +81,7 @@ export function createKeypress (
 
   const keydown: RecognizeableEffect<'keydown', KeypressMetadata> = (event, api) => {
     const { denied, getStatus } = api,
-          key = fromEventToKeyStatusKey(event)
+          key = fromEventToKeyStatusCode(event)
 
     // REPEATED KEYDOWN
     if (toStatus(key) === 'down') {
@@ -152,7 +152,7 @@ export function createKeypress (
 
   const keyup: RecognizeableEffect<'keyup', KeypressMetadata> = (event, api) => {
     const { denied } = api,
-          key = fromEventToKeyStatusKey(event)
+          key = fromEventToKeyStatusCode(event)
                 
     // SHOULD BLOCK EVENT
     if (localStatus === 'denied') {

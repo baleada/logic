@@ -14,7 +14,7 @@ export const ast = {
         type: 'Identifier',
         start: 9,
         end: 22,
-        name: 'createToSteps',
+        name: 'createDepthFirstSteps',
       },
       expression: false,
       generator: false,
@@ -89,14 +89,14 @@ export const ast = {
                         type: 'Identifier',
                         start: 66,
                         end: 80,
-                        name: 'toMockMetadata',
+                        name: 'toSetMetadata',
                       },
                       kind: 'init',
                       value: {
                         type: 'Identifier',
                         start: 66,
                         end: 80,
-                        name: 'toMockMetadata',
+                        name: 'toSetMetadata',
                       },
                     },
                     {
@@ -156,7 +156,7 @@ export const ast = {
                         type: 'Identifier',
                         start: 106,
                         end: 133,
-                        name: 'defaultCreateToStepsOptions',
+                        name: 'defaultCreateDepthFirstStepsOptions',
                       },
                     },
                     {
@@ -263,7 +263,7 @@ export const ast = {
                             type: 'Identifier',
                             start: 254,
                             end: 271,
-                            name: 'createToOutdegree',
+                            name: 'createOutdegree',
                           },
                           arguments: [
                             {
@@ -294,7 +294,7 @@ export const ast = {
                             type: 'Identifier',
                             start: 305,
                             end: 317,
-                            name: 'createToPath',
+                            name: 'createPath',
                           },
                           arguments: [
                             {
@@ -340,7 +340,7 @@ export const ast = {
                                   type: 'Identifier',
                                   start: 355,
                                   end: 368,
-                                  name: 'createToRoots',
+                                  name: 'createRoots',
                                 },
                                 arguments: [
                                   {
@@ -426,7 +426,7 @@ export const ast = {
                           type: 'Identifier',
                           start: 433,
                           end: 463,
-                          name: 'totalConnectionsFollowedByNode',
+                          name: 'totalChildrenDiscoveredByNode',
                         },
                         init: {
                           type: 'ObjectExpression',
@@ -482,7 +482,7 @@ export const ast = {
                                       type: 'Identifier',
                                       start: 524,
                                       end: 554,
-                                      name: 'totalConnectionsFollowedByNode',
+                                      name: 'totalChildrenDiscoveredByNode',
                                     },
                                     property: {
                                       type: 'Identifier',
@@ -1238,7 +1238,7 @@ export const ast = {
                                 type: 'Identifier',
                                 start: 1222,
                                 end: 1252,
-                                name: 'totalConnectionsFollowedByNode',
+                                name: 'totalChildrenDiscoveredByNode',
                               },
                             },
                           },
@@ -1259,7 +1259,7 @@ export const ast = {
                                   type: 'Identifier',
                                   start: 1263,
                                   end: 1293,
-                                  name: 'totalConnectionsFollowedByNode',
+                                  name: 'totalChildrenDiscoveredByNode',
                                 },
                                 property: {
                                   type: 'Identifier',
@@ -1380,7 +1380,7 @@ export const ast = {
                                 type: 'Identifier',
                                 start: 1380,
                                 end: 1394,
-                                name: 'toMockMetadata',
+                                name: 'toSetMetadata',
                               },
                               arguments: [
                                 {
@@ -1397,7 +1397,7 @@ export const ast = {
                                     type: 'Identifier',
                                     start: 1422,
                                     end: 1452,
-                                    name: 'totalConnectionsFollowedByNode',
+                                    name: 'totalChildrenDiscoveredByNode',
                                   },
                                   property: {
                                     type: 'Identifier',
@@ -1584,7 +1584,7 @@ export const ast = {
                                 type: 'Identifier',
                                 start: 1576,
                                 end: 1606,
-                                name: 'totalConnectionsFollowedByNode',
+                                name: 'totalChildrenDiscoveredByNode',
                               },
                               property: {
                                 type: 'Identifier',
@@ -1822,6 +1822,6 @@ for (const { from, to } of toEdges(ast.body[0])) {
   directedAcyclic.edges.push(defineGraphEdge<string, number>(
     fromId,
     _toId,
-    state => state[fromId].metadata === length,
+    state => state[fromId].value === length,
   ))
 }

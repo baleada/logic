@@ -1,23 +1,32 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { map, pipe, toArray } from 'lazy-collections'
-import type { AsyncGraphEdge, GraphNode, GraphStep } from '../../src/extracted/graph'
+import type { GraphAsyncEdge, GraphNode, GraphStep } from '../../src/extracted/graph'
 import {
-  createToPath,
-  createToSteps,
-  createToNodeSteps,
-  createPredicateAncestor,
-  createToCommonAncestors,
-  createToTree,
-  createToLayers,
+  createDepthFirstSteps,
+  createTree,
+  createLayers,
 } from '../../src/pipes/directed-acyclic-async'
+import {
+  createNodeDepthFirstSteps,
+  createAncestor,
+  createCommonAncestors,
+} from '../../src/pipes/directed-acyclic-async-node'
+import {
+  createPath,
+} from '../../src/pipes/directed-acyclic-async-state'
+import { createDepthPathConfig } from '../../src/factories'
 
 const suite = createSuite<{
-  directedAcyclic: {
+  depthFirstDirectedAcyclic: {
     nodes: GraphNode<any>[],
-    edges: AsyncGraphEdge<any, number>[],
+    edges: GraphAsyncEdge<any, number>[],
+  },
+  breadthFirstDirectedAcyclic: {
+    nodes: GraphNode<any>[],
+    edges: GraphAsyncEdge<any, number>[],
   }
-}>('async directed acyclic pipes')
+}>('directed acyclic async pipes')
 
 async function debounce<T> (cb: () => T) {
   return await new Promise<T>(resolve => {
@@ -37,26 +46,47 @@ suite.before(context => {
     'h',
   ]
 
-  const edges = [
-    { from: 'a', to: 'b', predicateTraversable: async state => await debounce(() => state.a.metadata === 0) },
-    { from: 'a', to: 'c', predicateTraversable: async state => await debounce(() => state.a.metadata === 1) },
-    { from: 'a', to: 'd', predicateTraversable: async state => await debounce(() => state.a.metadata === 2) },
-    { from: 'b', to: 'd', predicateTraversable: async state => await debounce(() => state.b.metadata === 0) },
-    { from: 'b', to: 'e', predicateTraversable: async state => await debounce(() => state.b.metadata === 1) },
-    { from: 'c', to: 'f', predicateTraversable: async state => await debounce(() => state.c.metadata === 0) },
-    { from: 'c', to: 'g', predicateTraversable: async state => await debounce(() => state.c.metadata === 1) },
-    { from: 'd', to: 'h', predicateTraversable: async state => await debounce(() => state.d.metadata === 0) },
+  const depthFirstEdges = [
+    { from: 'a', to: 'b', predicateShouldTraverse: async state => await debounce(() => state.a.value === 0) },
+    { from: 'a', to: 'c', predicateShouldTraverse: async state => await debounce(() => state.a.value === 1) },
+    { from: 'a', to: 'd', predicateShouldTraverse: async state => await debounce(() => state.a.value === 2) },
+    { from: 'b', to: 'd', predicateShouldTraverse: async state => await debounce(() => state.b.value === 0) },
+    { from: 'b', to: 'e', predicateShouldTraverse: async state => await debounce(() => state.b.value === 1) },
+    { from: 'c', to: 'f', predicateShouldTraverse: async state => await debounce(() => state.c.value === 0) },
+    { from: 'c', to: 'g', predicateShouldTraverse: async state => await debounce(() => state.c.value === 1) },
+    { from: 'd', to: 'h', predicateShouldTraverse: async state => await debounce(() => state.d.value === 0) },
   ]
 
-  context.directedAcyclic = { nodes: nodes, edges: edges }
+  const breadthFirstEdges = [
+    { from: 'a', to: 'b', predicateShouldTraverse: async state => await debounce(() => state.a.value === 0) },
+    { from: 'a', to: 'c', predicateShouldTraverse: async state => await debounce(() => state.b.value === 0) },
+    { from: 'a', to: 'd', predicateShouldTraverse: async state => await debounce(() => state.c.value === 0) },
+    { from: 'b', to: 'e', predicateShouldTraverse: async state => await debounce(() => state.d.value === 0) },
+    { from: 'c', to: 'f', predicateShouldTraverse: async state => await debounce(() => state.e.value === 0) },
+    { from: 'c', to: 'g', predicateShouldTraverse: async state => await debounce(() => state.f.value === 0) },
+    { from: 'd', to: 'h', predicateShouldTraverse: async state => await debounce(() => state.g.value === 0) },
+  ]
+
+  context.depthFirstDirectedAcyclic = {
+    nodes,
+    edges: depthFirstEdges,
+  }
+
+  context.breadthFirstDirectedAcyclic = {
+    nodes,
+    edges: breadthFirstEdges,
+  }
 })
 
-suite('createToPath(...) works', async ({ directedAcyclic }) => {
+suite('createPath(...) works', async ({ depthFirstDirectedAcyclic }) => {
   await (async () => {
-    const value = await createToPath(directedAcyclic)({
-            a: { status: 'set', metadata: 0 },
-            b: { status: 'set', metadata: 0 },
-            d: { status: 'set', metadata: 0 },
+    const value = await createPath(
+            depthFirstDirectedAcyclic,
+            createDepthPathConfig(depthFirstDirectedAcyclic),
+          )({
+            a: { status: 'set', value: 0 },
+            b: { status: 'set', value: 0 },
+            d: { status: 'set', value: 0 },
           }),
           expected = ['a', 'b', 'd', 'h']
 
@@ -64,9 +94,12 @@ suite('createToPath(...) works', async ({ directedAcyclic }) => {
   })()
   
   await (async () => {
-    const value = await createToPath(directedAcyclic)({
-            a: { status: 'set', metadata: 1 },
-            c: { status: 'set', metadata: 0 },
+    const value = await createPath(
+            depthFirstDirectedAcyclic,
+            createDepthPathConfig(depthFirstDirectedAcyclic),
+          )({
+            a: { status: 'set', value: 1 },
+            c: { status: 'set', value: 0 },
           }),
           expected = ['a', 'c', 'f']
 
@@ -74,12 +107,12 @@ suite('createToPath(...) works', async ({ directedAcyclic }) => {
   })()
 })
 
-suite('createToSteps works', async ({ directedAcyclic }) => {
+suite('createDepthFirstSteps works', async ({ depthFirstDirectedAcyclic }) => {
   const value = await pipe(
-    createToSteps(),
+    createDepthFirstSteps(),
     map<GraphStep<any, number>, any>(step => step.path.at(-1)),
     toArray()
-  )(directedAcyclic)
+  )(depthFirstDirectedAcyclic)
 
   assert.equal(
     value,
@@ -97,16 +130,16 @@ suite('createToSteps works', async ({ directedAcyclic }) => {
   )
 })
 
-suite.skip('createToSteps works with multiple roots', async ({ directedAcyclic }) => {
+suite.skip('createDepthFirstSteps works with multiple roots', async ({ depthFirstDirectedAcyclic }) => {
   const value = await pipe(
-    createToSteps(),
+    createDepthFirstSteps(),
     map<GraphStep<any, number>, any>(step => step.path.at(-1)),
     toArray()
   )({
-    nodes: [...directedAcyclic.nodes, 'i'],
+    nodes: [...depthFirstDirectedAcyclic.nodes, 'i'],
     edges: [
-      ...directedAcyclic.edges,
-      { from: 'i', to: 'c', predicateTraversable: async state => await debounce(() => state.i.metadata === 0) },
+      ...depthFirstDirectedAcyclic.edges,
+      { from: 'i', to: 'c', predicateShouldTraverse: async state => await debounce(() => state.i.value === 0) },
     ],
   })
 
@@ -131,24 +164,24 @@ suite.skip('createToSteps works with multiple roots', async ({ directedAcyclic }
   )
 })
 
-suite('createFromNodeToSteps works', async ({ directedAcyclic }) => {
+suite('createFromNodeDepthFirstSteps works', async ({ depthFirstDirectedAcyclic }) => {
   await (async () => {
     const value = await pipe(
-            createToNodeSteps(directedAcyclic),
+            createNodeDepthFirstSteps(depthFirstDirectedAcyclic),
             toArray()
           )('a'),
           expected = [
             {
               path: ['a'],
               state: {
-                a: { status: 'unset', metadata: 0 },
-                b: { status: 'unset', metadata: 0 },
-                c: { status: 'unset', metadata: 0 },
-                d: { status: 'unset', metadata: 0 },
-                e: { status: 'unset', metadata: 0 },
-                f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 },
-                h: { status: 'unset', metadata: 0 },
+                a: { status: 'unset' },
+                b: { status: 'unset' },
+                c: { status: 'unset' },
+                d: { status: 'unset' },
+                e: { status: 'unset' },
+                f: { status: 'unset' },
+                g: { status: 'unset' },
+                h: { status: 'unset' },
               },
             },
           ]
@@ -158,21 +191,21 @@ suite('createFromNodeToSteps works', async ({ directedAcyclic }) => {
 
   await (async () => {
     const value = await pipe(
-            createToNodeSteps(directedAcyclic),
+            createNodeDepthFirstSteps(depthFirstDirectedAcyclic),
             toArray(),
           )('g'),
           expected = [
             {
               path: [ 'a', 'c', 'g' ],
               state: {
-                a: { status: 'set', metadata: 1 },
-                b: { status: 'unset', metadata: 0 },
-                c: { status: 'set', metadata: 1 },
-                d: { status: 'unset', metadata: 0 },
-                e: { status: 'unset', metadata: 0 },
-                f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 },
-                h: { status: 'unset', metadata: 0 },
+                a: { status: 'set', value: 1 },
+                b: { status: 'unset' },
+                c: { status: 'set', value: 1 },
+                d: { status: 'unset' },
+                e: { status: 'unset' },
+                f: { status: 'unset' },
+                g: { status: 'unset' },
+                h: { status: 'unset' },
               },
             },
           ]
@@ -182,34 +215,34 @@ suite('createFromNodeToSteps works', async ({ directedAcyclic }) => {
   
   await (async () => {
     const value = await pipe(
-            createToNodeSteps(directedAcyclic),
+            createNodeDepthFirstSteps(depthFirstDirectedAcyclic),
             toArray(),
           )('d'),
           expected = [
             {
               path: [ 'a', 'b', 'd' ],
               state: {
-                a: { status: 'set', metadata: 0 },
-                b: { status: 'set', metadata: 0 },
-                c: { status: 'unset', metadata: 0 },
-                d: { status: 'unset', metadata: 0 },
-                e: { status: 'unset', metadata: 0 },
-                f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 },
-                h: { status: 'unset', metadata: 0 },
+                a: { status: 'set', value: 0 },
+                b: { status: 'set', value: 0 },
+                c: { status: 'unset' },
+                d: { status: 'unset' },
+                e: { status: 'unset' },
+                f: { status: 'unset' },
+                g: { status: 'unset' },
+                h: { status: 'unset' },
               },
             },
             {
               path: [ 'a', 'd' ],
               state: {
-                a: { status: 'set', metadata: 2 },
-                b: { status: 'unset', metadata: 0 },
-                c: { status: 'unset', metadata: 0 },
-                d: { status: 'unset', metadata: 0 },
-                e: { status: 'unset', metadata: 0 },
-                f: { status: 'unset', metadata: 0 },
-                g: { status: 'unset', metadata: 0 },
-                h: { status: 'unset', metadata: 0 },
+                a: { status: 'set', value: 2 },
+                b: { status: 'unset' },
+                c: { status: 'unset' },
+                d: { status: 'unset' },
+                e: { status: 'unset' },
+                f: { status: 'unset' },
+                g: { status: 'unset' },
+                h: { status: 'unset' },
               },
             },
           ]
@@ -218,9 +251,9 @@ suite('createFromNodeToSteps works', async ({ directedAcyclic }) => {
   })()
 })
 
-suite('createPredicateAncestor works', async ({ directedAcyclic }) => {
+suite('createAncestor works', async ({ depthFirstDirectedAcyclic }) => {
   await (async () => {
-    const value = await createPredicateAncestor(directedAcyclic)('d', 'a'),
+    const value = await createAncestor(depthFirstDirectedAcyclic)('d', 'a'),
           expected = true
 
     assert.equal(value, expected)
@@ -228,24 +261,24 @@ suite('createPredicateAncestor works', async ({ directedAcyclic }) => {
   
   // Handles non-shortest path
   await (async () => {
-    const value = await createPredicateAncestor(directedAcyclic)('d', 'b'),
+    const value = await createAncestor(depthFirstDirectedAcyclic)('d', 'b'),
           expected = true
 
     assert.equal(value, expected)
   })()
   
   await (async () => {
-    const value = await createPredicateAncestor(directedAcyclic)('d', 'c'),
+    const value = await createAncestor(depthFirstDirectedAcyclic)('d', 'c'),
           expected = false
 
     assert.equal(value, expected)
   })()
 })
 
-suite('createToCommonAncestors works', async ({ directedAcyclic }) => {
+suite('createCommonAncestors works', async ({ depthFirstDirectedAcyclic }) => {
   await (async () => {
     const value = await pipe(
-            async () => await createToCommonAncestors(directedAcyclic)('a', 'b'),
+            async () => await createCommonAncestors(depthFirstDirectedAcyclic)('a', 'b'),
             toArray(),
           )(),
           expected = []
@@ -255,7 +288,7 @@ suite('createToCommonAncestors works', async ({ directedAcyclic }) => {
   
   await (async () => {
     const value = await pipe(
-            async () => await createToCommonAncestors(directedAcyclic)('b', 'e'),
+            async () => await createCommonAncestors(depthFirstDirectedAcyclic)('b', 'e'),
             toArray(),
           )(),
           expected = [
@@ -266,9 +299,9 @@ suite('createToCommonAncestors works', async ({ directedAcyclic }) => {
   })()
 })
 
-suite('createToCommonAncestors handles multiple paths from one node to another', async ({ directedAcyclic }) => {
+suite('createCommonAncestors handles multiple paths from one node to another', async ({ depthFirstDirectedAcyclic }) => {
   const value = await pipe(
-          async () => await createToCommonAncestors(directedAcyclic)('d', 'g'),
+          async () => await createCommonAncestors(depthFirstDirectedAcyclic)('d', 'g'),
           toArray(),
         )(),
         expected = [
@@ -279,9 +312,9 @@ suite('createToCommonAncestors handles multiple paths from one node to another',
   assert.equal(value, expected)
 })
 
-suite('createToCommonAncestors orders ancestors from deepest to shallowest', async ({ directedAcyclic }) => {
+suite('createCommonAncestors orders ancestors from deepest to shallowest', async ({ depthFirstDirectedAcyclic }) => {
   const value = await pipe(
-          async () => await createToCommonAncestors(directedAcyclic)('d', 'e'),
+          async () => await createCommonAncestors(depthFirstDirectedAcyclic)('d', 'e'),
           toArray(),
         )(),
         expected = [
@@ -293,8 +326,8 @@ suite('createToCommonAncestors orders ancestors from deepest to shallowest', asy
   assert.equal(value, expected)
 })
 
-suite('createToTree works', async ({ directedAcyclic }) => {
-  const value = await createToTree<string, number>()(directedAcyclic),
+suite('createTree works', async ({ depthFirstDirectedAcyclic }) => {
+  const value = await createTree<string>()(depthFirstDirectedAcyclic),
         expected = [
           {
             node: 'a',
@@ -341,8 +374,8 @@ suite('createToTree works', async ({ directedAcyclic }) => {
   assert.equal(value, expected)
 })
 
-suite('createToLayers works', async ({ directedAcyclic }) => {
-  const value = await createToLayers()(directedAcyclic),
+suite('createLayers works', async ({ depthFirstDirectedAcyclic }) => {
+  const value = await createLayers()(depthFirstDirectedAcyclic),
         expected = [
           ['a'],
           ['b', 'c', 'd'],

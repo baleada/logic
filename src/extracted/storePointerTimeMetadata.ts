@@ -1,5 +1,5 @@
 import type { RecognizeableEffect } from '../classes'
-import { createClone } from '../pipes'
+import { createClone } from '../pipes/any'
 import type { PointerMoveMetadata } from './storePointerMoveMetadata'
 
 export type PointerTimeMetadata = {

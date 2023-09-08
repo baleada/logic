@@ -1,3 +1,8 @@
+// GRAPH
+export { createDepthPathConfig } from './createDepthPathConfig'
+export { createBreadthPathConfig } from './createBreadthPathConfig'
+
+
 // RECOGNIZEABLE EFFECTS
 export { createKeypress } from './createKeypress'
 export type {

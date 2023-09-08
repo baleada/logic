@@ -111,7 +111,7 @@ onMounted(() => {
           const to = `${(i - 1)},${j}` as const
 
           if (!edges.find(edge => edge.to === node && edge.from === to)) {
-            edges.push({ from: node, to, predicateTraversable: state => state[node].metadata === totalEdges })
+            edges.push({ from: node, to, predicateShouldTraverse: state => state[node].value === totalEdges })
             totalEdges++
           }
         }
@@ -120,7 +120,7 @@ onMounted(() => {
           const to = `${i},${(j - 1)}` as const
 
           if (!edges.find(edge => edge.to === node && edge.from === to)) {
-            edges.push({ from: node, to, predicateTraversable: state => state[node].metadata === totalEdges })
+            edges.push({ from: node, to, predicateShouldTraverse: state => state[node].value === totalEdges })
             totalEdges++
           }
         }
@@ -129,7 +129,7 @@ onMounted(() => {
           const to = `${(i + 1)},${j}` as const
 
           if (!edges.find(edge => edge.to === node && edge.from === to)) {
-            edges.push({ from: node, to, predicateTraversable: state => state[node].metadata === totalEdges })
+            edges.push({ from: node, to, predicateShouldTraverse: state => state[node].value === totalEdges })
             totalEdges++
           }
         }
@@ -138,7 +138,7 @@ onMounted(() => {
           const to = `${i},${(j + 1)}` as const
 
           if (!edges.find(edge => edge.to === node && edge.from === to)) {
-            edges.push({ from: node, to, predicateTraversable: state => state[node].metadata === totalEdges })
+            edges.push({ from: node, to, predicateShouldTraverse: state => state[node].value === totalEdges })
             totalEdges++
           }
         }

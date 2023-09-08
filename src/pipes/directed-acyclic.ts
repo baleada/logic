@@ -1,8 +1,5 @@
 import {
-  filter,
-  find,
   pipe,
-  some,
   toArray,
   at,
   includes,
@@ -10,62 +7,59 @@ import {
 import type {
   Graph,
   GraphNode,
-  GraphEdge,
   GraphState,
   GraphStep,
-  GraphCommonAncestor,
-  GraphTreeNode,
-  AsyncGraph,
+  GraphTree,
+  GraphAsync,
 } from '../extracted'
+import { createDepthPathConfig, createBreadthPathConfig } from '../factories'
 import {
-  createToOutdegree,
-  createToOutgoing,
-} from './graph'
+  createOnlyChild,
+  createOutdegree,
+  createTerminal,
+} from './graph-node'
 import type {
   GraphGeneratorTransform,
-  GraphNodeGeneratorTransform,
-  GraphStateTransform,
-  GraphNodeTupleTransform,
-  GraphNodeTupleGeneratorTransform,
   GraphTransform,
 } from './graph'
-import type { AsyncGraphGeneratorTransform } from './graph-async'
-import { createPredicateRoot } from './graph'
-import { createFind as createTreeFind } from './tree'
+import type { GraphAsyncGeneratorTransform } from './graph-async'
+import { createRoot } from './graph-node'
+import { createFind as createTreeFind } from './graph-tree'
+import { createPath } from './directed-acyclic-state'
+import type { CreatePathConfig } from './directed-acyclic-state'
+import { createReduce } from './array'
 
-export function createToLayers<
-  Id extends string,
-  Metadata
->(options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}): GraphTransform<Id, Metadata, GraphNode<Id>[][]> {
-  const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
+export function createLayers<
+  Id extends string
+>(options: { createDepthFirstSteps?: CreateStepsOptions<Id> } = {}): GraphGeneratorTransform<Id, any, GraphNode<Id>[]> {
+  const toSteps = createDepthFirstSteps<Id>(options.createDepthFirstSteps)
 
-  return function toLayers (directedAcyclic) {
+  return function* toLayers (directedAcyclic) {
     const layers: GraphNode<Id>[][] = []
 
     for (const { path } of toSteps(directedAcyclic)) {
       const node = path.at(-1),
             depth = path.length - 1
 
+      if (!layers[depth] && depth > 0) yield layers[depth - 1]
+
       ;(layers[depth] || (layers[depth] = [])).push(node)
     }
-
-    return layers
   }
 }
 
 // TODO: root option, multiple roots
-export function createToTree<
-  Id extends string,
-  Metadata
->(options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}): GraphTransform<Id, Metadata, GraphTreeNode<Id>[]> {
-  const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
+export function createTree<
+  Id extends string
+>(options: { createDepthFirstSteps?: CreateStepsOptions<Id> } = {}): GraphTransform<Id, any, GraphTree<Id>> {
+  const toSteps = createDepthFirstSteps<Id>(options.createDepthFirstSteps)
 
-  return function toTree (directedAcyclic) {
+  return directedAcyclic => {
     const firstRoot = pipe(
-            createToRoots<Id, Metadata, typeof directedAcyclic>(),
+            createRoots<Id, any, typeof directedAcyclic>(),
             at(0),
           )(directedAcyclic) as GraphNode<Id>,
-          tree: GraphTreeNode<Id>[] = []
+          tree: GraphTree<Id> = []
           
     tree.push({
       node: firstRoot,
@@ -91,110 +85,166 @@ export function createToTree<
   }
 }
 
-export function createToCommonAncestors<
-  Id extends string,
-  Metadata
-> (directedAcyclic: Graph<Id, Metadata>): GraphNodeTupleGeneratorTransform<Id, GraphCommonAncestor<Id>> {
-  const toNodeSteps = createToNodeSteps(directedAcyclic)
+export type CreateDepthFirstStepsOptions<Id extends string, StateValue = number> = CreateStepsOptions<Id> & {
+  getSetStateValue?: (api: { node: GraphNode<Id>, totalChildrenDiscovered: number }) => StateValue,
+}
 
-  return function* (a, b) {
-    for (const { path: aPath } of toNodeSteps(a)) {
-      for (const { path: bPath } of toNodeSteps(b)) {
-        for (let aPathIndex = aPath.length - 1; aPathIndex >= 0; aPathIndex--) {
-          for (let bPathIndex = bPath.length - 1; bPathIndex >= 0; bPathIndex--) {
-            if (
-              aPath[aPathIndex] === bPath[bPathIndex]
-              && !includes(aPath[aPathIndex])([a, b])
-            ) {
-              yield {
-                node: aPath[aPathIndex],
-                distances: {
-                  [a]: aPath.length - aPathIndex - 1,
-                  [b]: bPath.length - bPathIndex - 1,
-                },
-              } as GraphCommonAncestor<Id>
-            }
-          }
-        }
-      }
+const defaultCreateDepthFirstStepsOptions: CreateDepthFirstStepsOptions<any> = {
+  getSetStateValue: ({ totalChildrenDiscovered }) => totalChildrenDiscovered,
+}
+
+export function createDepthFirstSteps<Id extends string, StateValue = number> (
+  options: CreateDepthFirstStepsOptions<Id, StateValue> = {}
+): GraphGeneratorTransform<Id, StateValue, GraphStep<Id, StateValue>> {
+  return createSteps<Id, StateValue>(
+    createConfigureDepthFirstSteps<Id, StateValue>(options),
+    options
+  )
+}
+
+export function createConfigureDepthFirstSteps<Id extends string, StateValue = number> (
+  options: CreateDepthFirstStepsOptions<Id, StateValue>
+) {
+  const { getSetStateValue: getSetStateValueOption } = {
+    ...defaultCreateDepthFirstStepsOptions,
+    ...options,
+  } as CreateDepthFirstStepsOptions<Id, StateValue>
+
+  return function (
+    directedAcyclic: Graph<Id, StateValue> | GraphAsync<Id, StateValue>
+  ): CreateStepsConfig<Id, StateValue> {
+    const getSetStateValue: CreateStepsConfig<Id, StateValue>['getSetStateValue'] = node => getSetStateValueOption({
+            node,
+            totalChildrenDiscovered: totalChildrenDiscoveredByNode[node],
+          }),
+          stepFromEffect = node => totalChildrenDiscoveredByNode[node]++,
+          predicateSteppable = node => !predicateTerminal(node),
+          predicateTerminal = createTerminal(directedAcyclic),
+          predicateExhausted: CreateStepsConfig<Id, StateValue>['predicateExhausted'] = node =>
+            totalChildrenDiscoveredByNode[node] === toTotalSiblings(node),
+          toTotalSiblings = createOutdegree(directedAcyclic),
+          totalChildrenDiscoveredByNode = createReduce<Id, Record<Id, number>>(
+            (totalChildrenDiscoveredByNode, node) => {
+              totalChildrenDiscoveredByNode[node] = 0
+              return totalChildrenDiscoveredByNode
+            },
+            {} as Record<Id, number>,
+          )(directedAcyclic.nodes)
+  
+    return {
+      getSetStateValue,
+      stepFromEffect,
+      predicateSteppable,
+      predicateExhausted,
+      createPath: createDepthPathConfig(directedAcyclic),
     }
   }
 }
 
-export function createPredicateAncestor<
-  Id extends string,
-  Metadata
-> (directedAcyclic: Graph<Id, Metadata>): GraphNodeTupleTransform<Id, boolean> {
-  const toNodeSteps = createToNodeSteps(directedAcyclic)
+export type CreateBreadthFirstStepsOptions<Id extends string, StateValue = number> = CreateStepsOptions<Id> & {
+  getSetStateValue?: (api: { node: GraphNode<Id>, totalSiblingsDiscovered: number }) => StateValue,
+}
 
-  return function (descendant, ancestor) {
-    return pipe(
-      toNodeSteps,
-      some<GraphStep<Id, Metadata>>(({ path }) => includes(ancestor)(path) as boolean)
-    )(descendant)
+export const defaultCreateBreadthFirstStepsOptions: CreateBreadthFirstStepsOptions<any> = {
+  getSetStateValue: ({ totalSiblingsDiscovered }) => totalSiblingsDiscovered,
+}
+
+export function createBreadthFirstSteps<Id extends string, StateValue = number> (
+  options: CreateBreadthFirstStepsOptions<Id, StateValue> = {}
+): GraphGeneratorTransform<Id, StateValue, GraphStep<Id, StateValue>> {
+  return createSteps<Id, StateValue>(
+    createConfigureBreadthFirstSteps<Id, StateValue>(options),
+    options
+  )
+}
+
+export function createConfigureBreadthFirstSteps<Id extends string, StateValue = number> (
+  options: CreateBreadthFirstStepsOptions<Id, StateValue>
+) {
+  const { getSetStateValue: getSetStateValueOption } = {
+    ...defaultCreateBreadthFirstStepsOptions,
+    ...options,
+  } as CreateBreadthFirstStepsOptions<Id, StateValue>
+
+  return function (
+    directedAcyclic: Graph<Id, StateValue> | GraphAsync<Id, StateValue>
+  ): CreateStepsConfig<Id, StateValue> {
+    const getSetStateValue = node => getSetStateValueOption({
+            node,
+            totalSiblingsDiscovered: totalSiblingsDiscoveredByNode[node],
+          }),
+          stepFromEffect = node => totalSiblingsDiscoveredByNode[node]++,
+          predicateSteppable = node => !predicateOnlyChild(node),
+          predicateOnlyChild = createOnlyChild(directedAcyclic),
+          predicateExhausted: CreateStepsConfig<Id, StateValue>['predicateExhausted'] = node =>
+            totalSiblingsDiscoveredByNode[node] === toTotalSiblings(node),
+          toTotalSiblings = createOutdegree(directedAcyclic),
+          totalSiblingsDiscoveredByNode = createReduce<Id, Record<Id, number>>(
+            (totalSiblingsDiscoveredByNode, node) => {
+              totalSiblingsDiscoveredByNode[node] = 0
+              return totalSiblingsDiscoveredByNode
+            },
+            {} as Record<Id, number>,
+          )(directedAcyclic.nodes)
+
+    return {
+      getSetStateValue,
+      stepFromEffect,
+      predicateSteppable,
+      predicateExhausted,
+      createPath: createBreadthPathConfig(directedAcyclic),
+    }
   }
 }
 
-export function createToNodeSteps<
+export type CreateStepsConfig<
   Id extends string,
-  Metadata
-> (
-  directedAcyclic: Graph<Id, Metadata>,
-  options: { createToSteps?: CreateToStepsOptions<Id, Metadata> } = {}
-): GraphNodeGeneratorTransform<Id, GraphStep<Id, Metadata>> {
-  const toSteps = createToSteps<Id, Metadata>(options.createToSteps)
-
-  return function* (node) {
-    yield* pipe(
-      toSteps,
-      filter(({ path }) => path.at(-1) === node),
-    )(directedAcyclic)
-  }
-}
-
-export type CreateToStepsOptions<
-  Id extends string,
-  Metadata
+  StateValue
 > = {
-  root?: GraphNode<Id>,
-  toMockMetadata?: (node: GraphNode<Id>, totalConnectionsFollowed: number) => Metadata,
-  toUnsetMetadata?: (node: GraphNode<Id>) => Metadata,
-  kind?: 'directed acyclic' | 'arborescence'
+  getSetStateValue: (node: GraphNode<Id>) => StateValue,
+  stepFromEffect: (node: GraphNode<Id>) => void,
+  predicateSteppable: (node: GraphNode<Id>) => boolean,
+  predicateExhausted: (node: GraphNode<Id>) => boolean,
+  createPath: CreatePathConfig<Id, StateValue>,
 }
 
-export const defaultCreateToStepsOptions: CreateToStepsOptions<string, any> = {
-  toUnsetMetadata: () => 0,
-  toMockMetadata: (node, totalConnectionsFollowed) => totalConnectionsFollowed,
+export type CreateStepsOptions<Id extends string> = {
+  kind?: 'directed acyclic' | 'arborescence'
+  root?: GraphNode<Id>,
+}
+
+export const defaultCreateStepsOptions: CreateStepsOptions<any> = {
   kind: 'directed acyclic',
 }
 
-// TODO: Breadth-first steps
-export function createToSteps<
+export function createSteps<
   Id extends string,
-  Metadata
+  StateValue
 > (
-  options: CreateToStepsOptions<Id, Metadata> = {}
-): GraphGeneratorTransform<Id, Metadata, GraphStep<Id, Metadata>> {
-  const { toUnsetMetadata, toMockMetadata, root, kind } = { ...defaultCreateToStepsOptions, ...options } as CreateToStepsOptions<Id, Metadata>  
-
-  return function* (directedAcyclic) {    
-    const { nodes } = directedAcyclic,
-          toOutdegree = createToOutdegree(directedAcyclic),
-          toPath = createToPath(directedAcyclic),
+  configure: (directedAcyclic: Graph<Id, StateValue>) => CreateStepsConfig<Id, StateValue>,
+  options: CreateStepsOptions<Id> = {}
+): GraphGeneratorTransform<Id, StateValue, GraphStep<Id, StateValue>> {
+  return function* (directedAcyclic) {
+    const {
+            getSetStateValue,
+            stepFromEffect,
+            predicateSteppable,
+            predicateExhausted,
+            createPath: createPathConfig,
+          } = configure(directedAcyclic),
+          { kind, root } = { ...defaultCreateStepsOptions, ...options },
+          { nodes } = directedAcyclic,
+          toPath = createPath(directedAcyclic, createPathConfig),
           roots = pipe(
-            createToRoots<Id, Metadata, typeof directedAcyclic>({ kind }),
+            createRoots<Id, StateValue, typeof directedAcyclic>({ kind }),
             toArray(),
           )(directedAcyclic),
-          state = {} as GraphState<Id, Metadata>,
-          totalConnectionsFollowedByNode = {} as Record<GraphNode<Id>, number>,
-          predicateExhausted = (node: GraphNode<Id>) => {
-            return totalConnectionsFollowedByNode[node] === toOutdegree(node)
-          }
+          state = {} as GraphState<Id, StateValue>
 
     for (const node of nodes) {
       state[node] = {
         status: 'unset',
-        metadata: toUnsetMetadata(node),
+        value: undefined,
       }
     }
 
@@ -204,12 +254,12 @@ export function createToSteps<
 
     yield { path, state: JSON.parse(JSON.stringify(state)) }
 
-    function* toStep (): Generator<GraphStep<Id, Metadata>> {  
+    function* toStep (): Generator<GraphStep<Id, StateValue>> {  
       if (predicateExhausted(location)) {
         if (includes(location)(roots)) return
   
         state[location].status = 'unset'
-        state[location].metadata = toUnsetMetadata(location)
+        delete state[location].value
   
         const path = toPath(state)
         location = path.at(-2)
@@ -218,20 +268,17 @@ export function createToSteps<
         return
       }
       
-      if (!(location in totalConnectionsFollowedByNode)) totalConnectionsFollowedByNode[location] = 0
-  
       state[location].status = 'set'
-      state[location].metadata = toMockMetadata(location, totalConnectionsFollowedByNode[location])
+      state[location].value = getSetStateValue(location)
       
-      const path = toPath(state)      
+      const path = toPath(state)
   
       yield { path, state: JSON.parse(JSON.stringify(state)) }
-  
-      totalConnectionsFollowedByNode[location]++
+      stepFromEffect(location)
   
       const newLocation = path.at(-1)
   
-      if (toOutdegree(newLocation) > 0) location = newLocation
+      if (predicateSteppable(newLocation)) location = newLocation
   
       yield* toStep()
     }
@@ -240,52 +287,21 @@ export function createToSteps<
   }
 }
 
-// TODO: root option, multi root support
-export function createToPath<
+export function createRoots<
   Id extends string,
-  Metadata
-> (directedAcyclic: Graph<Id, Metadata>): GraphStateTransform<Id, Metadata, GraphNode<Id>[]> {
-  const toOutdegree = createToOutdegree<Id, Metadata, typeof directedAcyclic>(directedAcyclic),
-        toOutgoing = createToOutgoing<Id, Metadata, typeof directedAcyclic>(directedAcyclic),
-        firstRoot = pipe<typeof directedAcyclic>(
-          createToRoots<Id, Metadata, typeof directedAcyclic>(),
-          at(0)
-        )(directedAcyclic) as GraphNode<Id>
-
-  return state => {
-    const path = [firstRoot],
-          getLastOutdegree = () => toOutdegree(path.at(-1)),
-          getLastStatus = () => state[path.at(-1)].status
-
-    while (getLastOutdegree() > 0 && getLastStatus() === 'set') {
-      const edge = pipe(
-              toOutgoing,
-              find<GraphEdge<Id, Metadata>>(
-                ({ predicateTraversable }) => predicateTraversable(state)
-              ),
-            )(path.at(-1)) as GraphEdge<Id, Metadata>
-
-      path.push(edge.to)
-    }
-
-    return path
-  }
-}
-
-export function createToRoots<
-  Id extends string,
-  Metadata,
-  GraphType extends Graph<Id, Metadata> | AsyncGraph<Id, Metadata> = Graph<Id, Metadata>
+  StateValue,
+  GraphType extends Graph<Id, StateValue> | GraphAsync<Id, StateValue> = Graph<Id, StateValue>
 > (options: { kind?: 'directed acyclic' | 'arborescence' } = {}): (
-  GraphType extends AsyncGraph<Id, Metadata>
-    ? AsyncGraphGeneratorTransform<Id, Metadata, GraphNode<Id>>
-    : GraphGeneratorTransform<Id, Metadata, GraphNode<Id>>
+  GraphType extends GraphAsync<Id, StateValue>
+    ? GraphAsyncGeneratorTransform<Id, StateValue, GraphNode<Id>>
+    : GraphGeneratorTransform<Id, StateValue, GraphNode<Id>>
  ) {
   return function* (directedAcyclic) {
-    const { nodes } = directedAcyclic
+    const { nodes } = directedAcyclic,
+          predicateRoot = createRoot(directedAcyclic)
 
     for (const node of nodes) {
-      if (createPredicateRoot(directedAcyclic)(node)) yield node
+      if (predicateRoot(node)) yield node
       if (options.kind === 'arborescence') break
     }
   }

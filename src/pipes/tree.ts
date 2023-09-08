@@ -1,17 +1,50 @@
-import type {
-  GraphNode,
-  GraphTreeNode,
-} from '../extracted'
+import type { GraphNode, GraphEdge } from '../extracted'
+import type { GeneratorTransform } from './generator'
 
-export type GraphTreeTransform<Id extends string, Transformed> = (tree: GraphTreeNode<Id>[]) => Transformed
+export type ToGraphYielded = {
+  node: GraphNode<string>,
+  edge: PartialGraphEdge | undefined
+}
 
-export function createFind<Id extends string> (node: GraphNode<Id>): GraphTreeTransform<Id, GraphTreeNode<Id>> {
-  return tree => {
-    for (const treeNode of tree) {
-      if (treeNode.node === node) return treeNode
+type PartialGraphEdge = Omit<GraphEdge<string, unknown>, 'predicateShouldTraverse'>
 
-      const found = createFind(node)(treeNode.children)
-      if (found) return found
+export type CreateGraphOptions<TreeNode> = {
+  toId?: (node: TreeNode) => string,
+  toChildren?: (node: TreeNode) => TreeNode[],
+}
+
+let totalGraphNodes = -1
+
+const defaultOptions: Required<CreateGraphOptions<any>> = {
+  toId: () => `${totalGraphNodes++}`,
+  toChildren: node => node.children,
+}
+
+export function createGraph<TreeNode> (
+  options: CreateGraphOptions<TreeNode> = {}
+): GeneratorTransform<TreeNode[], ToGraphYielded> {
+  const { toId, toChildren } = { ...defaultOptions, ...options }
+
+  return function* (tree) {
+    const root = tree[0],
+          rootId = toId(root)
+  
+    function* toPair (node: TreeNode, id: string) {
+      const children = toChildren(node) || []
+
+      for (const child of children) {
+        const childId = toId(child)
+
+        yield {
+          node: childId,
+          edge: { from: id, to: childId },
+        }
+
+        yield* toPair(child, childId)
+      }
     }
+  
+    yield { node: rootId }
+    yield* toPair(root, rootId)
   }
 }

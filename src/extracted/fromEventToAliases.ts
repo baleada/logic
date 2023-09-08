@@ -1,17 +1,18 @@
-export function fromEventToAliases (event: KeyboardEvent): string[] {
-  if (event.shiftKey && event.code in aliasesByShiftCode) {
-    return [aliasesByShiftCode[event.code]]
-  }
+import { createClip } from '../pipes/string'
 
-  if (event.key in aliasListsByModifier) {
-    return aliasListsByModifier[event.key]
-  }
+export function fromEventToAliases (event: KeyboardEvent): string[] {
+  if (event.shiftKey && event.code in aliasesByShiftCode) return [aliasesByShiftCode[event.code]]
+
+  if (event.key in aliasListsByModifier) return aliasListsByModifier[event.key]
+  const withoutModifierSide = toWithoutModifierSide(event.code)
+  if (withoutModifierSide in aliasListsByModifier) return aliasListsByModifier[withoutModifierSide]
 
   return event.code in aliasesByCode
     ? [aliasesByCode[event.code]]
     : [event.code.match(aliasCaptureRE)?.[1].toLowerCase() || 'unsupported']
 }
 
+const toWithoutModifierSide = createClip(/(?:Left|Right)$/)
 const aliasCaptureRE = /^(?:Digit|Key)?(F[0-9]{1,2}|[0-9]|[A-Z])$/
 
 export const aliasesByCode = {

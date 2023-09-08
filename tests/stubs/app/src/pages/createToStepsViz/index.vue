@@ -35,11 +35,11 @@
 </template>
 
 <script setup lang="ts">
-import { createToLayers } from '../../../../../../src/pipes/directed-acyclic'
+import { createLayers } from '../../../../../../src/pipes/directed-acyclic'
 import { directedAcyclic } from './ast'
 import { ref, watchPostEffect, onMounted } from 'vue'
 
-const layers = createToLayers()(directedAcyclic)
+const layers = createLayers()(directedAcyclic)
 
 const elements = ref([])
 

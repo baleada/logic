@@ -28,6 +28,9 @@ const defaultNextAndPreviousOptions: NextAndPreviousOptions = {
   loops: true,
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/navigateable)
+ */
 export class Navigateable<Item> {
   constructor (array: Item[], options: NavigateableOptions = {}) {
     this.setArray(array)

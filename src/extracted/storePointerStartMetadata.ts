@@ -1,5 +1,5 @@
 import type { RecognizeableEffect } from '../classes'
-import { createClone } from '../pipes'
+import { createClone } from '../pipes/any'
 import { toMousePoint, toTouchMovePoint } from './toPoints'
 
 export type PointerStartMetadata = {

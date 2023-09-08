@@ -2,7 +2,7 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { map, pipe, toArray } from 'lazy-collections'
 import type { GraphEdge, GraphNode, GraphStep } from '../../src/extracted/graph'
-import { createToSteps } from '../../src/pipes/decision-tree'
+import { createDepthFirstSteps } from '../../src/pipes/decision-tree'
 
 const suite = createSuite<{
   decisionTree: {
@@ -23,20 +23,20 @@ suite.before(context => {
   ]
 
   const edges = [
-    { from: 'a', to: 'b', predicateTraversable: state => state.a.metadata === false },
-    { from: 'a', to: 'c', predicateTraversable: state => state.a.metadata === true },
-    { from: 'b', to: 'd', predicateTraversable: state => state.b.metadata === false },
-    { from: 'b', to: 'e', predicateTraversable: state => state.b.metadata === true },
-    { from: 'c', to: 'f', predicateTraversable: state => state.c.metadata === false },
-    { from: 'c', to: 'g', predicateTraversable: state => state.c.metadata === true },
+    { from: 'a', to: 'b', predicateShouldTraverse: state => state.a.value === false },
+    { from: 'a', to: 'c', predicateShouldTraverse: state => state.a.value === true },
+    { from: 'b', to: 'd', predicateShouldTraverse: state => state.b.value === false },
+    { from: 'b', to: 'e', predicateShouldTraverse: state => state.b.value === true },
+    { from: 'c', to: 'f', predicateShouldTraverse: state => state.c.value === false },
+    { from: 'c', to: 'g', predicateShouldTraverse: state => state.c.value === true },
   ]
 
   context.decisionTree = { nodes, edges }
 })
 
-suite('createToSteps prioritizes false branches by default', ({ decisionTree }) => {
+suite('createDepthFirstSteps prioritizes false branches by default', ({ decisionTree }) => {
   const value = pipe(
-    createToSteps(),
+    createDepthFirstSteps(),
     map<GraphStep<any, number>, any>(step => step.path.at(-1)),
     toArray()
   )(decisionTree)
@@ -55,9 +55,9 @@ suite('createToSteps prioritizes false branches by default', ({ decisionTree }) 
   )
 })
 
-suite('createToSteps optionally prioritizes true branches', ({ decisionTree }) => {
+suite('createDepthFirstSteps optionally prioritizes true branches', ({ decisionTree }) => {
   const value = pipe(
-    createToSteps({ priorityBranch: true }),
+    createDepthFirstSteps({ priorityBranch: true }),
     map<GraphStep<any, number>, any>(step => step.path.at(-1)),
     toArray()
   )(decisionTree)

@@ -1,14 +1,12 @@
-import { createMapAsync } from '../pipes'
-import { predicateArray } from '../extracted'
-
 export type ResolveableOptions = Record<never, never>
-
-export type ResolveableGetPromise<Value> = (...args: any[]) => (Promise<Value> | Promise<Value>[])
 
 export type ResolveableStatus = 'ready' | 'resolving' | 'resolved' | 'errored'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/resolveable)
+ */
 export class Resolveable<Value> {
-  constructor (getPromise: ResolveableGetPromise<Value>, options: ResolveableOptions = {}) {
+  constructor (getPromise: () => Promise<Value>, options: ResolveableOptions = {}) {
     this.setGetPromise(getPromise)
     this.ready()
   }
@@ -29,28 +27,25 @@ export class Resolveable<Value> {
   get value () { 
     return this.computedValue
   }
+  get error () { 
+    return this.computedError
+  }
 
-  private computedGetPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[])
-  setGetPromise (getPromise: (...args: any[]) => (Promise<Value> | Promise<Value>[])) {
+  private computedGetPromise: () => Promise<Value>
+  setGetPromise (getPromise: () => Promise<Value>) {
     this.computedGetPromise = getPromise
-
     return this
   }
-  
 
-  private computedValue: Value | Value[] | Error
-  async resolve (...args: any[]) {
+  private computedValue: Value
+  private computedError: Error
+  async resolve () {
     this.resolving()
     try {
-      const promises = this.getPromise(...args)
-
-      this.computedValue = predicateArray(promises)
-        ? await createMapAsync<Promise<Value>, Value>(async promise => await promise)(promises)
-        : await promises
-
-      this.resolved()    
+      this.computedValue = await this.getPromise()
+      this.resolved()
     } catch (error) {
-      this.computedValue = error as Error
+      this.computedError = error
       this.errored()    
     }
     

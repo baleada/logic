@@ -6,41 +6,41 @@ const suite = withPuppeteer(
   createSuite('Shareable')
 )
 
-suite('stores the state', async ({ puppeteer: { page } }) => {
+suite('stores the shareData', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev '})
-          return instance.state
+          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev' })
+          return instance.shareData
         }),
-        expected = { url: 'https://baleada.dev '}
+        expected = { url: 'https://baleada.dev' }
   
   assert.equal(value, expected)
 })
 
-suite('assignment sets the state', async ({ puppeteer: { page } }) => {
+suite('assignment sets the shareData', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev '})
-          instance.state = { url: 'https://alexvipond.dev '}
-          return instance.state
+          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev' })
+          instance.shareData = { url: 'https://alexvipond.dev' }
+          return instance.shareData
         }),
-        expected = { url: 'https://alexvipond.dev '}
+        expected = { url: 'https://alexvipond.dev' }
 
   assert.equal(value, expected)
 })
 
-suite('setState sets the state', async ({ puppeteer: { page } }) => {
+suite('setShareData sets the shareData', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev '})
-          instance.setState({ url: 'https://alexvipond.dev '})
-          return instance.state
+          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev' })
+          instance.setShareData({ url: 'https://alexvipond.dev' })
+          return instance.shareData
         }),
-        expected = { url: 'https://alexvipond.dev '}
+        expected = { url: 'https://alexvipond.dev' }
 
   assert.equal(value, expected)
 })
 
 suite('status is "ready" after construction', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev '})
+          const instance = new window.Logic.Shareable({ url: 'https://baleada.dev' })
           return instance.status
         }),
         expected = 'ready'

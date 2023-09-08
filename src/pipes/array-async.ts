@@ -30,17 +30,6 @@ export function createFindIndexAsync<Item>(predicate: (item: Item, index: number
   }
 }
 
-export function createForEachAsync<Item>(forEach: (item: Item, index: number) => any): ArrayAsyncTransform<Item, any> {
-  return async array => {
-    for (let i = 0; i < array.length; i++) {
-      const item = array[i]
-      await forEach(item, i)
-    }
-
-    return array
-  }
-}
-
 export function createMapAsync<Item, Mapped>(transform: (item: Item, index: number) => Promise<Mapped>): ArrayAsyncTransform<Item, Mapped[]> {
   return async array => {
     return await createReduceAsync<Item, Mapped[]>(

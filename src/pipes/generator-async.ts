@@ -1,1 +1,1 @@
-export type AsyncGeneratorTransform<Parameter, Yielded> = (param: Parameter) => AsyncGenerator<Yielded>
+export type GeneratorAsyncTransform<Parameter, Yielded> = (param: Parameter) => AsyncGenerator<Yielded>

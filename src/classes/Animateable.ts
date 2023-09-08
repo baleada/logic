@@ -90,6 +90,9 @@ const defaultAnimateOptions: AnimateOptions = {
   },
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/animateable)
+ */
 export class Animateable<Value extends string | number | any[]> {
   private initialDuration: number
   private iterationLimit: number | true
@@ -114,8 +117,8 @@ export class Animateable<Value extends string | number | any[]> {
 
     this.reversedControlPoints = fromControlPointsToReversedControlPoints(this.controlPoints)
     
-    this.toAnimationProgress = createToAnimationProgress(this.controlPoints)
-    this.reversedToAnimationProgress = createToAnimationProgress(this.reversedControlPoints)
+    this.toAnimationProgress = createAnimationProgress(this.controlPoints)
+    this.reversedToAnimationProgress = createAnimationProgress(this.reversedControlPoints)
 
     this.playCache = {}
     this.reverseCache = {}
@@ -859,7 +862,7 @@ export function createGetEaseables<Value extends string | number | any[]> (fromK
                         hasCustomTiming = !!keyframe.timing,
                         toAnimationProgress = index === propertyKeyframes.length - 1
                           ? () => 1
-                          : createToAnimationProgress(fromKeyframeToControlPoints({ keyframe, index, propertyKeyframes }))
+                          : createAnimationProgress(fromKeyframeToControlPoints({ keyframe, index, propertyKeyframes }))
 
                   propertyEaseables.push({
                     property,
@@ -927,7 +930,7 @@ export function fromControlPointsToReversedControlPoints (points: AnimateableCon
 }
 
 
-export function createToAnimationProgress (points: AnimateableControlPoints) {
+export function createAnimationProgress (points: AnimateableControlPoints) {
   const { 0: { x: point1x, y: point1y }, 1: { x: point2x, y: point2y } } = points
   return BezierEasing(point1x, point1y, point2x, point2y)
 }

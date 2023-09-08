@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { createToSteps } from '../../../../../../src/pipes/directed-acyclic'
+import { createDepthFirstSteps } from '../../../../../../src/pipes/directed-acyclic'
 import { directedAcyclic } from './ast'
 import { ref, onMounted } from 'vue'
 
@@ -15,7 +15,7 @@ onMounted(() => {
   // Lay out nodes in a circle
   let index = 0
   const coordinates = {}
-  for (const { path } of createToSteps()(directedAcyclic)) {
+  for (const { path } of createDepthFirstSteps()(directedAcyclic)) {
     const node = path.at(-1)
 
     const goldenRatio = 1.61803398875

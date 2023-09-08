@@ -1,12 +1,9 @@
-// ANY
 export {
   createClone,
   createDeepEqual,
   createEqual,
 } from './any'
 
-
-// ARRAY
 export {
   createConcat,
   createFilter,
@@ -24,20 +21,15 @@ export {
   createUnique,
 } from './array'
 
-
-// ARRAY ASYNC
 export {
   createFilterAsync,
   createFindAsync,
   createFindIndexAsync,
-  createForEachAsync,
   createMapAsync,
   createReduceAsync,
 } from './array-async'
 
-
-// ASSOCIATIVE ARRAY
-export { 
+export {
   createValue as createAssociativeArrayValue,
   createHas as createAssociativeArrayHas,
   createKeys as createAssociativeArrayKeys,
@@ -46,24 +38,126 @@ export {
 export { defineAssociativeArray } from '../extracted'
 export type { AssociativeArray } from '../extracted'
 
-
-// STRING
 export {
-  createClip,
-  createSlug,
-} from './string'
+  createList,
+} from './class-value'
 
+export {
+  createMix,
+} from './color'
+export type {
+  ColorInterpolationMethod,
+  MixColor,
+  CreateMixOptions,
+} from './color'
 
-// NUMBER
+export {
+  createTree as createDecisionTreeTree,
+  createCommonAncestors as createDecisionTreeCommonAncestors,
+  createAncestor as createDecisionTreeAncestor,
+  createNodeDepthFirstSteps as createDecisionTreeNodeDepthFirstSteps,
+  createDepthFirstSteps as createDecisionTreeSteps,
+  createPath as createDecisionTreePath,
+} from './decision-tree'
+
+export {
+  createLayers as createDirectedAcyclicLayers,
+  createTree as createDirectedAcyclicTree,
+  createRoots as createDirectedAcyclicRoots,
+  createDepthFirstSteps as createDirectedAcyclicDepthFirstSteps,
+} from './directed-acyclic'
+export type {
+  CreateStepsOptions as CreateDirectedAcyclicStepsOptions,
+} from './directed-acyclic'
+
+export {
+  createCommonAncestors as createDirectedAcyclicCommonAncestors,
+  createAncestor as createDirectedAcyclicAncestor,
+  createNodeDepthFirstSteps as createDirectedAcyclicNodeDepthFirstSteps,
+} from './directed-acyclic-node'
+
+export {
+  createPath as createDirectedAcyclicPath,
+} from './directed-acyclic-state'
+export type {
+  CreatePathConfig,
+} from './directed-acyclic-state'
+
+export {
+  createLayers as createDirectedAcyclicAsyncLayers,
+  createTree as createDirectedAcyclicAsyncTree,
+  createDepthFirstSteps as createDirectedAcyclicAsyncDepthFirstSteps,
+} from './directed-acyclic-async'
+
+export {
+  createCommonAncestors as createDirectedAcyclicAsyncCommonAncestors,
+  createAncestor as createDirectedAcyclicAsyncAncestor,
+  createNodeDepthFirstSteps as createDirectedAcyclicAsyncNodeDepthFirstSteps,
+} from './directed-acyclic-async-node'
+
+export {
+  createPath as createDirectedAcyclicAsyncPath,
+} from './directed-acyclic-async-state'
+
+export {
+  createFocusable,
+} from './element'
+export type { CreateFocusableOptions } from './element'
+
+export {
+  createChildren,
+  createSiblings,
+  createRoot,
+  createTerminal,
+  createOnlyChild,
+  createIndegree,
+  createOutdegree,
+  createIncoming,
+  createOutgoing,
+  createTotalSiblings,
+} from './graph-node'
+export {
+  defineGraph,
+  defineGraphNodes,
+  defineGraphEdges,
+  defineGraphNode,
+  defineGraphEdge,
+  defineGraphAsync,
+  defineGraphAsyncEdges,
+  defineGraphAsyncEdge,
+} from '../extracted'
+export type {
+  Graph,
+  GraphNode,
+  GraphEdge,
+  GraphState,
+  GraphPath,
+  GraphStep,
+  GraphCommonAncestor,
+  GraphTreeNode,
+  GraphTree,
+  GraphAsync,
+  GraphAsyncEdge,
+} from '../extracted'
+
+export {
+  createFind as createTreeFind,
+} from './graph-tree'
+
+export {
+  createKeycomboMatch,
+} from './keyboard-event'
+export type { CreateKeycomboMatchOptions } from './keyboard-event'
+
 export {
   createClamp,
   createDetermine,
 } from './number'
 export type { Potentiality } from './number'
 
-
-// OBJECT
 export {
+  createValue,
+  createHas,
   createEntries,
   createKeys,
   createEvery,
@@ -71,114 +165,16 @@ export {
   createDeepMerge,
 } from './object'
 
-
-// MAP
 export {
-  createRename,
-} from './map'
+  createClip,
+  createSanitize,
+  createSlug,
+} from './string'
 
-
-// ELEMENT
-export { createFocusable } from './element'
-export type { CreateFocusableOptions } from './element'
-
-
-// COLOR
-export { createMix } from './color'
-export type { ColorInterpolationMethod, MixColor, CreateMixOptions } from './color'
-
-
-// GRAPH
 export {
-  createToIndegree,
-  createToOutdegree,
-  createToIncoming,
-  createToOutgoing,
-  createPredicateRoot,
-} from './graph'
-export {
-  defineGraph,
-  defineGraphNodes,
-  defineGraphEdges,
-  defineGraphNode,
-  defineGraphEdge,
-  defineAsyncGraph,
-  defineAsyncGraphEdges,
-  defineAsyncGraphEdge,
-} from '../extracted'
-export type {
-  Graph,
-  GraphNode,
-  GraphEdge,
-  GraphState,
-  GraphStep,
-  GraphCommonAncestor,
-  GraphTreeNode,
-  AsyncGraph,
-  AsyncGraphEdge,
-} from '../extracted'
-
-
-// DIRECTED ACYCLIC
-export {
-  createToLayers as createDirectedAcyclicToLayers,
-  createToTree as createDirectedAcyclicToTree,
-  createToCommonAncestors as createDirectedAcyclicToCommonAncestors,
-  createPredicateAncestor as createDirectedAcyclicPredicateAncestor,
-  createToNodeSteps as createDirectedAcyclicToNodeSteps,
-  createToSteps as createDirectedAcyclicToSteps,
-  createToPath as createDirectedAcyclicToPath,
-  createToRoots as createDirectedAcyclicToRoots,
-} from './directed-acyclic'
-export type {
-  CreateToStepsOptions as CreateDirectedAcyclicToStepsOptions,
-} from './directed-acyclic'
-
-
-// ASYNC DIRECTED ACYCLIC
-export {
-  createToLayers as createAsyncDirectedAcyclicToLayers,
-  createToTree as createAsyncDirectedAcyclicToTree,
-  createToCommonAncestors as createAsyncDirectedAcyclicToCommonAncestors,
-  createPredicateAncestor as createAsyncDirectedAcyclicPredicateAncestor,
-  createToNodeSteps as createAsyncDirectedAcyclicToNodeSteps,
-  createToSteps as createAsyncDirectedAcyclicToSteps,
-  createToPath as createAsyncDirectedAcyclicToPath,
-} from './directed-acyclic-async'
-export type {
-  CreateToStepsOptions as CreateAsyncDirectedAcyclicToStepsOptions,
-} from './directed-acyclic-async'
-
-
-// DECISION TREE
-export {
-  createToTree as createDecisionTreeToTree,
-  createToCommonAncestors as createDecisionTreeToCommonAncestors,
-  createPredicateAncestor as createDecisionTreePredicateAncestor,
-  createToNodeSteps as createDecisionTreeToNodeSteps,
-  createToSteps as createDecisionTreeToSteps,
-  createToPath as createDecisionTreeToPath,
-} from './decision-tree'
-export type {
-  CreateToStepsOptions as CreateDecisionTreeToStepsOptions,
-} from './decision-tree'
-
-
-// TREE
-export {
-  createFind as createTreeFind,
+  createGraph,
 } from './tree'
-
-
-// MISC
-export { createList } from './createList'
-export { createToGraph } from './createToGraph'
 export type {
   ToGraphYielded,
-  CreateToGraphOptions,
-} from './createToGraph'
-
-
-// KEYBOARD EVENT
-export { createPredicateKeycomboMatch } from './keyboard-event'
-export type { CreatePredicateKeycomboMatchOptions } from './keyboard-event'
+  CreateGraphOptions,
+} from './tree'

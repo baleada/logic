@@ -4,6 +4,9 @@ export type FullscreenableGetElement<ElementType> = ((...args: any[]) => Element
 
 export type FullscreenableStatus = 'ready' | 'fullscreened' | 'errored' | 'exited'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/fullscreenable)
+ */
 export class Fullscreenable<ElementType extends Element> {
   constructor (getElement: FullscreenableGetElement<ElementType>, options: FullscreenableOptions = {}) {
     this.setGetElement(getElement)

@@ -15,8 +15,11 @@ const defaultOptions = {
   executions: 1,
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/delayable)
+ */
 export class Delayable {
-  private animateable: Animateable
+  private animateable: Animateable<number>
   constructor (effect: DelayableEffect, options: DelayableOptions = {}) {
     this.animateable = new Animateable(
       [

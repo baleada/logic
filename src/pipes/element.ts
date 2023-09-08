@@ -4,12 +4,12 @@ import type { DeepRequired } from '../extracted'
 export type ElementTransform<El extends HTMLElement, Transformed> = (element: El) => Transformed
 
 export type CreateFocusableOptions = {
-  elementIsCandidate?: boolean,
+  predicatesElement?: boolean,
   tabbableSelector?: string,
 }
 
 const defaultOptions: DeepRequired<CreateFocusableOptions> = {
-  elementIsCandidate: false,
+  predicatesElement: false,
   // Adapted from React Aria https://github.com/adobe/react-spectrum/blob/b6786da906973130a1746b2bee63215bba013ca4/packages/%40react-aria/focus/src/FocusScope.tsx#L256
   tabbableSelector: join(':not([hidden]):not([tabindex="-1"]),')([
     'input:not([disabled]):not([type=hidden])',
@@ -33,23 +33,23 @@ export function createFocusable (
   order: 'first' | 'last',
   options: CreateFocusableOptions = {}
 ): ElementTransform<HTMLElement, HTMLElement | undefined> {
-  const { elementIsCandidate, tabbableSelector } = { ...defaultOptions, ...options },
+  const { predicatesElement, tabbableSelector } = { ...defaultOptions, ...options },
         predicateFocusable = (element: HTMLElement): boolean => element.matches(tabbableSelector)
 
   return element => {
-    if (elementIsCandidate && predicateFocusable(element)) return element
+    if (predicatesElement && predicateFocusable(element)) return element
 
     switch (order) {
       case 'first':
         for (let i = 0; i < element.children.length; i++) {
-          const focusable = createFocusable(order, { elementIsCandidate: true })(element.children[i] as HTMLElement)
+          const focusable = createFocusable(order, { predicatesElement: true })(element.children[i] as HTMLElement)
           if (focusable) return focusable
         }
         
         break
       case 'last':
         for (let i = element.children.length - 1; i > -1; i--) {
-          const focusable = createFocusable(order, { elementIsCandidate: true })(element.children[i] as HTMLElement)
+          const focusable = createFocusable(order, { predicatesElement: true })(element.children[i] as HTMLElement)
           if (focusable) return focusable
         }
 

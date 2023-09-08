@@ -10,6 +10,9 @@ const defaultOptions: BroadcastableOptions = {
   name: 'baleada',
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/broadcastable)
+ */
 export class Broadcastable<State> {
   private name: string
   constructor (state: State, options: BroadcastableOptions = {}) {

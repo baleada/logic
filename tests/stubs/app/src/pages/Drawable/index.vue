@@ -15,8 +15,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { Drawable, toFlattenedD } from '../../../../../../src/classes/Drawable'
-import { createReduce } from '../../../../../../src/pipes'
-import polygonClipping from 'polygon-clipping'
 
 const points = ref([]),
       drawable = ref(
@@ -26,7 +24,7 @@ const points = ref([]),
       ),
       d = computed(() => drawable.value
         .draw(points.value, {
-          size: 16,
+          size: 10,
           thinning: 0.5,
           smoothing: 0.5,
           streamline: 0.5,
