@@ -18,7 +18,7 @@ import {
   createDeepMerge,
 } from '../pipes'
 import { defaultCreateMixOptions } from '../pipes/color'
-import type { ColorInterpolationMethod, CreateMixOptions } from '../pipes'
+import type { CreateMixOptions } from '../pipes'
 import { Listenable } from './Listenable'
 
 export type AnimateableKeyframe<Value extends string | number | any[]> = {
@@ -60,9 +60,7 @@ export type AnimateFrame = {
 
 export type AnimateOptions = {
   interpolate?: {
-    color?: {
-      method: ColorInterpolationMethod,
-    } & CreateMixOptions
+    color?: CreateMixOptions
   }
 }
 

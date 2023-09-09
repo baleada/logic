@@ -1,24 +1,28 @@
+export type MixColorTransform<Transformed> = (mixColor: MixColor) => Transformed
+
 export type ColorInterpolationMethod = RectangularColorSpace | PolarColorSpace | `${PolarColorSpace} ${HueInterpolationMethod}`
 type RectangularColorSpace = 'srgb' | 'srgb-linear' | 'lab' | 'oklab' | 'xyz' | 'xyz-d50' | 'xyz-d65'
 type PolarColorSpace = 'hsl' | 'hwb' | 'lch' | 'oklch'
 type HueInterpolationMethod = 'shorter' | 'longer' | 'increasing' | 'decreasing'
 
 export type CreateMixOptions = {
+  method?: ColorInterpolationMethod,
   tag?: string,
   getParent?: () => HTMLElement,
 }
 
 export const defaultCreateMixOptions: CreateMixOptions = {
+  method: 'oklch',
   tag: 'div',
   getParent: () => document.body,
 }
 
-export type MixColor = string | `${string} ${number}%`
+export type MixColor = `${string} ${number}%` | string
 
-export function createMix(method: ColorInterpolationMethod, options: CreateMixOptions = {}) {
-  const { tag, getParent } = { ...defaultCreateMixOptions, ...options }
+export function createMix (color2: MixColor, options: CreateMixOptions = {}): MixColorTransform<string> {
+  const { method, tag, getParent } = { ...defaultCreateMixOptions, ...options }
   
-  return (color1: MixColor, color2: MixColor) => {
+  return color1 => {
     const element = document.createElement(tag),
           parent = getParent()
 

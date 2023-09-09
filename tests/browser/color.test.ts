@@ -18,7 +18,7 @@ suite('createMix() works', async ({ puppeteer: { page } }) => {
     ] as [ColorInterpolationMethod, MixColor, MixColor, string][]
   ) {
     const value = await page.evaluate((method, color1, color2) => {
-            return window.Logic.createMix(method)(color1, color2)
+            return window.Logic.createMix(color2, { method })(color1)
           }, method, color1, color2)
 
     assert.is(value, expected)

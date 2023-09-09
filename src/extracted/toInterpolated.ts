@@ -25,8 +25,8 @@ export function toInterpolated (
   }
 
   if (predicateString(previous) && predicateString(next)) {
-    const { color: { method, ...createMixOptions } } = options    
-    return createMix(method, createMixOptions)(previous, `${next} ${progress * 100}%`)
+    const { color: createMixOptions } = options    
+    return createMix(`${next} ${progress * 100}%`, createMixOptions)(previous)
   }
 
   if (predicateArray(previous) && predicateArray(next)) {
