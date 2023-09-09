@@ -9,7 +9,7 @@ import {
   createKeyState,
   predicateSomeKeyDown,
   fromAliasToDownCodes,
-  fromEventToAliases,
+  fromCodeToAliases,
 } from '../extracted'
 import type {
   HookApi,
@@ -42,7 +42,7 @@ const defaultOptions: KeypressOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
   toDownCodes: alias => fromAliasToDownCodes(alias),
-  toAliases: code => fromEventToAliases({ code } as KeyboardEvent),
+  toAliases: code => fromCodeToAliases(code),
 }
 
 export function createKeypress (

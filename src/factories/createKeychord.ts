@@ -8,7 +8,7 @@ import {
   createKeyState,
   predicateSomeKeyDown,
   fromAliasToDownCodes,
-  fromEventToAliases,
+  fromCodeToAliases,
 } from '../extracted'
 import type {
   HookApi,
@@ -48,7 +48,7 @@ const defaultOptions: KeychordOptions = {
   maxInterval: 5000, // VS Code default
   preventsDefaultUnlessDenied: true,
   toDownCodes: alias => fromAliasToDownCodes(alias),
-  toAliases: code => fromEventToAliases({ code } as KeyboardEvent),
+  toAliases: code => fromCodeToAliases(code),
 }
 
 export function createKeychord (

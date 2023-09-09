@@ -1,25 +1,25 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { fromEventToAliases, aliasesByCode, aliasesByShiftCode, aliasListsByModifier } from '../../src/extracted/fromEventToAliases'
+import { fromKeyboardEventDescriptorToAliases, aliasesByCode, aliasesByShiftCode, aliasListsByModifier } from '../../src/extracted/fromKeyboardEventDescriptorToAliases'
 
-const suite = createSuite('fromEventToAliases')
+const suite = createSuite('fromKeyboardEventDescriptorToAliases')
 
 suite('transforms letters', () => {
-  const value = fromEventToAliases({ code: 'KeyA' } as KeyboardEvent),
+  const value = fromKeyboardEventDescriptorToAliases({ code: 'KeyA' }),
         expected = ['a']
 
   assert.equal(value, expected)
 })
 
 suite('transforms numbers', () => {
-  const value = fromEventToAliases({ code: 'Digit0' } as KeyboardEvent),
+  const value = fromKeyboardEventDescriptorToAliases({ code: 'Digit0' }),
         expected = ['0']
 
   assert.equal(value, expected)
 })
 
 suite('transforms function', () => {
-  const value = fromEventToAliases({ code: 'F1' } as KeyboardEvent),
+  const value = fromKeyboardEventDescriptorToAliases({ code: 'F1' }),
         expected = ['f1']
 
   assert.equal(value, expected)
@@ -27,7 +27,7 @@ suite('transforms function', () => {
 
 suite('transforms special', () => {
   for (const [code, alias] of Object.entries(aliasesByCode)) {
-    const value = fromEventToAliases({ code } as KeyboardEvent),
+    const value = fromKeyboardEventDescriptorToAliases({ code }),
         expected = [alias]
 
     assert.equal(value, expected)
@@ -36,7 +36,7 @@ suite('transforms special', () => {
 
 suite('transforms shift special', () => {
   for (const [code, alias] of Object.entries(aliasesByShiftCode)) {
-    const value = fromEventToAliases({ code, shiftKey: true } as KeyboardEvent),
+    const value = fromKeyboardEventDescriptorToAliases({ code, shiftKey: true }),
         expected = [alias]
 
     assert.equal(value, expected)
@@ -44,8 +44,8 @@ suite('transforms shift special', () => {
 })
 
 suite('transforms modifiers', () => {
-  for (const [key, aliases] of Object.entries(aliasListsByModifier)) {
-    const value = fromEventToAliases({ key } as KeyboardEvent),
+  for (const [code, aliases] of Object.entries(aliasListsByModifier)) {
+    const value = fromKeyboardEventDescriptorToAliases({ code }),
           expected = aliases
 
     assert.equal(value, expected)

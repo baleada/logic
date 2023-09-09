@@ -1,6 +1,15 @@
 import { createClip } from '../pipes/string'
 
-export function fromEventToAliases (event: KeyboardEvent): string[] {
+export type KeyboardEventDescriptor = {
+  code: string,
+  key?: string,
+  shiftKey?: boolean,
+  altKey?: boolean,
+  ctrlKey?: boolean,
+  metaKey?: boolean,
+}
+
+export function fromKeyboardEventDescriptorToAliases (event: KeyboardEventDescriptor): string[] {
   if (event.shiftKey && event.code in aliasesByShiftCode) return [aliasesByShiftCode[event.code]]
 
   if (event.key in aliasListsByModifier) return aliasListsByModifier[event.key]

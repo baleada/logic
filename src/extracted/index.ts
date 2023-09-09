@@ -26,7 +26,10 @@ export { fromComboToAliases } from './fromComboToAliases'
 
 export { fromComboToAliasesLength } from './fromComboToAliasesLength'
 
-export { fromEventToAliases } from './fromEventToAliases'
+export { fromKeyboardEventDescriptorToAliases } from './fromKeyboardEventDescriptorToAliases'
+export type { KeyboardEventDescriptor } from './fromKeyboardEventDescriptorToAliases'
+
+export { fromCodeToAliases } from './fromCodeToAliases'
 
 export { fromEventToKeyStatusCode, modifiers } from './fromEventToKeyStatusCode'
 

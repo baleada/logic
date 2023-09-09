@@ -3,7 +3,7 @@ import { createValue, createCode } from './key-statuses'
 import type { KeyStatuses, KeyStatusCode } from './key-statuses'
 import { fromComboToAliases } from './fromComboToAliases'
 import { fromAliasToDownCodes } from './fromAliasToDownCodes'
-import { fromEventToAliases } from './fromEventToAliases'
+import { fromCodeToAliases } from './fromCodeToAliases'
 import type { CreateKeycomboDownOptions } from './createKeycomboDown'
 import type { KeyStatusFunction } from './types'
 
@@ -13,7 +13,7 @@ export type CreateKeycomboMatchOptions = CreateKeycomboDownOptions & {
 
 const defaultOptions: CreateKeycomboMatchOptions = {
   toDownCodes: alias => fromAliasToDownCodes(alias),
-  toAliases: code => fromEventToAliases({ code } as KeyboardEvent),
+  toAliases: code => fromCodeToAliases(code),
 }
 
 export const createKeycomboMatch = (

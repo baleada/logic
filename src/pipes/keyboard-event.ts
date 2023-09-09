@@ -6,10 +6,15 @@ import {
   createKeyStatusesSet as createSet,
   fromComboToAliases,
   fromAliasToDownCodes,
-  fromEventToAliases,
+  fromKeyboardEventDescriptorToAliases,
   createKeyStatusCode,
 } from '../extracted'
-import type { KeyStatusCode, KeyStatus, KeyStatuses } from '../extracted'
+import type {
+  KeyStatusCode,
+  KeyStatus,
+  KeyStatuses,
+  KeyboardEventDescriptor,
+} from '../extracted'
 import { createMap } from './array'
 
 export type KeyboardEventTransform<Transformed> = (keyboardEvent: KeyboardEvent) => Transformed
@@ -21,7 +26,7 @@ export type CreateKeycomboMatchOptions = {
 
 const defaultOptions: CreateKeycomboMatchOptions = {
   toDownCodes: alias => fromAliasToDownCodes(alias),
-  toAliases: event => fromEventToAliases(event),
+  toAliases: event => fromKeyboardEventDescriptorToAliases(event),
 }
 
 export const createKeycomboMatch = (
@@ -32,11 +37,11 @@ export const createKeycomboMatch = (
         aliases = fromComboToAliases(keycombo),
         downCodes = createMap<string, KeyStatusCode[]>(toDownCodes)(aliases),
         implicitModifierAliases = (() => {
-          const implicitModifierAliases: typeof modifiers[number][] = []
+          const implicitModifierAliases: string[] = []
 
           for (const aliasDownCodes of downCodes) {
             for (const code of aliasDownCodes) {
-              const implicitModifier = find<string>(
+              const implicitModifier = find<typeof modifiers[number]>(
                 modifier => code.includes(modifier)
               )(modifiers) as string
               
@@ -59,22 +64,22 @@ export const createKeycomboMatch = (
       if (event[`${modifier.toLowerCase()}Key`]) createSet(modifier, 'down')(statuses)
     }
 
-    const events = createMap<[KeyStatusCode, KeyStatus], KeyboardEvent>(
+    const events = createMap<[KeyStatusCode, KeyStatus], KeyboardEventDescriptor>(
       ([code]) => {
-        const e = { code }
+        const e: KeyboardEventDescriptor = { code }
 
         for (const modifier of modifiers) {
           e[`${modifier.toLowerCase()}Key`] = event[`${modifier.toLowerCase()}Key`]
         }
 
-        return e as KeyboardEvent
+        return e
       }
     )(statuses)
 
     return (
       every<KeyStatusCode[]>(predicateAliasDown)(downCodes) as boolean
-      && every<KeyboardEvent>(
-        e => pipe<KeyboardEvent>(
+      && every<KeyboardEventDescriptor>(
+        e => pipe<KeyboardEventDescriptor>(
           toAliases,
           some<string>(
             alias => (
