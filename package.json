@@ -79,7 +79,7 @@
     "fast-fuzzy": "^1.12.0",
     "klona": "^2.0.6",
     "ky": "^0.33.3",
-    "lazy-collections": "0.0.0-insiders.71ee200",
+    "lazy-collections": "^0.11.2",
     "perfect-freehand": "^1.2.0",
     "polygon-clipping": "^0.15.3"
   },

@@ -19,12 +19,12 @@ export {
 } from './key-statuses'
 export type { KeyStatuses, KeyStatusCode, KeyStatus } from './key-statuses'
 
-export { createKeyState } from './createKeyState'
+export { createKeyState, unsupportedKeys } from './createKeyState'
 
 // Transforms
-export { fromComboToAliases } from './fromComboToAliases'
+export { createAliases } from './createAliases'
 
-export { fromComboToAliasesLength } from './fromComboToAliasesLength'
+export { createAliasesLength } from './createAliasesLength'
 
 export { fromKeyboardEventDescriptorToAliases } from './fromKeyboardEventDescriptorToAliases'
 export type { KeyboardEventDescriptor } from './fromKeyboardEventDescriptorToAliases'
@@ -33,7 +33,9 @@ export { fromCodeToAliases } from './fromCodeToAliases'
 
 export { fromEventToKeyStatusCode, modifiers } from './fromEventToKeyStatusCode'
 
-export { fromAliasToDownCodes } from './fromAliasToDownCodes'
+export { fromAliasToCode } from './fromAliasToCode'
+
+export { fromShorthandAliasToLonghandAlias } from './fromShorthandAliasToLonghandAlias'
 
 export { toDirection } from './toDirection'
 export type { Direction } from './toDirection'
@@ -103,7 +105,5 @@ export {
   predicateString,
   predicateObject,
 } from './predicates'
-
-export { toLength } from './lazy-collections'
 
 export { toInterpolated } from './toInterpolated'

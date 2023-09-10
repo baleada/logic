@@ -5,16 +5,16 @@ import {
   toHookApi,
   storeKeyboardTimeMetadata,
   fromEventToKeyStatusCode,
-  fromComboToAliasesLength,
+  createAliasesLength,
   createKeyState,
+  unsupportedKeys,
   predicateSomeKeyDown,
-  fromAliasToDownCodes,
+  fromAliasToCode,
   fromCodeToAliases,
 } from '../extracted'
 import type {
   HookApi,
   KeyboardTimeMetadata,
-  CreateKeycomboDownOptions,
   CreateKeycomboMatchOptions,
 } from '../extracted'
 
@@ -24,11 +24,9 @@ export type KeypressMetadata = {
   pressed: string,
 } & KeyboardTimeMetadata
 
-export type KeypressOptions = {
+export type KeypressOptions = CreateKeycomboMatchOptions & {
   minDuration?: number,
   preventsDefaultUnlessDenied?: boolean,
-  toDownCodes?: CreateKeycomboDownOptions['toDownCodes'],
-  toAliases?: CreateKeycomboMatchOptions['toAliases'],
   onDown?: KeypressHook,
   onUp?: KeypressHook,
   onVisibilitychange?: KeypressHook,
@@ -41,7 +39,7 @@ export type KeypressHookApi = HookApi<KeypressType, KeypressMetadata>
 const defaultOptions: KeypressOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
-  toDownCodes: alias => fromAliasToDownCodes(alias),
+  toCode: alias => fromAliasToCode(alias),
   toAliases: code => fromCodeToAliases(code),
 }
 
@@ -52,7 +50,8 @@ export function createKeypress (
   const {
           minDuration,
           preventsDefaultUnlessDenied,
-          toDownCodes,
+          toLonghand,
+          toCode,
           toAliases,
           onDown,
           onUp,
@@ -70,11 +69,12 @@ export function createKeypress (
           deleteStatus,
         } = createKeyState({
           keycomboOrKeycombos,
-          unsupportedAliases,
-          toDownCodes,
+          toLonghand,
+          toCode,
           toAliases,
           getRequest: () => request,
-        })
+        }),
+        fromComboToAliasesLength = createAliasesLength({ toLonghand })
 
   let request: number
   let localStatus: RecognizeableStatus
@@ -206,7 +206,3 @@ export function createKeypress (
     visibilitychange,
   }
 }
-
-// MacOS doesn't fire keyup while meta is still pressed
-const unsupportedAliases = ['meta', 'command', 'cmd']
-const unsupportedKeys = ['Meta']

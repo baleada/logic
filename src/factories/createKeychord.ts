@@ -4,16 +4,16 @@ import {
   toHookApi,
   storeKeyboardTimeMetadata,
   fromEventToKeyStatusCode,
-  fromComboToAliasesLength,
+  createAliasesLength,
   createKeyState,
+  unsupportedKeys,
   predicateSomeKeyDown,
-  fromAliasToDownCodes,
+  fromAliasToCode,
   fromCodeToAliases,
 } from '../extracted'
 import type {
   HookApi,
   KeyboardTimeMetadata,
-  CreateKeycomboDownOptions,
   CreateKeycomboMatchOptions,
 } from '../extracted'
 import { createMap } from '../pipes'
@@ -28,12 +28,10 @@ export type KeychordMetadata = {
   )[],
 }
 
-export type KeychordOptions = {
+export type KeychordOptions = CreateKeycomboMatchOptions & {
   minDuration?: number,
   maxInterval?: number,
   preventsDefaultUnlessDenied?: boolean,
-  toDownCodes?: CreateKeycomboDownOptions['toDownCodes'],
-  toAliases?: CreateKeycomboMatchOptions['toAliases'],
   onDown?: KeychordHook,
   onUp?: KeychordHook,
   onVisibilitychange?: KeychordHook,
@@ -47,7 +45,7 @@ const defaultOptions: KeychordOptions = {
   minDuration: 0,
   maxInterval: 5000, // VS Code default
   preventsDefaultUnlessDenied: true,
-  toDownCodes: alias => fromAliasToDownCodes(alias),
+  toCode: alias => fromAliasToCode(alias),
   toAliases: code => fromCodeToAliases(code),
 }
 
@@ -59,7 +57,8 @@ export function createKeychord (
           minDuration,
           maxInterval,
           preventsDefaultUnlessDenied,
-          toDownCodes,
+          toLonghand,
+          toCode,
           toAliases,
           onDown,
           onUp,
@@ -68,14 +67,15 @@ export function createKeychord (
         narrowedKeychord = keychord.split(' '),
         keyStates = createMap<string, ReturnType<typeof createKeyState>>(keycombo => createKeyState({
           keycomboOrKeycombos: keycombo,
-          unsupportedAliases,
-          toDownCodes,
+          toLonghand,
+          toCode,
           toAliases,
           getRequest: () => request,
         }))(narrowedKeychord),
         localStatuses = createMap<typeof keyStates[number], RecognizeableStatus>(
           () => 'recognizing'
-        )(keyStates)
+        )(keyStates),
+        fromComboToAliasesLength = createAliasesLength({ toLonghand })
 
   let request: number,
       playedIndex = 0
@@ -261,7 +261,3 @@ export function createKeychord (
     visibilitychange,
   }
 }
-
-// MacOS doesn't fire keyup while meta is still pressed
-const unsupportedAliases = ['meta', 'command', 'cmd']
-const unsupportedKeys = ['Meta']

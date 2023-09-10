@@ -4,7 +4,7 @@ import { createKeycomboMatch } from '../../src/pipes/keyboard-event'
 
 const suite = createSuite('keyboard event')
 
-suite('createKeycomboMatch predicates keys', () => {
+suite.only('createKeycomboMatch predicates keys', () => {
   {
     const event = { code: 'KeyA' } as KeyboardEvent,
           value = createKeycomboMatch('a')(event),
@@ -72,6 +72,14 @@ suite('createKeycomboMatch predicates keys', () => {
   {
     const event = { code: 'Backquote', shiftKey: true } as KeyboardEvent,
           value = createKeycomboMatch('~')(event),
+          expected = true
+
+    assert.is(value, expected, `~: ${JSON.stringify(event)}`)
+  }
+  
+  {
+    const event = { code: 'KeyA', shiftKey: true } as KeyboardEvent,
+          value = createKeycomboMatch('A')(event),
           expected = true
 
     assert.is(value, expected, `~: ${JSON.stringify(event)}`)

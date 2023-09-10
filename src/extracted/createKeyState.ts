@@ -16,32 +16,30 @@ import {
   createKeyStatusesSet,
   createKeyStatusesClear,
   createKeyStatusesDelete,
-  fromComboToAliases,
+  createAliases,
 } from '../extracted'
-import type { KeyStatuses } from '../extracted'
+import type { KeyStatuses, CreateKeycomboMatchOptions } from '../extracted'
 import { createFilter } from '../pipes/array'
 
 export function createKeyState (
   {
     keycomboOrKeycombos,
-    unsupportedAliases,
-    toDownCodes,
+    toLonghand,
+    toCode,
     toAliases,
     getRequest,
-  }: {
+  }: Required<CreateKeycomboMatchOptions> & {
     keycomboOrKeycombos: string | string[],
-    unsupportedAliases: string[],
-    toDownCodes: Parameters<typeof createKeycomboDown>[1]['toDownCodes'],
-    toAliases: Parameters<typeof createKeycomboMatch>[1]['toAliases'],
     getRequest: () => number,
   }
 ) {
-  const narrowedKeycombos = createFilter<string>(
+  const fromComboToAliases = createAliases({ toLonghand }),
+        narrowedKeycombos = createFilter<string>(
           keycombo => !some<string>(
             alias => includes(alias)(unsupportedAliases) as boolean
           )(fromComboToAliases(keycombo))
         )(Array.isArray(keycomboOrKeycombos) ? keycomboOrKeycombos : [keycomboOrKeycombos]),
-        createKeycomboDownOptions = { toDownCodes },
+        createKeycomboDownOptions = { toLonghand, toCode },
         downPredicatesByKeycombo = (() => {
           const predicates: [string, ReturnType<typeof createKeycomboDown>][] = []
 
@@ -115,3 +113,8 @@ export function createKeyState (
     deleteStatus,
   }
 }
+
+// MacOS doesn't fire keyup while meta is still pressed, which breaks the entire
+// keycombo system, so I'm just disabling it entirely 💀💀💀
+const unsupportedAliases = ['meta', 'command', 'cmd']
+export const unsupportedKeys = ['Meta']

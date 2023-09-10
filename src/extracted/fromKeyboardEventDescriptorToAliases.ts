@@ -2,7 +2,6 @@ import { createClip } from '../pipes/string'
 
 export type KeyboardEventDescriptor = {
   code: string,
-  key?: string,
   shiftKey?: boolean,
   altKey?: boolean,
   ctrlKey?: boolean,
@@ -11,8 +10,7 @@ export type KeyboardEventDescriptor = {
 
 export function fromKeyboardEventDescriptorToAliases (event: KeyboardEventDescriptor): string[] {
   if (event.shiftKey && event.code in aliasesByShiftCode) return [aliasesByShiftCode[event.code]]
-
-  if (event.key in aliasListsByModifier) return aliasListsByModifier[event.key]
+  
   const withoutModifierSide = toWithoutModifierSide(event.code)
   if (withoutModifierSide in aliasListsByModifier) return aliasListsByModifier[withoutModifierSide]
 
@@ -22,6 +20,7 @@ export function fromKeyboardEventDescriptorToAliases (event: KeyboardEventDescri
 }
 
 const toWithoutModifierSide = createClip(/(?:Left|Right)$/)
+
 const aliasCaptureRE = /^(?:Digit|Key)?(F[0-9]{1,2}|[0-9]|[A-Z])$/
 
 export const aliasesByCode = {

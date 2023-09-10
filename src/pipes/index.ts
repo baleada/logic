@@ -147,7 +147,7 @@ export {
 export {
   createKeycomboMatch,
 } from './keyboard-event'
-export type { CreateKeycomboMatchOptions } from './keyboard-event'
+export type { CreateKeycomboMatchOptions } from '../extracted'
 
 export {
   createClamp,

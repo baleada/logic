@@ -1,5 +1,4 @@
-import { pipe, filter, map } from 'lazy-collections'
-import { toLength } from '../extracted'
+import { pipe, filter, map, toLength } from 'lazy-collections'
 import type {
   Graph,
   GraphAsync,

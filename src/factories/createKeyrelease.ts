@@ -4,16 +4,16 @@ import {
   toHookApi,
   storeKeyboardTimeMetadata,
   fromEventToKeyStatusCode,
-  fromComboToAliasesLength,
+  createAliasesLength,
   createKeyState,
+  unsupportedKeys,
   predicateSomeKeyDown,
-  fromAliasToDownCodes,
+  fromAliasToCode,
   fromCodeToAliases,
 } from '../extracted'
 import type {
   HookApi,
   KeyboardTimeMetadata,
-  CreateKeycomboDownOptions,
   CreateKeycomboMatchOptions,
 } from '../extracted'
 
@@ -23,11 +23,9 @@ export type KeyreleaseMetadata = {
   released: string,
 } & KeyboardTimeMetadata
 
-export type KeyreleaseOptions = {
+export type KeyreleaseOptions = CreateKeycomboMatchOptions & {
   minDuration?: number,
   preventsDefaultUnlessDenied?: boolean,
-  toDownCodes?: CreateKeycomboDownOptions['toDownCodes'],
-  toAliases?: CreateKeycomboMatchOptions['toAliases'],
   onDown?: KeyreleaseHook,
   onUp?: KeyreleaseHook,
   onVisibilitychange?: KeyreleaseHook,
@@ -40,7 +38,7 @@ export type KeyreleaseHookApi = HookApi<KeyreleaseType, KeyreleaseMetadata>
 const defaultOptions: KeyreleaseOptions = {
   minDuration: 0,
   preventsDefaultUnlessDenied: true,
-  toDownCodes: alias => fromAliasToDownCodes(alias),
+  toCode: alias => fromAliasToCode(alias),
   toAliases: code => fromCodeToAliases(code),
 }
 
@@ -51,7 +49,8 @@ export function createKeyrelease (
   const {
           minDuration,
           preventsDefaultUnlessDenied,
-          toDownCodes,
+          toLonghand,
+          toCode,
           toAliases,
           onDown,
           onUp,
@@ -69,11 +68,12 @@ export function createKeyrelease (
           deleteStatus,
         } = createKeyState({
           keycomboOrKeycombos,
-          unsupportedAliases,
-          toDownCodes,
+          toLonghand,
+          toCode,
           toAliases,
           getRequest: () => request,
-        })
+        }),
+        fromComboToAliasesLength = createAliasesLength({ toLonghand })
 
   let request: number,
       localStatus: RecognizeableStatus
@@ -208,7 +208,3 @@ export function createKeyrelease (
     visibilitychange,
   }
 }
-
-// MacOS doesn't fire keyup while meta is still pressed
-const unsupportedAliases = ['meta', 'command', 'cmd']
-const unsupportedKeys = ['Meta']

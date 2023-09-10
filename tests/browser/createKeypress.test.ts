@@ -16,7 +16,7 @@ const suite = withPlaywright(
 // visibilitychange
 // releasing invalid partial combo doesn't trigger smaller combo
 
-for (const key of ['A', 'Shift', ',']) {
+for (const key of ['a', 'Shift', ',']) {
   suite('recognizes keypress', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
@@ -40,7 +40,7 @@ for (const key of ['A', 'Shift', ',']) {
   })
 }
 
-for (const key of ['A', 'Shift', ',']) {
+for (const key of ['a', 'Shift', ',']) {
   suite('recognizes keypress on every frame', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
@@ -68,7 +68,7 @@ for (const key of ['A', 'Shift', ',']) {
   })
 }
 
-for (const key of ['A', 'Shift', ',']) {
+for (const key of ['a', 'Shift', ',']) {
   suite('respects minDuration option', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
@@ -99,13 +99,13 @@ suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
       'recognizeable' as KeypressType, 
-      { recognizeable: { effects: window.Logic.createKeypress(['A', 'B']) } }
+      { recognizeable: { effects: window.Logic.createKeypress(['a', 'b']) } }
     )
 
     window.testState = { listenable: listenable.listen(() => {}) }
   })
 
-  for (const key of ['A', 'B']) {
+  for (const key of ['a', 'b']) {
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
     
@@ -134,13 +134,13 @@ suite('stores currently pressed keycombo', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
       'recognizeable' as KeypressType, 
-      { recognizeable: { effects: window.Logic.createKeypress(['A', 'B']) } }
+      { recognizeable: { effects: window.Logic.createKeypress(['a', 'b']) } }
     )
 
     window.testState = { listenable: listenable.listen(() => {}) }
   })
 
-  for (const key of ['A', 'B']) {
+  for (const key of ['a', 'b']) {
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
     
@@ -156,12 +156,12 @@ suite('stores currently pressed keycombo', async ({ playwright: { page } }) => {
   await page.evaluate(() => window.testState.listenable.stop())
 })
 
-for (const key of ['A', 'Shift', ',']) {
+for (const key of ['a', 'Shift', ',']) {
   suite('denies until all combos are released if non-matching keycombo happened', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
         'recognizeable' as KeypressType, 
-        { recognizeable: { effects: window.Logic.createKeypress([key, 'B']) } }
+        { recognizeable: { effects: window.Logic.createKeypress([key, 'b']) } }
       )
   
       window.testState = { listenable: listenable.listen(() => {}) }
@@ -169,9 +169,9 @@ for (const key of ['A', 'Shift', ',']) {
   
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
-    await page.keyboard.down('B')
+    await page.keyboard.down('b')
     await page.waitForTimeout(20)
-    await page.keyboard.up('B')
+    await page.keyboard.up('b')
     await page.waitForTimeout(20)
   
     await (async () => {
@@ -191,7 +191,7 @@ for (const key of ['A', 'Shift', ',']) {
       assert.is(value, expected)
     })()
   
-    await page.keyboard.down('B')
+    await page.keyboard.down('b')
     await page.waitForTimeout(20)
   
     await (async () => {
@@ -201,7 +201,7 @@ for (const key of ['A', 'Shift', ',']) {
       assert.is(value, expected)
     })()
   
-    await page.keyboard.up('B')
+    await page.keyboard.up('b')
     await page.evaluate(() => window.testState.listenable.stop())
   })
 }
@@ -210,7 +210,7 @@ suite('does not require all keys to be released before re-recognizing', async ({
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
       'recognizeable' as KeypressType,
-      { recognizeable: { effects: window.Logic.createKeypress('A+B') } }
+      { recognizeable: { effects: window.Logic.createKeypress('a+b') } }
     )
 
     window.testState = {
@@ -221,11 +221,11 @@ suite('does not require all keys to be released before re-recognizing', async ({
     }
   })
 
-  await page.keyboard.down('A')
+  await page.keyboard.down('a')
   await page.waitForTimeout(20)
-  await page.keyboard.down('B')
+  await page.keyboard.down('b')
   await page.waitForTimeout(20)
-  await page.keyboard.up('A')
+  await page.keyboard.up('a')
   await page.waitForTimeout(20)
 
   await (async () => {
@@ -236,7 +236,7 @@ suite('does not require all keys to be released before re-recognizing', async ({
 
   const previousValue = await page.evaluate(() => window.testState.count)
   
-  await page.keyboard.down('A')
+  await page.keyboard.down('a')
   await page.waitForTimeout(20)
 
   await (async () => {
@@ -245,7 +245,7 @@ suite('does not require all keys to be released before re-recognizing', async ({
     assert.ok(value > previousValue)
   })()
 
-  await page.keyboard.up('A')
+  await page.keyboard.up('a')
   await page.evaluate(() => window.testState.listenable.stop())
 })
 
@@ -264,7 +264,7 @@ suite('handles arrays of overlapping combos', async ({ playwright: { page } }) =
     }
   })
 
-  await page.keyboard.down('A')
+  await page.keyboard.down('a')
   await page.waitForTimeout(20)
 
   await (async () => {
@@ -307,7 +307,7 @@ suite('handles arrays of overlapping combos', async ({ playwright: { page } }) =
     assert.is(pressed, 'shift+opt+a')
   })()
 
-  await page.keyboard.up('A')
+  await page.keyboard.up('a')
   await page.keyboard.up('Shift')
   await page.keyboard.up('Alt')
   await page.evaluate(() => window.testState.listenable.stop())

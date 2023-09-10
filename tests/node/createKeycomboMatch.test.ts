@@ -64,8 +64,19 @@ suite('predicates lowercase letters', () => {
 suite('predicates uppercase letters', () => {
   const statuses: KeyStatuses = [
           ['KeyA', 'down'],
+          ['Shift', 'down'],
         ],
         value = createKeycomboMatch('A')(statuses)
+
+  assert.ok(value)
+})
+
+suite('predicate shifted special characters', () => {
+  const statuses: KeyStatuses = [
+          ['Backquote', 'down'],
+          ['Shift', 'down'],
+        ],
+        value = createKeycomboMatch('~')(statuses)
 
   assert.ok(value)
 })
@@ -135,20 +146,36 @@ suite('predicates fn', () => {
   assert.ok(value)
 })
 
+suite('predicates shift + special', () => {
+  const statuses: KeyStatuses = [
+          ['Shift', 'down'],
+          ['Slash', 'down'],
+        ],
+        value = createKeycomboMatch('?')(statuses)
+
+  assert.ok(value)
+})
+
 suite('supports custom alias and key transformers', () => {
-  const toDownCodes = alias => {
+  const toLonghand = alias => {
     switch (alias) {
-      case 'å': return ['KeyA', 'AltLeft']
-      case 'a': return ['KeyA']
-      case 'alt': return ['AltLeft']
-      default: return []
+      case 'å': return 'alt+a'
+      default: return alias
+    }
+  }
+
+  const toCode = alias => {
+    switch (alias) {
+      case 'a': return 'KeyA'
+      case 'alt': return 'AltLeft'
+      default: return ''
     }
   }
 
   const toAliases = key => {
     switch (key) {
-      case 'KeyA': return ['å', 'a']
-      case 'AltLeft': return ['å', 'alt']
+      case 'KeyA': return ['a']
+      case 'AltLeft': return ['alt']
       default: return []
     }
   }
@@ -160,17 +187,17 @@ suite('supports custom alias and key transformers', () => {
     ]
 
     {
-      const value = createKeycomboMatch('å', { toDownCodes, toAliases })(statuses)
+      const value = createKeycomboMatch('å', { toLonghand, toCode, toAliases })(statuses)
       assert.ok(value)
     }
     
     {
-      const value = createKeycomboMatch('a', { toDownCodes, toAliases })(statuses)
+      const value = createKeycomboMatch('a', { toLonghand, toCode, toAliases })(statuses)
       assert.not.ok(value)
     }
 
     {
-      const value = createKeycomboMatch('alt', { toDownCodes, toAliases })(statuses)
+      const value = createKeycomboMatch('alt', { toLonghand, toCode, toAliases })(statuses)
       assert.not.ok(value)
     }
   }
@@ -181,17 +208,17 @@ suite('supports custom alias and key transformers', () => {
     ]
 
     {
-      const value = createKeycomboMatch('å', { toDownCodes, toAliases })(statuses)
+      const value = createKeycomboMatch('å', { toLonghand, toCode, toAliases })(statuses)
       assert.not.ok(value)
     }
 
     {
-      const value = createKeycomboMatch('a', { toDownCodes, toAliases })(statuses)
+      const value = createKeycomboMatch('a', { toLonghand, toCode, toAliases })(statuses)
       assert.ok(value)
     }
 
     {
-      const value = createKeycomboMatch('alt', { toDownCodes, toAliases })(statuses)
+      const value = createKeycomboMatch('alt', { toLonghand, toCode, toAliases })(statuses)
       assert.not.ok(value)
     }
   }
@@ -202,17 +229,17 @@ suite('supports custom alias and key transformers', () => {
     ]
 
     {
-      const value = createKeycomboMatch('å', { toDownCodes, toAliases })(statuses)
+      const value = createKeycomboMatch('å', { toLonghand, toCode, toAliases })(statuses)
       assert.not.ok(value)
     }
 
     {
-      const value = createKeycomboMatch('a', { toDownCodes, toAliases })(statuses)
+      const value = createKeycomboMatch('a', { toLonghand, toCode, toAliases })(statuses)
       assert.not.ok(value)
     }
 
     {
-      const value = createKeycomboMatch('alt', { toDownCodes, toAliases })(statuses)
+      const value = createKeycomboMatch('alt', { toLonghand, toCode, toAliases })(statuses)
       assert.ok(value)
     }
   }

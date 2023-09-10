@@ -1,62 +1,65 @@
-import { every, find, includes, pipe, some } from 'lazy-collections'
+import {
+  every,
+  find,
+  includes,
+  map,
+  pipe,
+  some,
+} from 'lazy-collections'
 import {
   fromEventToKeyStatusCode,
   modifiers,
   createKeyStatusesValue as createValue,
   createKeyStatusesSet as createSet,
-  fromComboToAliases,
-  fromAliasToDownCodes,
-  fromKeyboardEventDescriptorToAliases,
+  createAliases,
+  fromAliasToCode,
   createKeyStatusCode,
+  fromKeyboardEventDescriptorToAliases,
 } from '../extracted'
 import type {
   KeyStatusCode,
   KeyStatus,
   KeyStatuses,
   KeyboardEventDescriptor,
+  CreateKeycomboMatchOptions as CreateKeyStatusesKeycomboMatchOptions,
 } from '../extracted'
 import { createMap } from './array'
 
 export type KeyboardEventTransform<Transformed> = (keyboardEvent: KeyboardEvent) => Transformed
 
-export type CreateKeycomboMatchOptions = {
-  toDownCodes?: (alias: string) => KeyStatusCode[],
-  toAliases?: (event: KeyboardEvent) => string[],
+export type CreateKeycomboMatchOptions = Omit<CreateKeyStatusesKeycomboMatchOptions, 'toAliases'> & {
+  toAliases?: (descriptor: KeyboardEventDescriptor) => string[],
 }
 
 const defaultOptions: CreateKeycomboMatchOptions = {
-  toDownCodes: alias => fromAliasToDownCodes(alias),
-  toAliases: event => fromKeyboardEventDescriptorToAliases(event),
+  toCode: alias => fromAliasToCode(alias),
+  toAliases: descriptor => fromKeyboardEventDescriptorToAliases(descriptor),
 }
 
 export const createKeycomboMatch = (
   keycombo: string,
   options: CreateKeycomboMatchOptions = {},
 ): KeyboardEventTransform<boolean> => {
-  const { toDownCodes, toAliases } = { ...defaultOptions, ...options },
+  const { toLonghand, toCode, toAliases: fromDescriptorToAliases } = { ...defaultOptions, ...options },
+        fromComboToAliases = createAliases({ toLonghand }),
         aliases = fromComboToAliases(keycombo),
-        downCodes = createMap<string, KeyStatusCode[]>(toDownCodes)(aliases),
+        codes = createMap<string, KeyStatusCode>(toCode)(aliases),
         implicitModifierAliases = (() => {
           const implicitModifierAliases: string[] = []
 
-          for (const aliasDownCodes of downCodes) {
-            for (const code of aliasDownCodes) {
-              const implicitModifier = find<typeof modifiers[number]>(
-                modifier => code.includes(modifier)
-              )(modifiers) as string
-              
-              if (implicitModifier) implicitModifierAliases.push(implicitModifier.toLowerCase())
-            }
+          for (const code of codes) {
+            const implicitModifier = find<typeof modifiers[number]>(
+              modifier => code.includes(modifier)
+            )(modifiers) as string
+            
+            if (implicitModifier) implicitModifierAliases.push(implicitModifier.toLowerCase())
           }
 
           return implicitModifierAliases
         })()
 
   return event => {
-    const statuses: KeyStatuses = [],
-          predicateAliasDown = every<KeyStatusCode>(
-            code => createValue(code, { predicateKey: createKeyStatusCode(code) })(statuses) === 'down'
-          ) as (entries: KeyStatusCode[]) => boolean
+    const statuses: KeyStatuses = []
 
     createSet(fromEventToKeyStatusCode(event), 'down')(statuses)
 
@@ -77,15 +80,21 @@ export const createKeycomboMatch = (
     )(statuses)
 
     return (
-      every<KeyStatusCode[]>(predicateAliasDown)(downCodes) as boolean
+      every<KeyStatusCode>(
+        code => createValue(
+          code,
+          { predicateKey: createKeyStatusCode(code) }
+        )(statuses) === 'down'
+      )(codes) as boolean
       && every<KeyboardEventDescriptor>(
         e => pipe<KeyboardEventDescriptor>(
-          toAliases,
-          some<string>(
-            alias => (
-              includes<string>(alias)(aliases) as boolean
-              || includes<string>(alias)(implicitModifierAliases) as boolean
-            )
+          fromDescriptorToAliases,
+          map<string, string[]>(fromComboToAliases),
+          some<string[]>(longhandAliases =>
+            every<string>(longhandAlias =>
+              includes<string>(longhandAlias)(aliases) as boolean
+              || includes<string>(longhandAlias)(implicitModifierAliases) as boolean
+            )(longhandAliases) as boolean
           ),
         )(e)
       )(events) as boolean
