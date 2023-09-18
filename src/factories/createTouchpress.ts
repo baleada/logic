@@ -1,4 +1,4 @@
-import type { RecognizeableEffect, RecognizeableOptions } from '../classes'
+import { Listenable, type RecognizeableEffect, type RecognizeableOptions } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
@@ -68,6 +68,7 @@ export function createTouchpress (options: TouchpressOptions = {}): Recognizeabl
       api,
       () => totalTouches === 1,
       newRequest => request = newRequest,
+      // @ts-expect-error
       recognize,
     )
 
@@ -79,6 +80,7 @@ export function createTouchpress (options: TouchpressOptions = {}): Recognizeabl
 
     if (getStatus() !== 'denied') {
       storePointerMoveMetadata(event, api)
+      // @ts-expect-error
       recognize(event, api)
     }
 
@@ -122,5 +124,22 @@ export function createTouchpress (options: TouchpressOptions = {}): Recognizeabl
     touchmove,
     touchcancel,
     touchend,
+  }
+}
+
+export class Touchpress extends Listenable<TouchpressType, TouchpressMetadata> {
+  constructor (options?: TouchpressOptions) {
+    super(
+      'recognizeable' as TouchpressType,
+      {
+        recognizeable: {
+          effects: createTouchpress(options),
+        },
+      }
+    )
+  }
+
+  get metadata () {
+    return this.recognizeable.metadata
   }
 }

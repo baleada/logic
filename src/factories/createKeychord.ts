@@ -1,5 +1,5 @@
 import { includes } from 'lazy-collections'
-import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
+import { Listenable, type RecognizeableEffect, type RecognizeableStatus } from '../classes'
 import {
   toHookApi,
   storeKeyboardTimeMetadata,
@@ -200,6 +200,7 @@ export function createKeychord (
     }
 
     // RELEASING FULL COMBO
+    // @ts-expect-error
     recognize(event, api)
 
     const status = getStatus()
@@ -259,5 +260,22 @@ export function createKeychord (
     keydown,
     keyup,
     visibilitychange,
+  }
+}
+
+export class Keychord extends Listenable<KeychordType, KeychordMetadata> {
+  constructor (keychord: string, options?: KeychordOptions) {
+    super(
+      'recognizeable' as KeychordType,
+      {
+        recognizeable: {
+          effects: createKeychord(keychord, options),
+        },
+      }
+    )
+  }
+
+  get metadata () {
+    return this.recognizeable.metadata
   }
 }

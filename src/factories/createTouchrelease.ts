@@ -1,4 +1,4 @@
-import type { RecognizeableEffect, RecognizeableOptions } from '../classes'
+import { Listenable, type RecognizeableEffect, type RecognizeableOptions } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
@@ -136,5 +136,22 @@ export function createTouchrelease (options: TouchreleaseOptions = {}): Recogniz
     touchmove,
     touchcancel,
     touchend,
+  }
+}
+
+export class Touchrelease extends Listenable<TouchreleaseType, TouchreleaseMetadata> {
+  constructor (options?: TouchreleaseOptions) {
+    super(
+      'recognizeable' as TouchreleaseType,
+      {
+        recognizeable: {
+          effects: createTouchrelease(options),
+        },
+      }
+    )
+  }
+
+  get metadata () {
+    return this.recognizeable.metadata
   }
 }

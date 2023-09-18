@@ -1,6 +1,6 @@
 
 import { includes } from 'lazy-collections'
-import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
+import { Listenable, type RecognizeableEffect, type RecognizeableStatus } from '../classes'
 import {
   toHookApi,
   storeKeyboardTimeMetadata,
@@ -133,6 +133,7 @@ export function createKeypress (
       getTimeMetadata: getMetadata,
       getShouldStore: () => downCombos.length && getDownCombos()[0] === downCombos[0],
       setRequest: newRequest => request = newRequest,
+      // @ts-expect-error
       recognize,
     })
 
@@ -204,5 +205,22 @@ export function createKeypress (
     keydown,
     keyup,
     visibilitychange,
+  }
+}
+
+export class Keypress extends Listenable<KeypressType, KeypressMetadata> {
+  constructor (keycomboOrKeycombos: string | string[], options?: KeypressOptions) {
+    super(
+      'recognizeable' as KeypressType,
+      {
+        recognizeable: {
+          effects: createKeypress(keycomboOrKeycombos, options),
+        },
+      }
+    )
+  }
+
+  get metadata () {
+    return this.recognizeable.metadata
   }
 }

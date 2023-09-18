@@ -1,4 +1,4 @@
-import type { RecognizeableEffect, RecognizeableOptions } from '../classes'
+import { Listenable, type RecognizeableEffect, type RecognizeableOptions } from '../classes'
 import { toHookApi, toPolarCoordinates } from '../extracted'
 import type { HookApi, PointerStartMetadata, PointerTimeMetadata, PolarCoordinates } from '../extracted'
 
@@ -163,4 +163,21 @@ export function createTouchrotate (options: TouchrotateOptions = {}): Recognizea
   }
 
   return { touchstart, touchmove, touchcancel, touchend }
+}
+
+export class Touchrotate extends Listenable<TouchrotateType, TouchrotateMetadata> {
+  constructor (options?: TouchrotateOptions) {
+    super(
+      'recognizeable' as TouchrotateType,
+      {
+        recognizeable: {
+          effects: createTouchrotate(options),
+        },
+      }
+    )
+  }
+
+  get metadata () {
+    return this.recognizeable.metadata
+  }
 }

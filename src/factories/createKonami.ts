@@ -1,4 +1,4 @@
-import type { RecognizeableOptions } from '../classes'
+import { Listenable, type RecognizeableOptions } from '../classes'
 import { createKeychord } from './createKeychord'
 import type {
   KeychordType,
@@ -16,4 +16,21 @@ export type KonamiHookApi = KeychordHookApi
 
 export function createKonami (options: KonamiOptions = {}): RecognizeableOptions<KonamiType, KonamiMetadata>['effects'] {
   return createKeychord('up up down down left right left right b a enter', options)
+}
+
+export class Konami extends Listenable<KonamiType, KonamiMetadata> {
+  constructor (options?: KonamiOptions) {
+    super(
+      'recognizeable' as KonamiType,
+      {
+        recognizeable: {
+          effects: createKonami(options),
+        },
+      }
+    )
+  }
+
+  get metadata () {
+    return this.recognizeable.metadata
+  }
 }

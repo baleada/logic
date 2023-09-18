@@ -1,4 +1,4 @@
-import type { ListenEffectParam, ListenOptions, RecognizeableEffect, RecognizeableOptions } from '../classes'
+import { Listenable, type ListenEffectParam, type ListenOptions, type RecognizeableEffect, type RecognizeableOptions } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
@@ -119,5 +119,22 @@ export function createMousepress (options: MousepressOptions = {}): Recognizeabl
     mousedown,
     mouseleave,
     mouseup,
+  }
+}
+
+export class Mousepress extends Listenable<MousepressType, MousepressMetadata> {
+  constructor (options?: MousepressOptions) {
+    super(
+      'recognizeable' as MousepressType,
+      {
+        recognizeable: {
+          effects: createMousepress(options),
+        },
+      }
+    )
+  }
+
+  get metadata () {
+    return this.recognizeable.metadata
   }
 }

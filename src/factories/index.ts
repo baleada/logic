@@ -4,7 +4,7 @@ export { createBreadthPathConfig } from './createBreadthPathConfig'
 
 
 // RECOGNIZEABLE EFFECTS
-export { createKeypress } from './createKeypress'
+export { createKeypress, Keypress } from './createKeypress'
 export type {
   KeypressType,
   KeypressMetadata,
@@ -13,7 +13,7 @@ export type {
   KeypressHookApi,
 } from './createKeypress'
 
-export { createKeyrelease } from './createKeyrelease'
+export { createKeyrelease, Keyrelease } from './createKeyrelease'
 export type {
   KeyreleaseType,
   KeyreleaseMetadata,
@@ -22,7 +22,7 @@ export type {
   KeyreleaseHookApi,
 } from './createKeyrelease'
 
-export { createKeychord } from './createKeychord'
+export { createKeychord, Keychord } from './createKeychord'
 export type {
   KeychordType,
   KeychordMetadata,
@@ -31,7 +31,7 @@ export type {
   KeychordHookApi,
 } from './createKeychord'
 
-export { createKonami } from './createKonami'
+export { createKonami, Konami } from './createKonami'
 export type {
   KonamiType,
   KonamiMetadata,
@@ -40,7 +40,7 @@ export type {
   KonamiHookApi,
 } from './createKonami'
 
-export { createMousepress } from './createMousepress'
+export { createMousepress, Mousepress } from './createMousepress'
 export type {
   MousepressType,
   MousepressMetadata,
@@ -49,7 +49,7 @@ export type {
   MousepressHookApi,
 } from './createMousepress'
 
-export { createMouserelease } from './createMouserelease'
+export { createMouserelease, Mouserelease } from './createMouserelease'
 export type {
   MousereleaseType,
   MousereleaseMetadata,
@@ -58,7 +58,7 @@ export type {
   MousereleaseHookApi,
 } from './createMouserelease'
 
-export { createTouchpress } from './createTouchpress'
+export { createTouchpress, Touchpress } from './createTouchpress'
 export type {
   TouchpressType,
   TouchpressMetadata,
@@ -67,7 +67,7 @@ export type {
   TouchpressHookApi,
 } from './createTouchpress'
 
-export { createTouchrelease } from './createTouchrelease'
+export { createTouchrelease, Touchrelease } from './createTouchrelease'
 export type {
   TouchreleaseType,
   TouchreleaseMetadata,

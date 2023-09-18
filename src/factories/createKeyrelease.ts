@@ -1,5 +1,5 @@
 import { includes } from 'lazy-collections'
-import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
+import { Listenable, type RecognizeableEffect, type RecognizeableStatus } from '../classes'
 import {
   toHookApi,
   storeKeyboardTimeMetadata,
@@ -207,5 +207,25 @@ export function createKeyrelease (
     keydown,
     keyup,
     visibilitychange,
+  }
+}
+
+export class Keyrelease extends Listenable<KeyreleaseType, KeyreleaseMetadata> {
+  constructor (
+    keycomboOrKeycombos: string | string[],
+    options?: KeyreleaseOptions
+  ) {
+    super(
+      'recognizeable' as KeyreleaseType,
+      {
+        recognizeable: {
+          effects: createKeyrelease(keycomboOrKeycombos, options),
+        },
+      }
+    )
+  }
+
+  get metadata () {
+    return this.recognizeable.metadata
   }
 }
