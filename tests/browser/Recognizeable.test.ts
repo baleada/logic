@@ -233,12 +233,15 @@ suite('effect API onRecognized() performs side effect', async ({ puppeteer: { pa
       [],
       {
         effects: {
-          click: (event, { onRecognized: o }) => o(event),
+          click: (event, { listenInjection: { effect: o } }) => o(event),
         },
       }
     )
     
-    instance.recognize(new MouseEvent('click'), { onRecognized })
+    instance.recognize(
+      new MouseEvent('click'),
+      { listenInjection: { effect: onRecognized, optionsByType: { click: {} } } }
+    )
     
     return onRecognizedStatus
   })
@@ -464,7 +467,7 @@ suite('includes all desired keys in effect API', async ({ puppeteer: { page } })
           'ready',
           'getSequence',
           'pushSequence',
-          'onRecognized',
+          'listenInjection',
         ]
 
   assert.equal(value, expected)

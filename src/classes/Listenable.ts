@@ -1,8 +1,5 @@
 import { some, find } from 'lazy-collections'
-import {
-  predicateNumber,
-  predicateFunction,
-} from '../extracted'
+import { predicateNumber } from '../extracted'
 import { createExceptAndOnlyEffect } from '../extracted'
 import type { RecognizeableOptions } from './Recognizeable'
 import { Recognizeable } from './Recognizeable'
@@ -191,32 +188,31 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     return this
   }
   private intersectionListen (effect: ListenEffect<'intersect'>, options: ListenOptions<'intersect'>) {
-    const { target = document.querySelector('html'), observer } = options,
+    const { target, observer } = { ...this.getDefaultListenOptions(), ...options } as ListenOptions<'intersect'>,
           id = new IntersectionObserver(effect, observer)
 
     id.observe(target)
     this.active.add({ target, id } as ListenableActive<Type>)
   }
   private mutationListen (effect: ListenEffect<'mutate'>, options: ListenOptions<'mutate'>) {
-    const { target = document.querySelector('html'), observe } = options,
+    const { target, observe } = { ...this.getDefaultListenOptions(), ...options } as ListenOptions<'mutate'>,
           id = new MutationObserver(effect)
 
     id.observe(target, observe)
     this.active.add({ target, id } as ListenableActive<Type>)
   }
   private resizeListen (effect: ListenEffect<'resize'>, options: ListenOptions<'resize'>) {
-    const { target = document.querySelector('html'), observe } = options,
+    const { target, observe } = { ...this.getDefaultListenOptions(), ...options } as ListenOptions<'resize'>,
           id = new ResizeObserver(effect)
 
     id.observe(target, observe)
     this.active.add({ target, id } as ListenableActive<Type>)
   }
   private mediaQueryListen (effect: ListenEffect<'(_)'>, options: ListenOptions<'(_)'>) {
-    const target = window.matchMedia(this.type)
+    const target = window.matchMedia(this.type),
+          { instantEffect } = { ...this.getDefaultListenOptions(), ...options } as ListenOptions<'(_)'>
 
-    if (predicateFunction(options.instantEffect)) {
-      (options.instantEffect as ListenOptions<'(_)'>['instantEffect'])(target)
-    }
+    instantEffect(target)
 
     const withApi = (event: ListenEffectParam<'(_)'>) => effect(event)
 
@@ -224,7 +220,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     this.active.add({ target, id: ['change', withApi] } as ListenableActive<Type>)
   }
   private idleListen (effect: ListenEffect<'idle'>, options: ListenOptions<'idle'>) {
-    const { requestIdleCallback } = options,
+    const { requestIdleCallback } = { ...this.getDefaultListenOptions(), ...options } as ListenOptions<'idle'>,
           id = window.requestIdleCallback(deadline => effect(deadline), requestIdleCallback)
 
     this.active.add({ target: window, id } as ListenableActive<Type>)
@@ -237,9 +233,20 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
   }
   private recognizeableListen (effect: (sequenceItem: ListenEffectParam<Type>) => any, options: ListenOptions<Type>) {
     const guardedEffect = (sequenceItem: ListenEffectParam<Type>) => {
-      this.recognizeable.recognize(sequenceItem, { onRecognized: sequenceItem => effect(sequenceItem) })
+            this.recognizeable.recognize(
+              sequenceItem,
+              { listenInjection: { effect, optionsByType } }
+            )
 
-      if (this.recognizeable.status === 'recognized') effect(sequenceItem)
+            if (this.recognizeable.status === 'recognized') effect(sequenceItem)
+          },
+          optionsByType = {} as Record<Type, ListenOptions<Type>>
+
+    for (const type of this.recognizeableEffectsKeys) {
+      optionsByType[type] = {
+        ...this.getDefaultListenOptions(toImplementation(type)),
+        ...options,
+      }
     }
 
     for (const type of this.recognizeableEffectsKeys) {
@@ -251,7 +258,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
   private documentEventListen (effect: ListenEffect<'visibilitychange'>, options: ListenOptions<'visibilitychange'>) {
     // Override the target option with document
     const narrowedOptions = {
-      ...options,
+      ...this.getDefaultListenOptions(),
       target: document,
     }
     
@@ -264,7 +271,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     this.addEventListeners(eventListeners, options)
   }
   private addEventListeners<EventType extends ListenableSupportedEventType> (eventListeners: ListenableActiveEventId<EventType>[], options: ListenOptions<EventType>) {
-    const { target = document } = options
+    const { target } = { ...this.getDefaultListenOptions(), ...options } as unknown as ListenOptions<EventType>
 
     for (const eventListener of eventListeners) {
       target.addEventListener(eventListener[0], eventListener[1], eventListener[2])
@@ -305,6 +312,44 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
   }
   private stopped () {
     this.computedStatus = 'stopped'
+  }
+
+  private getDefaultListenOptions (implementation?: ListenableImplementation): ListenOptions<Type> {
+    switch (implementation || this.implementation) {
+      case 'intersection':
+        return {
+          target: document.querySelector('html'),
+          observer: {},
+        } as unknown as ListenOptions<Type>
+      case 'mutation':
+        return {
+          target: document.querySelector('html'),
+          observe: {},
+        } as unknown as ListenOptions<Type>
+      case 'resize':
+        return {
+          target: document.querySelector('html'),
+          observe: {},
+        } as unknown as ListenOptions<Type>
+      case 'mediaquery':
+        return {
+          instantEffect: () => {},
+        } as unknown as ListenOptions<Type>
+      case 'idle':
+        return {
+          requestIdleCallback: {},
+        } as ListenOptions<Type>
+      case 'message':
+        return {
+          target: new BroadcastChannel('baleada'),
+        } as ListenOptions<Type>
+      case 'recognizeable':
+        return {} as ListenOptions<Type>
+      case 'documentevent':
+        return {} as ListenOptions<Type>
+      case 'event':
+        return { target: document } as ListenOptions<Type>
+    }
   }
 }
 

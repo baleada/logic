@@ -2,6 +2,7 @@ import { predicateArray } from '../extracted'
 import type {
   ListenableSupportedType,
   ListenEffectParam,
+  ListenOptions,
 } from './Listenable'
 
 export type RecognizeableOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
@@ -22,7 +23,7 @@ export type RecognizeableEffectApi<Type extends ListenableSupportedType, Metadat
   denied: () => void,
   getSequence: () => ListenEffectParam<Type>[],
   pushSequence: (sequenceItem: ListenEffectParam<Type>) => void,
-  onRecognized: (sequenceItem: ListenEffectParam<Type>) => any,
+  listenInjection: RecognizeOptions<Type>['listenInjection'],
 }
     
 export type RecognizeableStatus = 'recognized'
@@ -31,7 +32,10 @@ export type RecognizeableStatus = 'recognized'
   | 'ready'
 
 export type RecognizeOptions<Type extends ListenableSupportedType> = {
-  onRecognized?: (sequenceItem: ListenEffectParam<Type>) => any,
+  listenInjection?: {
+    effect: (sequenceItem: ListenEffectParam<Type>) => any,
+    optionsByType: Record<Type, ListenOptions<Type>>,
+  }
 }
 
 /**
@@ -103,7 +107,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     return this
   }
 
-  recognize (sequenceItem: ListenEffectParam<Type>, { onRecognized }: RecognizeOptions<Type> = {}) {
+  recognize (sequenceItem: ListenEffectParam<Type>, options: RecognizeOptions<Type> = {}) {
     this.recognizing()
 
     const type = this.toType(sequenceItem),
@@ -126,7 +130,10 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
           
     this.effectApi.getSequence = () => newSequence
     this.effectApi.pushSequence = pushSequence
-    this.effectApi.onRecognized = onRecognized || (() => {})
+    this.effectApi.listenInjection = {
+      effect: options.listenInjection?.effect || (() => {}) as unknown as RecognizeOptions<Type>['listenInjection']['effect'],
+      optionsByType: options.listenInjection?.optionsByType || {} as unknown as RecognizeOptions<Type>['listenInjection']['optionsByType'],
+    }
 
     this.effects[type]?.(sequenceItem, { ...this.effectApi })
       

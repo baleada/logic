@@ -1,13 +1,6 @@
-import type { ListenEffectParam, RecognizeableEffect, RecognizeableOptions } from '../classes'
+import type { ListenEffectParam, ListenOptions, RecognizeableEffect, RecognizeableOptions } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
-
-/*
- * mousepress is defined as a single mousedown that:
- * - starts at a given point
- * - travels a distance greater than or equal to 0px (or a minimum distance of your choice)
- * - does not mouseleave or end before 0ms (or a minimum duration of your choice) has elapsed
- */
 
 export type MousepressType = 'mousedown' | 'mouseleave' | 'mouseup'
 
@@ -18,7 +11,6 @@ export type MousepressMetadata = PointerStartMetadata
 export type MousepressOptions = {
   minDuration?: number,
   minDistance?: number,
-  getMousemoveTarget?: (event: MouseEvent) => HTMLElement,
   onDown?: MousepressHook,
   onMove?: MousepressHook,
   onLeave?: MousepressHook,
@@ -32,7 +24,6 @@ export type MousepressHookApi = HookApi<MousepressType, MousepressMetadata>
 const defaultOptions: MousepressOptions = {
   minDuration: 0,
   minDistance: 0,
-  getMousemoveTarget: (event: MouseEvent) => event.target as HTMLElement,
 }
 
 /**
@@ -42,15 +33,14 @@ export function createMousepress (options: MousepressOptions = {}): Recognizeabl
   const {
           minDuration,
           minDistance,
-          getMousemoveTarget,
           onDown,
           onLeave,
           onMove,
           onUp,
         } = { ...defaultOptions, ...options },
-        cleanup = (event: MouseEvent) => {
+        cleanup = (target: ListenOptions<MousepressType>['target']) => {
           window.cancelAnimationFrame(request)
-          getMousemoveTarget(event).removeEventListener('mousemove', mousemoveEffect)
+          target.removeEventListener('mousemove', mousemoveEffect)
         }
   
   let request: number
@@ -69,10 +59,12 @@ export function createMousepress (options: MousepressOptions = {}): Recognizeabl
       api,
       () => mouseStatus === 'down',
       newRequest => request = newRequest,
+      // @ts-expect-error
       recognize,
     )
 
-    getMousemoveTarget(event).addEventListener('mousemove', mousemoveEffect)
+    const { listenInjection: { optionsByType: { mousedown: { target } } } } = api
+    target.addEventListener('mousemove', mousemoveEffect)
 
     onDown?.(toHookApi(api))
   }
@@ -81,6 +73,7 @@ export function createMousepress (options: MousepressOptions = {}): Recognizeabl
     const { pushSequence } = api 
     pushSequence(event)
     storePointerMoveMetadata(event, api)
+    // @ts-expect-error
     recognize(event, api)
 
     onMove?.(toHookApi(api))
@@ -99,11 +92,11 @@ export function createMousepress (options: MousepressOptions = {}): Recognizeabl
   }
 
   const mouseleave: RecognizeableEffect<'mouseleave', MousepressMetadata> = (event, api) => {
-    const { denied } = api
+    const { denied, listenInjection: { optionsByType: { mouseleave: { target } } } } = api
 
     if (mouseStatus === 'down') {
       denied()
-      cleanup(event)
+      cleanup(target)
       mouseStatus = 'leave'
     }
 
@@ -111,12 +104,12 @@ export function createMousepress (options: MousepressOptions = {}): Recognizeabl
   }
 
   const mouseup: RecognizeableEffect<'mouseup', MousepressMetadata> = (event, api) => {
-    const { denied } = api
+    const { denied, listenInjection: { optionsByType: { mouseup: { target } } } } = api
 
     if (mouseStatus !== 'down') return
           
     denied()
-    cleanup(event)
+    cleanup(target)
     mouseStatus = 'up'
     
     onUp?.(toHookApi(api))

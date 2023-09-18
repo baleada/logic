@@ -167,6 +167,7 @@ export function createKeyrelease (
     }
 
     // RELEASING FULL COMBO
+    // @ts-expect-error
     recognize(event, api)
 
     const status = getStatus()

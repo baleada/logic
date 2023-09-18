@@ -1,4 +1,4 @@
-import type { ListenEffectParam, RecognizeableEffect, RecognizeableOptions } from '../classes'
+import type { ListenEffectParam, ListenOptions, RecognizeableEffect, RecognizeableOptions } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
@@ -21,7 +21,6 @@ export type MousereleaseOptions = {
   minDuration?: number,
   minDistance?: number,
   minVelocity?: number,
-  getMousemoveTarget?: (event: MouseEvent) => HTMLElement,
   onDown?: MousereleaseHook,
   onMove?: MousereleaseHook,
   onLeave?: MousereleaseHook,
@@ -36,7 +35,6 @@ const defaultOptions: MousereleaseOptions = {
   minDuration: 0,
   minDistance: 0,
   minVelocity: 0,
-  getMousemoveTarget: (event: MouseEvent) => event.target as HTMLElement,
 }
 
 export function createMouserelease (options: MousereleaseOptions = {}): RecognizeableOptions<MousereleaseType, MousereleaseMetadata>['effects'] {
@@ -44,15 +42,14 @@ export function createMouserelease (options: MousereleaseOptions = {}): Recogniz
           minDuration,
           minDistance,
           minVelocity,
-          getMousemoveTarget,
           onDown,
           onLeave,
           onMove,
           onUp,
         } = { ...defaultOptions, ...options },
-        cleanup = (event: MouseEvent) => {
+        cleanup = (target: ListenOptions<MousereleaseType>['target']) => {
           window.cancelAnimationFrame(request)
-          getMousemoveTarget(event).removeEventListener('mousemove', mousemoveEffect)
+          target.removeEventListener('mousemove', mousemoveEffect)
         }
 
   let request: number
@@ -73,7 +70,8 @@ export function createMouserelease (options: MousereleaseOptions = {}): Recogniz
       newRequest => request = newRequest,
     )
 
-    getMousemoveTarget(event).addEventListener('mousemove', mousemoveEffect)
+    const { listenInjection: { optionsByType: { mousedown: { target } } } } = api
+    target.addEventListener('mousemove', mousemoveEffect)
 
     onDown?.(toHookApi(api))
   }
@@ -85,11 +83,11 @@ export function createMouserelease (options: MousereleaseOptions = {}): Recogniz
   }
 
   const mouseleave: RecognizeableEffect<'mouseleave', MousereleaseMetadata> = (event, api) => {
-    const { denied } = api
+    const { denied, listenInjection: { optionsByType: { mouseleave: { target } } } } = api
 
     if (mouseStatus === 'down') {
       denied()
-      cleanup(event)
+      cleanup(target)
       mouseStatus = 'leave'
     }
 
@@ -101,7 +99,8 @@ export function createMouserelease (options: MousereleaseOptions = {}): Recogniz
 
     storePointerMoveMetadata(event, api)
     
-    cleanup(event)
+    const { listenInjection: { optionsByType: { mouseup: { target } } } } = api
+    cleanup(target)
     mouseStatus = 'up'
     
     recognize(event, api)

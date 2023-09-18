@@ -58,7 +58,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page } }) =>
   assert.is(value, expected)
 })
 
-suite(`status is 'listening' after successful listen(...)`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('status is \'listening\' after successful listen(...)', async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -71,7 +71,7 @@ suite(`status is 'listening' after successful listen(...)`, async ({ puppeteer: 
   reloadNext()
 })
 
-suite(`status is 'stopped' after successful stop(...)`, async ({ puppeteer: { page } }) => {
+suite('status is \'stopped\' after successful stop(...)', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -83,7 +83,7 @@ suite(`status is 'stopped' after successful stop(...)`, async ({ puppeteer: { pa
   assert.is(value, expected)
 })
 
-suite(`listen(...) adds event to active`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) adds event to active', async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -96,7 +96,7 @@ suite(`listen(...) adds event to active`, async ({ puppeteer: { reloadNext, page
   reloadNext()
 })
 
-suite(`stop(...) removes event from active`, async ({ puppeteer: { page } }) => {
+suite('stop(...) removes event from active', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -108,7 +108,7 @@ suite(`stop(...) removes event from active`, async ({ puppeteer: { page } }) => 
   assert.is(value, expected)
 })
 
-suite(`listen(...) handles intersect`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles intersect', async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
           const instance = new window.Logic.Listenable('intersect')
@@ -126,7 +126,7 @@ suite(`listen(...) handles intersect`, async ({ puppeteer: { reloadNext, page } 
   reloadNext()
 })
 
-suite(`listen(...) handles mutate`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles mutate', async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
           const instance = new window.Logic.Listenable('mutate')
@@ -145,7 +145,7 @@ suite(`listen(...) handles mutate`, async ({ puppeteer: { reloadNext, page } }) 
   reloadNext()
 })
 
-suite(`listen(...) handles resize`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles resize', async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
           const instance = new window.Logic.Listenable('resize')
@@ -165,12 +165,12 @@ suite(`listen(...) handles resize`, async ({ puppeteer: { reloadNext, page } }) 
   reloadNext()
 })
 
-suite(`listen(...) handles media queries`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles media queries', async ({ puppeteer: { reloadNext, page } }) => {
   await page.evaluate(async () => {
     window.testState = {
       value: false,
       instance: new window.Logic.Listenable('(min-width: 900px)')
-        .listen(() => window.testState.value = true)
+        .listen(() => window.testState.value = true),
     }
   })
   
@@ -190,7 +190,7 @@ suite(`listen(...) handles media queries`, async ({ puppeteer: { reloadNext, pag
   reloadNext()
 })
 
-suite(`listen(...) handles idle`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles idle', async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('idle')
           instance.listen(() => {})
@@ -204,7 +204,7 @@ suite(`listen(...) handles idle`, async ({ puppeteer: { reloadNext, page } }) =>
   reloadNext()
 })
 
-suite(`listen(...) handles message`, async ({ puppeteer: { browser, reloadNext, page } }) => {
+suite('listen(...) handles message', async ({ puppeteer: { browser, reloadNext, page } }) => {
   await page.evaluate(async () => {
     const instance = new window.Logic.Listenable('message')
     instance.listen(event => window.testState = event.data)
@@ -227,9 +227,9 @@ suite(`listen(...) handles message`, async ({ puppeteer: { browser, reloadNext, 
 })
 
 // Not sure how to trigger messageerror
-suite.skip(`listen(...) handles messageerror`, async ({ puppeteer: { browser, reloadNext, page } }) => {})
+suite.skip('listen(...) handles messageerror', async () => {})
 
-suite(`listen(...) handles visibility change`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles visibility change', async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('visibilitychange')
           instance.listen(() => {})
@@ -243,15 +243,15 @@ suite(`listen(...) handles visibility change`, async ({ puppeteer: { reloadNext,
   reloadNext()
 })
 
-suite(`listen(...) handles recognizeable`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles recognizeable', async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
               effects: {
                 keydown: () => {},
                 mousedown: () => {},
-              }
-            }
+              },
+            },
           })
           instance.listen(() => {})
           return instance.active.size === 2
@@ -263,7 +263,7 @@ suite(`listen(...) handles recognizeable`, async ({ puppeteer: { reloadNext, pag
   reloadNext()
 })
 
-suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) stores recognizeable', async ({ puppeteer: { reloadNext, page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
@@ -271,7 +271,7 @@ suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page
                 keydown: () => {},
                 mousedown: () => {},
               },
-            }
+            },
           })
           instance.listen(() => {})
           return instance.recognizeable instanceof window.Logic.Recognizeable
@@ -283,7 +283,7 @@ suite(`listen(...) stores recognizeable`, async ({ puppeteer: { reloadNext, page
   reloadNext()
 })
 
-suite(`listen(...) calls effect when recognizeable status is recognized`, async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) calls effect when recognizeable status is recognized', async ({ puppeteer: { reloadNext, page } }) => {
   await page.evaluate(async () => {
     const instance = new window.Logic.Listenable('recognizeable' as 'keydown', {
       recognizeable: {
@@ -291,8 +291,8 @@ suite(`listen(...) calls effect when recognizeable status is recognized`, async 
           keydown: (event, { recognized }) => {
             recognized()
           },
-        }
-      }
+        },
+      },
     })
     window.testState = 0
     instance.listen(() => {
@@ -314,7 +314,7 @@ suite(`listen(...) calls effect when recognizeable status is recognized`, async 
   reloadNext()
 })
 
-suite(`stop(...) handles observations`, async ({ puppeteer: { page } }) => {
+suite('stop(...) handles observations', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
           const instance = new window.Logic.Listenable('resize')
@@ -334,13 +334,13 @@ suite(`stop(...) handles observations`, async ({ puppeteer: { page } }) => {
 
 })
 
-suite(`stop(...) handles media queries`, async ({ puppeteer: { page } }) => {
+suite('stop(...) handles media queries', async ({ puppeteer: { page } }) => {
   await page.evaluate(async () => {
     window.testState = {
       value: false,
       instance: new window.Logic.Listenable('(min-width: 900px)')
-        .listen(() => window.testState.value = true)
-    };
+        .listen(() => window.testState.value = true),
+    }
 
     window.testState.instance.stop()
   })
@@ -360,7 +360,7 @@ suite(`stop(...) handles media queries`, async ({ puppeteer: { page } }) => {
 
 })
 
-suite(`stop(...) handles idle`, async ({ puppeteer: { page } }) => {
+suite('stop(...) handles idle', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('idle')
           instance.listen(() => {})
@@ -372,7 +372,7 @@ suite(`stop(...) handles idle`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`stop(...) handles visibility change`, async ({ puppeteer: { page } }) => {
+suite('stop(...) handles visibility change', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('visibilitychange')
           instance.listen(() => {})
@@ -384,16 +384,16 @@ suite(`stop(...) handles visibility change`, async ({ puppeteer: { page } }) => 
   assert.is(value, expected)
 })
 
-suite(`stop(...) handles keycombos`, async ({ puppeteer: { page } }) => {
+suite('stop(...) handles keycombos', async ({ puppeteer: { page } }) => {
   await page.evaluate(async () => {
     window.testState = {
       value: false,
       instance: new window.Logic.Listenable('keydown')
         .listen(event => {
-          const matches = window.Logic.createMatchesKeycombo('cmd+b')
+          const matches = window.Logic.createKeycomboMatch('cmd+b')
           if (matches(event)) window.testState.value = true
-        })
-    };
+        }),
+    }
 
     window.testState.instance.stop()
   })
@@ -412,69 +412,15 @@ suite(`stop(...) handles keycombos`, async ({ puppeteer: { page } }) => {
 
 })
 
-suite(`stop(...) handles left click combos`, async ({ puppeteer: { page } }) => {
-  await page.evaluate(async () => {
-    window.testState = {
-      value: false,
-      instance: new window.Logic.Listenable('mousedown')
-        .listen(event => {
-          const matches = window.Logic.createMatchesMousecombo('cmd+mousedown')
-          if (matches(event)) window.testState.value = true
-        })
-    };
-
-    window.testState.instance.stop()
-  })
-
-  await page.keyboard.down('Meta')
-  await page.mouse.down()
-
-  const value = await page.evaluate(() => {
-          return new Promise(resolve => {
-            setTimeout(() => resolve(window.testState.value), 20)
-          })
-        }),
-        expected = false
-
-  assert.is(value, expected)
-})
-
-suite(`stop(...) handles right click combos`, async ({ puppeteer: { page } }) => {
-  await page.evaluate(async () => {
-    window.testState = {
-      value: false,
-      instance: new window.Logic.Listenable('contextmenu')
-        .listen(event => {
-          const matches = window.Logic.createMatchesMousecombo('cmd+rightclick')
-          if (matches(event)) window.testState.value = true
-        })
-    };
-
-    window.testState.instance.stop()
-  })
-
-  await page.keyboard.down('Meta')
-  await page.mouse.click(100, 100, { button: 'right' })
-
-  const value = await page.evaluate(() => {
-          return new Promise(resolve => {
-            setTimeout(() => resolve(window.testState.value), 20)
-          })
-        }),
-        expected = false
-
-  assert.is(value, expected)
-})
-
-suite(`stop(...) handles recognizeable`, async ({ puppeteer: { page } }) => {
+suite('stop(...) handles recognizeable', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
               effects: {
                 keydown: () => {},
                 mousedown: () => {},
-              }
-            }
+              },
+            },
 
           })
           instance.listen(() => {})
@@ -486,7 +432,7 @@ suite(`stop(...) handles recognizeable`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`stop(...) can be limited to a target`, async ({ puppeteer: { page } }) => {
+suite('stop(...) can be limited to a target', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -500,7 +446,7 @@ suite(`stop(...) can be limited to a target`, async ({ puppeteer: { page } }) =>
   assert.equal(value, expected)
 })
 
-suite(`status is 'listening' when stop(...) is limited to a target such that not all active listeners are removed`, async ({ puppeteer: { page } }) => {
+suite('status is \'listening\' when stop(...) is limited to a target such that not all active listeners are removed', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})

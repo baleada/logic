@@ -40,7 +40,7 @@ export function storeKeyboardTimeMetadata<
 }): void {
   if (!getShouldStore()) return
 
-  const { getStatus, onRecognized } = api,
+  const { getStatus, listenInjection: { effect } } = api,
         timeMetadata = getTimeMetadata()
 
   if (!timeMetadata.times) timeMetadata.times = createClone<KeyboardTimeMetadata['times']>()(initialMetadata.times)
@@ -59,7 +59,7 @@ export function storeKeyboardTimeMetadata<
         // @ts-expect-error
         recognize(event, api)
         // @ts-expect-error
-        if (getStatus() === 'recognized') onRecognized(event)
+        if (getStatus() === 'recognized') effect(event)
       }
 
       storeDuration()

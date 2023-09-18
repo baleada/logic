@@ -33,7 +33,7 @@ export function storePointerTimeMetadata<
     PointerTimeMetadata & PointerMoveMetadata
   >,
 ): void {
-  const { getSequence, getMetadata, getStatus, onRecognized } = api,
+  const { getSequence, getMetadata, getStatus, listenInjection: { effect } } = api,
         metadata = getMetadata()
 
   if (!metadata.times) {
@@ -55,8 +55,9 @@ export function storePointerTimeMetadata<
         
         const event = getSequence().at(-1)
 
+        // @ts-expect-error
         recognize?.(event, api)
-        if (getStatus() === 'recognized') onRecognized(event)
+        if (getStatus() === 'recognized') effect(event)
 
         storeDuration()
       }
