@@ -16,6 +16,9 @@ const defaultOptions: StoreableOptions = {
   statusKeySuffix: ' status',
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/storeable)
+ */
 export class Storeable<String extends string> {
   private kind: 'local' | 'session'
   private statusKeySuffix: string

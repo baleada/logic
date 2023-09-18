@@ -7,14 +7,23 @@ type ObjectTransform<Type extends Record<any, any>, Transformed> = (transform: T
 
 type ValueOf<Type> = Type[keyof Type]
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/value)
+ */
 export function createValue<Type extends Record<any, any>>(key: keyof Type): ObjectTransform<Type, ValueOf<Type>> {
   return object => object[key]
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/has)
+ */
 export function createHas<Type extends Record<any, any>>(key: keyof Type): ObjectTransform<Type, boolean> {
   return object => key in object
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/keys)
+ */
 export function createKeys<Type extends Record<any, any>>(): ObjectTransform<Type, (keyof Type)[]> {
   return object => {
     const keys = []
@@ -27,6 +36,9 @@ export function createKeys<Type extends Record<any, any>>(): ObjectTransform<Typ
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/values)
+ */
 export function createValues<Type extends Record<any, any>>(): ObjectTransform<Type, ValueOf<Type>[]> {
   return object => {
     const values = []
@@ -39,6 +51,9 @@ export function createValues<Type extends Record<any, any>>(): ObjectTransform<T
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/entries)
+ */
 export function createEntries<Type extends Record<any, any>>(): ObjectTransform<Type, [keyof Type, ValueOf<Type>][]> {
   return object => {
     const entries = []
@@ -51,6 +66,9 @@ export function createEntries<Type extends Record<any, any>>(): ObjectTransform<
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/every)
+ */
 export function createEvery<Type extends Record<any, any>>(predicate: (key: keyof Type, value: ValueOf<Type>) => unknown): ObjectTransform<Type, boolean> {
   return object => {
     for (const key in object) {
@@ -63,6 +81,9 @@ export function createEvery<Type extends Record<any, any>>(predicate: (key: keyo
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/some)
+ */
 export function createSome<Type extends Record<any, any>>(predicate: (key: keyof Type, value: ValueOf<Type>) => unknown): ObjectTransform<Type, boolean> {
   return object => {
     for (const key in object) {
@@ -73,6 +94,9 @@ export function createSome<Type extends Record<any, any>>(predicate: (key: keyof
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/deep-merge)
+ */
 export function createDeepMerge<Type extends Record<any, any>>(override?: Type): ObjectTransform<Type, Type> {
   return object => {
     const merged: Type = createClone<typeof object>()(object)

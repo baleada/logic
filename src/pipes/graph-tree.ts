@@ -6,6 +6,9 @@ import type {
 
 export type GraphTreeTransform<Id extends string, Transformed> = (tree: GraphTree<Id>) => Transformed
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/find)
+ */
 export function createFind<Id extends string> (node: GraphNode<Id>): GraphTreeTransform<Id, GraphTreeNode<Id>> {
   return tree => {
     for (const treeNode of tree) {

@@ -5,6 +5,9 @@ export type SearchableOptions<Item> = SearcherOptions<Item>
 
 export type SearchableStatus = 'ready' | 'searched'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/searchable)
+ */
 export class Searchable<Item extends string | object> {
   private searcherOptions: SearcherOptions<Item>
   private computedResults: SearcherMatchData<Item>[] | Item[]

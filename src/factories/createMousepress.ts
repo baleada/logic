@@ -35,6 +35,9 @@ const defaultOptions: MousepressOptions = {
   getMousemoveTarget: (event: MouseEvent) => event.target as HTMLElement,
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/factories/mousepress)
+ */
 export function createMousepress (options: MousepressOptions = {}): RecognizeableOptions<MousepressType, MousepressMetadata>['effects'] {
   const {
           minDuration,

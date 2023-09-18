@@ -22,6 +22,7 @@ const external = [
           'src/pipes/index.ts',
           'src/links/index.ts',
           'src/factories/index.ts',
+          'src/extracted/public.ts',
         ])
         .external(external)
         .resolve()
@@ -40,6 +41,7 @@ const external = [
           'types/pipes/index.d.ts',
           'types/links/index.d.ts',
           'types/factories/index.d.ts',
+          'src/extracted/public.d.ts',
         ])
         .external([
           ...external,

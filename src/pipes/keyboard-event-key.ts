@@ -3,6 +3,9 @@ import type { StringTransform } from './string'
 
 type MatchKind = 'variant' | 'case' | 'accent'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/match-kinds)
+ */
 export function createMatchKinds (name: string): StringTransform<MatchKind[]> {
   const variantSensitive = new Compareable(name, { collator: { sensitivity: 'variant' } }),
         caseSensitive = new Compareable(name, { collator: { sensitivity: 'case' } }),

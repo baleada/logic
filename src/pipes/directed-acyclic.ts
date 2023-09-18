@@ -29,6 +29,9 @@ import { createPath } from './directed-acyclic-state'
 import type { CreatePathConfig } from './directed-acyclic-state'
 import { createReduce } from './array'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-layers)
+ */
 export function createLayers<
   Id extends string
 >(options: { createDepthFirstSteps?: CreateStepsOptions<Id> } = {}): GraphGeneratorTransform<Id, any, GraphNode<Id>[]> {
@@ -49,6 +52,9 @@ export function createLayers<
 }
 
 // TODO: root option, multiple roots
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-tree)
+ */
 export function createTree<
   Id extends string
 >(options: { createDepthFirstSteps?: CreateStepsOptions<Id> } = {}): GraphTransform<Id, any, GraphTree<Id>> {
@@ -93,6 +99,9 @@ const defaultCreateDepthFirstStepsOptions: CreateDepthFirstStepsOptions<any> = {
   getSetStateValue: ({ totalChildrenDiscovered }) => totalChildrenDiscovered,
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-depth-first-steps)
+ */
 export function createDepthFirstSteps<Id extends string, StateValue = number> (
   options: CreateDepthFirstStepsOptions<Id, StateValue> = {}
 ): GraphGeneratorTransform<Id, StateValue, GraphStep<Id, StateValue>> {
@@ -149,6 +158,9 @@ export const defaultCreateBreadthFirstStepsOptions: CreateBreadthFirstStepsOptio
   getSetStateValue: ({ totalSiblingsDiscovered }) => totalSiblingsDiscovered,
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-breadth-first-steps)
+ */
 export function createBreadthFirstSteps<Id extends string, StateValue = number> (
   options: CreateBreadthFirstStepsOptions<Id, StateValue> = {}
 ): GraphGeneratorTransform<Id, StateValue, GraphStep<Id, StateValue>> {
@@ -217,6 +229,9 @@ export const defaultCreateStepsOptions: CreateStepsOptions<any> = {
   kind: 'directed acyclic',
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-steps)
+ */
 export function createSteps<
   Id extends string,
   StateValue
@@ -287,6 +302,9 @@ export function createSteps<
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-roots)
+ */
 export function createRoots<
   Id extends string,
   StateValue,

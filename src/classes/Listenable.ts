@@ -55,6 +55,7 @@ export type ListenEffectParam<Type extends ListenableSupportedType> =
   Type extends 'mutate' ? MutationRecord[] :
   Type extends 'resize' ? ResizeObserverEntry[] :
   Type extends 'idle' ? IdleDeadline :
+  Type extends ('message' | 'messageerror') ? MessageEvent : 
   Type extends ListenableMediaQuery ? MediaQueryListEvent :
   Type extends ListenableRightClick ? MouseEvent :
   Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? HTMLElementEventMap[Type] :
@@ -104,6 +105,9 @@ type ListenableActiveEventId<Type extends ListenableSupportedEventType> = [
 
 export type ListenableStatus = 'ready' | 'listening' | 'stopped'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/listenable)
+ */
 export class Listenable<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> {
   private computedRecognizeable: Recognizeable<Type, RecognizeableMetadata>
   private recognizeableEffectsKeys: Type[]

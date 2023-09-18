@@ -29,6 +29,9 @@ const defaultOptions: DeepRequired<CreateFocusableOptions> = {
   ]) as string,
 } 
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/focusable)
+ */
 export function createFocusable (
   order: 'first' | 'last',
   options: CreateFocusableOptions = {}

@@ -3,6 +3,9 @@ import { createFilter } from './array'
 
 export type ArrayAsyncTransform<Item, Transformed> = (array: Item[]) => Promise<Transformed>
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/filter-async)
+ */
 export function createFilterAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncTransform<Item, Item[]> {
   return async array => {
     const transformedAsync = await createMapAsync<Item, boolean>(predicate)(array)
@@ -10,6 +13,9 @@ export function createFilterAsync<Item>(predicate: (item: Item, index: number) =
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/find-async)
+ */
 export function createFindAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncTransform<Item, Item | undefined> {
   return async array => {
     for (let i = 0; i < array.length; i++) {
@@ -20,6 +26,9 @@ export function createFindAsync<Item>(predicate: (item: Item, index: number) => 
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/find-index-async)
+ */
 export function createFindIndexAsync<Item>(predicate: (item: Item, index: number) => Promise<boolean>): ArrayAsyncTransform<Item, number> {
   return async array => {
     for (let i = 0; i < array.length; i++) {
@@ -30,6 +39,9 @@ export function createFindIndexAsync<Item>(predicate: (item: Item, index: number
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/map-async)
+ */
 export function createMapAsync<Item, Mapped>(transform: (item: Item, index: number) => Promise<Mapped>): ArrayAsyncTransform<Item, Mapped[]> {
   return async array => {
     return await createReduceAsync<Item, Mapped[]>(
@@ -43,6 +55,9 @@ export function createMapAsync<Item, Mapped>(transform: (item: Item, index: numb
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/reduce-async)
+ */
 export function createReduceAsync<Item, Accumulator>(
   accumulate: (accumulator: Accumulator, item: Item, index: number) => Promise<Accumulator>,
   initialValue?: Accumulator

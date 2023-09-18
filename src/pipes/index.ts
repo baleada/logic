@@ -35,8 +35,6 @@ export {
   createKeys as createAssociativeArrayKeys,
   createValues as createAssociativeArrayValues,
 } from './associative-array'
-export { defineAssociativeArray } from '../extracted'
-export type { AssociativeArray } from '../extracted'
 
 export {
   createList,
@@ -116,29 +114,6 @@ export {
   createOutgoing,
   createTotalSiblings,
 } from './graph-node'
-export {
-  defineGraph,
-  defineGraphNodes,
-  defineGraphEdges,
-  defineGraphNode,
-  defineGraphEdge,
-  defineGraphAsync,
-  defineGraphAsyncEdges,
-  defineGraphAsyncEdge,
-} from '../extracted'
-export type {
-  Graph,
-  GraphNode,
-  GraphEdge,
-  GraphState,
-  GraphPath,
-  GraphStep,
-  GraphCommonAncestor,
-  GraphTreeNode,
-  GraphTree,
-  GraphAsync,
-  GraphAsyncEdge,
-} from '../extracted'
 
 export {
   createFind as createTreeFind,
@@ -147,7 +122,7 @@ export {
 export {
   createKeycomboMatch,
 } from './keyboard-event'
-export type { CreateKeycomboMatchOptions } from '../extracted'
+export type { CreateKeycomboMatchOptions } from './keyboard-event'
 
 export {
   createClamp,

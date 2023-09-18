@@ -20,6 +20,9 @@ const defaultOptions: Required<CreateGraphOptions<any>> = {
   toChildren: node => node.children,
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/graph)
+ */
 export function createGraph<TreeNode> (
   options: CreateGraphOptions<TreeNode> = {}
 ): GeneratorTransform<TreeNode[], ToGraphYielded> {

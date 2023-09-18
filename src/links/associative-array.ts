@@ -5,6 +5,9 @@ import type { WithPredicateKey } from '../pipes/associative-array'
 
 export type AssociativeArrayEffect<Key, Value> = (associativeArray: AssociativeArray<Key, Value>) => AssociativeArray<Key, Value>
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/links/associative-array-set)
+ */
 export function createSet<Key extends any, Value extends any> (
   key: Key,
   value: Value,
@@ -28,6 +31,9 @@ export function createSet<Key extends any, Value extends any> (
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/links/associative-array-clear)
+ */
 export function createClear<Key extends any, Value extends any> (): AssociativeArrayEffect<Key, Value> {
   return associativeArray => {
     associativeArray.length = 0
@@ -35,6 +41,9 @@ export function createClear<Key extends any, Value extends any> (): AssociativeA
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/links/associative-array-delete)
+ */
 export function createDelete<Key extends any> (
   key: Key,
   options: WithPredicateKey = {},

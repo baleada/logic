@@ -11,6 +11,9 @@ import { createRoots } from './directed-acyclic'
 import type { CreatePathConfig } from './directed-acyclic-state'
 
 // TODO: root option, multi root support
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-async-path)
+ */
 export function createPath<
   Id extends string,
   Metadata

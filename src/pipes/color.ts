@@ -19,6 +19,9 @@ export const defaultCreateMixOptions: CreateMixOptions = {
 
 export type MixColor = `${string} ${number}%` | string
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/mix)
+ */
 export function createMix (color2: MixColor, options: CreateMixOptions = {}): MixColorTransform<string> {
   const { method, tag, getParent } = { ...defaultCreateMixOptions, ...options }
   

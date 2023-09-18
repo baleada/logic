@@ -34,6 +34,9 @@ export type RecognizeOptions<Type extends ListenableSupportedType> = {
   onRecognized?: (sequenceItem: ListenEffectParam<Type>) => any,
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/recognizeable)
+ */
 export class Recognizeable<Type extends ListenableSupportedType, Metadata extends Record<any, any>> {
   private maxSequenceLength: number | true
   private effects: RecognizeableOptions<Type, Metadata>['effects']

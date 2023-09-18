@@ -17,6 +17,9 @@ import type {
 import { createDepthFirstSteps } from './directed-acyclic-async'
 import type { CreateDepthFirstStepsOptions } from './directed-acyclic'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-common-ancestors)
+ */
 export function createCommonAncestors<
   Id extends string,
   Metadata
@@ -47,6 +50,9 @@ export function createCommonAncestors<
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/Ancestor)
+ */
 export function createAncestor<
   Id extends string,
   Metadata
@@ -61,6 +67,9 @@ export function createAncestor<
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/NodeDepthFirstSteps)
+ */
 export function createNodeDepthFirstSteps<
   Id extends string,
   Metadata

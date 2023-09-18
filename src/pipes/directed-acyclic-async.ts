@@ -27,6 +27,9 @@ import {
 } from './directed-acyclic'
 import { createFind as createTreeFind } from './graph-tree'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-async-layers)
+ */
 export function createLayers<
   Id extends string
 >(options: { createDepthFirstSteps?: CreateStepsOptions<Id> } = {}): GraphAsyncTransform<Id, any, GraphNode<Id>[][]> {
@@ -48,6 +51,9 @@ export function createLayers<
 
 
 // TODO: root option, multiple roots
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-async-tree)
+ */
 export function createTree<
   Id extends string
 >(options: { createDepthFirstSteps?: CreateStepsOptions<Id> } = {}): GraphAsyncTransform<Id, any, GraphTree<Id>> {
@@ -84,6 +90,9 @@ export function createTree<
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-async-depth-first-steps)
+ */
 export function createDepthFirstSteps<Id extends string, StateValue = number> (
   options: CreateDepthFirstStepsOptions<Id, StateValue> = {}
 ): GraphAsyncGeneratorAsyncTransform<Id, StateValue, GraphStep<Id, StateValue>> {
@@ -93,6 +102,9 @@ export function createDepthFirstSteps<Id extends string, StateValue = number> (
   )
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-async-breadth-first-steps)
+ */
 export function createBreadthFirstSteps<Id extends string, StateValue = number> (
   options: CreateBreadthFirstStepsOptions<Id, StateValue> = {}
 ): GraphAsyncGeneratorAsyncTransform<Id, StateValue, GraphStep<Id, StateValue>> {
@@ -102,6 +114,9 @@ export function createBreadthFirstSteps<Id extends string, StateValue = number> 
   )
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-async-steps)
+ */
 export function createSteps<
   Id extends string,
   StateValue

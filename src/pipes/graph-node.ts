@@ -16,6 +16,9 @@ export type GraphNodeTupleTransform<Id extends string, Transformed> = (...nodes:
 
 export type GraphNodeTupleGeneratorTransform<Id extends string, Yielded> = (...nodes: [GraphNode<Id>, GraphNode<Id>]) => Generator<Yielded>
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/root)
+ */
 export function createRoot<
   Id extends string,
   Metadata,
@@ -25,6 +28,9 @@ export function createRoot<
   return node => toIndegree(node) === 0
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/terminal)
+ */
 export function createTerminal<
   Id extends string,
   Metadata,
@@ -34,6 +40,9 @@ export function createTerminal<
   return node => toOutdegree(node) === 0
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/children)
+ */
 export function createChildren<
   Id extends string,
   Metadata,
@@ -45,6 +54,9 @@ export function createChildren<
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/indegree)
+ */
 export function createIndegree<
   Id extends string,
   Metadata,
@@ -57,6 +69,9 @@ export function createIndegree<
   )(node)
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/outdegree)
+ */
 export function createOutdegree<
   Id extends string,
   Metadata,
@@ -69,6 +84,9 @@ export function createOutdegree<
   )(node)
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/incoming)
+ */
 export function createIncoming<
   Id extends string,
   Metadata,
@@ -92,6 +110,9 @@ export function createIncoming<
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/outgoing)
+ */
 export function createOutgoing<
   Id extends string,
   Metadata,
@@ -126,6 +147,9 @@ export function createOnlyChild<
   return node => toTotalSiblings(node) === 0
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/total-siblings)
+ */
 export function createTotalSiblings<
   Id extends string,
   Metadata,
@@ -138,6 +162,9 @@ export function createTotalSiblings<
   )(node)
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/siblings)
+ */
 export function createSiblings<
   Id extends string,
   Metadata,

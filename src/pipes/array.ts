@@ -4,6 +4,9 @@ import { predicateObject } from '../extracted'
 
 export type ArrayTransform<Item, Transformed> = (array: Item[]) => Transformed
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/concat)
+ */
 export function createConcat<Item>(...arrays: Item[][]): ArrayTransform<Item, Item[]> {
   return array => pipe(
     concat(array, ...arrays),
@@ -11,6 +14,9 @@ export function createConcat<Item>(...arrays: Item[][]): ArrayTransform<Item, It
   )() as Item[]
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/filter)
+ */
 export function createFilter<Item>(predicate: (item: Item, index: number) => boolean): ArrayTransform<Item, Item[]> {
   return array => pipe(
     filter(predicate),
@@ -18,6 +24,9 @@ export function createFilter<Item>(predicate: (item: Item, index: number) => boo
   )(array) as Item[]
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/insert)
+ */
 export function createInsert<Item>(item: Item, index: number): ArrayTransform<Item, Item[]> {
   return array => {
     const withItems = createConcat(array, [item])([])
@@ -29,6 +38,9 @@ export function createInsert<Item>(item: Item, index: number): ArrayTransform<It
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/map)
+ */
 export function createMap<Item, Transformed = Item>(transform: (item: Item, index: number) => Transformed): ArrayTransform<Item, Transformed[]> {
   return array => pipe(
     map(transform),
@@ -36,6 +48,9 @@ export function createMap<Item, Transformed = Item>(transform: (item: Item, inde
   )(array) as Transformed[]
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/reduce)
+ */
 export function createReduce<Item, Accumulator>(
   accumulate: (accumulator: Accumulator, item: Item, index: number) => Accumulator,
   initialValue?: Accumulator
@@ -43,6 +58,9 @@ export function createReduce<Item, Accumulator>(
   return array => reduce<Accumulator, Item>(accumulate, initialValue)(array) as Accumulator
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/remove)
+ */
 export function createRemove<Item>(index: number): ArrayTransform<Item, Item[]> {
   return array => {
     return createConcat(
@@ -52,6 +70,9 @@ export function createRemove<Item>(index: number): ArrayTransform<Item, Item[]> 
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/reorder)
+ */
 export function createReorder<Item>(
   from: { start: number; itemCount: number; } | number,
   to: number
@@ -94,10 +115,16 @@ export function createReorder<Item>(
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/replace)
+ */
 export function createReplace<Item>(index: number, replacement: Item): ArrayTransform<Item, Item[]> {
   return createMap<Item, Item>((item, i) => i === index ? replacement : item)
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/reverse)
+ */
 export function createReverse<Item>(): ArrayTransform<Item, Item[]> {
   return array => {
     const reversed = []
@@ -110,6 +137,9 @@ export function createReverse<Item>(): ArrayTransform<Item, Item[]> {
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/slice)
+ */
 export function createSlice<Item>(from: number, to?: number): ArrayTransform<Item, Item[]> {
   if (from < 0 || to && to < 0) return array => array.slice(from, to)
 
@@ -125,12 +155,18 @@ export function createSlice<Item>(from: number, to?: number): ArrayTransform<Ite
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/shuffle)
+ */
 export function createShuffle<Item>(): ArrayTransform<Item, Item[]> {
   return array => {
     return arrayShuffle(array)
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/sort)
+ */
 export function createSort<Item>(compare?: (itemA: Item, itemB: Item) => number): ArrayTransform<Item, Item[]> {
   return array => {
     return pipe(
@@ -140,6 +176,9 @@ export function createSort<Item>(compare?: (itemA: Item, itemB: Item) => number)
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/swap)
+ */
 export function createSwap<Item>(item1Index: number, item2Index: number): ArrayTransform<Item, Item[]> {
   return array => {
     const { reorderFrom, reorderTo } = (() => {
@@ -167,6 +206,9 @@ export function createSwap<Item>(item1Index: number, item2Index: number): ArrayT
   }
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/unique)
+ */
 export function createUnique<Item>(): ArrayTransform<Item, Item[]> {
   return array => pipe(
     unique(),

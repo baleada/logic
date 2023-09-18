@@ -17,6 +17,9 @@ export type CreatePathConfig<
 }
 
 // TODO: root option, multi root support, breadth-first support
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/directed-acyclic-path)
+ */
 export function createPath<
   Id extends string,
   Metadata

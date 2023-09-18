@@ -4,6 +4,9 @@ export type ShareableOptions = Record<never, never>
 
 export type ShareableStatus = 'ready' | 'sharing' | 'shared' | 'errored'
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/classes/shareable)
+ */
 export class Shareable {
   constructor (shareData: ShareData, options: ShareableOptions = {}) {
     this.setShareData(shareData)

@@ -8,6 +8,9 @@ import { createMap } from './array'
 
 export type NumberTransform<Transformed> = (number: number) => Transformed
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/clamp)
+ */
 export function createClamp(min: number, max: number): NumberTransform<number> {
   return number => {
     const maxed = Math.max(number, min)
@@ -17,6 +20,9 @@ export function createClamp(min: number, max: number): NumberTransform<number> {
 
 export type Potentiality<Outcome> = { outcome: Outcome, probability: number }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/determine)
+ */
 export function createDetermine<Outcome>(
   potentialities: Potentiality<Outcome>[]
 ): NumberTransform<Outcome> {

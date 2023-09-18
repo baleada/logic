@@ -36,6 +36,9 @@ const defaultOptions: CreateKeycomboMatchOptions = {
   toAliases: descriptor => fromKeyboardEventDescriptorToAliases(descriptor),
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/keycombo-match)
+ */
 export const createKeycomboMatch = (
   keycombo: string,
   options: CreateKeycomboMatchOptions = {},
