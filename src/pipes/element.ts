@@ -60,3 +60,10 @@ export function createFocusable (
     }
   }
 }
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/computed-style)
+ */
+export function createComputedStyle (pseudoElement?: string): ElementTransform<HTMLElement, CSSStyleDeclaration> {
+  return element => getComputedStyle(element, pseudoElement)
+}

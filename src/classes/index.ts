@@ -46,9 +46,6 @@ export type { RecognizeableOptions, RecognizeableStatus, RecognizeableEffect, Re
 export { Resolveable } from './Resolveable'
 export type { ResolveableOptions, ResolveableStatus } from './Resolveable'
 
-export { Searchable } from './Searchable'
-export type { SearchableOptions, SearchableStatus } from './Searchable'
-
 export { Shareable } from './Shareable'
 export type { ShareableOptions, ShareableStatus } from './Shareable'
 

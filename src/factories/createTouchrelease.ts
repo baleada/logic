@@ -1,4 +1,5 @@
-import { Listenable, type RecognizeableEffect, type RecognizeableOptions } from '../classes'
+import { Listenable } from '../classes/Listenable'
+import type { RecognizeableEffect } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
@@ -37,7 +38,7 @@ const defaultOptions: TouchreleaseOptions = {
   minVelocity: 0,
 }
 
-export function createTouchrelease (options: TouchreleaseOptions = {}): RecognizeableOptions<TouchreleaseType, TouchreleaseMetadata>['effects'] {
+export function createTouchrelease (options: TouchreleaseOptions = {}) {
   const {
           minDuration,
           minDistance,

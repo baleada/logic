@@ -1,4 +1,4 @@
-import { Listenable, type RecognizeableOptions } from '../classes'
+import { Listenable } from '../classes/Listenable'
 import { createKeychord } from './createKeychord'
 import type {
   KeychordType,
@@ -14,7 +14,7 @@ export type KonamiOptions = KeychordOptions
 export type KonamiHook = KeychordHook
 export type KonamiHookApi = KeychordHookApi
 
-export function createKonami (options: KonamiOptions = {}): RecognizeableOptions<KonamiType, KonamiMetadata>['effects'] {
+export function createKonami (options: KonamiOptions = {}) {
   return createKeychord('up up down down left right left right b a enter', options)
 }
 

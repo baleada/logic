@@ -1,4 +1,5 @@
-import { Listenable, type RecognizeableEffect, type RecognizeableOptions } from '../classes'
+import { Listenable } from '../classes/Listenable'
+import type { RecognizeableEffect } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
@@ -33,7 +34,7 @@ const defaultOptions: TouchpressOptions = {
   minDistance: 0,
 }
 
-export function createTouchpress (options: TouchpressOptions = {}): RecognizeableOptions<TouchpressType, TouchpressMetadata>['effects'] {
+export function createTouchpress (options: TouchpressOptions = {}) {
   const {
           minDuration,
           minDistance,

@@ -1,4 +1,5 @@
-import { Listenable, type RecognizeableEffect, type RecognizeableOptions } from '../classes'
+import { Listenable } from '../classes/Listenable'
+import type { RecognizeableEffect } from '../classes'
 import { toHookApi, toPolarCoordinates } from '../extracted'
 import type { HookApi, PointerStartMetadata, PointerTimeMetadata, PolarCoordinates } from '../extracted'
 
@@ -46,7 +47,7 @@ const defaultOptions: TouchrotateOptions = {
   minRotationUnit: 'degrees',
 }
 
-export function createTouchrotate (options: TouchrotateOptions = {}): RecognizeableOptions<TouchrotateType, TouchrotateMetadata>['effects'] {
+export function createTouchrotate (options: TouchrotateOptions = {}) {
   const { minRotation, minRotationUnit, onStart, onMove, onCancel, onEnd } = { ...defaultOptions, ...options },
         cache: { identifiers?: [number, number] } = {}
 

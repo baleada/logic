@@ -15,7 +15,6 @@ import { Navigateable } from '../../src/classes/Navigateable'
 import { Pickable } from '../../src/classes/Pickable'
 import { Recognizeable } from '../../src/classes/Recognizeable'
 import { Resolveable } from '../../src/classes/Resolveable'
-import { Searchable } from '../../src/classes/Searchable'
 import { Shareable } from '../../src/classes/Shareable'
 import { Storeable } from '../../src/classes/Storeable'
 
@@ -109,12 +108,6 @@ suite('can construct Resolveable instance in a server environment', () => {
   const instance = new Resolveable(async () => {})
 
   assert.ok(instance instanceof Resolveable)
-})
-
-suite('can construct Searchable instance in a server environment', () => {
-  const instance = new Searchable([])
-
-  assert.ok(instance instanceof Searchable)
 })
 
 suite('can construct Shareable instance in a server environment', () => {

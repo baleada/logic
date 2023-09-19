@@ -1,4 +1,9 @@
-import { Listenable, type ListenEffectParam, type ListenOptions, type RecognizeableEffect, type RecognizeableOptions } from '../classes'
+import { Listenable } from '../classes/Listenable'
+import type {
+  RecognizeableEffect,
+  ListenEffectParam,
+  ListenOptions,
+} from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
@@ -37,7 +42,7 @@ const defaultOptions: MousereleaseOptions = {
   minVelocity: 0,
 }
 
-export function createMouserelease (options: MousereleaseOptions = {}): RecognizeableOptions<MousereleaseType, MousereleaseMetadata>['effects'] {
+export function createMouserelease (options: MousereleaseOptions = {}) {
   const {
           minDuration,
           minDistance,

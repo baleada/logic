@@ -99,6 +99,7 @@ export {
 
 export {
   createFocusable,
+  createComputedStyle,
 } from './element'
 export type { CreateFocusableOptions } from './element'
 
@@ -127,6 +128,10 @@ export type { CreateKeycomboMatchOptions } from './keyboard-event'
 export {
   createClamp,
   createDetermine,
+  createGreater,
+  createGreaterOrEqual,
+  createLessOrEqual,
+  createLess,
 } from './number'
 export type { Potentiality } from './number'
 
@@ -144,6 +149,11 @@ export {
   createClip,
   createSanitize,
   createSlug,
+  createNumber,
+  createResults,
+} from './string'
+export type{
+  CreateResultsOptions,
 } from './string'
 
 export {

@@ -1,4 +1,9 @@
-import { Listenable, type ListenEffectParam, type ListenOptions, type RecognizeableEffect, type RecognizeableOptions } from '../classes'
+import { Listenable } from '../classes/Listenable'
+import type {
+  RecognizeableEffect,
+  ListenEffectParam,
+  ListenOptions,
+} from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
@@ -29,7 +34,7 @@ const defaultOptions: MousepressOptions = {
 /**
  * [Docs](https://baleada.dev/docs/logic/factories/mousepress)
  */
-export function createMousepress (options: MousepressOptions = {}): RecognizeableOptions<MousepressType, MousepressMetadata>['effects'] {
+export function createMousepress (options: MousepressOptions = {}) {
   const {
           minDuration,
           minDistance,

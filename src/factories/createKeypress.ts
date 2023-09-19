@@ -1,6 +1,7 @@
 
 import { includes } from 'lazy-collections'
-import { Listenable, type RecognizeableEffect, type RecognizeableStatus } from '../classes'
+import { Listenable } from '../classes/Listenable'
+import type { RecognizeableEffect, RecognizeableStatus } from '../classes'
 import {
   toHookApi,
   storeKeyboardTimeMetadata,

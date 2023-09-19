@@ -57,3 +57,31 @@ export function createDetermine<Outcome>(
     ({ predicate }) => predicate(determinant)
   )(predicates) as Predicate).outcome
 }
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/greater)
+ */
+export function createGreater (threshold: number): NumberTransform<boolean> {
+  return number => number > threshold
+}
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/greater-or-equal)
+ */
+export function createGreaterOrEqual (threshold: number): NumberTransform<boolean> {
+  return number => number >= threshold
+}
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/less-or-equal)
+ */
+export function createLessOrEqual (threshold: number): NumberTransform<boolean> {
+  return number => number <= threshold
+}
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/less)
+ */
+export function createLess (threshold: number): NumberTransform<boolean> {
+  return number => number < threshold
+}
