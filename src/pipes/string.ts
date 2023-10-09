@@ -1,5 +1,5 @@
 import { Searcher, sortKind } from 'fast-fuzzy'
-import type { FullOptions as SearcherOptions, MatchData as SearcherMatchData } from 'fast-fuzzy'
+import type { FullOptions as SearcherOptions, MatchData } from 'fast-fuzzy'
 import type { Config as DOMPurifyConfig } from 'dompurify'
 import createDOMPurify from 'dompurify'
 import slugify from '@sindresorhus/slugify'
@@ -57,17 +57,17 @@ export function createNumber (options: { radix?: number } = {}): StringTransform
   return string => parseInt(string, radix)
 }
 
-export type CreateResultsOptions<Candidate extends string | object, MatchData extends boolean> = Omit<SearcherOptions<Candidate>, 'returnMatchData'> & {
-  returnMatchData?: MatchData,
+export type CreateResultsOptions<Candidate extends string | object, ReturnsMatchData extends boolean> = Omit<SearcherOptions<Candidate>, 'returnMatchData'> & {
+  returnMatchData?: ReturnsMatchData,
 }
 
-export function createResults<Candidate extends string | object, MatchData extends boolean = false> (
+export function createResults<Candidate extends string | object, ReturnsMatchData extends boolean = false> (
   candidates: Candidate[],
   options: (
-    CreateResultsOptions<Candidate, MatchData>
-    | ((api: { sortKind: typeof sortKind }) => CreateResultsOptions<Candidate, MatchData>)
+    CreateResultsOptions<Candidate, ReturnsMatchData>
+    | ((api: { sortKind: typeof sortKind }) => CreateResultsOptions<Candidate, ReturnsMatchData>)
   ) = {}
-): StringTransform<MatchData extends true ? SearcherMatchData<Candidate>[] : Candidate[]> {
+): StringTransform<ReturnsMatchData extends true ? MatchData<Candidate>[] : Candidate[]> {
   const narrowedOptions = predicateFunction(options)
           ? options({ sortKind })
           : options,
