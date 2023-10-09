@@ -144,7 +144,7 @@ suite('stores currently pressed keycombo', async ({ playwright: { page } }) => {
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
     
-    const value = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.pressed),
+    const value = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.keycombo),
           expected = key
     
     assert.equal(value, expected)
@@ -272,7 +272,7 @@ suite('handles arrays of overlapping combos', async ({ playwright: { page } }) =
 
     assert.ok(value > 0)
 
-    const pressed = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.pressed)
+    const pressed = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.keycombo)
 
     assert.is(pressed, 'a')
   })()
@@ -287,7 +287,7 @@ suite('handles arrays of overlapping combos', async ({ playwright: { page } }) =
 
     assert.ok(value > previousValue, JSON.stringify([value, previousValue]))
 
-    const pressed = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.pressed)
+    const pressed = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.keycombo)
 
     assert.is(pressed, 'shift+a')
   })()
@@ -302,7 +302,7 @@ suite('handles arrays of overlapping combos', async ({ playwright: { page } }) =
 
     assert.ok(value > previousValue, JSON.stringify([value, previousValue]))
 
-    const pressed = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.pressed)
+    const pressed = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.keycombo)
 
     assert.is(pressed, 'shift+opt+a')
   })()

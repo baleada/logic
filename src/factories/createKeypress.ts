@@ -22,7 +22,7 @@ import type {
 export type KeypressType = 'keydown' | 'keyup' | 'visibilitychange'
 
 export type KeypressMetadata = {
-  pressed: string,
+  keycombo: string,
 } & KeyboardTimeMetadata
 
 export type KeypressOptions = CreateKeycomboMatchOptions & {
@@ -124,7 +124,7 @@ export function createKeypress (
     const { getMetadata } = api,
           metadata = getMetadata()
 
-    metadata.pressed = downCombos[0]
+    metadata.keycombo = downCombos[0]
     localStatus = 'recognizing'
 
     cleanup()
@@ -177,7 +177,7 @@ export function createKeypress (
       const { getMetadata } = api,
             metadata = getMetadata()
 
-      metadata.pressed = downCombos[0]
+      metadata.keycombo = downCombos[0]
 
       if (preventsDefaultUnlessDenied) event.preventDefault()
 

@@ -7,15 +7,6 @@ import type {
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
-/*
- * mouserelease is defined as a single mousedown that:
- * - starts at a given point
- * - travels a distance greater than or equal to 0px (or a minimum distance of your choice)
- * - travels at a velocity of greater than or equal to 0px/ms (or a minimum velocity of your choice)
- * - does not mouseleave or end before 0ms (or a minimum duration of your choice) has elapsed
- * - ends
- */
-
 export type MousereleaseType = 'mousedown' | 'mouseleave' | 'mouseup'
 
 export type MousereleaseMetadata = PointerStartMetadata
@@ -42,6 +33,9 @@ const defaultOptions: MousereleaseOptions = {
   minVelocity: 0,
 }
 
+/**
+ * [Docs](https://baleada.dev/docs/logic/factories/mouserelease)
+ */
 export function createMouserelease (options: MousereleaseOptions = {}) {
   const {
           minDuration,

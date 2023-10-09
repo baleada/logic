@@ -24,7 +24,7 @@ export type KeychordType = 'keydown' | 'keyup' | 'visibilitychange'
 export type KeychordMetadata = {
   played: (
     {
-      released: string,
+      keycombo: string,
     } & KeyboardTimeMetadata
   )[],
 }
@@ -51,7 +51,7 @@ const defaultOptions: KeychordOptions = {
 }
 
 export function createKeychord (
-  keychord: string,
+  keycombos: string,
   options: KeychordOptions = {}
 ) {
   const {
@@ -65,14 +65,14 @@ export function createKeychord (
           onUp,
           onVisibilitychange,
         } = { ...defaultOptions, ...options },
-        narrowedKeychord = keychord.split(' '),
+        narrowedKeycombos = keycombos.split(' '),
         keyStates = createMap<string, ReturnType<typeof createKeyState>>(keycombo => createKeyState({
           keycomboOrKeycombos: keycombo,
           toLonghand,
           toCode,
           toAliases,
           getRequest: () => request,
-        }))(narrowedKeychord),
+        }))(narrowedKeycombos),
         localStatuses = createMap<typeof keyStates[number], RecognizeableStatus>(
           () => 'recognizing'
         )(keyStates),
@@ -179,7 +179,7 @@ export function createKeychord (
       if (!predicateSomeKeyDown(keyStates[playedIndex].statuses)) {
         if (
           localStatuses[playedIndex] === 'denied'
-          || (playedIndex === narrowedKeychord.length - 1 && localStatuses[playedIndex] === 'recognized')
+          || (playedIndex === narrowedKeycombos.length - 1 && localStatuses[playedIndex] === 'recognized')
         ) {
           playedIndex = 0
           for (let i = 0; i < localStatuses.length; i++) localStatuses[i] = 'recognizing'
@@ -212,13 +212,13 @@ export function createKeychord (
     ) {
       metadata.played[playedIndex] = {
         ...metadata.played[playedIndex],
-        released: downCombos[0],
+        keycombo: downCombos[0],
       }
     }
 
     if (preventsDefaultUnlessDenied) event.preventDefault()
     if (
-      playedIndex === narrowedKeychord.length - 1
+      playedIndex === narrowedKeycombos.length - 1
       && !predicateSomeKeyDown(keyStates[playedIndex].statuses)
     ) {
       playedIndex = 0
@@ -237,7 +237,7 @@ export function createKeychord (
       return
     }
     
-    if (playedIndex === narrowedKeychord.length - 1) {
+    if (playedIndex === narrowedKeycombos.length - 1) {
       recognized()
       localStatuses[playedIndex] = 'recognized'
       return
@@ -265,12 +265,12 @@ export function createKeychord (
 }
 
 export class Keychord extends Listenable<KeychordType, KeychordMetadata> {
-  constructor (keychord: string, options?: KeychordOptions) {
+  constructor (keycombos: string, options?: KeychordOptions) {
     super(
       'recognizeable' as KeychordType,
       {
         recognizeable: {
-          effects: createKeychord(keychord, options),
+          effects: createKeychord(keycombos, options),
         },
       }
     )

@@ -21,7 +21,7 @@ import type {
 export type KeyreleaseType = 'keydown' | 'keyup' | 'visibilitychange'
 
 export type KeyreleaseMetadata = {
-  released: string,
+  keycombo: string,
 } & KeyboardTimeMetadata
 
 export type KeyreleaseOptions = CreateKeycomboMatchOptions & {
@@ -175,7 +175,7 @@ export function createKeyrelease (
 
     if (status === 'recognized') {
       localStatus = status
-      metadata.released = downCombos[0]
+      metadata.keycombo = downCombos[0]
     }
 
     if (preventsDefaultUnlessDenied) event.preventDefault()

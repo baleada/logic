@@ -125,7 +125,7 @@ suite('stores played chord', async ({ playwright: { page, reloadNext } }) => {
   await page.keyboard.press('O')
   await page.keyboard.press('P')
   
-  const value = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.played.map(({ released }) => released)),
+  const value = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.played.map(({ keycombo }) => keycombo)),
         expected = ['p', 'o', 'o', 'p']        
 
   assert.equal(value, expected)

@@ -152,7 +152,7 @@ suite('stores most recently released keycombo', async ({ playwright: { page } })
     await page.waitForTimeout(20)
   }
     
-  const value = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.released),
+  const value = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.keycombo),
         expected = 'b'
 
   assert.equal(value, expected)
