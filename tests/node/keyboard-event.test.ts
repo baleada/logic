@@ -84,6 +84,13 @@ suite.only('createKeycomboMatch predicates keys', () => {
 
     assert.is(value, expected, `~: ${JSON.stringify(event)}`)
   }
+
+  {
+    const value = createKeycomboMatch('ctrl+opt+left')({ code: 'ArrowLeft', ctrlKey: true, altKey: true } as KeyboardEvent),
+          expected = true
+
+    assert.is(value, expected)
+  }
 })
 
 suite('createKeycomboMatch predicates modifiers', () => {

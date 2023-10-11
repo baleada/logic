@@ -67,7 +67,8 @@ export const createKeycomboMatch = (
     createSet(fromEventToKeyStatusCode(event), 'down')(statuses)
 
     for (const modifier of modifiers) {
-      if (event[`${modifier.toLowerCase()}Key`]) createSet(modifier, 'down')(statuses)
+      const prefix = modifier === 'Control' ? 'ctrl' : modifier.toLowerCase()
+      if (event[`${prefix}Key`]) createSet(modifier, 'down')(statuses)
     }
 
     const events = createMap<[KeyStatusCode, KeyStatus], KeyboardEventDescriptor>(
@@ -75,12 +76,13 @@ export const createKeycomboMatch = (
         const e: KeyboardEventDescriptor = { code }
 
         for (const modifier of modifiers) {
-          e[`${modifier.toLowerCase()}Key`] = event[`${modifier.toLowerCase()}Key`]
+          const prefix = modifier === 'Control' ? 'ctrl' : modifier.toLowerCase()
+          e[`${prefix}Key`] = event[`${prefix}Key`]
         }
 
         return e
       }
-    )(statuses)
+    )(statuses)    
 
     return (
       every<KeyStatusCode>(
