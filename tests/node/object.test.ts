@@ -9,6 +9,8 @@ import {
   createSome,
   createEvery,
   createDeepMerge,
+  createOmit,
+  createPick,
 } from '../../src/pipes/object'
 import {
   createSet,
@@ -192,6 +194,41 @@ suite('createDeepMerge() deeply merges an object with overrides', ({ object }) =
 
     assert.equal(value, expected)
   }
+})
+
+// suite('createPredicated(...) predicates', () => {
+//   const value = createPredicated(1, { a: 2, b: 3 })({ a: true, b: false }),
+//         expected = 2
+
+//   assert.is(value, expected)
+// })
+
+// suite('createPredicated(...) falls back to default value', () => {
+//   const value = createPredicated(1, { a: 2, b: 3 })({ a: false, b: false }),
+//         expected = 1
+
+//   assert.is(value, expected)
+// })
+
+// suite('createPredicated(...) respects priority', () => {
+//   const value = createPredicated(1, { a: 2, b: 3, c: 4 }, { priority: ['c', 'b', 'a'] })({ a: true, b: true, c: true }),
+//         expected = 4
+
+//   assert.is(value, expected)
+// })
+
+suite('createOmit(...) omits keys', () => {
+  const value = createOmit(['foo'])({ foo: 1, bar: 2 }),
+        expected = { bar: 2 }
+
+  assert.equal(value, expected)
+})
+
+suite('createPick(...) picks keys', () => {
+  const value = createPick(['foo'])({ foo: 1, bar: 2 }),
+        expected = { foo: 1 }
+
+  assert.equal(value, expected)
 })
 
 suite.run()

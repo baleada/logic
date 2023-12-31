@@ -103,3 +103,71 @@ export function createDeepMerge<Type extends Record<any, any>>(override?: Type):
     return merge(merged, override || {})
   }
 }
+
+export type CreateFindOptions<Conditions extends any[]> = {
+  priority?: Conditions[number][],
+}
+
+// /**
+//  * [Docs](https://baleada.dev/docs/logic/pipes/find)
+//  */
+// export function createFind<Type extends Record<any, any>>(
+//   predicate: (key: keyof Type, value: ValueOf<Type>) => unknown,
+//   options: CreateFindOptions<(keyof Type)[]> = {}
+// ): ObjectTransform<Type, [keyof Type, ValueOf<Type>]> {
+//   const { priority = createKeys()(predicate) } = options
+
+//   return object => {
+//     for (const c of priority) {
+//       if (predicate(c, object[c])) return [c, object[c]]
+//     }
+//   }
+// }
+
+// /**
+//  * [Docs](https://baleada.dev/docs/logic/pipes/find2)
+//  */
+// export function createFind2<Value extends any, ByState extends Record<any, Value>>(
+//   defaultValue: Value,
+//   byState: Partial<ByState>,
+//   options: CreateFindOptions<(keyof ByState)[]> = {},
+// ): ObjectTransform<Record<keyof ByState, boolean>, Value> {
+//   const find = createFind<Record<keyof ByState, boolean>>(
+//     (key, value) => value,
+//     options,
+//   )
+
+//   return object => {
+//     return byState[find(object)?.[0]] ?? defaultValue
+//   }
+// }
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/omit)
+ */
+export function createOmit<Type extends Record<any, any>, Omitted extends keyof Type>(keys: Omitted[]): ObjectTransform<Type, Omit<Type, Omitted>> {
+  return object => {
+    const omitted = { ...object }
+
+    for (const key of keys) {
+      delete omitted[key]
+    }
+
+    return omitted
+  }
+}
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/pick)
+ */
+export function createPick<Type extends Record<any, any>, Picked extends keyof Type>(keys: Picked[]): ObjectTransform<Type, Pick<Type, Picked>> {
+  return object => {
+    const picked = {} as Pick<Type, Picked>
+
+    for (const key of keys) {
+      picked[key] = object[key]
+    }
+
+    return picked
+  }
+}

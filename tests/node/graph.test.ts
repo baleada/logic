@@ -14,8 +14,6 @@ import {
   createTotalSiblings,
 } from '../../src/pipes/graph-node'
 
-
-
 const suite = createSuite<{
   graph: {
     nodes: GraphNode<any>[],

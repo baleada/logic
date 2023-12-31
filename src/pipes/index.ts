@@ -143,6 +143,8 @@ export {
   createEvery,
   createSome,
   createDeepMerge,
+  createOmit,
+  createPick,
 } from './object'
 
 export {
