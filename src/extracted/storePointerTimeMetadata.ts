@@ -44,27 +44,31 @@ export function storePointerTimeMetadata<
   metadata.times.end = Math.round(event.timeStamp)
 
   let previousTime = metadata.times.start
-  const storeDuration = () => {
-    const request = requestAnimationFrame(timestamp => {
-      if (getShouldStore()) {
-        previousTime = metadata.times.end
-        metadata.times.end = Math.round(timestamp)
-        metadata.duration = Math.max(0, metadata.times.end - metadata.times.start)
-        const durationFromPrevious = Math.max(0, metadata.times.end - previousTime)
-        metadata.velocity = metadata.distance.straight.fromPrevious / durationFromPrevious
-        
-        const event = getSequence().at(-1)
 
-        // @ts-expect-error
-        recognize?.(event, api)
-        if (getStatus() === 'recognized') effect(event)
+  const frameEffect: FrameRequestCallback = timestamp => {
+          previousTime = metadata.times.end
+          metadata.times.end = Math.round(timestamp)
+          metadata.duration = Math.max(0, metadata.times.end - metadata.times.start)
+          const durationFromPrevious = Math.max(0, metadata.times.end - previousTime)
+          metadata.velocity = (metadata.distance.straight.fromPrevious / durationFromPrevious) || 0
+          
+          const event = getSequence().at(-1)
 
-        storeDuration()
-      }
-    })
+          // @ts-expect-error
+          recognize?.(event, api)
+          if (getStatus() === 'recognized') effect(event)
+        },
+        storeDuration = () => {
+          const request = requestAnimationFrame(timestamp => {
+            if (!getShouldStore()) return
+            
+            frameEffect(timestamp)
+            storeDuration()
+          })
 
-    setRequest(request)
-  }
+          setRequest(request)
+        }
   
+  frameEffect(performance.now())
   storeDuration()
 }

@@ -48,25 +48,28 @@ export function storeKeyboardTimeMetadata<
   timeMetadata.times.start = Math.round(event.timeStamp)
   timeMetadata.times.end = Math.round(event.timeStamp)
 
-  const storeDuration = () => {
-    const request = requestAnimationFrame(timestamp => {
-      if (!getShouldStore()) return
-      
-      timeMetadata.times.end = Math.round(timestamp)
-      timeMetadata.duration = Math.max(0, timeMetadata.times.end - timeMetadata.times.start)
-      
-      if (recognize) {
-        // @ts-expect-error
-        recognize(event, api)
-        // @ts-expect-error
-        if (getStatus() === 'recognized') effect(event)
-      }
+  const frameEffect: FrameRequestCallback = timestamp => {
+          timeMetadata.times.end = Math.round(timestamp)
+          timeMetadata.duration = Math.max(0, timeMetadata.times.end - timeMetadata.times.start)
+          
+          if (recognize) {
+            // @ts-expect-error
+            recognize(event, api)
+            // @ts-expect-error
+            if (getStatus() === 'recognized') effect(event)
+          }
+        },
+        storeDuration = () => {
+          const request = requestAnimationFrame(timestamp => {
+            if (!getShouldStore()) return
+            
+            frameEffect(timestamp)
+            storeDuration()
+          })
 
-      storeDuration()
-    })
-
-    setRequest(request)
-  }
+          setRequest(request)
+        }
   
+  frameEffect(performance.now())
   storeDuration()
 }
