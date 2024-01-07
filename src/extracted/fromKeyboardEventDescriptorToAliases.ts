@@ -1,22 +1,15 @@
 import { createClip } from '../pipes/string'
+import type { KeyboardEventDescriptor } from './keyboard-event-descriptor'
 
-export type KeyboardEventDescriptor = {
-  code: string,
-  shiftKey?: boolean,
-  altKey?: boolean,
-  ctrlKey?: boolean,
-  metaKey?: boolean,
-}
-
-export function fromKeyboardEventDescriptorToAliases (event: KeyboardEventDescriptor): string[] {
-  if (event.shiftKey && event.code in aliasesByShiftCode) return [aliasesByShiftCode[event.code]]
+export function fromKeyboardEventDescriptorToAliases (descriptor: KeyboardEventDescriptor): string[] {
+  if (descriptor.shiftKey && descriptor.code in aliasesByShiftCode) return [aliasesByShiftCode[descriptor.code]]
   
-  const withoutModifierSide = toWithoutModifierSide(event.code)
+  const withoutModifierSide = toWithoutModifierSide(descriptor.code)
   if (withoutModifierSide in aliasListsByModifier) return aliasListsByModifier[withoutModifierSide]
 
-  return event.code in aliasesByCode
-    ? [aliasesByCode[event.code]]
-    : [event.code.match(aliasCaptureRE)?.[1].toLowerCase() || 'unsupported']
+  return descriptor.code in aliasesByCode
+    ? [aliasesByCode[descriptor.code]]
+    : [descriptor.code.match(aliasCaptureRE)?.[1].toLowerCase() || 'unsupported']
 }
 
 const toWithoutModifierSide = createClip(/(?:Left|Right)$/)

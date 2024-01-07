@@ -25,7 +25,7 @@ import type {
 } from '../extracted'
 import { createMap } from './array'
 
-export type KeyboardEventTransform<Transformed> = (keyboardEvent: KeyboardEvent) => Transformed
+export type KeyboardEventDescriptorTransform<Transformed> = (descriptor: KeyboardEventDescriptor) => Transformed
 
 export type CreateKeycomboMatchOptions = Omit<CreateKeyStatusesKeycomboMatchOptions, 'toAliases'> & {
   toAliases?: (descriptor: KeyboardEventDescriptor) => string[],
@@ -42,7 +42,7 @@ const defaultOptions: CreateKeycomboMatchOptions = {
 export const createKeycomboMatch = (
   keycombo: string,
   options: CreateKeycomboMatchOptions = {},
-): KeyboardEventTransform<boolean> => {
+): KeyboardEventDescriptorTransform<boolean> => {
   const { toLonghand, toCode, toAliases: fromDescriptorToAliases } = { ...defaultOptions, ...options },
         fromComboToAliases = createAliases({ toLonghand }),
         aliases = fromComboToAliases(keycombo),
@@ -61,26 +61,26 @@ export const createKeycomboMatch = (
           return implicitModifierAliases
         })()
 
-  return event => {
+  return descriptor => {
     const statuses: KeyStatuses = []
 
-    createSet(fromEventToKeyStatusCode(event), 'down')(statuses)
+    if (descriptor.code) createSet(fromEventToKeyStatusCode(descriptor), 'down')(statuses)
 
     for (const modifier of modifiers) {
       const prefix = modifier === 'Control' ? 'ctrl' : modifier.toLowerCase()
-      if (event[`${prefix}Key`]) createSet(modifier, 'down')(statuses)
+      if (descriptor[`${prefix}Key`]) createSet(modifier, 'down')(statuses)
     }
 
-    const events = createMap<[KeyStatusCode, KeyStatus], KeyboardEventDescriptor>(
+    const descriptors = createMap<[KeyStatusCode, KeyStatus], KeyboardEventDescriptor>(
       ([code]) => {
-        const e: KeyboardEventDescriptor = { code }
+        const newDescriptor: KeyboardEventDescriptor = { code }
 
         for (const modifier of modifiers) {
           const prefix = modifier === 'Control' ? 'ctrl' : modifier.toLowerCase()
-          e[`${prefix}Key`] = event[`${prefix}Key`]
+          newDescriptor[`${prefix}Key`] = descriptor[`${prefix}Key`]
         }
 
-        return e
+        return newDescriptor
       }
     )(statuses)    
 
@@ -92,7 +92,7 @@ export const createKeycomboMatch = (
         )(statuses) === 'down'
       )(codes) as boolean
       && every<KeyboardEventDescriptor>(
-        e => pipe<KeyboardEventDescriptor>(
+        d => pipe<KeyboardEventDescriptor>(
           fromDescriptorToAliases,
           map<string, string[]>(fromComboToAliases),
           some<string[]>(longhandAliases =>
@@ -101,8 +101,8 @@ export const createKeycomboMatch = (
               || includes<string>(longhandAlias)(implicitModifierAliases) as boolean
             )(longhandAliases) as boolean
           ),
-        )(e)
-      )(events) as boolean
+        )(d)
+      )(descriptors) as boolean
     )
   }
 }

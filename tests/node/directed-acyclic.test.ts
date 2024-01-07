@@ -206,7 +206,7 @@ suite.skip('createDepthFirstSteps works with multiple roots', ({ depthFirstDirec
   )
 })
 
-suite.only('createFromNodeDepthFirstSteps works', ({ depthFirstDirectedAcyclic }) => {
+suite('createFromNodeDepthFirstSteps works', ({ depthFirstDirectedAcyclic }) => {
   {
     const value = [...createNodeDepthFirstSteps(depthFirstDirectedAcyclic)('a')],
           expected = [
@@ -396,7 +396,7 @@ suite('createTree works', ({ depthFirstDirectedAcyclic }) => {
 })
 
 suite('createLayers works', ({ depthFirstDirectedAcyclic }) => {
-  const value = createLayers()(depthFirstDirectedAcyclic),
+  const value = [...createLayers()(depthFirstDirectedAcyclic)],
         expected = [
           ['a'],
           ['b', 'c', 'd'],

@@ -27,7 +27,6 @@ export { createAliases } from './createAliases'
 export { createAliasesLength } from './createAliasesLength'
 
 export { fromKeyboardEventDescriptorToAliases } from './fromKeyboardEventDescriptorToAliases'
-export type { KeyboardEventDescriptor } from './fromKeyboardEventDescriptorToAliases'
 
 export { fromCodeToAliases } from './fromCodeToAliases'
 
@@ -89,6 +88,8 @@ export type {
 
 export { defineAssociativeArray } from './associative-array'
 export type { AssociativeArray } from './associative-array'
+
+export type { KeyboardEventDescriptor } from './keyboard-event-descriptor'
 
 
 // MULTIPLE CONCERNS

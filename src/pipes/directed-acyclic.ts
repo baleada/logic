@@ -44,10 +44,14 @@ export function createLayers<
       const node = path.at(-1),
             depth = path.length - 1
 
+      // After we complete a layer, yield it
       if (!layers[depth] && depth > 0) yield layers[depth - 1]
 
       ;(layers[depth] || (layers[depth] = [])).push(node)
     }
+
+    // Yield the last layer
+    yield layers.at(-1)
   }
 }
 

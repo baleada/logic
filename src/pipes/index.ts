@@ -122,8 +122,8 @@ export {
 
 export {
   createKeycomboMatch,
-} from './keyboard-event'
-export type { CreateKeycomboMatchOptions } from './keyboard-event'
+} from './keyboard-event-descriptor'
+export type { CreateKeycomboMatchOptions } from './keyboard-event-descriptor'
 
 export {
   createClamp,
