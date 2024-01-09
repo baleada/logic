@@ -145,7 +145,7 @@ export type CreateFindOptions<Conditions extends any[]> = {
 /**
  * [Docs](https://baleada.dev/docs/logic/pipes/omit)
  */
-export function createOmit<Type extends Record<any, any>, Omitted extends keyof Type>(keys: Omitted[]): ObjectTransform<Type, Omit<Type, Omitted>> {
+export function createOmit<Type extends Record<any, any>, Omitted extends keyof Type = keyof Type>(keys: Omitted[]): ObjectTransform<Type, Omit<Type, Omitted>> {
   return object => {
     const omitted = { ...object }
 
@@ -160,7 +160,7 @@ export function createOmit<Type extends Record<any, any>, Omitted extends keyof 
 /**
  * [Docs](https://baleada.dev/docs/logic/pipes/pick)
  */
-export function createPick<Type extends Record<any, any>, Picked extends keyof Type>(keys: Picked[]): ObjectTransform<Type, Pick<Type, Picked>> {
+export function createPick<Type extends Record<any, any>, Picked extends keyof Type = keyof Type>(keys: Picked[]): ObjectTransform<Type, Pick<Type, Picked>> {
   return object => {
     const picked = {} as Pick<Type, Picked>
 
