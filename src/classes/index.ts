@@ -38,7 +38,7 @@ export { Navigateable } from './Navigateable'
 export type { NavigateableOptions, NavigateableStatus } from './Navigateable'
 
 export { Pickable } from './Pickable'
-export type { PickableOptions, PickableStatus } from './Pickable'
+export type { PickableOptions, PickableStatus, PickOptions } from './Pickable'
 
 export { Recognizeable } from './Recognizeable'
 export type { RecognizeableOptions, RecognizeableStatus, RecognizeableEffect, RecognizeOptions } from './Recognizeable'
