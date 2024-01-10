@@ -33,31 +33,66 @@ const defaultOptions: DeepRequired<CreateFocusableOptions> = {
  * [Docs](https://baleada.dev/docs/logic/pipes/focusable)
  */
 export function createFocusable (
-  order: 'first' | 'last',
+  order: 'first' | 'last' | 'next' | 'previous',
   options: CreateFocusableOptions = {}
 ): ElementTransform<HTMLElement, HTMLElement | undefined> {
   const { predicatesElement, tabbableSelector } = { ...defaultOptions, ...options },
         predicateFocusable = (element: HTMLElement): boolean => element.matches(tabbableSelector)
 
-  return element => {
-    if (predicatesElement && predicateFocusable(element)) return element
+  switch (order) {
+    case 'first':
+      return element => {
+        if (predicatesElement && predicateFocusable(element)) return element
 
-    switch (order) {
-      case 'first':
         for (let i = 0; i < element.children.length; i++) {
           const focusable = createFocusable(order, { predicatesElement: true })(element.children[i] as HTMLElement)
           if (focusable) return focusable
         }
-        
-        break
-      case 'last':
+      }
+    case 'last':
+      return element => {
+        if (predicatesElement && predicateFocusable(element)) return element
+
         for (let i = element.children.length - 1; i > -1; i--) {
           const focusable = createFocusable(order, { predicatesElement: true })(element.children[i] as HTMLElement)
           if (focusable) return focusable
         }
+      }
+    case 'next':
+      return element => {
+        if (predicatesElement && predicateFocusable(element)) return element
 
-        break
-    }
+        const focusable = createFocusable('first')(element)
+        if (focusable) return focusable
+
+        let current = element
+        while (current && current !== document.documentElement) {
+          const nextSibling = current.nextElementSibling as HTMLElement
+
+          if (nextSibling) {
+            const focusable = createFocusable('first', { predicatesElement: true })(nextSibling)
+            if (focusable) return focusable
+          }
+
+          current = current.parentElement as HTMLElement
+        }
+      }
+    case 'previous':
+      return element => {
+        if (predicatesElement && predicateFocusable(element)) return element
+
+        let current = element
+        while (current && current !== document.documentElement) {
+          const previousSibling = current.previousElementSibling as HTMLElement
+
+          if (previousSibling) {
+            const focusable = createFocusable('last', { predicatesElement: true })(previousSibling)
+            if (focusable) return focusable
+          }
+
+          current = current.parentElement as HTMLElement
+        }
+      }
   }
 }
 

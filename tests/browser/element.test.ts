@@ -36,6 +36,51 @@ suite('createFocusable(...) returns undefined when no focusable', async ({ puppe
   assert.is(value, expected)
 })
 
+suite('createFocusable(\'next\') finds next focusable when next focusable is descendant', async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          return window.Logic.createFocusable('next')(window.testState.element3.value)?.id
+        }),
+        expected = 'next-descendant'
+
+  assert.is(value, expected)
+})
+
+suite('createFocusable(\'next\') finds next focusable when next focusable is distant ancestor\'s sibling', async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          return window.Logic.createFocusable('next')(window.testState.element4.value)?.id
+        }),
+        expected = 'next-distant-sibling'
+
+  assert.is(value, expected)
+})
+
+suite('createFocusable(\'next\') returns undefined if no next focusable', async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          return window.Logic.createFocusable('next')(window.testState.element6.value)?.id
+        }),
+        expected = undefined
+
+  assert.is(value, expected)
+})
+
+suite('createFocusable(\'previous\') finds previous focusable when previous focusable is distant ancestor\'s sibling', async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          return window.Logic.createFocusable('previous')(window.testState.element5.value)?.id
+        }),
+        expected = 'previous-distant-sibling'
+
+  assert.is(value, expected)
+})
+
+suite('createFocusable(\'previous\') returns undefined if no previous focusable', async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          return window.Logic.createFocusable('previous')(window.testState.element7.value)?.id
+        }),
+        expected = undefined
+
+  assert.is(value, expected)
+})
+
 suite('createComputedStyle(...) returns computed style', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/')
   await page.waitForSelector('div')
