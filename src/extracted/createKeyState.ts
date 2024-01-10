@@ -87,7 +87,7 @@ export function createKeyState (
             validAlias => includes<string>(validAlias)(aliases) as boolean
           )(validAliases) as boolean
         },
-        cleanup = () => {
+        stop = () => {
           window.cancelAnimationFrame(getRequest())
         },
         statuses: KeyStatuses = [],
@@ -105,7 +105,7 @@ export function createKeyState (
     validAliases,
     getDownCombos,
     predicateValid,
-    cleanup,
+    stop,
     statuses,
     toStatus,
     setStatus,

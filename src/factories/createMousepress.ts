@@ -2,10 +2,11 @@ import { Listenable } from '../classes/Listenable'
 import type {
   RecognizeableEffect,
   ListenEffectParam,
-  ListenOptions,
+  RecognizeableStopTarget,
 } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
+import {  } from '../classes/Recognizeable'
 
 export type MousepressType = 'mousedown' | 'mouseleave' | 'mouseup'
 
@@ -43,7 +44,7 @@ export function createMousepress (options: MousepressOptions = {}) {
           onMove,
           onUp,
         } = { ...defaultOptions, ...options },
-        cleanup = (target: ListenOptions<MousepressType>['target']) => {
+        stop = (target: RecognizeableStopTarget<MousepressType>) => {
           window.cancelAnimationFrame(request)
           target.removeEventListener('mousemove', mousemoveEffect)
         }
@@ -101,7 +102,7 @@ export function createMousepress (options: MousepressOptions = {}) {
 
     if (mouseStatus === 'down') {
       denied()
-      cleanup(target)
+      stop(target)
       mouseStatus = 'leave'
     }
 
@@ -114,14 +115,17 @@ export function createMousepress (options: MousepressOptions = {}) {
     if (mouseStatus !== 'down') return
           
     denied()
-    cleanup(target)
+    stop(target)
     mouseStatus = 'up'
     
     onUp?.(toHookApi(api))
   }
 
   return {
-    mousedown,
+    mousedown: {
+      effect: mousedown,
+      stop,
+    },
     mouseleave,
     mouseup,
   }

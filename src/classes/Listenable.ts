@@ -1,7 +1,8 @@
 import { some, find } from 'lazy-collections'
 import { predicateNumber } from '../extracted'
 import { createExceptAndOnlyEffect } from '../extracted'
-import type { RecognizeableOptions } from './Recognizeable'
+import { createFilter } from '../pipes'
+import type { RecognizeableOptions, RecognizeableStopTarget } from './Recognizeable'
 import { Recognizeable } from './Recognizeable'
 
 export type ListenableSupportedType = 'recognizeable'
@@ -92,7 +93,11 @@ export type ListenableActive<
   Type extends ('message' | 'messageerror') ? { target: BroadcastChannel, id: [type: string, effect: (event: MessageEvent) => void] } :
   Type extends ListenableMediaQuery ? { target: MediaQueryList, id: [type: string, effect: (param: ListenEffectParam<Type>) => void] } :
   Type extends ListenableSupportedEventType ? { target: Element | Document, id: ListenableActiveEventId<Type> } :
-  { id: Listenable<Type, RecognizeableMetadata> }
+  {
+    id: Listenable<Type, RecognizeableMetadata>,
+    target: RecognizeableStopTarget<Type>,
+    stopExtension: (target: RecognizeableStopTarget<Type>) => void,
+  }
 
 type ListenableActiveEventId<Type extends ListenableSupportedEventType> = [
   type: Type,
@@ -252,7 +257,11 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     for (const type of this.recognizeableEffectsKeys) {
       const listenable = new Listenable(type)
       listenable.listen(guardedEffect as ListenEffect<Type>, options)
-      this.active.add({ id: listenable } as ListenableActive<Type>)
+      this.active.add({
+        id: listenable,
+        target: 'target' in options ? options.target : undefined,
+        stopExtension: this.recognizeable.stops[type],
+      } as ListenableActive<Type>)
     }
   }
   private documentEventListen (effect: ListenEffect<'visibilitychange'>, options: ListenOptions<'visibilitychange'>) {
@@ -293,7 +302,9 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
         // and shouldn't use web APIs during construction.
         break
       default:
-        const stoppables: ListenableActive<Type>[] = [...this.active].filter(active => !target || ('target' in active ? active.target === target : false)),
+        const stoppables: ListenableActive<Type>[] = createFilter<ListenableActive<Type>>(
+                active => !target || ('target' in active ? active.target === target : false)
+              )([...this.active]),
               shouldUpdateStatus = stoppables.length === this.active.size
         
         for (const stoppable of stoppables) {
@@ -301,9 +312,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
           this.active.delete(stoppable)
         }
         
-        if (shouldUpdateStatus) {
-          this.stopped()
-        }
+        if (shouldUpdateStatus) this.stopped()
 
         break
       }
@@ -355,7 +364,9 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
 
 function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive<Type>) {
   if (stoppable.id instanceof Listenable) {
-    stoppable.id.stop()
+    const { id, target, stopExtension } = stoppable as ListenableActive<'recognizeable'>
+    id.stop()
+    stopExtension(target)
     return
   }
 

@@ -41,7 +41,7 @@ export { Pickable } from './Pickable'
 export type { PickableOptions, PickableStatus, PickOptions } from './Pickable'
 
 export { Recognizeable } from './Recognizeable'
-export type { RecognizeableOptions, RecognizeableStatus, RecognizeableEffect, RecognizeOptions } from './Recognizeable'
+export type { RecognizeableOptions, RecognizeableStatus, RecognizeableEffect, RecognizeableEffectConfig, RecognizeableStopTarget, RecognizeOptions } from './Recognizeable'
 
 export { Resolveable } from './Resolveable'
 export type { ResolveableOptions, ResolveableStatus } from './Resolveable'

@@ -432,6 +432,8 @@ suite('stop(...) handles recognizeable', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
+// TODO: test recognizeable.stops
+
 suite('stop(...) can be limited to a target', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')

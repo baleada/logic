@@ -508,4 +508,6 @@ suite('respects maxSequenceLength', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
+// TODO: test recognizeable.stops
+
 suite.run()

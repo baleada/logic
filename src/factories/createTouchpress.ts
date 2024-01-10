@@ -43,7 +43,7 @@ export function createTouchpress (options: TouchpressOptions = {}) {
           onMove,
           onEnd,
         } = { ...defaultOptions, ...options },
-        cleanup = () => {
+        stop = () => {
           window.cancelAnimationFrame(request)
         }
   
@@ -56,7 +56,7 @@ export function createTouchpress (options: TouchpressOptions = {}) {
     totalTouches++
 
     if (totalTouches > 1) {
-      cleanup()
+      stop()
       denied()
       onStart?.(toHookApi(api))
       return
@@ -103,7 +103,7 @@ export function createTouchpress (options: TouchpressOptions = {}) {
   const touchcancel: RecognizeableEffect<'touchcancel', TouchpressMetadata> = (event, api) => {
     const { denied } = api
 
-    cleanup()
+    stop()
     denied()
     totalTouches--
     
@@ -113,7 +113,7 @@ export function createTouchpress (options: TouchpressOptions = {}) {
   const touchend: RecognizeableEffect<'touchend', TouchpressMetadata> = (event, api) => {
     const { denied } = api
 
-    cleanup()
+    stop()
     denied()
     totalTouches--
     

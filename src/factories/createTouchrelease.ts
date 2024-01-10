@@ -48,7 +48,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
           onMove,
           onEnd,
         } = { ...defaultOptions, ...options },
-        cleanup = () => {
+        stop = () => {
           window.cancelAnimationFrame(request)
         }
 
@@ -61,7 +61,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
     totalTouches++
 
     if (totalTouches > 1) {
-      cleanup()
+      stop()
       denied()
       onStart?.(toHookApi(api))
       return
@@ -90,7 +90,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
   const touchcancel: RecognizeableEffect<'touchcancel', TouchreleaseMetadata> = (event, api) => {
     const { denied } = api
 
-    cleanup()
+    stop()
     denied()
     totalTouches--
     
@@ -101,7 +101,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
     const { denied } = api
 
     if (totalTouches !== 1) {
-      cleanup()
+      stop()
       denied()
       onEnd?.(toHookApi(api))
       return
@@ -109,7 +109,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
 
     storePointerMoveMetadata(event, api)
     
-    cleanup()
+    stop()
     totalTouches--
     
     recognize(event, api)

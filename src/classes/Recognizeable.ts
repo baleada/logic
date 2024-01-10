@@ -7,7 +7,12 @@ import type {
 
 export type RecognizeableOptions<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
   maxSequenceLength?: true | number,
-  effects?: { [type in Type]?: RecognizeableEffect<type, Metadata> }
+  effects?: { [type in Type]?: RecognizeableEffect<type, Metadata> | RecognizeableEffectConfig<type, Metadata> },
+}
+
+export type RecognizeableEffectConfig<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
+  effect: RecognizeableEffect<Type, Metadata>,
+  stop: (target: RecognizeableStopTarget<Type>) => void,
 }
 
 export type RecognizeableEffect<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = (
@@ -38,6 +43,16 @@ export type RecognizeOptions<Type extends ListenableSupportedType> = {
   }
 }
 
+export type RecognizeableStops<Type extends ListenableSupportedType> = {
+  [type in Type]?: (target: RecognizeableStopTarget<type>) => void
+}
+
+export type RecognizeableStopTarget<Type extends ListenableSupportedType> = (
+  'target' extends keyof ListenOptions<Type>
+    ? ListenOptions<Type>['target']
+    : never
+)
+
 /**
  * [Docs](https://baleada.dev/docs/logic/classes/recognizeable)
  */
@@ -52,7 +67,16 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     }
     
     this.maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
-    this.effects = options?.effects || defaultOptions.effects
+    this.effects = options.effects || defaultOptions.effects
+    
+    const stops: RecognizeableStops<Type> = {}
+    for (const effect in this.effects) {
+      const effectOrConfig = this.effects[effect]
+      stops[effect] = isEffectConfig(effectOrConfig)
+        ? effectOrConfig.stop
+        : () => {}
+    }
+    this.computedStops = stops
 
     this.resetComputedMetadata()
 
@@ -94,6 +118,10 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
   set sequence (sequence) {
     this.setSequence(sequence)
   }
+  private computedStops: RecognizeableStops<Type>
+  get stops() {
+    return this.computedStops
+  }
   get status () {
     return this.computedStatus
   }
@@ -113,19 +141,15 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     const type = this.toType(sequenceItem),
           pushSequence = (sequenceItem: ListenEffectParam<Type>) => {
             newSequence.push(sequenceItem)
+            
             if (
               this.maxSequenceLength !== true
               && newSequence.length > this.maxSequenceLength
-            ) {
-              newSequence.shift()
-            }
+            ) newSequence.shift()
           },
           newSequence: ListenEffectParam<Type>[] = []
 
-    for (const sequenceItem of this.sequence) {
-      pushSequence(sequenceItem)
-    }
-
+    for (const previousSequenceItem of this.sequence) pushSequence(previousSequenceItem)
     pushSequence(sequenceItem)
           
     this.effectApi.getSequence = () => newSequence
@@ -135,7 +159,16 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
       optionsByType: options.listenInjection?.optionsByType || {} as unknown as RecognizeOptions<Type>['listenInjection']['optionsByType'],
     }
 
-    this.effects[type]?.(sequenceItem, { ...this.effectApi })
+    switch (typeof this.effects[type]) {
+      case 'function':
+        this.effects[type](sequenceItem, { ...this.effectApi })
+        break
+      case 'object':
+        this.effects[type].effect(sequenceItem, { ...this.effectApi })
+        break
+      default:
+        // No effect for this type
+    }
       
     switch (this.status) {
       case 'ready':
@@ -179,4 +212,8 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
       return (sequenceItem as Event).type
     }
   }
+}
+
+function isEffectConfig (effectOrConfig: RecognizeableEffect<any, any> | RecognizeableEffectConfig<any, any>): effectOrConfig is RecognizeableEffectConfig<any, any> {
+  return typeof effectOrConfig === 'object'
 }

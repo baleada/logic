@@ -140,7 +140,7 @@ export function createKeychord (
 
     localStatuses[playedIndex] = 'recognizing'
 
-    keyStates[playedIndex].cleanup()
+    keyStates[playedIndex].stop()
     storeKeyboardTimeMetadata({
       event,
       api,
@@ -250,7 +250,7 @@ export function createKeychord (
     if (document.visibilityState === 'hidden') {
       for (const { clearStatuses } of keyStates) clearStatuses()
       localStatuses[playedIndex] = 'recognizing'
-      keyStates[playedIndex].cleanup()
+      keyStates[playedIndex].stop()
       playedIndex = 0
     }
 

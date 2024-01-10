@@ -61,7 +61,7 @@ export function createKeyrelease (
           matchPredicatesByKeycombo,
           getDownCombos,
           predicateValid,
-          cleanup,
+          stop,
           statuses,
           toStatus,
           setStatus,
@@ -124,7 +124,7 @@ export function createKeyrelease (
 
     localStatus = 'recognizing'
 
-    cleanup()
+    stop()
     storeKeyboardTimeMetadata({
       event,
       api,
@@ -198,7 +198,7 @@ export function createKeyrelease (
     if (document.visibilityState === 'hidden') {
       clearStatuses()
       localStatus = 'recognizing'
-      cleanup()
+      stop()
     }
 
     onVisibilitychange?.(toHookApi(api))

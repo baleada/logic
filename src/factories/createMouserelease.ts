@@ -2,7 +2,7 @@ import { Listenable } from '../classes/Listenable'
 import type {
   RecognizeableEffect,
   ListenEffectParam,
-  ListenOptions,
+  RecognizeableStopTarget,
 } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
@@ -46,7 +46,7 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
           onMove,
           onUp,
         } = { ...defaultOptions, ...options },
-        cleanup = (target: ListenOptions<MousereleaseType>['target']) => {
+        stop = (target: RecognizeableStopTarget<MousereleaseType>) => {
           window.cancelAnimationFrame(request)
           target.removeEventListener('mousemove', mousemoveEffect)
         }
@@ -86,7 +86,7 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
 
     if (mouseStatus === 'down') {
       denied()
-      cleanup(target)
+      stop(target)
       mouseStatus = 'leave'
     }
 
@@ -99,7 +99,7 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
     storePointerMoveMetadata(event, api)
     
     const { listenInjection: { optionsByType: { mouseup: { target } } } } = api
-    cleanup(target)
+    stop(target)
     mouseStatus = 'up'
     
     recognize(event, api)
@@ -123,7 +123,10 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
   }
 
   return {
-    mousedown,
+    mousedown: {
+      effect: mousedown,
+      stop,
+    },
     mouseleave,
     mouseup,
   }

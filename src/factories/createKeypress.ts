@@ -62,7 +62,7 @@ export function createKeypress (
           matchPredicatesByKeycombo,
           getDownCombos,
           predicateValid,
-          cleanup,
+          stop,
           statuses,
           toStatus,
           setStatus,
@@ -127,7 +127,7 @@ export function createKeypress (
     metadata.keycombo = downCombos[0]
     localStatus = 'recognizing'
 
-    cleanup()
+    stop()
     storeKeyboardTimeMetadata({
       event,
       api,
@@ -188,7 +188,7 @@ export function createKeypress (
     }
 
     denied()
-    cleanup()
+    stop()
     onUp?.(toHookApi(api))
   }
 
@@ -196,7 +196,7 @@ export function createKeypress (
     if (document.visibilityState === 'hidden') {
       clearStatuses()
       localStatus = 'recognizing'
-      cleanup()
+      stop()
     }
 
     onVisibilitychange?.(toHookApi(api))
