@@ -1,3 +1,4 @@
+import { at } from 'lazy-collections'
 import type { RecognizeableEffect } from '../classes'
 import { createClone } from '../pipes/any'
 
@@ -60,6 +61,12 @@ export function storeKeyboardTimeMetadata<
           }
         },
         storeDuration = () => {
+          const sequence = api.getSequence()
+          
+          if (!document.body.contains(
+            (at(-1)(sequence) as typeof sequence[number]).target as HTMLElement
+          )) return
+
           const request = requestAnimationFrame(timestamp => {
             if (!getShouldStore()) return
             

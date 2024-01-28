@@ -1,3 +1,4 @@
+import { at } from 'lazy-collections'
 import type { RecognizeableEffect } from '../classes'
 import { createClone } from '../pipes/any'
 import type { PointerMoveMetadata } from './storePointerMoveMetadata'
@@ -59,6 +60,12 @@ export function storePointerTimeMetadata<
           if (getStatus() === 'recognized') effect(event)
         },
         storeDuration = () => {
+          const sequence = api.getSequence()
+          
+          if (!document.body.contains(
+            (at(-1)(sequence) as typeof sequence[number]).target as HTMLElement
+          )) return
+
           const request = requestAnimationFrame(timestamp => {
             if (!getShouldStore()) return
             
