@@ -54,9 +54,17 @@ suite('createFocusable(\'next\') finds next focusable when next focusable is dis
   assert.is(value, expected)
 })
 
+suite('createFocusable(\'next\') finds next focusable when next element sibling has no focusable, but sibling after does', async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          return window.Logic.createFocusable('next')(window.testState.sibling1.value) === window.testState.sibling3.value
+        })
+
+  assert.ok(value)
+})
+
 suite('createFocusable(\'next\') returns undefined if no next focusable', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          return window.Logic.createFocusable('next')(window.testState.element6.value)?.id
+          return window.Logic.createFocusable('next')(window.testState.sibling3.value)?.id
         }),
         expected = undefined
 
@@ -70,6 +78,14 @@ suite('createFocusable(\'previous\') finds previous focusable when previous focu
         expected = 'previous-distant-sibling'
 
   assert.is(value, expected)
+})
+
+suite('createFocusable(\'previous\') finds previous focusable when previous element sibling has no focusable, but sibling before does', async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          return window.Logic.createFocusable('previous')(window.testState.sibling3.value) === window.testState.sibling1.value
+        })
+
+  assert.ok(value)
 })
 
 suite('createFocusable(\'previous\') returns undefined if no previous focusable', async ({ puppeteer: { page } }) => {

@@ -74,7 +74,7 @@ export function createFocusable (
             if (focusable) return focusable
           }
 
-          current = current.parentElement as HTMLElement
+          current = (current.nextElementSibling || current.parentElement) as HTMLElement
         }
       }
     case 'previous':
@@ -90,7 +90,7 @@ export function createFocusable (
             if (focusable) return focusable
           }
 
-          current = current.parentElement as HTMLElement
+          current = (current.previousElementSibling || current.parentElement) as HTMLElement
         }
       }
   }

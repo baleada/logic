@@ -33,6 +33,11 @@
     </div>
   </div>
   <div ref="element6"></div>
+  <div>
+    <input type="text" ref="sibling1" />
+    <div ref="sibling2"></div>
+    <input type="text" ref="sibling3" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -45,6 +50,9 @@ const element4 = ref()
 const element5 = ref()
 const element6 = ref()
 const element7 = ref()
+const sibling1 = ref()
+const sibling2 = ref()
+const sibling3 = ref()
 
 onMounted(() => {
   window.testState = {
@@ -55,6 +63,9 @@ onMounted(() => {
     element5,
     element6,
     element7,
+    sibling1,
+    sibling2,
+    sibling3,
   }
 })
 </script>
