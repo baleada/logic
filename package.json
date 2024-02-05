@@ -1,6 +1,6 @@
 {
   "name": "@baleada/logic",
-  "version": "0.24.11",
+  "version": "0.24.12",
   "description": "UI logic for the Baleada toolkit",
   "main": "lib/index.cjs",
   "module": "lib/index.js",
