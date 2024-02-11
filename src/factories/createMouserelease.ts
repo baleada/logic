@@ -117,9 +117,10 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
       && metadata.velocity >= minVelocity
     ) {
       recognized()
-    } else {
-      denied()
+      return
     }
+
+    denied()
   }
 
   return {

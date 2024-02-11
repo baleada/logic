@@ -44,13 +44,13 @@ export function storePointerTimeMetadata<
   metadata.times.start = Math.round(event.timeStamp)
   metadata.times.end = Math.round(event.timeStamp)
 
-  let previousTime = metadata.times.start
+  let previousEndTime = metadata.times.start
 
   const frameEffect: FrameRequestCallback = timestamp => {
-          previousTime = metadata.times.end
+          previousEndTime = metadata.times.end
           metadata.times.end = Math.round(timestamp)
           metadata.duration = Math.max(0, metadata.times.end - metadata.times.start)
-          const durationFromPrevious = Math.max(0, metadata.times.end - previousTime)
+          const durationFromPrevious = Math.max(0, metadata.times.end - previousEndTime)
           metadata.velocity = (metadata.distance.straight.fromPrevious / durationFromPrevious) || 0
           
           const event = getSequence().at(-1)
@@ -62,7 +62,7 @@ export function storePointerTimeMetadata<
         storeDuration = () => {
           const sequence = api.getSequence()
           
-          if (!document.body.contains(
+          if (!document.contains(
             (at(-1)(sequence) as typeof sequence[number]).target as HTMLElement
           )) return
 
