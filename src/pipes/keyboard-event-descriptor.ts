@@ -82,7 +82,7 @@ export const createKeycomboMatch = (
 
         return newDescriptor
       }
-    )(statuses)    
+    )(statuses)
 
     return (
       every<KeyStatusCode>(
