@@ -44,6 +44,7 @@ const defaultOptions: KeypressOptions = {
   toAliases: code => fromCodeToAliases(code),
 }
 
+// TODO: window blur clear state
 export function createKeypress (
   keycomboOrKeycombos: string | string[],
   options: KeypressOptions = {}
@@ -75,12 +76,25 @@ export function createKeypress (
           toAliases,
           getRequest: () => request,
         }),
-        fromComboToAliasesLength = createAliasesLength({ toLonghand })
+        fromComboToAliasesLength = createAliasesLength({ toLonghand }),
+        maybeAddWindowBlurListener = () => {
+          if (windowBlurStatus === 'added') return
+          window.addEventListener('blur', onWindowBlur)
+          windowBlurStatus = 'added'
+        },
+        onWindowBlur = () => {
+          clearStatuses()
+          localStatus = 'recognizing'
+          stop()
+        }
 
-  let request: number
-  let localStatus: RecognizeableStatus
+  let request: number,
+      localStatus: RecognizeableStatus,
+      windowBlurStatus: 'added' | 'removed' = 'removed'
 
   const keydown: RecognizeableEffect<'keydown', KeypressMetadata> = (event, api) => {
+    maybeAddWindowBlurListener()
+
     const { denied, getStatus } = api,
           key = fromEventToKeyStatusCode(event)
 
@@ -193,17 +207,17 @@ export function createKeypress (
   }
 
   const visibilitychange: RecognizeableEffect<'visibilitychange', KeypressMetadata> = (event, api) => {
-    if (document.visibilityState === 'hidden') {
-      clearStatuses()
-      localStatus = 'recognizing'
-      stop()
-    }
-
+    if (document.visibilityState === 'hidden') onWindowBlur()
     onVisibilitychange?.(toHookApi(api))
   }
 
   return {
-    keydown,
+    keydown: {
+      effect: keydown,
+      stop: () => {
+        window.removeEventListener('blur', onWindowBlur)
+      },
+    },
     keyup,
     visibilitychange,
   }

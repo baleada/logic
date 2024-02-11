@@ -74,12 +74,25 @@ export function createKeyrelease (
           toAliases,
           getRequest: () => request,
         }),
-        fromComboToAliasesLength = createAliasesLength({ toLonghand })
+        fromComboToAliasesLength = createAliasesLength({ toLonghand }),
+        maybeAddWindowBlurListener = () => {
+          if (windowBlurStatus === 'added') return
+          window.addEventListener('blur', onWindowBlur)
+          windowBlurStatus = 'added'
+        },
+        onWindowBlur = () => {
+          clearStatuses()
+          localStatus = 'recognizing'
+          stop()
+        }
 
   let request: number,
-      localStatus: RecognizeableStatus
+      localStatus: RecognizeableStatus,
+      windowBlurStatus: 'added' | 'removed' = 'removed'
 
   const keydown: RecognizeableEffect<'keydown', KeyreleaseMetadata> = (event, api) => {
+    maybeAddWindowBlurListener()
+
     const { denied, getStatus } = api,
           key = fromEventToKeyStatusCode(event)
 
@@ -205,7 +218,12 @@ export function createKeyrelease (
   }
 
   return {
-    keydown,
+    keydown: {
+      effect: keydown,
+      stop: () => {
+        window.removeEventListener('blur', onWindowBlur)
+      },
+    },
     keyup,
     visibilitychange,
   }
