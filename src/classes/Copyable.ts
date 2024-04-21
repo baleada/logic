@@ -32,7 +32,7 @@ export class Copyable {
   private ready () {
     this.computedStatus = 'ready'
   }
-  
+
   get string () {
     return this.computedString
   }
@@ -51,43 +51,43 @@ export class Copyable {
   get error () {
     return this.computedError
   }
-  
+
   private computedString: string
   setString (string: string) {
     this.computedString = string
     return this
   }
-  
+
   private computedResponse: undefined
   private computedError: Error
-  async copy (options: { kind: 'clipboard' | 'deprecated' } = { kind: 'clipboard' }) {    
+  async copy (options: { kind: 'clipboard' | 'deprecated' } = { kind: 'clipboard' }) {
     this.copying()
-    
+
     const { kind } = options
 
     switch (kind) {
       case 'clipboard':
         try {
           this.computedResponse = await navigator.clipboard.writeText(this.string) as undefined
-          
+
           this.computedIsClipboardText = true
-          
+
           this.copied()
         } catch (error) {
           this.computedError = error as Error
           this.errored()
         }
-        
+
         break
       case 'deprecated':
         const input = document.createElement('input')
         input.type = 'text'
         input.value = this.string
-        
+
         document.body.appendChild(input)
         input.select()
         document.execCommand('copy')
-        
+
         document.body.removeChild(input)
 
         this.computedIsClipboardText = true
@@ -95,7 +95,7 @@ export class Copyable {
         this.copied()
         break
     }
-    
+
     return this
   }
   private copying () {

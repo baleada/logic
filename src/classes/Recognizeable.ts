@@ -19,7 +19,7 @@ export type RecognizeableEffect<Type extends ListenableSupportedType, Metadata e
   sequenceItem: ListenEffectParam<Type>,
   api: RecognizeableEffectApi<Type, Metadata>,
 ) => void
-    
+
 export type RecognizeableEffectApi<Type extends ListenableSupportedType, Metadata extends Record<any, any>> = {
   getStatus: () => RecognizeableStatus,
   getMetadata: () => Metadata,
@@ -30,7 +30,7 @@ export type RecognizeableEffectApi<Type extends ListenableSupportedType, Metadat
   pushSequence: (sequenceItem: ListenEffectParam<Type>) => void,
   listenInjection: RecognizeOptions<Type>['listenInjection'],
 }
-    
+
 export type RecognizeableStatus = 'recognized'
   | 'recognizing'
   | 'denied'
@@ -65,10 +65,10 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
       maxSequenceLength: true as const,
       effects: {},
     }
-    
+
     this.maxSequenceLength = options?.maxSequenceLength || defaultOptions.maxSequenceLength // 0 and false are not allowed
     this.effects = options.effects || defaultOptions.effects
-    
+
     const stops: RecognizeableStops<Type> = {}
     for (const effect in this.effects) {
       const effectOrConfig = this.effects[effect]
@@ -100,7 +100,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
   private resetComputedMetadata () {
     this.computedMetadata = {} as Metadata
   }
-  
+
   private recognized () {
     this.computedStatus = 'recognized'
   }
@@ -141,7 +141,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
     const type = this.toType(sequenceItem),
           pushSequence = (sequenceItem: ListenEffectParam<Type>) => {
             newSequence.push(sequenceItem)
-            
+
             if (
               this.maxSequenceLength !== true
               && newSequence.length > this.maxSequenceLength
@@ -151,7 +151,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
 
     for (const previousSequenceItem of this.sequence) pushSequence(previousSequenceItem)
     pushSequence(sequenceItem)
-          
+
     this.effectApi.getSequence = () => newSequence
     this.effectApi.pushSequence = pushSequence
     this.effectApi.listenInjection = {
@@ -169,7 +169,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
       default:
         // No effect for this type
     }
-      
+
     switch (this.status) {
       case 'ready':
       case 'denied':
@@ -192,11 +192,11 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
       if (sequenceItem[0] instanceof IntersectionObserverEntry) {
         return 'intersect'
       }
-  
+
       if (sequenceItem[0] instanceof MutationRecord) {
         return 'mutate'
       }
-      
+
       if (sequenceItem[0] instanceof ResizeObserverEntry) {
         return 'resize'
       }
@@ -204,7 +204,7 @@ export class Recognizeable<Type extends ListenableSupportedType, Metadata extend
       if (sequenceItem instanceof MediaQueryListEvent) {
         return sequenceItem.media
       }
-    
+
       if ('didTimeout' in sequenceItem) {
         return 'idle'
       }

@@ -34,12 +34,12 @@ export type ListenableOptions<
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
 > = { recognizeable?: RecognizeableOptions<Type, RecognizeableMetadata> }
 
-export type ListenEffect<Type extends ListenableSupportedType> = 
+export type ListenEffect<Type extends ListenableSupportedType> =
   Type extends 'intersect' ? (entries: ListenEffectParam<Type>) => any :
   Type extends 'mutate' ? (records: ListenEffectParam<Type>) => any :
   Type extends 'resize' ? (entries: ListenEffectParam<Type>) => any :
   Type extends 'idle' ? (deadline: ListenEffectParam<Type>) => any :
-  Type extends ('message' | 'messageerror') ? (event: MessageEvent) => any : 
+  Type extends ('message' | 'messageerror') ? (event: MessageEvent) => any :
   Type extends ListenableMediaQuery ? (event: ListenEffectParam<Type>) => any :
   Type extends (ListenableLeftClick | ListenableRightClick) ? (event: ListenEffectParam<Type>) => any :
   Type extends (ListenablePointer) ? (event: ListenEffectParam<Type>) => any :
@@ -48,19 +48,19 @@ export type ListenEffect<Type extends ListenableSupportedType> =
   Type extends keyof Omit<DocumentEventMap, 'resize'> ? (event: ListenEffectParam<Type>) => any :
   never
 
-export type ListenEffectParam<Type extends ListenableSupportedType> = 
+export type ListenEffectParam<Type extends ListenableSupportedType> =
   Type extends 'intersect' ? IntersectionObserverEntry[] :
   Type extends 'mutate' ? MutationRecord[] :
   Type extends 'resize' ? ResizeObserverEntry[] :
   Type extends 'idle' ? IdleDeadline :
-  Type extends ('message' | 'messageerror') ? MessageEvent : 
+  Type extends ('message' | 'messageerror') ? MessageEvent :
   Type extends ListenableMediaQuery ? MediaQueryListEvent :
   Type extends ListenableRightClick ? MouseEvent :
   Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? HTMLElementEventMap[Type] :
   Type extends keyof Omit<DocumentEventMap, 'resize'> ? DocumentEventMap[Type] :
   never
 
-export type ListenOptions<Type extends ListenableSupportedType> = 
+export type ListenOptions<Type extends ListenableSupportedType> =
   Type extends 'intersect' ? { observer?: IntersectionObserverInit } & ObservationListenOptions :
   Type extends 'mutate' ? { observe?: MutationObserverInit } & ObservationListenOptions :
   Type extends 'resize' ? { observe?: ResizeObserverOptions } & ObservationListenOptions :
@@ -85,7 +85,7 @@ type EventListenOptions = {
 export type ListenableActive<
   Type extends ListenableSupportedType,
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> = 
+> =
   Type extends 'intersect' ? { target: Element, id: IntersectionObserver } :
   Type extends 'mutate' ? { target: Element, id: MutationObserver } :
   Type extends 'resize' ? { target: Element, id: ResizeObserver } :
@@ -118,7 +118,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     if (type === 'recognizeable') {
       this.computedRecognizeable = new Recognizeable<Type, RecognizeableMetadata>([], options?.recognizeable)
       this.recognizeableEffectsKeys = Object.keys(options?.recognizeable?.effects) as Type[]
-    }    
+    }
 
     this.computedActive = new Set()
 
@@ -270,7 +270,7 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
       ...this.getDefaultListenOptions(),
       target: document,
     }
-    
+
     this.eventListen(effect, narrowedOptions)
   }
   private eventListen<EventType extends ListenableSupportedEventType> (effect: ListenEffect<EventType>, options: ListenOptions<EventType>) {
@@ -306,12 +306,12 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
                 active => !target || ('target' in active ? active.target === target : false)
               )([...this.active]),
               shouldUpdateStatus = stoppables.length === this.active.size
-        
+
         for (const stoppable of stoppables) {
           stop(stoppable)
           this.active.delete(stoppable)
         }
-        
+
         if (shouldUpdateStatus) this.stopped()
 
         break
@@ -381,7 +381,7 @@ function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive
     target.removeEventListener(id[0], id[1])
     return
   }
-  
+
   if (predicateNumber(stoppable.id)) {
     const { target, id } = stoppable as ListenableActive<'idle'>
     target.cancelIdleCallback(id)
@@ -393,7 +393,7 @@ function stop<Type extends ListenableSupportedType> (stoppable: ListenableActive
     target.removeEventListener(id[0], id[1])
     return
   }
-  
+
   const { target, id } = stoppable as ListenableActive<ListenableSupportedEventType>
   // @ts-ignore
   target.removeEventListener(id[0], id[1], id[2])

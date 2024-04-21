@@ -115,7 +115,7 @@ export class Storeable<String extends string> {
       this.computedError = error as Error
       this.errored()
     }
-    
+
     return this
   }
   private stored () {

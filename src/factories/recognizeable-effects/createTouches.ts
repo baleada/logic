@@ -22,7 +22,7 @@ export type TouchesMetadata = {
 
 type Touch = {
   times: PointerTimeMetadata['times'],
-  points: PointerStartMetadata['points'], 
+  points: PointerStartMetadata['points'],
   distance: number,
   interval: number
 }
@@ -66,13 +66,13 @@ export function createTouches (options: TouchesOptions = {}): RecognizeableOptio
   const touchstart: RecognizeableEffect<'touchstart', TouchesMetadata> = (event, api) => {
     const { getMetadata } = api,
           metadata = getMetadata()
-    
+
     metadata.touchTotal = event.touches.length
 
     if (!metadata.lastTouch) {
       metadata.lastTouch = createClone<typeof metadata.lastTouch>()(initialTouch)
     }
-    
+
     metadata.lastTouch.times.start = event.timeStamp
     metadata.lastTouch.points.start = toTouchMovePoint(event)
 
@@ -115,7 +115,7 @@ export function createTouches (options: TouchesOptions = {}): RecognizeableOptio
       if (!metadata.touches) {
         metadata.touches = []
       }
-      
+
       const interval = metadata.touches.length === 0
         ? 0
         : endTime - metadata.touches[metadata.touches.length - 1].times.end
@@ -152,6 +152,6 @@ export function createTouches (options: TouchesOptions = {}): RecognizeableOptio
       recognized()
     }
   }
-  
+
   return { touchstart, touchmove, touchcancel, touchend }
 }

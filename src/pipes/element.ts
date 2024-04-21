@@ -27,7 +27,7 @@ const defaultOptions: DeepRequired<CreateFocusableOptions> = {
     '[contenteditable]',
     '[tabindex]:not([disabled])',
   ]) as string,
-} 
+}
 
 /**
  * [Docs](https://baleada.dev/docs/logic/pipes/focusable)

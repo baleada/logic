@@ -46,7 +46,7 @@ export function createTouchpress (options: TouchpressOptions = {}) {
         stop = () => {
           window.cancelAnimationFrame(request)
         }
-  
+
   let request: number
   let totalTouches = 0
 
@@ -106,7 +106,7 @@ export function createTouchpress (options: TouchpressOptions = {}) {
     stop()
     denied()
     totalTouches--
-    
+
     onCancel?.(toHookApi(api))
   }
 
@@ -116,7 +116,7 @@ export function createTouchpress (options: TouchpressOptions = {}) {
     stop()
     denied()
     totalTouches--
-    
+
     onEnd?.(toHookApi(api))
   }
 

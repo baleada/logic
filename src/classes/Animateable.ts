@@ -114,7 +114,7 @@ export class Animateable<Value extends string | number | any[]> {
     this.alternates = options?.alternates || defaultOptions.alternates
 
     this.reversedControlPoints = fromControlPointsToReversedControlPoints(this.controlPoints)
-    
+
     this.toAnimationProgress = createAnimationProgress(this.controlPoints)
     this.reversedToAnimationProgress = createAnimationProgress(this.reversedControlPoints)
 
@@ -127,7 +127,7 @@ export class Animateable<Value extends string | number | any[]> {
 
     this.getEaseables = createGetEaseables(({ keyframe }) => keyframe.timing ? fromTimingToControlPoints(keyframe.timing) : this.controlPoints)
     this.getReversedEaseables = createGetEaseables(({ keyframe, index, propertyKeyframes }) => keyframe.timing ? fromControlPointsToReversedControlPoints(fromTimingToControlPoints(propertyKeyframes[index + 1].timing)) : this.reversedControlPoints)
-    
+
     this.setKeyframes(keyframes)
     this.setPlaybackRate(1)
     this.ready()
@@ -220,10 +220,10 @@ export class Animateable<Value extends string | number | any[]> {
 
     switch (this.status) {
       case 'playing':
-      case 'reversing': 
+      case 'reversing':
         this.totalTimeInvisible = (1 / narrowedPlaybackRate) * this.totalTimeInvisible
         this.seek(this.progress.time)
-        
+
         break
     }
 
@@ -292,7 +292,7 @@ export class Animateable<Value extends string | number | any[]> {
         this.createAnimate('play')(effect, options)
         break
     }
-    
+
     return this
   }
   private playing () {
@@ -364,7 +364,7 @@ export class Animateable<Value extends string | number | any[]> {
         this.createAnimate('reverse')(effect, options)
         break
     }
-    
+
     return this
   }
   private reversing () {
@@ -387,7 +387,7 @@ export class Animateable<Value extends string | number | any[]> {
           default:
             this.invisibleAt = timestamp
             break
-        }        
+        }
       })
     }
   }
@@ -515,7 +515,7 @@ export class Animateable<Value extends string | number | any[]> {
             progress: { time: timeProgress, animation: animationProgress },
             interpolated: toInterpolated({ previous, next, progress: animationProgress }, interpolateOptions),
           }
-          
+
           return frame
         },
         { properties: {}, timestamp }
@@ -605,7 +605,7 @@ export class Animateable<Value extends string | number | any[]> {
               status: this.status as 'playing' | 'reversing',
               timeProgress: (timestamp - this.startTime) / this.duration,
             }
-    
+
             this.paused()
           })
           break
@@ -617,7 +617,7 @@ export class Animateable<Value extends string | number | any[]> {
               status: this.status as 'playing' | 'reversing',
               timeProgress: (timestamp - this.startTime) / this.duration,
             }
-      
+
             this.paused()
           })
       }
@@ -625,25 +625,25 @@ export class Animateable<Value extends string | number | any[]> {
       switch (this.status) {
         case 'playing':
           this.cancelAnimate()
-          
+
           window.requestAnimationFrame(timestamp => {
             this.pauseCache = {
               status: this.status as 'playing' | 'reversing',
               timeProgress: (timestamp - this.startTime) / this.duration,
             }
-    
+
             this.paused()
           })
           break
         case 'reversing':
           this.cancelAnimate()
-          
+
           window.requestAnimationFrame(timestamp => {
             this.pauseCache = {
               status: this.status as 'playing' | 'reversing',
               timeProgress: (timestamp - this.startTime) / this.duration,
             }
-      
+
             this.paused()
           })
       }
@@ -766,9 +766,9 @@ export class Animateable<Value extends string | number | any[]> {
           }
 
           break
-      }    
+      }
     }
-    
+
     return this
   }
   private sought () {
@@ -806,7 +806,7 @@ export class Animateable<Value extends string | number | any[]> {
 
     return this
   }
-  
+
   stop () {
     switch (this.status) {
       case 'ready':
@@ -820,7 +820,7 @@ export class Animateable<Value extends string | number | any[]> {
         this.stopped()
         break
     }
-    
+
     return this
   }
   private stopped () {
@@ -869,7 +869,7 @@ export function createGetEaseables<Value extends string | number | any[]> (fromK
                     hasCustomTiming,
                     toAnimationProgress,
                   })
-                  
+
                   return propertyEaseables
                 },
                 []
@@ -882,7 +882,7 @@ export function createGetEaseables<Value extends string | number | any[]> (fromK
                 toAnimationProgress: () => 1,
                 hasCustomTiming: false,
               }
-        
+
         return createConcat(
           easeables,
           [firstEaseable],
@@ -891,7 +891,7 @@ export function createGetEaseables<Value extends string | number | any[]> (fromK
       },
       []
     )
-    
+
     return fromPropertiesToEasables(properties)
   }
 }
@@ -906,13 +906,13 @@ export function toProperties<Value extends string | number | any[]> (keyframes: 
       }
     }
   }
-  
+
   return [...properties]
 }
 
 export function fromTimingToControlPoints(timing: AnimateableTiming): AnimateableControlPoints {
   const { 0: point1x, 1: point1y, 2: point2x, 3: point2y } = timing
-  
+
   return [
     { x: point1x, y: point1y },
     { x: point2x, y: point2y },

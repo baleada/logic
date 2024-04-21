@@ -15,6 +15,6 @@ export function createDepthPathConfig<
           at(-1),
           createOutgoing<Id, Metadata, typeof directedAcyclic>(directedAcyclic)
         )(path)
-  
+
   return { predicatePathable, toTraversalCandidates }
 }

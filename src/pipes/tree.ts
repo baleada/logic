@@ -31,7 +31,7 @@ export function createGraph<TreeNode> (
   return function* (tree) {
     const root = tree[0],
           rootId = toId(root)
-  
+
     function* toPair (node: TreeNode, id: string) {
       const children = toChildren(node) || []
 
@@ -46,7 +46,7 @@ export function createGraph<TreeNode> (
         yield* toPair(child, childId)
       }
     }
-  
+
     yield { node: rootId }
     yield* toPair(root, rootId)
   }

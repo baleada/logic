@@ -48,7 +48,7 @@ export function createMousepress (options: MousepressOptions = {}) {
           window.cancelAnimationFrame(request)
           target.removeEventListener('mousemove', mousemoveEffect)
         }
-  
+
   let request: number
   let mousemoveEffect: (event: ListenEffectParam<'mousemove'>) => void
   let mouseStatus: 'down' | 'up' | 'leave'
@@ -76,7 +76,7 @@ export function createMousepress (options: MousepressOptions = {}) {
   }
 
   const mousemove: RecognizeableEffect<'mousemove', MousepressMetadata> = (event, api) => {
-    const { pushSequence } = api 
+    const { pushSequence } = api
     pushSequence(event)
     storePointerMoveMetadata(event, api)
     // @ts-expect-error
@@ -113,11 +113,11 @@ export function createMousepress (options: MousepressOptions = {}) {
     const { denied, listenInjection: { optionsByType: { mouseup: { target } } } } = api
 
     if (mouseStatus !== 'down') return
-          
+
     denied()
     stop(target)
     mouseStatus = 'up'
-    
+
     onUp?.(toHookApi(api))
   }
 

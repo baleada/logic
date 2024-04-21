@@ -82,7 +82,7 @@ export class Completeable {
   get dividerIndices () {
     return this.computedDividerIndices
   }
-  
+
   private getSegmentStartIndex (): number {
     switch (this.segmentFrom) {
       case 'start':
@@ -116,7 +116,7 @@ export class Completeable {
         this.setDividerIndices()
         break
     }
-    
+
     return this
   }
 
@@ -217,7 +217,7 @@ export function toPreviousMatch ({ string, re, from }: { string: string, re: Reg
             toString,
           )(string) as string,
           toNextMatchIndex = toNextMatch({ string: reversedStringBeforeFrom, re, from: 0 })
-    
+
     indexOf = toNextMatchIndex === -1
       ? -1
       : (reversedStringBeforeFrom.length - 1) - toNextMatchIndex

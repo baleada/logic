@@ -56,7 +56,7 @@ export class Compareable {
 
   private computedString: string
   setString (string: string) {
-    this.computedString = string    
+    this.computedString = string
     return this
   }
 

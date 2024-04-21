@@ -14,7 +14,7 @@ export class Grantable {
   private ready () {
     this.computedStatus = 'ready'
   }
-  
+
   get descriptor () {
     return this.computedDescriptor
   }
@@ -30,7 +30,7 @@ export class Grantable {
   get status () {
     return this.computedStatus
   }
-  
+
   private computedDescriptor: PermissionDescriptor
   setDescriptor (descriptor: PermissionDescriptor) {
     this.computedDescriptor = descriptor
@@ -51,7 +51,7 @@ export class Grantable {
     }
 
     return this
-  }  
+  }
   private granting () {
     this.computedStatus = 'granting'
   }
