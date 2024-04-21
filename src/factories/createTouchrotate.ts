@@ -85,7 +85,7 @@ export function createTouchrotate (options: TouchrotateOptions = {}) {
           end: { x: 0, y: 0 },
         },
       },
-    ]    
+    ]
 
     metadata.angle = {
       start: toPolarCoordinates({

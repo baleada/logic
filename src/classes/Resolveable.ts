@@ -24,10 +24,10 @@ export class Resolveable<Value> {
   get status () {
     return this.computedStatus
   }
-  get value () { 
+  get value () {
     return this.computedValue
   }
-  get error () { 
+  get error () {
     return this.computedError
   }
 
@@ -46,9 +46,9 @@ export class Resolveable<Value> {
       this.resolved()
     } catch (error) {
       this.computedError = error
-      this.errored()    
+      this.errored()
     }
-    
+
     return this
   }
   private resolving () {

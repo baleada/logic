@@ -66,10 +66,10 @@ export class Fetchable {
   get retryCount () {
     return this.computedRetryCount
   }
-  get response () { 
+  get response () {
     return this.computedResponse
   }
-  get error () { 
+  get error () {
     return this.computedError
   }
   get arrayBuffer () {
@@ -93,7 +93,7 @@ export class Fetchable {
     this.computedResource = resource
     return this
   }
-  
+
   private computedResponse: Response
   private computedError: Error
   async fetch (options: FetchOptions = {}) {

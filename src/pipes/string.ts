@@ -43,7 +43,7 @@ export function createSanitize (options?: DOMPurifyConfig): StringTransform<stri
  */
 export function createSplit (options: { separator?: string | RegExp, limit?: number }): StringTransform<string[]> {
   const { separator = '', limit } = options
-  
+
   return string => {
     return string.split(separator, limit)
   }

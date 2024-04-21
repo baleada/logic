@@ -54,7 +54,7 @@ export const createKeycomboMatch = (
             const implicitModifier = find<typeof modifiers[number]>(
               modifier => code.includes(modifier)
             )(modifiers) as string
-            
+
             if (implicitModifier) implicitModifierAliases.push(implicitModifier.toLowerCase())
           }
 

@@ -25,11 +25,11 @@ export function storePointerStartMetadata<
 ): void {
   const { getMetadata } = api,
         metadata = getMetadata()
-  
+
   const point = event instanceof MouseEvent
     ? toMousePoint(event)
     : toTouchMovePoint(event)
-  
+
   if (!metadata.points) metadata.points = createClone<typeof metadata.points>()(initialMetadata.points)
   metadata.points.start = point
   metadata.points.end = point

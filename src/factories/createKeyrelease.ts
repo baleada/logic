@@ -157,11 +157,11 @@ export function createKeyrelease (
           } = api,
           metadata = getMetadata(),
           key = fromEventToKeyStatusCode(event)
-                
+
     // SHOULD BLOCK EVENT
     if (['denied', 'recognized'].includes(localStatus)) {
       if (localStatus === 'denied') denied()
-      
+
       if (includes(event.key)(unsupportedKeys) as boolean) clearStatuses()
       else deleteStatus(key)
 

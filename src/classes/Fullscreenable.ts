@@ -43,7 +43,7 @@ export class Fullscreenable<ElementType extends Element> {
     await this.fullscreen(options)
     return this
   }
-  
+
   private computedError: Error
   async fullscreen (options: FullscreenOptions = {}) {
     try {

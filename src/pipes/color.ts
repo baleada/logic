@@ -24,7 +24,7 @@ export type MixColor = `${string} ${number}%` | string
  */
 export function createMix (color2: MixColor, options: CreateMixOptions = {}): MixColorTransform<string> {
   const { method, tag, getParent } = { ...defaultCreateMixOptions, ...options }
-  
+
   return color1 => {
     const element = document.createElement(tag),
           parent = getParent()
@@ -35,7 +35,7 @@ export function createMix (color2: MixColor, options: CreateMixOptions = {}): Mi
 
     const mixed = getComputedStyle(element).color
 
-    parent.removeChild(element)    
+    parent.removeChild(element)
 
     return mixed
   }

@@ -18,7 +18,7 @@ export function createAliases (options: CreateAliasesOptions = {}): (combo: stri
   return combo => {
     const separator = '+',
           splitByPlus = createSplit({ separator })
-  
+
     return pipe(
       splitByPlus,
       flatMap<string, string[]>(

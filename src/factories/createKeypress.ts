@@ -169,11 +169,11 @@ export function createKeypress (
   const keyup: RecognizeableEffect<'keyup', KeypressMetadata> = (event, api) => {
     const { denied } = api,
           key = fromEventToKeyStatusCode(event)
-                
+
     // SHOULD BLOCK EVENT
     if (localStatus === 'denied') {
       denied()
-      
+
       if (includes(event.key)(unsupportedKeys) as boolean) clearStatuses()
       else deleteStatus(key)
 
@@ -181,6 +181,8 @@ export function createKeypress (
       onUp?.(toHookApi(api))
       return
     }
+
+    // TODO: clear status on unsupported keyup to fix returning focus to window?
 
     deleteStatus(key)
 

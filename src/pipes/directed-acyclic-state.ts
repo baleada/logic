@@ -44,7 +44,7 @@ export function createPath<
               find<GraphEdge<Id, Metadata>>(
                 ({ predicateShouldTraverse }) => predicateShouldTraverse(state)
               ),
-            )(path) as GraphEdge<Id, Metadata>            
+            )(path) as GraphEdge<Id, Metadata>
 
       path.push(edge.to)
     }

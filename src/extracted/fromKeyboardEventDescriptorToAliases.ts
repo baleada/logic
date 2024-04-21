@@ -3,7 +3,7 @@ import type { KeyboardEventDescriptor } from './keyboard-event-descriptor'
 
 export function fromKeyboardEventDescriptorToAliases (descriptor: KeyboardEventDescriptor): string[] {
   if (descriptor.shiftKey && descriptor.code in aliasesByShiftCode) return [aliasesByShiftCode[descriptor.code]]
-  
+
   const withoutModifierSide = toWithoutModifierSide(descriptor.code)
   if (withoutModifierSide in aliasListsByModifier) return aliasListsByModifier[withoutModifierSide]
 

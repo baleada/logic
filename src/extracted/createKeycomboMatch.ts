@@ -22,7 +22,7 @@ export const createKeycomboMatch = (
 ): KeyStatusFunction<boolean> => {
   const { toLonghand, toCode, toAliases } = { ...defaultOptions, ...options },
         aliases = createAliases({ toLonghand })(keycombo),
-        codes = map<string, KeyStatusCode>(toCode)(aliases)        
+        codes = map<string, KeyStatusCode>(toCode)(aliases)
 
   return statuses => (
     every<KeyStatusCode>(

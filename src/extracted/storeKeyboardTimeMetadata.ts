@@ -52,7 +52,7 @@ export function storeKeyboardTimeMetadata<
   const frameEffect: FrameRequestCallback = timestamp => {
           timeMetadata.times.end = Math.round(timestamp)
           timeMetadata.duration = Math.max(0, timeMetadata.times.end - timeMetadata.times.start)
-          
+
           if (recognize) {
             // @ts-expect-error
             recognize(event, api)
@@ -62,21 +62,21 @@ export function storeKeyboardTimeMetadata<
         },
         storeDuration = () => {
           const sequence = api.getSequence()
-          
+
           if (!document.body.contains(
             (at(-1)(sequence) as typeof sequence[number]).target as HTMLElement
           )) return
 
           const request = requestAnimationFrame(timestamp => {
             if (!getShouldStore()) return
-            
+
             frameEffect(timestamp)
             storeDuration()
           })
 
           setRequest(request)
         }
-  
+
   frameEffect(performance.now())
   storeDuration()
 }

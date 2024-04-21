@@ -71,7 +71,7 @@ export class Broadcastable<State> {
   private errored () {
     this.computedStatus = 'errored'
   }
-  
+
   stop () {
     this.channel.close()
     this.stopped()

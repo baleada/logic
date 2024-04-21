@@ -48,7 +48,7 @@ export class Drawable {
   get d () {
     return this.computedD
   }
-  
+
   private computedStroke: DrawableStroke
   setStroke (stroke: DrawableStroke) {
     this.computedStroke = stroke
@@ -66,7 +66,7 @@ export class Drawable {
   private drawing () {
     this.computedStatus = 'drawing'
   }
-  
+
   private drawn () {
     this.computedStatus = 'drawn'
   }

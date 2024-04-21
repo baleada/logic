@@ -24,7 +24,7 @@ export type ClicksMetadata = {
 
 type Click = {
   times: PointerTimeMetadata['times'],
-  points: PointerStartMetadata['points'], 
+  points: PointerStartMetadata['points'],
   distance: number,
   interval: number
 }
@@ -71,9 +71,9 @@ export function createClicks (options: ClicksOptions = {}): RecognizeableOptions
   const mousedown: RecognizeableEffect<ClicksType, ClicksMetadata> = (event, api) => {
     const { getMetadata } = api,
           metadata = getMetadata()
-    
+
     metadata.mouseStatus = 'down'
-    
+
     if (!metadata.lastClick) {
       metadata.lastClick = createClone<typeof metadata.lastClick>()(initialClick)
     }
@@ -150,7 +150,7 @@ export function createClicks (options: ClicksOptions = {}): RecognizeableOptions
       metadata.clicks = [lastClick]
       return
     }
-    
+
     if (metadata.clicks.length >= minClicks) {
       recognized()
     }

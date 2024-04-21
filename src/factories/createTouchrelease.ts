@@ -81,7 +81,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
 
   const touchmove: RecognizeableEffect<'touchmove', TouchreleaseMetadata> = (event, api) => {
     const { getStatus } = api
-    
+
     if (getStatus() !== 'denied') storePointerMoveMetadata(event, api)
 
     onMove?.(toHookApi(api))
@@ -93,7 +93,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
     stop()
     denied()
     totalTouches--
-    
+
     onCancel?.(toHookApi(api))
   }
 
@@ -108,12 +108,12 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
     }
 
     storePointerMoveMetadata(event, api)
-    
+
     stop()
     totalTouches--
-    
+
     recognize(event, api)
-    
+
     onEnd?.(toHookApi(api))
   }
 

@@ -109,7 +109,7 @@ export function createKeychord (
     const { getMetadata } = api,
           metadata = getMetadata(),
           downCombos = keyStates[playedIndex].getDownCombos()
-    
+
     if (playedIndex === 0) metadata.played = []
 
     if (
@@ -166,11 +166,11 @@ export function createKeychord (
           } = api,
           metadata = getMetadata(),
           key = fromEventToKeyStatusCode(event)
-                
+
     // ALREADY ACTED ON MULTI-KEY COMBO
     if (['denied', 'recognized'].includes(localStatuses[playedIndex])) {
       if (localStatuses[playedIndex] === 'denied') denied()
-      
+
       for (const { clearStatuses, deleteStatus } of keyStates) {
         if (includes(event.key)(unsupportedKeys) as boolean) clearStatuses()
         else deleteStatus(key)
@@ -236,7 +236,7 @@ export function createKeychord (
       denied()
       return
     }
-    
+
     if (playedIndex === narrowedKeycombos.length - 1) {
       recognized()
       localStatuses[playedIndex] = 'recognized'

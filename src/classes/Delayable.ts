@@ -123,7 +123,7 @@ export class Delayable {
       this.paused()
       break
     }
-    
+
     return this
   }
   private paused () {
@@ -174,7 +174,7 @@ export class Delayable {
   private sought () {
     this.computedStatus = 'sought'
   }
-  
+
   stop () {
     this.animateable.stop()
     this.stopped()

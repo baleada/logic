@@ -52,7 +52,7 @@ export function storePointerTimeMetadata<
           metadata.duration = Math.max(0, metadata.times.end - metadata.times.start)
           const durationFromPrevious = Math.max(0, metadata.times.end - previousEndTime)
           metadata.velocity = (metadata.distance.straight.fromPrevious / durationFromPrevious) || 0
-          
+
           const event = getSequence().at(-1)
 
           // @ts-expect-error
@@ -61,21 +61,21 @@ export function storePointerTimeMetadata<
         },
         storeDuration = () => {
           const sequence = api.getSequence()
-          
+
           if (!document.contains(
             (at(-1)(sequence) as typeof sequence[number]).target as HTMLElement
           )) return
 
           const request = requestAnimationFrame(timestamp => {
             if (!getShouldStore()) return
-            
+
             frameEffect(timestamp)
             storeDuration()
           })
 
           setRequest(request)
         }
-  
+
   frameEffect(performance.now())
   storeDuration()
 }

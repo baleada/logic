@@ -37,7 +37,7 @@ export class Navigateable<Item> {
     this.navigate(options?.initialLocation ?? defaultOptions.initialLocation)
     this.ready()
   }
-  
+
   private computedStatus: NavigateableStatus
   private ready () {
     this.computedStatus = 'ready'
@@ -93,7 +93,7 @@ export class Navigateable<Item> {
         if (location < 0 && allow === 'possible') {
           return 0
         }
-  
+
         if (location > this.array.length - 1) {
           return Math.max(this.array.length - 1, 0)
         }
@@ -101,7 +101,7 @@ export class Navigateable<Item> {
 
       return location
     })()
-      
+
     this.computedLocation = narrowedLocation
   }
 
@@ -168,7 +168,7 @@ export class Navigateable<Item> {
   private previoused () {
     this.computedStatus = 'navigated to previous'
   }
-  
+
   random () {
     const newLocation = Math.floor(Math.random() * (this.array.length))
     this._navigate(newLocation)

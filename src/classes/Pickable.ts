@@ -66,7 +66,7 @@ export class Pickable<Item> {
   get first () {
     return this.computedFirst
   }
-  computedLast: number 
+  computedLast: number
   get last () {
     return this.computedLast
   }
@@ -102,7 +102,7 @@ export class Pickable<Item> {
 
   pick (indexOrIndices: number | number[], options: PickOptions = {}) {
     const { replace, allowsDuplicates } = { ...defaultPickOptions, ...options }
-    
+
     this.computedPicks = pipe(
       narrowIndices,
       this.toPossiblePicks,
@@ -138,7 +138,7 @@ export class Pickable<Item> {
               array => concat(array, maybeWithoutDuplicates),
               toArray(),
             )(this.picks)
-          case 'lifo': 
+          case 'lifo':
             if (maybeWithoutDuplicates.length === 0) {
               return this.picks
             }
@@ -163,7 +163,7 @@ export class Pickable<Item> {
     this.computedFirst = Math.min(...this.picks)
     this.computedLast = Math.max(...this.picks)
     this.computedMultiple = toUnique(this.picks).length > 1
-    
+
     this.picked()
     return this
   }
@@ -191,7 +191,7 @@ export class Pickable<Item> {
     this.computedFirst = Math.min(...this.picks)
     this.computedLast = Math.max(...this.picks)
     this.computedMultiple = toUnique(this.picks).length > 1
-    
+
     this.omitted()
     return this
   }

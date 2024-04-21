@@ -97,13 +97,13 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
     if (mouseStatus !== 'down') return
 
     storePointerMoveMetadata(event, api)
-    
+
     const { listenInjection: { optionsByType: { mouseup: { target } } } } = api
     stop(target)
     mouseStatus = 'up'
-    
+
     recognize(event, api)
-    
+
     onUp?.(toHookApi(api))
   }
 

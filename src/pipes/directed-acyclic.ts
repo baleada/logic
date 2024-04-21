@@ -70,7 +70,7 @@ export function createTree<
             at(0),
           )(directedAcyclic) as GraphNode<Id>,
           tree: GraphTree<Id> = []
-          
+
     tree.push({
       node: firstRoot,
       children: [],
@@ -143,7 +143,7 @@ export function createConfigureDepthFirstSteps<Id extends string, StateValue = n
             },
             {} as Record<Id, number>,
           )(directedAcyclic.nodes)
-  
+
     return {
       getSetStateValue,
       stepFromEffect,
@@ -273,35 +273,35 @@ export function createSteps<
 
     yield { path, state: JSON.parse(JSON.stringify(state)) }
 
-    function* toStep (): Generator<GraphStep<Id, StateValue>> {  
+    function* toStep (): Generator<GraphStep<Id, StateValue>> {
       if (predicateExhausted(location)) {
         if (includes(location)(roots)) return
-  
+
         state[location].status = 'unset'
         delete state[location].value
-  
+
         const path = toPath(state)
         location = path.at(-2)
-  
+
         yield* toStep()
         return
       }
-      
+
       state[location].status = 'set'
       state[location].value = getSetStateValue(location)
-      
+
       const path = toPath(state)
-  
+
       yield { path, state: JSON.parse(JSON.stringify(state)) }
       stepFromEffect(location)
-  
+
       const newLocation = path.at(-1)
-  
+
       if (predicateSteppable(newLocation)) location = newLocation
-  
+
       yield* toStep()
     }
-  
+
     yield* toStep()
   }
 }

@@ -102,7 +102,7 @@ export function createIncoming<
   type GraphEdgeType = GraphType extends GraphAsync<Id, Metadata>
     ? GraphAsyncEdge<Id, Metadata>
     : GraphEdge<Id, Metadata>
-  
+
   return function* (node) {
     yield * filter<typeof edges[number]>(
       ({ to }) => to === node
@@ -128,7 +128,7 @@ export function createOutgoing<
   type GraphEdgeType = GraphType extends GraphAsync<Id, Metadata>
     ? GraphAsyncEdge<Id, Metadata>
     : GraphEdge<Id, Metadata>
-  
+
   return function* (node) {
     yield * filter<typeof edges[number]>(
       ({ from }) => from === node
@@ -181,7 +181,7 @@ export function createSiblings<
         ({ from }) => from
       )
     )(edges) as Iterable<GraphNode<Id>>
-    
+
 
     for (const parent of parents) {
       yield * pipe(

@@ -65,7 +65,7 @@ export function createTree<
             at(0),
           )(directedAcyclicAsync) as GraphNode<Id>,
           tree: GraphTree<Id> = []
-          
+
     tree.push({
       node: firstRoot,
       children: [],
@@ -154,35 +154,35 @@ export function createSteps<
 
     yield { path, state: JSON.parse(JSON.stringify(state)) }
 
-    async function* toStep (): AsyncGenerator<GraphStep<Id, StateValue>> {  
+    async function* toStep (): AsyncGenerator<GraphStep<Id, StateValue>> {
       if (predicateExhausted(location)) {
         if (includes(location)(roots)) return
-  
+
         state[location].status = 'unset'
         delete state[location].value
-  
+
         const path = await toPath(state)
         location = path.at(-2)
-  
+
         yield* await toStep()
         return
       }
-      
+
       state[location].status = 'set'
       state[location].value = getSetStateValue(location)
-      
-      const path = await toPath(state)      
-  
+
+      const path = await toPath(state)
+
       yield { path, state: JSON.parse(JSON.stringify(state)) }
       stepFromEffect(location)
-  
+
       const newLocation = path.at(-1)
-  
+
       if (predicateSteppable(newLocation)) location = newLocation
-  
+
       yield* await toStep()
     }
-  
+
     yield* await toStep()
   }
 }
