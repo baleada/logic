@@ -29,3 +29,5 @@ export { fromShorthandAliasToLonghandAlias } from './fromShorthandAliasToLonghan
 export { fromAliasToCode } from './fromAliasToCode'
 export { fromKeyboardEventDescriptorToAliases } from './fromKeyboardEventDescriptorToAliases'
 export { fromCodeToAliases } from './fromCodeToAliases'
+
+export type { KeyboardEventDescriptor } from './keyboard-event-descriptor'

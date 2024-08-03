@@ -11,8 +11,6 @@ import * as ListenableExports from '../src/classes/Listenable'
 import * as NavigateableExports from '../src/classes/Navigateable'
 import * as RecognizeableExports from '../src/classes/Recognizeable'
 import * as ResolveableExports from '../src/classes/Resolveable'
-import * as SanitizeableExports from '../src/classes/Sanitizeable'
-import * as SearchableExports from '../src/classes/Searchable'
 import * as StoreableExports from '../src/classes/Storeable'
 import * as extracted from '../src/extracted'
 import * as pipeExports from '../src/pipes'
@@ -32,8 +30,6 @@ function checkTestCoverage () {
     ...NavigateableExports,
     ...RecognizeableExports,
     ...ResolveableExports,
-    ...SanitizeableExports,
-    ...SearchableExports,
     ...StoreableExports,
     ...extracted
   })

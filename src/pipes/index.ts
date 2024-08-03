@@ -104,6 +104,14 @@ export {
 export type { CreateFocusableOptions } from './element'
 
 export {
+  createTry,
+} from './function'
+
+export {
+  createTryAsync,
+} from './function-async'
+
+export {
   createChildren,
   createSiblings,
   createRoot,

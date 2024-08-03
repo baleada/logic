@@ -58,15 +58,15 @@ suite('createSlice(...) supports negative indices', ({ array }) => {
     const value = (array => {
       return createSlice<string>(-1)(array)
     })(array)
-  
+
     assert.equal(value, ['huevito'])
   }
-  
+
   {
     const value = (array => {
       return createSlice<string>(1, -1)(array)
     })(array)
-  
+
     assert.equal(value, ['frijoles', 'mantequilla', 'aguacate'])
   }
 })
@@ -222,7 +222,7 @@ suite('createSwap({ indices }) swaps the item at the first index with the item a
     value1,
     ['huevito', 'frijoles', 'mantequilla', 'aguacate', 'tortilla']
   )
-  
+
   const value2 = (array => {
     return createSwap<string>(4, 0)(array)
   })(array)
@@ -230,7 +230,7 @@ suite('createSwap({ indices }) swaps the item at the first index with the item a
     value2,
     ['huevito', 'frijoles', 'mantequilla', 'aguacate', 'tortilla']
   )
-  
+
   const value3 = (array => {
     return createSwap<string>(0, 1)(array)
   })(array)

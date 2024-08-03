@@ -11,7 +11,7 @@ export type AssociativeArrayEffect<Key, Value> = (associativeArray: AssociativeA
 export function createSet<Key extends any, Value extends any> (
   key: Key,
   value: Value,
-  options: WithPredicateKey = {},
+  options: WithPredicateKey<Key> = {},
 ): AssociativeArrayEffect<Key, Value> {
   const { predicateKey = createEqual(key) } = options
 
@@ -46,7 +46,7 @@ export function createClear<Key extends any, Value extends any> (): AssociativeA
  */
 export function createDelete<Key extends any> (
   key: Key,
-  options: WithPredicateKey = {},
+  options: WithPredicateKey<Key> = {},
 ): AssociativeArrayEffect<Key, any> {
   const { predicateKey = createEqual(key) } = options
 

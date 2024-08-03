@@ -146,9 +146,9 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     return this.computedRecognizeable
   }
 
-  private computedType: string
+  private computedType: Type
   private implementation: ListenableImplementation
-  setType (type: string) {
+  setType (type: Type) {
     this.stop()
     this.computedType = type
     this.implementation = toImplementation(type)
@@ -274,8 +274,8 @@ export class Listenable<Type extends ListenableSupportedType, RecognizeableMetad
     this.eventListen(effect, narrowedOptions)
   }
   private eventListen<EventType extends ListenableSupportedEventType> (effect: ListenEffect<EventType>, options: ListenOptions<EventType>) {
-    const { exceptAndOnlyEffect, effectOptions } = toAddEventListenerParams(this.type as EventType, effect, options),
-          eventListeners: ListenableActiveEventId<EventType>[] = [[this.type as EventType, exceptAndOnlyEffect, ...effectOptions]]
+    const { exceptAndOnlyEffect, effectOptions } = toAddEventListenerParams(this.type as unknown as EventType, effect, options),
+          eventListeners: ListenableActiveEventId<EventType>[] = [[this.type as unknown as EventType, exceptAndOnlyEffect, ...effectOptions]]
 
     this.addEventListeners(eventListeners, options)
   }
