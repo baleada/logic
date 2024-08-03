@@ -5,8 +5,8 @@ import { createEqual } from './any'
 
 export type AssociativeArrayTransform<Key, Value, Transformed> = (associativeArray: AssociativeArray<Key, Value>) => Transformed
 
-export type WithPredicateKey = {
-  predicateKey?: (candidate) => boolean
+export type WithPredicateKey<Key extends any> = {
+  predicateKey?: (candidate: Key) => boolean
 }
 
 /**
@@ -14,7 +14,7 @@ export type WithPredicateKey = {
  */
 export function createValue<Key extends any, Value extends any> (
   key: Key,
-  options: WithPredicateKey = {},
+  options: WithPredicateKey<Key> = {},
 ): AssociativeArrayTransform<Key, Value, Value | undefined> {
   const { predicateKey = createEqual(key) } = options
 
@@ -30,7 +30,7 @@ export function createValue<Key extends any, Value extends any> (
  */
 export function createHas<Key extends any> (
   key: Key,
-  options: WithPredicateKey = {},
+  options: WithPredicateKey<Key> = {},
 ): AssociativeArrayTransform<Key, any, boolean> {
   const { predicateKey = createEqual(key) } = options
 
