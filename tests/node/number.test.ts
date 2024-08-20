@@ -3,6 +3,7 @@ import * as assert from 'uvu/assert'
 import {
   createClamp,
   createDetermine,
+  createFormat,
   createGreater,
   createGreaterOrEqual,
   createLessOrEqual,
@@ -44,7 +45,7 @@ suite('createDetermine(...) determines outcome', () => {
     { outcome: 3, probability: 1 },
     { outcome: 4, probability: 1 },
   ]
-  
+
   {
     const value = createDetermine(potentialities)(0),
           expected = 1
@@ -81,7 +82,7 @@ suite('createDetermine(...) falls back to final potentiality if determinant is g
     { outcome: 3, probability: 1 },
     { outcome: 4, probability: 1 },
   ]
-  
+
   const value = createDetermine(potentialities)(4),
         expected = 4
 
@@ -95,9 +96,16 @@ suite('createDetermine(...) falls back to first potentiality if determinant is l
     { outcome: 3, probability: 1 },
     { outcome: 4, probability: 1 },
   ]
-  
+
   const value = createDetermine(potentialities)(-1),
         expected = 1
+
+  assert.is(value, expected)
+})
+
+suite('createFormat(...) formats number', ({ number }) => {
+  const value = createFormat('en-US', { style: 'currency', currency: 'USD' })(number),
+        expected = '$42.00'
 
   assert.is(value, expected)
 })

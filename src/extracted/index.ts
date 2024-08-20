@@ -26,6 +26,19 @@ export { createAliases } from './createAliases'
 
 export { createAliasesLength } from './createAliasesLength'
 
+export {
+  createToIntl,
+  toCollator,
+  toDateTimeFormat,
+  toDisplayNames,
+  toListFormat,
+  toLocale,
+  toNumberFormat,
+  toPluralRules,
+  toRelativeTimeFormat,
+  toSegmenter,
+ } from './createToIntl'
+
 export { fromKeyboardEventDescriptorToAliases } from './fromKeyboardEventDescriptorToAliases'
 
 export { fromCodeToAliases } from './fromCodeToAliases'

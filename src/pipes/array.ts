@@ -1,6 +1,6 @@
 import arrayShuffle from 'array-shuffle'
 import { pipe, toArray, concat, unique, filter, map, reduce, slice, sort } from 'lazy-collections'
-import { predicateObject } from '../extracted'
+import { predicateObject, toListFormat } from '../extracted'
 
 export type ArrayTransform<Item, Transformed> = (array: Item[]) => Transformed
 
@@ -214,4 +214,12 @@ export function createUnique<Item>(): ArrayTransform<Item, Item[]> {
     unique(),
     toArray()
   )(array) as Item[]
+}
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/array-format)
+ */
+export function createFormat (...params: ConstructorParameters<typeof Intl.ListFormat>): ArrayTransform<string, string> {
+  const listFormat = toListFormat(...params)
+  return array => listFormat.format(array)
 }

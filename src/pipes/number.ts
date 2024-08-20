@@ -4,6 +4,7 @@ import {
   find,
   reduce,
 } from 'lazy-collections'
+import { toNumberFormat } from '../extracted'
 import { createMap } from './array'
 
 export type NumberTransform<Transformed> = (number: number) => Transformed
@@ -56,6 +57,14 @@ export function createDetermine<Outcome>(
   return determinant => (find<Predicate>(
     ({ predicate }) => predicate(determinant)
   )(predicates) as Predicate).outcome
+}
+
+/**
+ * [Docs](https://baleada.dev/docs/logic/pipes/number-format)
+ */
+export function createFormat (...params: ConstructorParameters<typeof Intl.NumberFormat>): NumberTransform<string> {
+  const numberFormat = toNumberFormat(...params)
+  return number => numberFormat.format(number)
 }
 
 /**

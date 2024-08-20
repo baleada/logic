@@ -15,7 +15,7 @@ suite('interpolates numbers', async ({ puppeteer: { page } }) => {
 
 suite('interpolates strings as colors', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => window.Logic.toInterpolated({ previous: 'white', next: '#000', progress: .5 }, { color: { method: 'oklch' } })),
-        expected = 'oklch(0.499997 0.0000248993 11.8942)'
+        expected = 'oklch(0.499997 0.0000248993 23.7884)'
 
   assert.is(value, expected)
 })

@@ -14,6 +14,7 @@ import {
   createConcat,
   createReverse,
   createSort,
+  createFormat,
 } from '../../src/pipes/array'
 
 const suite = createSuite<{
@@ -254,6 +255,13 @@ suite('createUnique() removes duplicates', () => {
   })()
 
   assert.equal(value, ['baleada', 'toolkit'])
+})
+
+suite('createFormat(...) formats array', () => {
+  const value = createFormat('en-US', { type: 'conjunction' })(['tortilla', 'frijoles', 'baleada', 'aguacate', 'huevito']),
+        expected = 'tortilla, frijoles, baleada, aguacate, and huevito'
+
+  assert.is(value, expected)
 })
 
 suite.run()

@@ -19,6 +19,7 @@ export {
   createSort,
   createSwap,
   createUnique,
+  createFormat as createArrayFormat,
 } from './array'
 
 export {
@@ -98,6 +99,10 @@ export {
 } from './directed-acyclic-async-state'
 
 export {
+  createFormat as createDateFormat,
+} from './date'
+
+export {
   createFocusable,
   createComputedStyle,
 } from './element'
@@ -136,6 +141,7 @@ export type { CreateKeycomboMatchOptions } from './keyboard-event-descriptor'
 export {
   createClamp,
   createDetermine,
+  createFormat as createNumberFormat,
   createGreater,
   createGreaterOrEqual,
   createLessOrEqual,
