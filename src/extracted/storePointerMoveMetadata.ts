@@ -111,13 +111,19 @@ export function storePointerMoveMetadata<
   metadata.distance.horizontal.fromPrevious = newX - previousX
   metadata.distance.vertical.fromPrevious = newY - previousY
   metadata.angle.fromPrevious = angleFromPrevious
-  metadata.direction.fromPrevious = toDirection(angleFromPrevious.degrees)
+  metadata.direction.fromPrevious = toDirection({
+    angle: angleFromPrevious.degrees,
+    distance: distanceFromPrevious,
+  })
 
   metadata.distance.straight.fromStart = distanceFromStart
   metadata.distance.horizontal.fromStart = newX - startX
   metadata.distance.vertical.fromStart = newY - startY
   metadata.angle.fromStart = angleFromStart
-  metadata.direction.fromStart = toDirection(angleFromStart.degrees)
+  metadata.direction.fromStart = toDirection({
+    angle: angleFromStart.degrees,
+    distance: distanceFromStart,
+  })
   metadata.points.end = { x: newX, y: newY }
 }
 
