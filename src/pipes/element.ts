@@ -1,7 +1,7 @@
 import { join } from 'lazy-collections'
 import type { DeepRequired } from '../extracted'
 
-export type ElementTransform<El extends Element, Transformed> = (element: El) => Transformed
+export type ElementTransform<El extends HTMLElement | SVGElement, Transformed> = (element: El) => Transformed
 
 export type CreateFocusableOptions = {
   predicatesElement?: boolean,
@@ -35,9 +35,9 @@ const defaultOptions: DeepRequired<CreateFocusableOptions> = {
 export function createFocusable (
   order: 'first' | 'last' | 'next' | 'previous',
   options: CreateFocusableOptions = {}
-): ElementTransform<Element, Element | undefined> {
+): ElementTransform<HTMLElement | SVGElement, HTMLElement | SVGElement | undefined> {
   const { predicatesElement, tabbableSelector } = { ...defaultOptions, ...options },
-        predicateFocusable = (element: Element): boolean => element.matches(tabbableSelector)
+        predicateFocusable = (element: HTMLElement | SVGElement): boolean => element.matches(tabbableSelector)
 
   switch (order) {
     case 'first':
@@ -45,7 +45,7 @@ export function createFocusable (
         if (predicatesElement && predicateFocusable(element)) return element
 
         for (let i = 0; i < element.children.length; i++) {
-          const focusable = createFocusable(order, { predicatesElement: true })(element.children[i] as Element)
+          const focusable = createFocusable(order, { predicatesElement: true })(element.children[i] as HTMLElement)
           if (focusable) return focusable
         }
       }
@@ -54,7 +54,7 @@ export function createFocusable (
         if (predicatesElement && predicateFocusable(element)) return element
 
         for (let i = element.children.length - 1; i > -1; i--) {
-          const focusable = createFocusable(order, { predicatesElement: true })(element.children[i] as Element)
+          const focusable = createFocusable(order, { predicatesElement: true })(element.children[i] as HTMLElement)
           if (focusable) return focusable
         }
       }
@@ -67,14 +67,14 @@ export function createFocusable (
 
         let current = element
         while (current && current !== document.documentElement) {
-          const nextSibling = current.nextElementSibling as Element
+          const nextSibling = current.nextElementSibling as HTMLElement
 
           if (nextSibling) {
             const focusable = createFocusable('first', { predicatesElement: true })(nextSibling)
             if (focusable) return focusable
           }
 
-          current = (current.nextElementSibling || current.parentElement) as Element
+          current = (current.nextElementSibling || current.parentElement) as HTMLElement
         }
       }
     case 'previous':
@@ -83,14 +83,14 @@ export function createFocusable (
 
         let current = element
         while (current && current !== document.documentElement) {
-          const previousSibling = current.previousElementSibling as Element
+          const previousSibling = current.previousElementSibling as HTMLElement
 
           if (previousSibling) {
             const focusable = createFocusable('last', { predicatesElement: true })(previousSibling)
             if (focusable) return focusable
           }
 
-          current = (current.previousElementSibling || current.parentElement) as Element
+          current = (current.previousElementSibling || current.parentElement) as HTMLElement
         }
       }
   }
@@ -99,6 +99,6 @@ export function createFocusable (
 /**
  * [Docs](https://baleada.dev/docs/logic/pipes/computed-style)
  */
-export function createComputedStyle (pseudoElement?: string): ElementTransform<Element, CSSStyleDeclaration> {
+export function createComputedStyle (pseudoElement?: string): ElementTransform<HTMLElement | SVGElement, CSSStyleDeclaration> {
   return element => getComputedStyle(element, pseudoElement)
 }
