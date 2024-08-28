@@ -63,7 +63,7 @@ export function storePointerTimeMetadata<
           const sequence = api.getSequence()
 
           if (!document.contains(
-            (at(-1)(sequence) as typeof sequence[number]).target as HTMLElement
+            (at(-1)(sequence) as typeof sequence[number]).target as Element
           )) return
 
           const request = requestAnimationFrame(timestamp => {

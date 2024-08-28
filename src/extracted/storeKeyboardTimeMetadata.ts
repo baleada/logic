@@ -64,7 +64,7 @@ export function storeKeyboardTimeMetadata<
           const sequence = api.getSequence()
 
           if (!document.body.contains(
-            (at(-1)(sequence) as typeof sequence[number]).target as HTMLElement
+            (at(-1)(sequence) as typeof sequence[number]).target as HTMLElement | SVGElement
           )) return
 
           const request = requestAnimationFrame(timestamp => {
