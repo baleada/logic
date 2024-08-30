@@ -12,7 +12,7 @@ export type MousepressType = 'mousedown' | 'mouseleave' | 'mouseup'
 
 export type MousepressMetadata = PointerStartMetadata
   & PointerMoveMetadata
-  & PointerTimeMetadata
+  & PointerTimeMetadata<true>
 
 export type MousepressOptions = {
   minDuration?: number,
@@ -58,16 +58,17 @@ export function createMousepress (options: MousepressOptions = {}) {
     // @ts-expect-error
     mousemoveEffect = event => mousemove(event, api)
 
-    storePointerStartMetadata(event, api)
-    storePointerMoveMetadata(event, api)
-    storePointerTimeMetadata(
+    storePointerStartMetadata({ event, api })
+    storePointerMoveMetadata({ event, api })
+    storePointerTimeMetadata({
       event,
+      moves: true,
       api,
-      () => mouseStatus === 'down',
-      newRequest => request = newRequest,
+      getShouldStore: () => mouseStatus === 'down',
+      setRequest: newRequest => request = newRequest,
       // @ts-expect-error
       recognize,
-    )
+    })
 
     const { listenInjection: { optionsByType: { mousedown: { target } } } } = api
     target.addEventListener('mousemove', mousemoveEffect)
@@ -78,7 +79,7 @@ export function createMousepress (options: MousepressOptions = {}) {
   const mousemove: RecognizeableEffect<'mousemove', MousepressMetadata> = (event, api) => {
     const { pushSequence } = api
     pushSequence(event)
-    storePointerMoveMetadata(event, api)
+    storePointerMoveMetadata({ event, api })
     // @ts-expect-error
     recognize(event, api)
 

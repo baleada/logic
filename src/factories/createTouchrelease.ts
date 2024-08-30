@@ -16,7 +16,7 @@ export type TouchreleaseType = 'touchstart' | 'touchmove' | 'touchcancel' | 'tou
 
 export type TouchreleaseMetadata = PointerStartMetadata
   & PointerMoveMetadata
-  & PointerTimeMetadata
+  & PointerTimeMetadata<true>
 
 export type TouchreleaseOptions = {
   minDuration?: number,
@@ -67,14 +67,15 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
       return
     }
 
-    storePointerStartMetadata(event, api)
-    storePointerMoveMetadata(event, api)
-    storePointerTimeMetadata(
+    storePointerStartMetadata({ event, api })
+    storePointerMoveMetadata({ event, api })
+    storePointerTimeMetadata({
       event,
+      moves: true,
       api,
-      () => totalTouches === 1,
-      newRequest => request = newRequest,
-    )
+      getShouldStore: () => totalTouches === 1,
+      setRequest: newRequest => request = newRequest,
+    })
 
     onStart?.(toHookApi(api))
   }
@@ -82,7 +83,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
   const touchmove: RecognizeableEffect<'touchmove', TouchreleaseMetadata> = (event, api) => {
     const { getStatus } = api
 
-    if (getStatus() !== 'denied') storePointerMoveMetadata(event, api)
+    if (getStatus() !== 'denied') storePointerMoveMetadata({ event, api })
 
     onMove?.(toHookApi(api))
   }
@@ -107,7 +108,7 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
       return
     }
 
-    storePointerMoveMetadata(event, api)
+    storePointerMoveMetadata({ event, api })
 
     stop()
     totalTouches--

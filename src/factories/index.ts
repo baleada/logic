@@ -75,3 +75,12 @@ export type {
   TouchreleaseHook,
   TouchreleaseHookApi,
 } from './createTouchrelease'
+
+export { createHover, Hover } from './createHover'
+export type {
+  HoverType,
+  HoverMetadata,
+  HoverOptions,
+  HoverHook,
+  HoverHookApi,
+} from './createHover'

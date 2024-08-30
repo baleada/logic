@@ -14,7 +14,7 @@ export type TouchpressType = 'touchstart' | 'touchmove' | 'touchcancel' | 'touch
 
 export type TouchpressMetadata = PointerStartMetadata
   & PointerMoveMetadata
-  & PointerTimeMetadata
+  & PointerTimeMetadata<true>
 
 export type TouchpressOptions = {
   minDuration?: number,
@@ -62,16 +62,17 @@ export function createTouchpress (options: TouchpressOptions = {}) {
       return
     }
 
-    storePointerStartMetadata(event, api)
-    storePointerMoveMetadata(event, api)
-    storePointerTimeMetadata(
+    storePointerStartMetadata({ event, api })
+    storePointerMoveMetadata({ event, api })
+    storePointerTimeMetadata({
       event,
+      moves: true,
       api,
-      () => totalTouches === 1,
-      newRequest => request = newRequest,
+      getShouldStore: () => totalTouches === 1,
+      setRequest: newRequest => request = newRequest,
       // @ts-expect-error
       recognize,
-    )
+    })
 
     onStart?.(toHookApi(api))
   }
@@ -80,7 +81,7 @@ export function createTouchpress (options: TouchpressOptions = {}) {
     const { getStatus } = api
 
     if (getStatus() !== 'denied') {
-      storePointerMoveMetadata(event, api)
+      storePointerMoveMetadata({ event, api })
       // @ts-expect-error
       recognize(event, api)
     }

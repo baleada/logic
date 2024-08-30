@@ -23,7 +23,7 @@ export type ClicksMetadata = {
 }
 
 type Click = {
-  times: PointerTimeMetadata['times'],
+  times: PointerTimeMetadata<true>['times'],
   points: PointerStartMetadata['points'],
   distance: number,
   interval: number

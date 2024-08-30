@@ -11,7 +11,7 @@ export type MousereleaseType = 'mousedown' | 'mouseleave' | 'mouseup'
 
 export type MousereleaseMetadata = PointerStartMetadata
   & PointerMoveMetadata
-  & PointerTimeMetadata
+  & PointerTimeMetadata<true>
 
 export type MousereleaseOptions = {
   minDuration?: number,
@@ -60,14 +60,15 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
     // @ts-expect-error
     mousemoveEffect = event => mousemove(event, api)
 
-    storePointerStartMetadata(event, api)
-    storePointerMoveMetadata(event, api)
-    storePointerTimeMetadata(
+    storePointerStartMetadata({ event, api })
+    storePointerMoveMetadata({ event, api })
+    storePointerTimeMetadata({
       event,
+      moves: true,
       api,
-      () => mouseStatus === 'down',
-      newRequest => request = newRequest,
-    )
+      getShouldStore: () => mouseStatus === 'down',
+      setRequest: newRequest => request = newRequest,
+    })
 
     const { listenInjection: { optionsByType: { mousedown: { target } } } } = api
     target.addEventListener('mousemove', mousemoveEffect)
@@ -76,7 +77,7 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
   }
 
   const mousemove: RecognizeableEffect<'mousemove', MousereleaseMetadata> = (event, api) => {
-    storePointerMoveMetadata(event, api)
+    storePointerMoveMetadata({ event, api })
 
     onMove?.(toHookApi(api))
   }
@@ -96,7 +97,7 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
   const mouseup: RecognizeableEffect<'mouseup', MousereleaseMetadata> = (event, api) => {
     if (mouseStatus !== 'down') return
 
-    storePointerMoveMetadata(event, api)
+    storePointerMoveMetadata({ event, api })
 
     const { listenInjection: { optionsByType: { mouseup: { target } } } } = api
     stop(target)

@@ -65,11 +65,11 @@ export function storePointerMoveMetadata<
     | 'touchstart'
     | 'touchmove'
     | 'touchend',
-  Metadata extends PointerMoveMetadata & PointerStartMetadata & PointerTimeMetadata
-> (
+  Metadata extends PointerMoveMetadata & PointerStartMetadata & PointerTimeMetadata<true>
+> ({ event, api }: {
   event: MouseEvent | TouchEvent,
   api: Parameters<RecognizeableEffect<Type, Metadata>>[1]
-): void {
+}): void {
   const { getMetadata } = api,
         metadata = getMetadata()
 
