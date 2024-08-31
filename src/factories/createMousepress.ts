@@ -8,18 +8,18 @@ import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePo
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 import {  } from '../classes/Recognizeable'
 
-export type MousepressType = 'mousedown' | 'mouseleave' | 'mouseup'
+export type MousepressType = 'mousedown' | 'mouseout' | 'mouseup'
 
 export type MousepressMetadata = PointerStartMetadata
   & PointerMoveMetadata
-  & PointerTimeMetadata<true>
+  & PointerTimeMetadata
 
 export type MousepressOptions = {
   minDuration?: number,
   minDistance?: number,
   onDown?: MousepressHook,
   onMove?: MousepressHook,
-  onLeave?: MousepressHook,
+  onOut?: MousepressHook,
   onUp?: MousepressHook,
 }
 
@@ -40,7 +40,7 @@ export function createMousepress (options: MousepressOptions = {}) {
           minDuration,
           minDistance,
           onDown,
-          onLeave,
+          onOut,
           onMove,
           onUp,
         } = { ...defaultOptions, ...options },
@@ -62,7 +62,6 @@ export function createMousepress (options: MousepressOptions = {}) {
     storePointerMoveMetadata({ event, api })
     storePointerTimeMetadata({
       event,
-      moves: true,
       api,
       getShouldStore: () => mouseStatus === 'down',
       setRequest: newRequest => request = newRequest,
@@ -98,8 +97,16 @@ export function createMousepress (options: MousepressOptions = {}) {
     }
   }
 
-  const mouseleave: RecognizeableEffect<'mouseleave', MousepressMetadata> = (event, api) => {
-    const { denied, listenInjection: { optionsByType: { mouseleave: { target } } } } = api
+  const mouseout: RecognizeableEffect<'mouseout', MousepressMetadata> = (event, api) => {
+    const { denied, listenInjection: { optionsByType: { mouseout: { target } } } } = api
+
+    if (
+      event.target !== target
+      && (target as Element | Document).contains?.(event.relatedTarget as Node)
+    ) {
+      onOut?.(toHookApi(api))
+      return
+    }
 
     if (mouseStatus === 'down') {
       denied()
@@ -107,7 +114,7 @@ export function createMousepress (options: MousepressOptions = {}) {
       mouseStatus = 'leave'
     }
 
-    onLeave?.(toHookApi(api))
+    onOut?.(toHookApi(api))
   }
 
   const mouseup: RecognizeableEffect<'mouseup', MousepressMetadata> = (event, api) => {
@@ -127,7 +134,7 @@ export function createMousepress (options: MousepressOptions = {}) {
       effect: mousedown,
       stop,
     },
-    mouseleave,
+    mouseout,
     mouseup,
   }
 }

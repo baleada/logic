@@ -17,7 +17,7 @@ const initialMetadata: PointerStartMetadata = {
 }
 
 export function storePointerStartMetadata<
-  Type extends 'mousedown' | 'touchstart' | 'mouseenter',
+  Type extends 'mousedown' | 'touchstart' | 'mouseover',
   Metadata extends PointerStartMetadata
 > ({ event, api }: {
   event: MouseEvent | TouchEvent,

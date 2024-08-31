@@ -73,8 +73,8 @@ suite('calls hooks', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     window.testState = {
       hooks: {
-        onEnter: false,
-        onLeave: false,
+        onOver: false,
+        onOut: false,
       },
     }
 
@@ -83,8 +83,8 @@ suite('calls hooks', async ({ playwright: { page, reloadNext } }) => {
       {
         recognizeable: {
           effects: window.Logic.createHover({
-            onEnter: () => window.testState.hooks.onEnter = true,
-            onLeave: () => window.testState.hooks.onLeave = true,
+            onOver: () => window.testState.hooks.onOver = true,
+            onOut: () => window.testState.hooks.onOut = true,
           }),
         },
       }
@@ -97,14 +97,14 @@ suite('calls hooks', async ({ playwright: { page, reloadNext } }) => {
   await page.mouse.move(19, 19)
 
   const value = await page.evaluate(() => window.testState.hooks),
-        expected = { onEnter: true, onLeave: true }
+        expected = { onOver: true, onOut: true }
 
   assert.equal(value, expected)
 
   reloadNext()
 })
 
-suite('denies on mouseleave', async ({ playwright: { page, reloadNext } }) => {
+suite('denies on mouseout', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<HoverType, HoverMetadata>(
       'recognizeable' as HoverType,

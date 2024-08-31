@@ -1,20 +1,20 @@
 import { Listenable } from '../classes/Listenable'
 import type { RecognizeableEffect } from '../classes'
-import { toHookApi, storePointerStartMetadata, storePointerTimeMetadata } from '../extracted'
-import type { PointerStartMetadata, PointerTimeMetadata, HookApi } from '../extracted'
-import {  } from '../classes/Recognizeable'
+import { toHookApi, storePointerStartMetadata, storePointerTimeMetadata, storePointerMoveMetadata } from '../extracted'
+import type { PointerStartMetadata, PointerTimeMetadata, HookApi, PointerMoveMetadata } from '../extracted'
 
-export type HoverType = 'mouseenter' | 'mouseleave' | 'touchstart'
+export type HoverType = 'mouseover' | 'mouseout' | 'touchstart'
 
 export type HoverMetadata = (
   & PointerStartMetadata
-  & PointerTimeMetadata<false>
+  & PointerMoveMetadata
+  & PointerTimeMetadata
 )
 
 export type HoverOptions = {
   minDuration?: number,
-  onEnter?: HoverHook,
-  onLeave?: HoverHook,
+  onOver?: HoverHook,
+  onOut?: HoverHook,
 }
 
 export type HoverHook = (api: HoverHookApi) => any
@@ -31,34 +31,40 @@ const defaultOptions: HoverOptions = {
 export function createHover (options: HoverOptions = {}) {
   const {
           minDuration,
-          onEnter,
-          onLeave,
+          onOver,
+          onOut,
         } = { ...defaultOptions, ...options },
         stop = () => {
           window.cancelAnimationFrame(request)
         }
 
   let request: number
-  let mouseStatus: 'entered' | 'exited'
+  let mouseStatus: 'entered' | 'exited' = 'exited'
 
-  const mouseenter: RecognizeableEffect<'mouseenter', HoverMetadata> = (event, api) => {
-    mouseStatus = 'entered'
+  const mouseover: RecognizeableEffect<'mouseover', HoverMetadata> = (event, api) => {
+    if (mouseStatus === 'exited') {
+      mouseStatus = 'entered'
 
-    storePointerStartMetadata({ event, api })
-    storePointerTimeMetadata({
-      event,
-      moves: false,
-      api,
-      getShouldStore: () => mouseStatus === 'entered',
-      setRequest: newRequest => request = newRequest,
-      // @ts-expect-error
-      recognize,
-    })
+      storePointerStartMetadata({ event, api })
+      storePointerMoveMetadata({ event, api })
+      storePointerTimeMetadata({
+        event,
+        api,
+        getShouldStore: () => mouseStatus === 'entered',
+        setRequest: newRequest => request = newRequest,
+        // @ts-expect-error
+        recognize,
+      })
 
-    onEnter?.(toHookApi(api))
+      onOver?.(toHookApi(api))
+      return
+    }
+
+    storePointerMoveMetadata({ event, api })
+    onOver?.(toHookApi(api))
   }
 
-  const recognize: RecognizeableEffect<'mouseenter', HoverMetadata> = (event, api) => {
+  const recognize: RecognizeableEffect<'mouseover', HoverMetadata> = (event, api) => {
     const { getMetadata, recognized } = api,
           metadata = getMetadata()
 
@@ -67,15 +73,24 @@ export function createHover (options: HoverOptions = {}) {
     }
   }
 
-  const mouseleave: RecognizeableEffect<'mouseleave', HoverMetadata> = (event, api) => {
-    const { denied } = api
+  const mouseout: RecognizeableEffect<'mouseout', HoverMetadata> = (event, api) => {
+    const { denied, listenInjection: { optionsByType: { mouseout: { target } } } } = api
+
+    if (
+      event.target !== target
+      && (target as Element | Document).contains?.(event.relatedTarget as Node)
+    ) {
+      onOut?.(toHookApi(api))
+      return
+    }
 
     if (mouseStatus === 'entered') {
       denied()
+      stop()
       mouseStatus = 'exited'
     }
 
-    onLeave?.(toHookApi(api))
+    onOut?.(toHookApi(api))
   }
 
   const touchstart: RecognizeableEffect<'touchstart', HoverMetadata> = event => {
@@ -83,11 +98,11 @@ export function createHover (options: HoverOptions = {}) {
   }
 
   return {
-    mouseenter: {
-      effect: mouseenter,
+    mouseover: {
+      effect: mouseover,
       stop,
     },
-    mouseleave,
+    mouseout,
     touchstart,
   }
 }

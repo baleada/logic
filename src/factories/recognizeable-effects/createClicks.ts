@@ -7,14 +7,14 @@ import type { HookApi, PointerStartMetadata, PointerTimeMetadata } from '../../e
  * clicks is defined as a single mousedown/mouseup combination that:
  * - starts at a given point
  * - does not move beyond a maximum distance
- * - does not mouseleave
+ * - does not mouseout
  * - ends
  * - repeats 1 time (or a minimum number of your choice), with each click
      ending less than or equal to 500ms (or a maximum interval of your choice)
      after the previous click ended
  */
 
-export type ClicksType = 'mousedown' | 'mouseleave' | 'mouseup'
+export type ClicksType = 'mousedown' | 'mouseout' | 'mouseup'
 
 export type ClicksMetadata = {
   mouseStatus: 'down' | 'up' | 'leave',
@@ -23,7 +23,7 @@ export type ClicksMetadata = {
 }
 
 type Click = {
-  times: PointerTimeMetadata<true>['times'],
+  times: PointerTimeMetadata['times'],
   points: PointerStartMetadata['points'],
   distance: number,
   interval: number
@@ -36,7 +36,7 @@ export type ClicksOptions = {
   getMousemoveTarget?: (event: MouseEvent) => HTMLElement,
   onDown?: ClicksHook,
   onMove?: ClicksHook,
-  onLeave?: ClicksHook,
+  onOut?: ClicksHook,
   onUp?: ClicksHook
 }
 
@@ -65,7 +65,7 @@ const initialClick: Click = {
 }
 
 export function createClicks (options: ClicksOptions = {}): RecognizeableOptions<ClicksType, ClicksMetadata>['effects'] {
-  const { minClicks, maxInterval, maxDistance, getMousemoveTarget, onDown, onMove, onLeave, onUp } = { ...defaultOptions, ...options },
+  const { minClicks, maxInterval, maxDistance, getMousemoveTarget, onDown, onMove, onOut, onUp } = { ...defaultOptions, ...options },
         cache: { mousemoveEffect?: (event: ListenEffectParam<'mousemove'>) => void } = {}
 
   const mousedown: RecognizeableEffect<ClicksType, ClicksMetadata> = (event, api) => {
@@ -91,7 +91,7 @@ export function createClicks (options: ClicksOptions = {}): RecognizeableOptions
     onMove?.(toHookApi(api))
   }
 
-  const mouseleave: RecognizeableEffect<ClicksType, ClicksMetadata> = (event, api) => {
+  const mouseout: RecognizeableEffect<ClicksType, ClicksMetadata> = (event, api) => {
     const { getMetadata, denied } = api,
           metadata = getMetadata()
 
@@ -101,7 +101,7 @@ export function createClicks (options: ClicksOptions = {}): RecognizeableOptions
       getMousemoveTarget(event).removeEventListener('mousemove', cache.mousemoveEffect)
     }
 
-    onLeave?.(toHookApi(api))
+    onOut?.(toHookApi(api))
   }
 
   const mouseup: RecognizeableEffect<ClicksType, ClicksMetadata> = (event, api) => {
@@ -156,5 +156,5 @@ export function createClicks (options: ClicksOptions = {}): RecognizeableOptions
     }
   }
 
-  return { mousedown, mouseleave, mouseup }
+  return { mousedown, mouseout, mouseup }
 }

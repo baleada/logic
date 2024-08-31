@@ -59,13 +59,16 @@ const initialMetadata: PointerMoveMetadata = {
 }
 
 export function storePointerMoveMetadata<
-  Type extends 'mousedown'
+  Type extends (
+    | 'mousedown'
     | 'mousemove'
     | 'mouseup'
     | 'touchstart'
     | 'touchmove'
-    | 'touchend',
-  Metadata extends PointerMoveMetadata & PointerStartMetadata & PointerTimeMetadata<true>
+    | 'touchend'
+    | 'mouseover'
+  ),
+  Metadata extends PointerMoveMetadata & PointerStartMetadata & PointerTimeMetadata
 > ({ event, api }: {
   event: MouseEvent | TouchEvent,
   api: Parameters<RecognizeableEffect<Type, Metadata>>[1]

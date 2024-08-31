@@ -14,7 +14,7 @@ export type TouchpressType = 'touchstart' | 'touchmove' | 'touchcancel' | 'touch
 
 export type TouchpressMetadata = PointerStartMetadata
   & PointerMoveMetadata
-  & PointerTimeMetadata<true>
+  & PointerTimeMetadata
 
 export type TouchpressOptions = {
   minDuration?: number,
@@ -66,7 +66,6 @@ export function createTouchpress (options: TouchpressOptions = {}) {
     storePointerMoveMetadata({ event, api })
     storePointerTimeMetadata({
       event,
-      moves: true,
       api,
       getShouldStore: () => totalTouches === 1,
       setRequest: newRequest => request = newRequest,

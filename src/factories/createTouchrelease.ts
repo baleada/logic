@@ -16,7 +16,7 @@ export type TouchreleaseType = 'touchstart' | 'touchmove' | 'touchcancel' | 'tou
 
 export type TouchreleaseMetadata = PointerStartMetadata
   & PointerMoveMetadata
-  & PointerTimeMetadata<true>
+  & PointerTimeMetadata
 
 export type TouchreleaseOptions = {
   minDuration?: number,
@@ -71,7 +71,6 @@ export function createTouchrelease (options: TouchreleaseOptions = {}) {
     storePointerMoveMetadata({ event, api })
     storePointerTimeMetadata({
       event,
-      moves: true,
       api,
       getShouldStore: () => totalTouches === 1,
       setRequest: newRequest => request = newRequest,

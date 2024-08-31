@@ -2,19 +2,18 @@ import { at } from 'lazy-collections'
 import type { RecognizeableEffect } from '../classes'
 import { createClone } from '../pipes/any'
 import type { PointerMoveMetadata } from './storePointerMoveMetadata'
+import type { PointerStartMetadata } from './storePointerStartMetadata'
 
-export type PointerTimeMetadata<Moves extends boolean> = (
-  & {
-    times: {
-      start: number,
-      end: number,
-    },
-    duration: number,
-  }
-  & (Moves extends true ? { velocity: number } : {})
-)
+export type PointerTimeMetadata = {
+  times: {
+    start: number,
+    end: number,
+  },
+  duration: number,
+  velocity: number,
+}
 
-const initialMetadata: PointerTimeMetadata<true> = {
+const initialMetadata: PointerTimeMetadata = {
   times: {
     start: 0,
     end: 0,
@@ -23,26 +22,20 @@ const initialMetadata: PointerTimeMetadata<true> = {
   velocity: 0,
 }
 
-export function storePointerTimeMetadata<
-  Type extends 'mousedown' | 'touchstart' | 'mouseenter',
-  Moves extends boolean,
-  Metadata extends (Moves extends true ? (PointerTimeMetadata<Moves> & PointerMoveMetadata) : PointerTimeMetadata<Moves>)
-> ({
+export function storePointerTimeMetadata<Type extends 'mousedown' | 'touchstart' | 'mouseover'> ({
   event,
-  moves,
   api,
   getShouldStore,
   setRequest,
   recognize,
 }: {
   event: MouseEvent | TouchEvent,
-  moves: Moves,
-  api: Parameters<RecognizeableEffect<Type, Metadata>>[1],
+  api: Parameters<RecognizeableEffect<Type, PointerStartMetadata & PointerMoveMetadata & PointerTimeMetadata>>[1],
   getShouldStore: () => boolean,
   setRequest: (request: number) => void,
   recognize?: RecognizeableEffect<
-    'mousedown' | 'mousemove' | 'touchstart' | 'touchmove' | 'mouseenter',
-    Metadata
+    'mousedown' | 'mousemove' | 'touchstart' | 'touchmove' | 'mouseover',
+    PointerStartMetadata & PointerMoveMetadata & PointerTimeMetadata
   >,
 }): void {
   const { getSequence, getMetadata, getStatus, listenInjection: { effect } } = api,
@@ -62,12 +55,10 @@ export function storePointerTimeMetadata<
           metadata.times.end = Math.round(timestamp)
           metadata.duration = Math.max(0, metadata.times.end - metadata.times.start)
           const durationFromPrevious = Math.max(0, metadata.times.end - previousEndTime)
-          if (moves) {
-            (metadata as PointerMoveMetadata & PointerTimeMetadata<true>).velocity = (
-              ((metadata as PointerMoveMetadata & PointerTimeMetadata<true>).distance.straight.fromPrevious / durationFromPrevious)
-              || 0
-            )
-          }
+          metadata.velocity = (
+            metadata.distance.straight.fromPrevious / durationFromPrevious
+            || 0
+          )
 
           const event = getSequence().at(-1)
 

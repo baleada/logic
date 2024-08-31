@@ -13,7 +13,7 @@ export type TouchrotateType = 'touchstart' | 'touchmove' | 'touchend' | 'touchca
 
 export type TouchrotateMetadata = {
   touches: [Touch, Touch],
-  times: PointerTimeMetadata<true>['times'],
+  times: PointerTimeMetadata['times'],
   rotation: PolarCoordinates['angle'],
   angle: {
     start: PolarCoordinates['angle'],

@@ -7,11 +7,11 @@ import type {
 import { toHookApi, storePointerStartMetadata, storePointerMoveMetadata, storePointerTimeMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerMoveMetadata, PointerTimeMetadata, HookApi } from '../extracted'
 
-export type MousereleaseType = 'mousedown' | 'mouseleave' | 'mouseup'
+export type MousereleaseType = 'mousedown' | 'mouseout' | 'mouseup'
 
 export type MousereleaseMetadata = PointerStartMetadata
   & PointerMoveMetadata
-  & PointerTimeMetadata<true>
+  & PointerTimeMetadata
 
 export type MousereleaseOptions = {
   minDuration?: number,
@@ -19,7 +19,7 @@ export type MousereleaseOptions = {
   minVelocity?: number,
   onDown?: MousereleaseHook,
   onMove?: MousereleaseHook,
-  onLeave?: MousereleaseHook,
+  onOut?: MousereleaseHook,
   onUp?: MousereleaseHook,
 }
 
@@ -42,7 +42,7 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
           minDistance,
           minVelocity,
           onDown,
-          onLeave,
+          onOut,
           onMove,
           onUp,
         } = { ...defaultOptions, ...options },
@@ -64,7 +64,6 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
     storePointerMoveMetadata({ event, api })
     storePointerTimeMetadata({
       event,
-      moves: true,
       api,
       getShouldStore: () => mouseStatus === 'down',
       setRequest: newRequest => request = newRequest,
@@ -82,8 +81,16 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
     onMove?.(toHookApi(api))
   }
 
-  const mouseleave: RecognizeableEffect<'mouseleave', MousereleaseMetadata> = (event, api) => {
-    const { denied, listenInjection: { optionsByType: { mouseleave: { target } } } } = api
+  const mouseout: RecognizeableEffect<'mouseout', MousereleaseMetadata> = (event, api) => {
+    const { denied, listenInjection: { optionsByType: { mouseout: { target } } } } = api
+
+    if (
+      event.target !== target
+      && (target as Element | Document).contains?.(event.relatedTarget as Node)
+    ) {
+      onOut?.(toHookApi(api))
+      return
+    }
 
     if (mouseStatus === 'down') {
       denied()
@@ -91,7 +98,7 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
       mouseStatus = 'leave'
     }
 
-    onLeave?.(toHookApi(api))
+    onOut?.(toHookApi(api))
   }
 
   const mouseup: RecognizeableEffect<'mouseup', MousereleaseMetadata> = (event, api) => {
@@ -129,7 +136,7 @@ export function createMouserelease (options: MousereleaseOptions = {}) {
       effect: mousedown,
       stop,
     },
-    mouseleave,
+    mouseout,
     mouseup,
   }
 }

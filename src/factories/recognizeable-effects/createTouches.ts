@@ -21,7 +21,7 @@ export type TouchesMetadata = {
 }
 
 type Touch = {
-  times: PointerTimeMetadata<true>['times'],
+  times: PointerTimeMetadata['times'],
   points: PointerStartMetadata['points'],
   distance: number,
   interval: number
