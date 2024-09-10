@@ -71,7 +71,16 @@ suite('predicates uppercase letters', () => {
   assert.ok(value)
 })
 
-suite('predicate shifted special characters', () => {
+suite('predicates brackets', () => {
+  const statuses: KeyStatuses = [
+          ['BracketLeft', 'down'],
+        ],
+        value = createKeycomboMatch('[')(statuses)
+
+  assert.ok(value)
+})
+
+suite('predicates shifted special characters', () => {
   const statuses: KeyStatuses = [
           ['Backquote', 'down'],
           ['Shift', 'down'],
@@ -81,15 +90,25 @@ suite('predicate shifted special characters', () => {
   assert.ok(value)
 })
 
+suite('predicates shifted brackets', () => {
+  const statuses: KeyStatuses = [
+          ['BracketLeft', 'down'],
+          ['Shift', 'down'],
+        ],
+        value = createKeycomboMatch('{')(statuses)
+
+  assert.ok(value)
+})
+
 suite('predicates alt', () => {
   for (const direction of ['', 'Left', 'Right']) {
     const statuses: KeyStatuses = [
       [`Alt${direction}`, 'down'],
     ]
-  
+
     for (const alias of ['alt', 'opt', 'option']) {
       const value = createKeycomboMatch(alias)(statuses)
-      
+
       assert.ok(value, alias)
     }
   }
@@ -100,10 +119,10 @@ suite('predicates control', () => {
     const statuses: KeyStatuses = [
       [`Control${direction}`, 'down'],
     ]
-  
+
     for (const alias of ['ctrl', 'control']) {
       const value = createKeycomboMatch(alias)(statuses)
-      
+
       assert.ok(value, alias)
     }
   }
@@ -114,10 +133,10 @@ suite('predicates meta', () => {
     const statuses: KeyStatuses = [
       [`Meta${direction}`, 'down'],
     ]
-  
+
     for (const alias of ['meta', 'cmd', 'command']) {
       const value = createKeycomboMatch(alias)(statuses)
-      
+
       assert.ok(value, alias)
     }
   }
@@ -128,10 +147,10 @@ suite('predicates shift', () => {
     const statuses: KeyStatuses = [
       [`Shift${direction}`, 'down'],
     ]
-  
+
     for (const alias of ['shift']) {
       const value = createKeycomboMatch(alias)(statuses)
-      
+
       assert.ok(value, alias)
     }
   }
@@ -190,7 +209,7 @@ suite('supports custom alias and key transformers', () => {
       const value = createKeycomboMatch('å', { toLonghand, toCode, toAliases })(statuses)
       assert.ok(value)
     }
-    
+
     {
       const value = createKeycomboMatch('a', { toLonghand, toCode, toAliases })(statuses)
       assert.not.ok(value)
@@ -222,7 +241,7 @@ suite('supports custom alias and key transformers', () => {
       assert.not.ok(value)
     }
   }
-  
+
   {
     const statuses: KeyStatuses = [
       ['AltLeft', 'down'],

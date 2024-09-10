@@ -22,7 +22,7 @@ const keyStatusKeysByAlias: {
   '`': 'Backquote',
   '-': 'Minus',
   '=': 'Equal',
-  '': 'BracketLeft',
+  '[': 'BracketLeft',
   ']': 'BracketRight',
   '\\': 'Backslash',
   ';': 'Semicolon',
