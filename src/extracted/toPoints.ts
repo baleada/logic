@@ -1,4 +1,4 @@
-export function toMousePoint (event: MouseEvent): { x: number, y: number } {
+export function toPointerPoint (event: MouseEvent): { x: number, y: number } {
   return {
     x: event.clientX,
     y: event.clientY,

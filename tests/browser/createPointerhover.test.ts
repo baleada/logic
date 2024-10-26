@@ -2,13 +2,13 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import type {
-  HoverType,
-  HoverMetadata,
+  PointerhoverType,
+  PointerhoverMetadata,
 } from '../../src/factories'
 import type { Listenable } from '../../src/classes/Listenable'
 
 const suite = withPlaywright(
-  createSuite('createHover')
+  createSuite('createPointerhover')
 )
 
 suite.before.each(async ({ playwright: { page } }) => {
@@ -27,9 +27,9 @@ suite.before.each(async ({ playwright: { page } }) => {
 
 suite('recognizes hover', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<HoverType, HoverMetadata>(
-      'recognizeable' as HoverType,
-      { recognizeable: { effects: window.Logic.createHover() } }
+    const listenable = new window.Logic.Listenable<PointerhoverType, PointerhoverMetadata>(
+      'recognizeable' as PointerhoverType,
+      { recognizeable: { effects: window.Logic.createPointerhover() } }
     )
 
     window.testState = { listenable: listenable.listen(() => {}, { target: document.getElementById('el') }) }
@@ -38,7 +38,7 @@ suite('recognizes hover', async ({ playwright: { page, reloadNext } }) => {
   await page.mouse.move(21, 21)
   await page.waitForTimeout(10)
 
-  const value = await page.evaluate(() => (window.testState.listenable as Listenable<HoverType, HoverMetadata>).recognizeable.status),
+  const value = await page.evaluate(() => (window.testState.listenable as Listenable<PointerhoverType, PointerhoverMetadata>).recognizeable.status),
         expected = 'recognized'
 
   assert.is(value, expected)
@@ -48,9 +48,9 @@ suite('recognizes hover', async ({ playwright: { page, reloadNext } }) => {
 
 suite('respects minDuration option', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<HoverType, HoverMetadata>(
-      'recognizeable' as HoverType,
-      { recognizeable: { effects: window.Logic.createHover({ minDuration: 100 }) } }
+    const listenable = new window.Logic.Listenable<PointerhoverType, PointerhoverMetadata>(
+      'recognizeable' as PointerhoverType,
+      { recognizeable: { effects: window.Logic.createPointerhover({ minDuration: 100 }) } }
     )
 
     window.testState = { listenable: listenable.listen(() => {}, { target: document.getElementById('el') }) }
@@ -59,11 +59,11 @@ suite('respects minDuration option', async ({ playwright: { page, reloadNext } }
   await page.mouse.move(21, 21)
   await page.waitForTimeout(50)
 
-  const recognizing = await page.evaluate(() => (window.testState.listenable as Listenable<HoverType, HoverMetadata>).recognizeable.status)
+  const recognizing = await page.evaluate(() => (window.testState.listenable as Listenable<PointerhoverType, PointerhoverMetadata>).recognizeable.status)
   assert.is(recognizing, 'recognizing')
 
   await page.waitForTimeout(100)
-  const recognized = await page.evaluate(() => (window.testState.listenable as Listenable<HoverType, HoverMetadata>).recognizeable.status)
+  const recognized = await page.evaluate(() => (window.testState.listenable as Listenable<PointerhoverType, PointerhoverMetadata>).recognizeable.status)
   assert.is(recognized, 'recognized')
 
   reloadNext()
@@ -78,11 +78,11 @@ suite('calls hooks', async ({ playwright: { page, reloadNext } }) => {
       },
     }
 
-    const listenable = new window.Logic.Listenable<HoverType, HoverMetadata>(
-      'recognizeable' as HoverType,
+    const listenable = new window.Logic.Listenable<PointerhoverType, PointerhoverMetadata>(
+      'recognizeable' as PointerhoverType,
       {
         recognizeable: {
-          effects: window.Logic.createHover({
+          effects: window.Logic.createPointerhover({
             onOver: () => window.testState.hooks.onOver = true,
             onOut: () => window.testState.hooks.onOut = true,
           }),
@@ -106,9 +106,9 @@ suite('calls hooks', async ({ playwright: { page, reloadNext } }) => {
 
 suite('denies on mouseout', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
-    const listenable = new window.Logic.Listenable<HoverType, HoverMetadata>(
-      'recognizeable' as HoverType,
-      { recognizeable: { effects: window.Logic.createHover() } }
+    const listenable = new window.Logic.Listenable<PointerhoverType, PointerhoverMetadata>(
+      'recognizeable' as PointerhoverType,
+      { recognizeable: { effects: window.Logic.createPointerhover() } }
     )
 
     window.testState = { listenable: listenable.listen(() => {}, { target: document.getElementById('el') }) }
@@ -117,7 +117,7 @@ suite('denies on mouseout', async ({ playwright: { page, reloadNext } }) => {
   await page.mouse.move(21, 21)
   await page.mouse.move(19, 19)
 
-  const value = await page.evaluate(() => (window.testState.listenable as Listenable<HoverType, HoverMetadata>).recognizeable.status),
+  const value = await page.evaluate(() => (window.testState.listenable as Listenable<PointerhoverType, PointerhoverMetadata>).recognizeable.status),
         expected = 'denied'
 
   assert.is(value, expected)

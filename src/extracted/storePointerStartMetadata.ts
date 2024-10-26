@@ -1,6 +1,6 @@
 import type { RecognizeableEffect } from '../classes'
 import { createClone } from '../pipes/any'
-import { toMousePoint, toTouchMovePoint } from './toPoints'
+import { toPointerPoint, toTouchMovePoint } from './toPoints'
 
 export type PointerStartMetadata = {
   points: {
@@ -17,7 +17,7 @@ const initialMetadata: PointerStartMetadata = {
 }
 
 export function storePointerStartMetadata<
-  Type extends 'mousedown' | 'touchstart' | 'mouseover',
+  Type extends 'mousedown' | 'touchstart' | 'mouseover' | 'pointerdown' | 'pointerover',
   Metadata extends PointerStartMetadata
 > ({ event, api }: {
   event: MouseEvent | TouchEvent,
@@ -26,8 +26,8 @@ export function storePointerStartMetadata<
   const { getMetadata } = api,
         metadata = getMetadata()
 
-  const point = event instanceof MouseEvent
-    ? toMousePoint(event)
+  const point = (event instanceof MouseEvent || event instanceof PointerEvent)
+    ? toPointerPoint(event)
     : toTouchMovePoint(event)
 
   if (!metadata.points) metadata.points = createClone<typeof metadata.points>()(initialMetadata.points)

@@ -2,7 +2,7 @@ import type { RecognizeableEffect } from '../classes'
 import { createClone } from '../pipes/any'
 import { toDirection } from './toDirection'
 import type { Direction } from './toDirection'
-import { toMousePoint, toTouchMovePoint, toTouchEndPoint } from './toPoints'
+import { toPointerPoint, toTouchMovePoint, toTouchEndPoint } from './toPoints'
 import { toPolarCoordinates } from './toPolarCoordinates'
 import type { PolarCoordinates } from './toPolarCoordinates'
 import type { PointerStartMetadata } from './storePointerStartMetadata'
@@ -67,6 +67,10 @@ export function storePointerMoveMetadata<
     | 'touchmove'
     | 'touchend'
     | 'mouseover'
+    | 'pointerdown'
+    | 'pointermove'
+    | 'pointerup'
+    | 'pointerover'
   ),
   Metadata extends PointerMoveMetadata & PointerStartMetadata & PointerTimeMetadata
 > ({ event, api }: {
@@ -86,7 +90,7 @@ export function storePointerMoveMetadata<
         { x: startX, y: startY } = metadata.points.start,
         { x: newX, y: newY } = (() => {
           if (event instanceof MouseEvent) {
-            return toMousePoint(event)
+            return toPointerPoint(event)
           }
 
           if (event instanceof TouchEvent) {

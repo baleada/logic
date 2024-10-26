@@ -5,13 +5,13 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount } from 'vue'
 import { Listenable } from '../../../../../../src/classes/Listenable';
-import { createHover, HoverType, HoverMetadata } from '../../../../../../src/factories/createHover';
+import { createMousehover, MousehoverType, MousehoverMetadata } from '../../../../../../src/factories/createMousehover';
 
-let listenable: Listenable<HoverType, HoverMetadata>
+let listenable: Listenable<MousehoverType, MousehoverMetadata>
 onMounted(() => {
-  listenable = new Listenable<HoverType, HoverMetadata>(
-    'recognizeable' as HoverType, 
-    { recognizeable: { effects: createHover() } }
+  listenable = new Listenable<MousehoverType, MousehoverMetadata>(
+    'recognizeable' as MousehoverType, 
+    { recognizeable: { effects: createMousehover() } }
   )
 
   window.testState = {

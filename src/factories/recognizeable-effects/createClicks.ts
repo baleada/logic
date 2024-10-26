@@ -1,6 +1,6 @@
 import type { ListenEffectParam, RecognizeableEffect, RecognizeableOptions } from '../../classes'
 import { createClone } from '../../pipes'
-import { toHookApi, toMousePoint, toPolarCoordinates } from '../../extracted'
+import { toHookApi, toPointerPoint, toPolarCoordinates } from '../../extracted'
 import type { HookApi, PointerStartMetadata, PointerTimeMetadata } from '../../extracted'
 
 /*
@@ -79,7 +79,7 @@ export function createClicks (options: ClicksOptions = {}): RecognizeableOptions
     }
 
     metadata.lastClick.times.start = event.timeStamp
-    metadata.lastClick.points.start = toMousePoint(event)
+    metadata.lastClick.points.start = toPointerPoint(event)
 
     cache.mousemoveEffect = event => mousemove(event, api)
     getMousemoveTarget(event).addEventListener('mousemove', cache.mousemoveEffect)

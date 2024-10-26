@@ -22,7 +22,7 @@ const initialMetadata: PointerTimeMetadata = {
   velocity: 0,
 }
 
-export function storePointerTimeMetadata<Type extends 'mousedown' | 'touchstart' | 'mouseover'> ({
+export function storePointerTimeMetadata<Type extends 'mousedown' | 'touchstart' | 'pointerdown' | 'mouseover' | 'pointerover'> ({
   event,
   api,
   getShouldStore,

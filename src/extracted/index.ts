@@ -55,7 +55,7 @@ export type { Direction } from './toDirection'
 export { toHookApi } from './toHookApi'
 export type { HookApi } from './toHookApi'
 
-export { toMousePoint, toTouchMovePoint, toTouchEndPoint } from './toPoints'
+export { toPointerPoint, toTouchMovePoint, toTouchEndPoint } from './toPoints'
 
 export { toPolarCoordinates } from './toPolarCoordinates'
 export type { PolarCoordinates } from './toPolarCoordinates'

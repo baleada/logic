@@ -3,32 +3,32 @@ import type { RecognizeableEffect } from '../classes'
 import { toHookApi, storePointerStartMetadata, storePointerTimeMetadata, storePointerMoveMetadata } from '../extracted'
 import type { PointerStartMetadata, PointerTimeMetadata, HookApi, PointerMoveMetadata } from '../extracted'
 
-export type HoverType = 'mouseover' | 'mouseout' | 'touchstart'
+export type PointerhoverType = 'pointerover' | 'pointerout'
 
-export type HoverMetadata = (
+export type PointerhoverMetadata = (
   & PointerStartMetadata
   & PointerMoveMetadata
   & PointerTimeMetadata
 )
 
-export type HoverOptions = {
+export type PointerhoverOptions = {
   minDuration?: number,
-  onOver?: HoverHook,
-  onOut?: HoverHook,
+  onOver?: PointerhoverHook,
+  onOut?: PointerhoverHook,
 }
 
-export type HoverHook = (api: HoverHookApi) => any
+export type PointerhoverHook = (api: PointerhoverHookApi) => any
 
-export type HoverHookApi = HookApi<HoverType, HoverMetadata>
+export type PointerhoverHookApi = HookApi<PointerhoverType, PointerhoverMetadata>
 
-const defaultOptions: HoverOptions = {
+const defaultOptions: PointerhoverOptions = {
   minDuration: 0,
 }
 
 /**
- * [Docs](https://baleada.dev/docs/logic/factories/hover)
+ * [Docs](https://baleada.dev/docs/logic/factories/pointerhover)
  */
-export function createHover (options: HoverOptions = {}) {
+export function createPointerhover (options: PointerhoverOptions = {}) {
   const {
           minDuration,
           onOver,
@@ -39,18 +39,18 @@ export function createHover (options: HoverOptions = {}) {
         }
 
   let request: number
-  let mouseStatus: 'entered' | 'exited' = 'exited'
+  let pointerStatus: 'entered' | 'exited' = 'exited'
 
-  const mouseover: RecognizeableEffect<'mouseover', HoverMetadata> = (event, api) => {
-    if (mouseStatus === 'exited') {
-      mouseStatus = 'entered'
+  const pointerover: RecognizeableEffect<'pointerover', PointerhoverMetadata> = (event, api) => {
+    if (pointerStatus === 'exited') {
+      pointerStatus = 'entered'
 
       storePointerStartMetadata({ event, api })
       storePointerMoveMetadata({ event, api })
       storePointerTimeMetadata({
         event,
         api,
-        getShouldStore: () => mouseStatus === 'entered',
+        getShouldStore: () => pointerStatus === 'entered',
         setRequest: newRequest => request = newRequest,
         // @ts-expect-error
         recognize,
@@ -64,7 +64,7 @@ export function createHover (options: HoverOptions = {}) {
     onOver?.(toHookApi(api))
   }
 
-  const recognize: RecognizeableEffect<'mouseover', HoverMetadata> = (event, api) => {
+  const recognize: RecognizeableEffect<'pointerover', PointerhoverMetadata> = (event, api) => {
     const { getMetadata, recognized } = api,
           metadata = getMetadata()
 
@@ -73,8 +73,8 @@ export function createHover (options: HoverOptions = {}) {
     }
   }
 
-  const mouseout: RecognizeableEffect<'mouseout', HoverMetadata> = (event, api) => {
-    const { denied, listenInjection: { optionsByType: { mouseout: { target } } } } = api
+  const pointerout: RecognizeableEffect<'pointerout', PointerhoverMetadata> = (event, api) => {
+    const { denied, listenInjection: { optionsByType: { pointerout: { target } } } } = api
 
     if (
       event.target !== target
@@ -84,36 +84,31 @@ export function createHover (options: HoverOptions = {}) {
       return
     }
 
-    if (mouseStatus === 'entered') {
+    if (pointerStatus === 'entered') {
       denied()
       stop()
-      mouseStatus = 'exited'
+      pointerStatus = 'exited'
     }
 
     onOut?.(toHookApi(api))
   }
 
-  const touchstart: RecognizeableEffect<'touchstart', HoverMetadata> = event => {
-    event.preventDefault()
-  }
-
   return {
-    mouseover: {
-      effect: mouseover,
+    pointerover: {
+      effect: pointerover,
       stop,
     },
-    mouseout,
-    touchstart,
+    pointerout,
   }
 }
 
-export class Hover extends Listenable<HoverType, HoverMetadata> {
-  constructor (options?: HoverOptions) {
+export class Pointerhover extends Listenable<PointerhoverType, PointerhoverMetadata> {
+  constructor (options?: PointerhoverOptions) {
     super(
-      'recognizeable' as HoverType,
+      'recognizeable' as PointerhoverType,
       {
         recognizeable: {
-          effects: createHover(options),
+          effects: createPointerhover(options),
         },
       }
     )
