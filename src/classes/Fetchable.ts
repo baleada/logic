@@ -20,11 +20,11 @@ export type FetchMethodOptions = Omit<FetchOptions, 'method'>
 /**
  * [Docs](https://baleada.dev/docs/logic/classes/fetchable)
  */
-export class Fetchable {
+export class Fetchable<ResolveableValue> {
   private computedArrayBuffer: Resolveable<ArrayBuffer | undefined>
   private computedBlob: Resolveable<Blob | undefined>
   private computedFormData: Resolveable<FormData | undefined>
-  private computedJson: Resolveable<any | undefined>
+  private computedJson: Resolveable<ResolveableValue | undefined>
   private computedText: Resolveable<string | undefined>
   constructor (resource: string, options: FetchableOptions = {}) {
     this.setResource(resource)
