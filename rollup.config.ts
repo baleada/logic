@@ -41,7 +41,7 @@ const external = [
           'types/pipes/index.d.ts',
           'types/links/index.d.ts',
           'types/factories/index.d.ts',
-          'src/extracted/public.d.ts',
+          'types/extracted/public.d.ts',
         ])
         .external([
           ...external,
