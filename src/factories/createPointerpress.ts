@@ -51,7 +51,7 @@ export function createPointerpress (options: PointerpressOptions = {}) {
 
   let request: number
   let pointermoveEffect: (event: ListenEffectParam<'pointermove'>) => void
-  let pointerStatus: 'down' | 'up' | 'leave'
+  let pointerStatus: 'down' | 'up' | 'out'
 
   const pointerdown: RecognizeableEffect<'pointerdown', PointerpressMetadata> = (event, api) => {
     pointerStatus = 'down'
@@ -111,7 +111,7 @@ export function createPointerpress (options: PointerpressOptions = {}) {
     if (pointerStatus === 'down') {
       denied()
       stop(target)
-      pointerStatus = 'leave'
+      pointerStatus = 'out'
     }
 
     onOut?.(toHookApi(api))
