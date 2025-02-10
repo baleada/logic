@@ -48,7 +48,7 @@
   },
   "homepage": "https://baleada.dev",
   "devDependencies": {
-    "@baleada/prepare": "^0.5.39",
+    "@baleada/prepare": "^0.5.53",
     "@types/node": "^14.14.41",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "@typescript-eslint/parser": "^5.54.1",

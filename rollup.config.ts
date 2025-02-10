@@ -25,6 +25,7 @@ const external = [
           'src/extracted/public.ts',
         ])
         .external(external)
+        .treeshake('smallest')
         .resolve()
         .esbuild(),
       esm = shared
