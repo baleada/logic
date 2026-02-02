@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 import type {
   KeyreleaseType,
   KeyreleaseMetadata,
@@ -8,7 +9,8 @@ import type {
 import type { RecognizeableStatus } from '../../src/classes'
 
 const suite = withPlaywright(
-  createSuite('createKeyrelease')
+  createSuite('createKeyrelease'),
+  withPlaywrightOptions
 )
 
 // TODO
@@ -20,23 +22,23 @@ for (const key of ['a', 'Shift', ',']) {
   suite('recognizes keyrelease', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
-        'recognizeable' as KeyreleaseType, 
+        'recognizeable' as KeyreleaseType,
         { recognizeable: { effects: window.Logic.createKeyrelease(key) } }
       )
-  
+
       window.testState = { listenable: listenable.listen(() => {}) }
     }, key)
-  
+
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
     await page.keyboard.up(key)
     await page.waitForTimeout(20)
-    
+
     const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
           expected = 'recognized'
-  
+
     assert.is(value, expected, key)
-  
+
     await page.evaluate(() => window.testState.listenable.stop())
   })
 }
@@ -45,10 +47,10 @@ for (const key of ['a', 'Shift', ',']) {
   suite('recognizes keyrelease only once', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
-        'recognizeable' as KeyreleaseType, 
+        'recognizeable' as KeyreleaseType,
         { recognizeable: { effects: window.Logic.createKeyrelease(key) } }
       )
-  
+
       window.testState = {
         count: 0,
         listenable: listenable.listen(() => {
@@ -56,17 +58,17 @@ for (const key of ['a', 'Shift', ',']) {
         }),
       }
     }, key)
-  
+
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
     await page.keyboard.up(key)
     await page.waitForTimeout(20)
-    
+
     const value = await page.evaluate(() => window.testState.count),
           expected = 1
-  
+
     assert.is(value, expected, key)
-  
+
     await page.evaluate(() => window.testState.listenable.stop())
   })
 }
@@ -75,7 +77,7 @@ for (const key of ['a', 'Shift', ',']) {
   suite('respects minDuration option', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
-        'recognizeable' as KeyreleaseType, 
+        'recognizeable' as KeyreleaseType,
         { recognizeable: { effects: window.Logic.createKeyrelease(key, { minDuration: 100 }) } }
       )
 
@@ -86,8 +88,8 @@ for (const key of ['a', 'Shift', ',']) {
     await page.waitForTimeout(50)
     await page.keyboard.up(key)
     await page.waitForTimeout(20)
-    
-    const recognizing = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus)  
+
+    const recognizing = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus)
     assert.is(recognizing, 'denied')
 
     await page.keyboard.down(key)
@@ -105,7 +107,7 @@ for (const key of ['a', 'Shift', ',']) {
 suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
-      'recognizeable' as KeyreleaseType, 
+      'recognizeable' as KeyreleaseType,
       { recognizeable: { effects: window.Logic.createKeyrelease(['a', 'b']) } }
     )
 
@@ -117,16 +119,16 @@ suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
     await page.waitForTimeout(20)
     await page.keyboard.up(key)
     await page.waitForTimeout(20)
-    
+
     const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
           expected = 'recognized'
-  
+
     assert.is(value, expected)
   }
 
   await page.keyboard.down('C')
   await page.waitForTimeout(20)
-  
+
   const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
         expected = 'denied'
 
@@ -138,7 +140,7 @@ suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
 suite('stores most recently released keycombo', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
-      'recognizeable' as KeyreleaseType, 
+      'recognizeable' as KeyreleaseType,
       { recognizeable: { effects: window.Logic.createKeyrelease(['a', 'b']) } }
     )
 
@@ -151,7 +153,7 @@ suite('stores most recently released keycombo', async ({ playwright: { page } })
     await page.keyboard.up(key)
     await page.waitForTimeout(20)
   }
-    
+
   const value = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.keycombo),
         expected = 'b'
 
@@ -164,47 +166,47 @@ for (const key of ['a', 'Shift', ',']) {
   suite('denies until all combos are released if non-matching keycombo happened', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeyreleaseType, KeyreleaseMetadata>(
-        'recognizeable' as KeyreleaseType, 
+        'recognizeable' as KeyreleaseType,
         { recognizeable: { effects: window.Logic.createKeyrelease([key, 'b']) } }
       )
-  
+
       window.testState = { listenable: listenable.listen(() => {}) }
     }, key)
-  
+
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
     await page.keyboard.down('b')
     await page.waitForTimeout(20)
     await page.keyboard.up('b')
     await page.waitForTimeout(20)
-  
+
     await (async () => {
       const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
             expected = 'denied'
-  
+
       assert.is(value, expected)
     })()
-  
+
     await page.keyboard.up(key)
     await page.waitForTimeout(20)
-  
+
     await (async () => {
       const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
             expected = 'denied'
-  
+
       assert.is(value, expected)
     })()
-  
+
     await page.keyboard.down('b')
     await page.waitForTimeout(20)
-  
+
     await (async () => {
       const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
             expected = 'recognizing'
-  
+
       assert.is(value, expected)
     })()
-  
+
     await page.evaluate(() => window.testState.listenable.stop())
   })
 }
@@ -237,7 +239,7 @@ suite('only recognizes when first key of combo goes up', async ({ playwright: { 
 
     assert.is(value, expected)
   })()
-  
+
   await page.keyboard.up('b')
   await page.waitForTimeout(20)
 
@@ -279,7 +281,7 @@ suite('does not require all keys to be released before re-recognizing', async ({
 
     assert.is(value, expected)
   })()
-  
+
   await page.keyboard.down('a')
   await page.waitForTimeout(20)
   await page.keyboard.up('a')

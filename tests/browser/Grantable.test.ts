@@ -1,20 +1,22 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 
 type Context = {
   descriptor: { name: string }
 }
 
-const suite = withPuppeteer(
-  createSuite<Context>('Grantable')
+const suite = withPlaywright(
+  createSuite<Context>('Grantable'),
+  withPlaywrightOptions
 )
 
 suite.before(context => {
   context.descriptor = { name: 'geolocation' }
 })
 
-suite('stores the descriptor', async ({ puppeteer: { page }, descriptor }) => {
+suite('stores the descriptor', async ({ playwright: { page }, descriptor }) => {
   const value = await page.evaluate(descriptor => {
           const instance = new window.Logic.Grantable(descriptor)
           return instance.descriptor
@@ -24,29 +26,29 @@ suite('stores the descriptor', async ({ puppeteer: { page }, descriptor }) => {
   assert.equal(value, expected)
 })
 
-suite('assignment sets the descriptor', async ({ puppeteer: { page }, descriptor }) => {
+suite('assignment sets the descriptor', async ({ playwright: { page }, descriptor }) => {
   const value = await page.evaluate(descriptor => {
           const instance = new window.Logic.Grantable(descriptor)
           instance.descriptor = { name: 'clipboard-write' }
           return instance.descriptor
         }, descriptor),
         expected = { name: 'clipboard-write' }
-  
+
   assert.equal(value, expected)
 })
 
-suite('setDescriptor sets the descriptor', async ({ puppeteer: { page }, descriptor }) => {
+suite('setDescriptor sets the descriptor', async ({ playwright: { page }, descriptor }) => {
   const value = await page.evaluate(descriptor => {
           const instance = new window.Logic.Grantable(descriptor)
           instance.setDescriptor({ name: 'clipboard-write' })
           return instance.descriptor
         }, descriptor),
         expected = { name: 'clipboard-write' }
-  
+
   assert.equal(value, expected)
 })
 
-suite('status is "ready" after construction', async ({ puppeteer: { page }, descriptor }) => {
+suite('status is "ready" after construction', async ({ playwright: { page }, descriptor }) => {
   const value = await page.evaluate(descriptor => {
           const instance = new window.Logic.Grantable(descriptor)
           return instance.status
@@ -56,29 +58,29 @@ suite('status is "ready" after construction', async ({ puppeteer: { page }, desc
   assert.is(value, expected)
 })
 
-suite(`status is 'granting' immediately after grant(...)`, async ({ puppeteer: { page }, descriptor }) => {
+suite(`status is 'granting' immediately after grant(...)`, async ({ playwright: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
           const instance = new window.Logic.Grantable(descriptor)
           instance.grant()
           return instance.status
         }, descriptor),
         expected = 'granting'
-  
+
   assert.is(value, expected)
 })
 
-suite(`status is 'granted' after successful grant(...)`, async ({ puppeteer: { page }, descriptor }) => {
+suite(`status is 'granted' after successful grant(...)`, async ({ playwright: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
           const instance = new window.Logic.Grantable(descriptor)
           await instance.grant()
           return instance.status
         }, descriptor),
         expected = 'granted'
-  
+
   assert.is(value, expected)
 })
 
-suite(`status is 'errored' after unsuccessful grant(...)`, async ({ puppeteer: { page } }) => {
+suite(`status is 'errored' after unsuccessful grant(...)`, async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-expect-error
           const instance = new window.Logic.Grantable({ name: 'stub' })
@@ -86,18 +88,18 @@ suite(`status is 'errored' after unsuccessful grant(...)`, async ({ puppeteer: {
           return instance.status
         }),
         expected = 'errored'
-  
+
   assert.is(value, expected)
 })
 
-suite(`permission is stored after successful grant(...)`, async ({ puppeteer: { page }, descriptor }) => {
+suite(`permission is stored after successful grant(...)`, async ({ playwright: { page }, descriptor }) => {
   const value = await page.evaluate(async descriptor => {
           const instance = new window.Logic.Grantable(descriptor)
           await instance.grant()
           return instance.permission.state
         }, descriptor),
         expected = 'prompt'
-  
+
   assert.equal(value, expected)
 })
 

@@ -1,12 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 
-const suite = withPuppeteer(
-  createSuite('Listenable')
+const suite = withPlaywright(
+  createSuite('Listenable'),
+  withPlaywrightOptions
 )
 
-suite('stores the type', async ({ puppeteer: { page } }) => {
+suite('stores the type', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Listenable('click')
           return instance.type
@@ -16,7 +18,7 @@ suite('stores the type', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('assignment sets the type', async ({ puppeteer: { page } }) => {
+suite('assignment sets the type', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Listenable('click')
           instance.type = 'keydown'
@@ -27,7 +29,7 @@ suite('assignment sets the type', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('setType sets the type', async ({ puppeteer: { page } }) => {
+suite('setType sets the type', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Listenable('click')
           instance.setType('keydown')
@@ -38,7 +40,7 @@ suite('setType sets the type', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('active is empty after construction', async ({ puppeteer: { page } }) => {
+suite('active is empty after construction', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Listenable('click')
           return instance.active.size
@@ -48,7 +50,7 @@ suite('active is empty after construction', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('status is "ready" after construction', async ({ puppeteer: { page } }) => {
+suite('status is "ready" after construction', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Listenable('click')
           return instance.status
@@ -58,7 +60,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page } }) =>
   assert.is(value, expected)
 })
 
-suite('status is \'listening\' after successful listen(...)', async ({ puppeteer: { reloadNext, page } }) => {
+suite('status is \'listening\' after successful listen(...)', async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -71,7 +73,7 @@ suite('status is \'listening\' after successful listen(...)', async ({ puppeteer
   reloadNext()
 })
 
-suite('status is \'stopped\' after successful stop(...)', async ({ puppeteer: { page } }) => {
+suite('status is \'stopped\' after successful stop(...)', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -83,7 +85,7 @@ suite('status is \'stopped\' after successful stop(...)', async ({ puppeteer: { 
   assert.is(value, expected)
 })
 
-suite('listen(...) adds event to active', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) adds event to active', async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -96,7 +98,7 @@ suite('listen(...) adds event to active', async ({ puppeteer: { reloadNext, page
   reloadNext()
 })
 
-suite('stop(...) removes event from active', async ({ puppeteer: { page } }) => {
+suite('stop(...) removes event from active', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -108,13 +110,13 @@ suite('stop(...) removes event from active', async ({ puppeteer: { page } }) => 
   assert.is(value, expected)
 })
 
-suite('listen(...) handles intersect', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles intersect', async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           let value = false
           const instance = new window.Logic.Listenable('intersect')
-          
+
           instance.listen(() => value = true, { target: document.body })
-        
+
           return new Promise(resolve => {
             setTimeout(() => resolve(value), 20)
           })
@@ -126,14 +128,14 @@ suite('listen(...) handles intersect', async ({ puppeteer: { reloadNext, page } 
   reloadNext()
 })
 
-suite('listen(...) handles mutate', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles mutate', async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           let value = false
           const instance = new window.Logic.Listenable('mutate')
-          
+
           instance.listen(() => value = true, { target: document.body, observe: { attributes: true } })
           document.body.classList.add('stub')
-        
+
           return new Promise(resolve => {
             setTimeout(() => resolve(value), 20)
           })
@@ -145,15 +147,15 @@ suite('listen(...) handles mutate', async ({ puppeteer: { reloadNext, page } }) 
   reloadNext()
 })
 
-suite('listen(...) handles resize', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles resize', async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           let value = false
           const instance = new window.Logic.Listenable('resize')
-          
+
           instance.listen(() => value = true, { target: document.body })
           const bodyHeight = document.body.getBoundingClientRect().height
           document.body.style.height = `${bodyHeight + 1}px`
-        
+
           return new Promise(resolve => {
             setTimeout(() => resolve(value), 20)
           })
@@ -165,7 +167,9 @@ suite('listen(...) handles resize', async ({ puppeteer: { reloadNext, page } }) 
   reloadNext()
 })
 
-suite('listen(...) handles media queries', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles media queries', async ({ playwright: { page, reloadNext } }) => {
+  await page.setViewportSize({ width: 800, height: 600 })
+
   await page.evaluate(async () => {
     window.testState = {
       value: false,
@@ -173,10 +177,8 @@ suite('listen(...) handles media queries', async ({ puppeteer: { reloadNext, pag
         .listen(() => window.testState.value = true),
     }
   })
-  
-  // Puppeteer viewport defaults to 800x600
-  // Setting to 901 should trigger the 900px media query listener
-  await page.setViewport({ width: 901, height: 600 })
+
+  await page.setViewportSize({ width: 901, height: 600 })
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
@@ -190,7 +192,7 @@ suite('listen(...) handles media queries', async ({ puppeteer: { reloadNext, pag
   reloadNext()
 })
 
-suite('listen(...) handles idle', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles idle', async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('idle')
           instance.listen(() => {})
@@ -204,13 +206,13 @@ suite('listen(...) handles idle', async ({ puppeteer: { reloadNext, page } }) =>
   reloadNext()
 })
 
-suite('listen(...) handles message', async ({ puppeteer: { browser, reloadNext, page } }) => {
+suite('listen(...) handles message', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     const instance = new window.Logic.Listenable('message')
     instance.listen(event => window.testState = event.data)
   })
 
-  const page2: typeof page = await browser.newPage()
+  const page2: typeof page = await page.context().newPage()
   await page2.goto('http://localhost:5173')
   await page2.evaluate(() => {
     new BroadcastChannel('baleada').postMessage('baleada')
@@ -229,7 +231,7 @@ suite('listen(...) handles message', async ({ puppeteer: { browser, reloadNext, 
 // Not sure how to trigger messageerror
 suite.skip('listen(...) handles messageerror', async () => {})
 
-suite('listen(...) handles visibility change', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles visibility change', async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('visibilitychange')
           instance.listen(() => {})
@@ -243,7 +245,7 @@ suite('listen(...) handles visibility change', async ({ puppeteer: { reloadNext,
   reloadNext()
 })
 
-suite('listen(...) handles recognizeable', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) handles recognizeable', async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
@@ -263,7 +265,7 @@ suite('listen(...) handles recognizeable', async ({ puppeteer: { reloadNext, pag
   reloadNext()
 })
 
-suite('listen(...) stores recognizeable', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) stores recognizeable', async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
@@ -283,7 +285,7 @@ suite('listen(...) stores recognizeable', async ({ puppeteer: { reloadNext, page
   reloadNext()
 })
 
-suite('listen(...) calls effect when recognizeable status is recognized', async ({ puppeteer: { reloadNext, page } }) => {
+suite('listen(...) calls effect when recognizeable status is recognized', async ({ playwright: { page, reloadNext } }) => {
   await page.evaluate(async () => {
     const instance = new window.Logic.Listenable('recognizeable' as 'keydown', {
       recognizeable: {
@@ -314,16 +316,16 @@ suite('listen(...) calls effect when recognizeable status is recognized', async 
   reloadNext()
 })
 
-suite('stop(...) handles observations', async ({ puppeteer: { page } }) => {
+suite('stop(...) handles observations', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           let value = false
           const instance = new window.Logic.Listenable('resize')
-          
+
           instance.listen(() => value = true, { target: document.body })
           instance.stop()
           const bodyHeight = document.body.getBoundingClientRect().height
           document.body.style.height = `${bodyHeight + 1}px`
-        
+
           return new Promise(resolve => {
             setTimeout(() => resolve(value), 20)
           })
@@ -334,7 +336,9 @@ suite('stop(...) handles observations', async ({ puppeteer: { page } }) => {
 
 })
 
-suite('stop(...) handles media queries', async ({ puppeteer: { page } }) => {
+suite('stop(...) handles media queries', async ({ playwright: { page } }) => {
+  await page.setViewportSize({ width: 800, height: 600 })
+
   await page.evaluate(async () => {
     window.testState = {
       value: false,
@@ -344,10 +348,8 @@ suite('stop(...) handles media queries', async ({ puppeteer: { page } }) => {
 
     window.testState.instance.stop()
   })
-  
-  // Puppeteer viewport defaults to 800x600
-  // Setting to 901 should trigger the 900px media query listener
-  await page.setViewport({ width: 901, height: 600 })
+
+  await page.setViewportSize({ width: 901, height: 600 })
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
@@ -360,7 +362,7 @@ suite('stop(...) handles media queries', async ({ puppeteer: { page } }) => {
 
 })
 
-suite('stop(...) handles idle', async ({ puppeteer: { page } }) => {
+suite('stop(...) handles idle', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('idle')
           instance.listen(() => {})
@@ -372,7 +374,7 @@ suite('stop(...) handles idle', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('stop(...) handles visibility change', async ({ puppeteer: { page } }) => {
+suite('stop(...) handles visibility change', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('visibilitychange')
           instance.listen(() => {})
@@ -384,7 +386,7 @@ suite('stop(...) handles visibility change', async ({ puppeteer: { page } }) => 
   assert.is(value, expected)
 })
 
-suite('stop(...) handles keycombos', async ({ puppeteer: { page } }) => {
+suite('stop(...) handles keycombos', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
     window.testState = {
       value: false,
@@ -412,7 +414,7 @@ suite('stop(...) handles keycombos', async ({ puppeteer: { page } }) => {
 
 })
 
-suite('stop(...) handles recognizeable', async ({ puppeteer: { page } }) => {
+suite('stop(...) handles recognizeable', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('recognizeable' as 'keydown' | 'mousedown', {
             recognizeable: {
@@ -434,7 +436,7 @@ suite('stop(...) handles recognizeable', async ({ puppeteer: { page } }) => {
 
 // TODO: test recognizeable.stops
 
-suite('stop(...) can be limited to a target', async ({ puppeteer: { page } }) => {
+suite('stop(...) can be limited to a target', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})
@@ -448,7 +450,7 @@ suite('stop(...) can be limited to a target', async ({ puppeteer: { page } }) =>
   assert.equal(value, expected)
 })
 
-suite('status is \'listening\' when stop(...) is limited to a target such that not all active listeners are removed', async ({ puppeteer: { page } }) => {
+suite('status is \'listening\' when stop(...) is limited to a target such that not all active listeners are removed', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Listenable('click')
           instance.listen(() => {})

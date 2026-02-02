@@ -1,15 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('Fullscreenable'),
-  {
-    launch: ({ executablePath: { macOS } }) => ({ headless: false, executablePath: macOS }),
-  }
+  withPlaywrightOptions
 )
 
-suite('stores the getElement', async ({ puppeteer: { page } }) => {
+suite('stores the getElement', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Fullscreenable(() => document.body)
           return instance.getElement().tagName
@@ -19,7 +18,7 @@ suite('stores the getElement', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('assignment sets the getElement', async ({ puppeteer: { page } }) => {
+suite('assignment sets the getElement', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Fullscreenable(() => document.querySelector('span') as HTMLElement)
           instance.getElement = () => document.body
@@ -30,7 +29,7 @@ suite('assignment sets the getElement', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('setGetElement sets the getElement', async ({ puppeteer: { page } }) => {
+suite('setGetElement sets the getElement', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Fullscreenable(() => document.querySelector('span') as HTMLElement)
           instance.setGetElement(() => document.body)
@@ -41,7 +40,7 @@ suite('setGetElement sets the getElement', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('status is "ready" after construction', async ({ puppeteer: { page } }) => {
+suite('status is "ready" after construction', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Fullscreenable(() => document.body)
           return instance.status
@@ -51,7 +50,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page } }) =>
   assert.is(value, expected)
 })
 
-suite('element gets the element', async ({ puppeteer: { page } }) => {
+suite('element gets the element', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Fullscreenable(() => document.body)
           return instance.element.tagName
@@ -61,7 +60,7 @@ suite('element gets the element', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('status is \'fullscreened\' after successful fullscreen(...)', async ({ puppeteer: { page } }) => {
+suite('status is \'fullscreened\' after successful fullscreen(...)', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.fullscreen()
@@ -72,7 +71,7 @@ suite('status is \'fullscreened\' after successful fullscreen(...)', async ({ pu
   assert.is(value, expected)
 })
 
-suite('status is \'exited\' after successful exit(...)', async ({ puppeteer: { page } }) => {
+suite('status is \'exited\' after successful exit(...)', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.fullscreen()
@@ -84,7 +83,7 @@ suite('status is \'exited\' after successful exit(...)', async ({ puppeteer: { p
   assert.is(value, expected)
 })
 
-suite('enter(...) is an alias for fullscreen(...)', async ({ puppeteer: { page } }) => {
+suite('enter(...) is an alias for fullscreen(...)', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.enter()
@@ -95,7 +94,7 @@ suite('enter(...) is an alias for fullscreen(...)', async ({ puppeteer: { page }
   assert.is(value, expected)
 })
 
-suite('status is \'errored\' after unsuccessful fullscreen(...)', async ({ puppeteer: { page } }) => {
+suite('status is \'errored\' after unsuccessful fullscreen(...)', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-expect-error
           const instance = new window.Logic.Fullscreenable(() => ({}))
@@ -107,7 +106,7 @@ suite('status is \'errored\' after unsuccessful fullscreen(...)', async ({ puppe
   assert.is(value, expected)
 })
 
-suite('stores the error after unsuccessful fullscreen(...)', async ({ puppeteer: { page } }) => {
+suite('stores the error after unsuccessful fullscreen(...)', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           // @ts-expect-error
           const instance = new window.Logic.Fullscreenable(() => ({}))
@@ -119,7 +118,7 @@ suite('stores the error after unsuccessful fullscreen(...)', async ({ puppeteer:
   assert.is(value, expected)
 })
 
-suite('status is \'errored\' after unsuccessful exit(...)', async ({ puppeteer: { page } }) => {
+suite('status is \'errored\' after unsuccessful exit(...)', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.fullscreen()
@@ -133,7 +132,7 @@ suite('status is \'errored\' after unsuccessful exit(...)', async ({ puppeteer: 
   assert.is(value, expected)
 })
 
-suite('stores the error after unsuccessful exit(...)', async ({ puppeteer: { page } }) => {
+suite('stores the error after unsuccessful exit(...)', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Fullscreenable(() => document.body)
           await instance.fullscreen()

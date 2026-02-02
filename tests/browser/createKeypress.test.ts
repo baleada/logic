@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 import type {
   KeypressType,
   KeypressMetadata,
@@ -8,7 +9,8 @@ import type {
 import type { RecognizeableStatus } from '../../src/classes'
 
 const suite = withPlaywright(
-  createSuite('createKeypress')
+  createSuite('createKeypress'),
+  withPlaywrightOptions
 )
 
 // TODO
@@ -20,21 +22,21 @@ for (const key of ['a', 'Shift', ',']) {
   suite('recognizes keypress', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
-        'recognizeable' as KeypressType, 
+        'recognizeable' as KeypressType,
         { recognizeable: { effects: window.Logic.createKeypress(key) } }
       )
-  
+
       window.testState = { listenable: listenable.listen(() => {}) }
     }, key)
-  
+
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
-    
+
     const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
           expected = 'recognized'
-  
+
     assert.is(value, expected, key)
-  
+
     await page.keyboard.up(key)
     await page.evaluate(() => window.testState.listenable.stop())
   })
@@ -44,10 +46,10 @@ for (const key of ['a', 'Shift', ',']) {
   suite('recognizes keypress on every frame', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
-        'recognizeable' as KeypressType, 
+        'recognizeable' as KeypressType,
         { recognizeable: { effects: window.Logic.createKeypress(key) } }
       )
-  
+
       window.testState = {
         count: 0,
         listenable: listenable.listen(() => {
@@ -55,14 +57,14 @@ for (const key of ['a', 'Shift', ',']) {
         }),
       }
     }, key)
-  
+
     await page.keyboard.down(key)
     await page.waitForTimeout(100)
-    
+
     const value = await page.evaluate(() => window.testState.count)
-  
+
     assert.ok(value > 1, key)
-  
+
     await page.keyboard.up(key)
     await page.evaluate(() => window.testState.listenable.stop())
   })
@@ -72,7 +74,7 @@ for (const key of ['a', 'Shift', ',']) {
   suite('respects minDuration option', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
-        'recognizeable' as KeypressType, 
+        'recognizeable' as KeypressType,
         { recognizeable: { effects: window.Logic.createKeypress(key, { minDuration: 100 }) } }
       )
 
@@ -81,8 +83,8 @@ for (const key of ['a', 'Shift', ',']) {
 
     await page.keyboard.down(key)
     await page.waitForTimeout(50)
-    
-    const recognizing = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus)  
+
+    const recognizing = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus)
     assert.is(recognizing, 'recognizing')
 
     await page.waitForTimeout(150)
@@ -98,7 +100,7 @@ for (const key of ['a', 'Shift', ',']) {
 suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
-      'recognizeable' as KeypressType, 
+      'recognizeable' as KeypressType,
       { recognizeable: { effects: window.Logic.createKeypress(['a', 'b']) } }
     )
 
@@ -108,10 +110,10 @@ suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
   for (const key of ['a', 'b']) {
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
-    
+
     const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
           expected = 'recognized'
-  
+
     assert.is(value, expected)
 
     await page.keyboard.up(key)
@@ -120,7 +122,7 @@ suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
 
   await page.keyboard.down('C')
   await page.waitForTimeout(20)
-  
+
   const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
         expected = 'denied'
 
@@ -133,7 +135,7 @@ suite('recognizes arrays of keycombos', async ({ playwright: { page } }) => {
 suite('stores currently pressed keycombo', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
     const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
-      'recognizeable' as KeypressType, 
+      'recognizeable' as KeypressType,
       { recognizeable: { effects: window.Logic.createKeypress(['a', 'b']) } }
     )
 
@@ -143,12 +145,12 @@ suite('stores currently pressed keycombo', async ({ playwright: { page } }) => {
   for (const key of ['a', 'b']) {
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
-    
+
     const value = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.keycombo),
           expected = key
-    
+
     assert.equal(value, expected)
-    
+
     await page.keyboard.up(key)
     await page.waitForTimeout(20)
   }
@@ -160,47 +162,47 @@ for (const key of ['a', 'Shift', ',']) {
   suite('denies until all combos are released if non-matching keycombo happened', async ({ playwright: { page } }) => {
     await page.evaluate(async key => {
       const listenable = new window.Logic.Listenable<KeypressType, KeypressMetadata>(
-        'recognizeable' as KeypressType, 
+        'recognizeable' as KeypressType,
         { recognizeable: { effects: window.Logic.createKeypress([key, 'b']) } }
       )
-  
+
       window.testState = { listenable: listenable.listen(() => {}) }
     }, key)
-  
+
     await page.keyboard.down(key)
     await page.waitForTimeout(20)
     await page.keyboard.down('b')
     await page.waitForTimeout(20)
     await page.keyboard.up('b')
     await page.waitForTimeout(20)
-  
+
     await (async () => {
       const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
             expected = 'denied'
-  
+
       assert.is(value, expected)
     })()
-  
+
     await page.keyboard.up(key)
     await page.waitForTimeout(20)
-  
+
     await (async () => {
       const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
             expected = 'denied'
-  
+
       assert.is(value, expected)
     })()
-  
+
     await page.keyboard.down('b')
     await page.waitForTimeout(20)
-  
+
     await (async () => {
       const value = await page.evaluate(() => window.testState.listenable.recognizeable.status as RecognizeableStatus),
             expected = 'recognized'
-  
+
       assert.is(value, expected)
     })()
-  
+
     await page.keyboard.up('b')
     await page.evaluate(() => window.testState.listenable.stop())
   })
@@ -235,7 +237,7 @@ suite('does not require all keys to be released before re-recognizing', async ({
   })()
 
   const previousValue = await page.evaluate(() => window.testState.count)
-  
+
   await page.keyboard.down('a')
   await page.waitForTimeout(20)
 
@@ -291,7 +293,7 @@ suite('handles arrays of overlapping combos', async ({ playwright: { page } }) =
 
     assert.is(pressed, 'shift+a')
   })()
-  
+
   await (async () => {
     const previousValue = await page.evaluate(() => window.testState.count)
 

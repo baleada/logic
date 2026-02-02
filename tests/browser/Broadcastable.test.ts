@@ -1,22 +1,24 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 
-const suite = withPuppeteer(
-  createSuite('Broadcastable')
+const suite = withPlaywright(
+  createSuite('Broadcastable'),
+  withPlaywrightOptions
 )
 
-suite('stores the state', async ({ puppeteer: { page } }) => {
+suite('stores the state', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           return instance.state
         }),
         expected = 'Baleada: a toolkit for building web apps'
-  
+
   assert.is(value, expected)
 })
 
-suite('assignment sets the state', async ({ puppeteer: { page } }) => {
+suite('assignment sets the state', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           instance.state = 'Baleada: a toolkit'
@@ -27,7 +29,7 @@ suite('assignment sets the state', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('setState sets the state', async ({ puppeteer: { page } }) => {
+suite('setState sets the state', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           instance.setState('Baleada: a toolkit')
@@ -38,7 +40,7 @@ suite('setState sets the state', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('status is "ready" after construction', async ({ puppeteer: { page } }) => {
+suite('status is "ready" after construction', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           return instance.status
@@ -48,7 +50,7 @@ suite('status is "ready" after construction', async ({ puppeteer: { page } }) =>
   assert.is(value, expected)
 })
 
-suite(`channel is BroadcastChannel`, async ({ puppeteer: { page } }) => {
+suite(`channel is BroadcastChannel`, async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           return instance.channel instanceof BroadcastChannel
@@ -58,8 +60,8 @@ suite(`channel is BroadcastChannel`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`broadcast(...) broadcasts state`, async ({ puppeteer: { browser, reloadNext, page } }) => {
-  const page2: typeof page = await browser.newPage()
+suite(`broadcast(...) broadcasts state`, async ({ playwright: { page, reloadNext } }) => {
+  const page2: typeof page = await page.context().newPage()
   await page2.goto('http://localhost:5173')
   await page2.evaluate(() => {
     const instance = new BroadcastChannel('baleada')
@@ -67,7 +69,7 @@ suite(`broadcast(...) broadcasts state`, async ({ puppeteer: { browser, reloadNe
       window.testState = event.data
     })
   })
-  
+
   await page.evaluate(async () => {
     const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
     instance.broadcast()
@@ -81,7 +83,7 @@ suite(`broadcast(...) broadcasts state`, async ({ puppeteer: { browser, reloadNe
   reloadNext()
 })
 
-suite(`status is 'broadcasted' after successful broadcast`, async ({ puppeteer: { page } }) => {
+suite(`status is 'broadcasted' after successful broadcast`, async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           instance.broadcast()
@@ -92,7 +94,7 @@ suite(`status is 'broadcasted' after successful broadcast`, async ({ puppeteer: 
   assert.is(value, expected)
 })
 
-suite(`broadcast(...) stores the error`, async ({ puppeteer: { browser, reloadNext, page } }) => {
+suite(`broadcast(...) stores the error`, async ({ playwright: { page, reloadNext } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Broadcastable(() => 'Baleada: a toolkit for building web apps')
           instance.broadcast()
@@ -105,7 +107,7 @@ suite(`broadcast(...) stores the error`, async ({ puppeteer: { browser, reloadNe
   reloadNext()
 })
 
-suite(`status is 'errored' after unsuccessful broadcast`, async ({ puppeteer: { page } }) => {
+suite(`status is 'errored' after unsuccessful broadcast`, async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Broadcastable(() => 'Baleada: a toolkit for building web apps')
           instance.broadcast()
@@ -116,8 +118,8 @@ suite(`status is 'errored' after unsuccessful broadcast`, async ({ puppeteer: { 
   assert.is(value, expected)
 })
 
-suite(`stop(...) closes the channel`, async ({ puppeteer: { browser, reloadNext, page } }) => {
-  const page2: typeof page = await browser.newPage()
+suite(`stop(...) closes the channel`, async ({ playwright: { page, reloadNext } }) => {
+  const page2: typeof page = await page.context().newPage()
   await page2.goto('http://localhost:5173')
   await page2.evaluate(() => {
     const instance = new BroadcastChannel('baleada')
@@ -125,7 +127,7 @@ suite(`stop(...) closes the channel`, async ({ puppeteer: { browser, reloadNext,
       window.testState = event.data
     })
   })
-  
+
   await page.evaluate(async () => {
     const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
     instance.stop()
@@ -140,7 +142,7 @@ suite(`stop(...) closes the channel`, async ({ puppeteer: { browser, reloadNext,
   reloadNext()
 })
 
-suite(`status is 'stopped' after successful stop`, async ({ puppeteer: { page } }) => {
+suite(`status is 'stopped' after successful stop`, async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Broadcastable('Baleada: a toolkit for building web apps')
           instance.stop()

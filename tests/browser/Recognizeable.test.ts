@@ -1,12 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 
-const suite = withPuppeteer(
-  createSuite('Recognizeable')
+const suite = withPlaywright(
+  createSuite('Recognizeable'),
+  withPlaywrightOptions
 )
 
-suite('stores the sequence', async ({ puppeteer: { page } }) => {
+suite('stores the sequence', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     return new window.Logic.Recognizeable([]).sequence
   })
@@ -14,7 +16,7 @@ suite('stores the sequence', async ({ puppeteer: { page } }) => {
   assert.equal(value, [])
 })
 
-suite('assignment sets the sequence', async ({ puppeteer: { page } }) => {
+suite('assignment sets the sequence', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new window.Logic.Recognizeable([])
     instance.sequence = [new MouseEvent('click')]
@@ -24,7 +26,7 @@ suite('assignment sets the sequence', async ({ puppeteer: { page } }) => {
   assert.is(value, 1)
 })
 
-suite('setSequence sets the sequence', async ({ puppeteer: { page } }) => {
+suite('setSequence sets the sequence', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new window.Logic.Recognizeable([])
     instance.setSequence([new MouseEvent('click')])
@@ -34,7 +36,7 @@ suite('setSequence sets the sequence', async ({ puppeteer: { page } }) => {
   assert.is(value, 1)
 })
 
-suite('first recognize(sequenceItem) sets status to recognizing', async ({ puppeteer: { page } }) => {
+suite('first recognize(sequenceItem) sets status to recognizing', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new window.Logic.Recognizeable([])
     instance.recognize(new MouseEvent('click'))
@@ -44,10 +46,10 @@ suite('first recognize(sequenceItem) sets status to recognizing', async ({ puppe
   assert.is(value, 'recognizing')
 })
 
-suite('recognize(sequenceItem) calls effect', async ({ puppeteer: { page } }) => {
+suite('recognize(sequenceItem) calls effect', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     let effectWasCalled = false
-    
+
     const instance = new window.Logic.Recognizeable(
       [],
       {
@@ -57,16 +59,16 @@ suite('recognize(sequenceItem) calls effect', async ({ puppeteer: { page } }) =>
         },
       }
     )
-    
+
     instance.recognize(new MouseEvent('click'))
-    
+
     return effectWasCalled
   })
 
   assert.is(value, true)
 })
 
-suite('effect API recognized() sets status', async ({ puppeteer: { page } }) => {
+suite('effect API recognized() sets status', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new window.Logic.Recognizeable(
       [],
@@ -76,17 +78,17 @@ suite('effect API recognized() sets status', async ({ puppeteer: { page } }) => 
         },
       }
     )
-    
+
     instance.recognize(new MouseEvent('click'))
-    
-    
+
+
     return instance.status
   })
 
   assert.is(value, 'recognized')
 })
 
-suite('effect API denied() sets status', async ({ puppeteer: { page } }) => {
+suite('effect API denied() sets status', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new window.Logic.Recognizeable(
       [],
@@ -96,17 +98,17 @@ suite('effect API denied() sets status', async ({ puppeteer: { page } }) => {
         },
       }
     )
-    
+
     instance.recognize(new MouseEvent('click'))
-    
-    
+
+
     return instance.status
   })
 
   assert.is(value, 'denied')
 })
 
-suite('effect API getSequence() gets the new sequence', async ({ puppeteer: { page } }) => {
+suite('effect API getSequence() gets the new sequence', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     let sequence
 
@@ -118,9 +120,9 @@ suite('effect API getSequence() gets the new sequence', async ({ puppeteer: { pa
         },
       }
     )
-    
+
     instance.recognize(new MouseEvent('click'))
-    
+
     return {
       fromInstance: JSON.stringify(instance.sequence),
       fromApi: JSON.stringify(sequence),
@@ -130,7 +132,7 @@ suite('effect API getSequence() gets the new sequence', async ({ puppeteer: { pa
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite('effect API getStatus() gets status', async ({ puppeteer: { page } }) => {
+suite('effect API getStatus() gets status', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     let status
 
@@ -142,9 +144,9 @@ suite('effect API getStatus() gets status', async ({ puppeteer: { page } }) => {
         },
       }
     )
-    
+
     instance.recognize(new MouseEvent('click'))
-    
+
     return {
       fromInstance: instance.status,
       fromApi: status,
@@ -154,7 +156,7 @@ suite('effect API getStatus() gets status', async ({ puppeteer: { page } }) => {
   assert.equal(value.fromInstance, value.fromApi)
 })
 
-suite('effect API getMetadata() gets metadata', async ({ puppeteer: { page } }) => {
+suite('effect API getMetadata() gets metadata', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     let metadata
 
@@ -166,9 +168,9 @@ suite('effect API getMetadata() gets metadata', async ({ puppeteer: { page } }) 
         },
       }
     )
-    
+
     instance.recognize(new MouseEvent('click'))
-    
+
     return {
       fromInstance: JSON.stringify(instance.metadata),
       fromApi: JSON.stringify(metadata),
@@ -178,7 +180,7 @@ suite('effect API getMetadata() gets metadata', async ({ puppeteer: { page } }) 
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite('effect API getMetadata() is a reference to metadata', async ({ puppeteer: { page } }) => {
+suite('effect API getMetadata() is a reference to metadata', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     let metadata
 
@@ -190,12 +192,12 @@ suite('effect API getMetadata() is a reference to metadata', async ({ puppeteer:
         },
       }
     )
-    
+
     instance.recognize(new MouseEvent('click'))
 
     // Mutating the getMetadata return value should affect the instance's metadata
     metadata.stub = 'stub'
-    
+
     return {
       fromInstance: JSON.stringify(instance.metadata),
       fromApi: JSON.stringify(metadata),
@@ -205,7 +207,7 @@ suite('effect API getMetadata() is a reference to metadata', async ({ puppeteer:
   assert.is(value.fromInstance, value.fromApi)
 })
 
-suite('effect API setMetadata() sets metadata', async ({ puppeteer: { page } }) => {
+suite('effect API setMetadata() sets metadata', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     const instance = new window.Logic.Recognizeable(
       [],
@@ -215,16 +217,16 @@ suite('effect API setMetadata() sets metadata', async ({ puppeteer: { page } }) 
         },
       }
     )
-    
+
     instance.recognize(new MouseEvent('click'))
-    
+
     return instance.metadata
   })
 
   assert.equal(value, { stub: 'stub' })
 })
 
-suite('effect API onRecognized() performs side effect', async ({ puppeteer: { page } }) => {
+suite('effect API onRecognized() performs side effect', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     let onRecognizedStatus = 'not performed'
     const onRecognized = () => onRecognizedStatus = 'performed'
@@ -237,19 +239,19 @@ suite('effect API onRecognized() performs side effect', async ({ puppeteer: { pa
         },
       }
     )
-    
+
     instance.recognize(
       new MouseEvent('click'),
       { listenInjection: { effect: onRecognized, optionsByType: { click: {} } } }
     )
-    
+
     return onRecognizedStatus
   })
 
   assert.equal(value, 'performed')
 })
 
-suite('effect API sequenceItem accesses sequenceItem', async ({ puppeteer: { page } }) => {
+suite('effect API sequenceItem accesses sequenceItem', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     let result
 
@@ -261,9 +263,9 @@ suite('effect API sequenceItem accesses sequenceItem', async ({ puppeteer: { pag
         },
       }
     )
-    
+
     instance.recognize(new MouseEvent('click'))
-    
+
     return result
   })
 
@@ -271,7 +273,7 @@ suite('effect API sequenceItem accesses sequenceItem', async ({ puppeteer: { pag
 })
 
 /* status */
-suite('status is \'ready\' after construction', async ({ puppeteer: { page } }) => {
+suite('status is \'ready\' after construction', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     return new window.Logic.Recognizeable([]).status
   })
@@ -279,7 +281,7 @@ suite('status is \'ready\' after construction', async ({ puppeteer: { page } }) 
   assert.is(value, 'ready')
 })
 
-suite('status is \'recognizing\' after recognize(...) is called at least once and effects did not call recognized or denied', async ({ puppeteer: { page } }) => {
+suite('status is \'recognizing\' after recognize(...) is called at least once and effects did not call recognized or denied', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
     return new window.Logic.Recognizeable([])
       .recognize(new MouseEvent('click'))
@@ -289,7 +291,7 @@ suite('status is \'recognizing\' after recognize(...) is called at least once an
   assert.is(value, 'recognizing')
 })
 
-suite('correctly routes IntersectionObserverEntry[]', async ({ puppeteer: { page } }) => {
+suite('correctly routes IntersectionObserverEntry[]', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Recognizeable(
                   [],
@@ -303,9 +305,9 @@ suite('correctly routes IntersectionObserverEntry[]', async ({ puppeteer: { page
                   // @ts-expect-error
                   instance.recognize(...params)
                 })
-                
+
           observer.observe(document.body)
-        
+
           return new Promise(resolve => {
             setTimeout(() => resolve(instance.status), 20)
           })
@@ -315,7 +317,7 @@ suite('correctly routes IntersectionObserverEntry[]', async ({ puppeteer: { page
   assert.is(value, expected)
 })
 
-suite('correctly routes MutationRecord[]', async ({ puppeteer: { page } }) => {
+suite('correctly routes MutationRecord[]', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Recognizeable(
                   [],
@@ -329,10 +331,10 @@ suite('correctly routes MutationRecord[]', async ({ puppeteer: { page } }) => {
                   // @ts-expect-error
                   instance.recognize(...params)
                 })
-                
+
           observer.observe(document.body, { attributes: true })
           document.body.classList.add('stub')
-        
+
           return new Promise(resolve => {
             setTimeout(() => resolve(instance.status), 20)
           })
@@ -342,7 +344,7 @@ suite('correctly routes MutationRecord[]', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('correctly routes ResizeObserverEntry[]', async ({ puppeteer: { page } }) => {
+suite('correctly routes ResizeObserverEntry[]', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Recognizeable(
                   [],
@@ -356,11 +358,11 @@ suite('correctly routes ResizeObserverEntry[]', async ({ puppeteer: { page } }) 
                   // @ts-expect-error
                   instance.recognize(...params)
                 })
-                
+
           observer.observe(document.body)
           const bodyHeight = document.body.getBoundingClientRect().height
           document.body.style.height = `${bodyHeight + 1}px`
-                
+
           return new Promise(resolve => {
             setTimeout(() => resolve(instance.status), 20)
           })
@@ -370,7 +372,7 @@ suite('correctly routes ResizeObserverEntry[]', async ({ puppeteer: { page } }) 
   assert.is(value, expected)
 })
 
-suite('correctly routes MediaQueryListEvent', async ({ puppeteer: { page } }) => {
+suite('correctly routes MediaQueryListEvent', async ({ playwright: { page } }) => {
   await page.evaluate(async () => {
     window.testState = new window.Logic.Recognizeable(
         [],
@@ -382,14 +384,14 @@ suite('correctly routes MediaQueryListEvent', async ({ puppeteer: { page } }) =>
           },
         }
       )
-  
+
     const target = window.matchMedia('(min-width: 900px)')
 
     target.addEventListener('change', event => window.testState.recognize(event, {}))
   })
-  
-  await page.setViewport({ width: 1, height: 600 })
-  await page.setViewport({ width: 901, height: 600 })
+
+  await page.setViewportSize({ width: 1, height: 600 })
+  await page.setViewportSize({ width: 901, height: 600 })
 
   const value = await page.evaluate(() => {
           return new Promise(resolve => {
@@ -401,7 +403,7 @@ suite('correctly routes MediaQueryListEvent', async ({ puppeteer: { page } }) =>
   assert.is(value, expected)
 })
 
-suite('correctly routes IdleDeadline', async ({ puppeteer: { page } }) => {
+suite('correctly routes IdleDeadline', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Recognizeable(
                   [],
@@ -413,7 +415,7 @@ suite('correctly routes IdleDeadline', async ({ puppeteer: { page } }) => {
                 )
 
           instance.recognize({ didTimeout: true, timeRemaining: () => 0 }, {})
-                
+
           return instance.status
         }),
         expected = 'recognized'
@@ -421,7 +423,7 @@ suite('correctly routes IdleDeadline', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('correctly routes events', async ({ puppeteer: { page } }) => {
+suite('correctly routes events', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const instance = new window.Logic.Recognizeable(
                   [],
@@ -433,7 +435,7 @@ suite('correctly routes events', async ({ puppeteer: { page } }) => {
                 )
 
           instance.recognize(new Event('visibilitychange'), {})
-                
+
           return instance.status
         }),
         expected = 'recognized'
@@ -441,7 +443,7 @@ suite('correctly routes events', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('includes all desired keys in effect API', async ({ puppeteer: { page } }) => {
+suite('includes all desired keys in effect API', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           let keys
 
@@ -455,7 +457,7 @@ suite('includes all desired keys in effect API', async ({ puppeteer: { page } })
                 )
 
           instance.recognize(new Event('visibilitychange'), {})
-                
+
           return keys
         }),
         expected = [
@@ -473,7 +475,7 @@ suite('includes all desired keys in effect API', async ({ puppeteer: { page } })
   assert.equal(value, expected)
 })
 
-suite('respects maxSequenceLength', async ({ puppeteer: { page } }) => {
+suite('respects maxSequenceLength', async ({ playwright: { page } }) => {
   await (async () => {
     const value = await page.evaluate(() => {
             const instance = new window.Logic.Recognizeable(
@@ -485,16 +487,16 @@ suite('respects maxSequenceLength', async ({ puppeteer: { page } }) => {
                 maxSequenceLength: 1,
               }
             )
-            
+
             instance.recognize(new MouseEvent('click'))
-        
+
             window.testState = { instance }
-        
+
             return instance.sequence.length
           }),
           expected = 1
-          
-  
+
+
     assert.is(value, expected)
   })()
 

@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 import type {
   PointerhoverType,
   PointerhoverMetadata,
@@ -8,7 +9,8 @@ import type {
 import type { Listenable } from '../../src/classes/Listenable'
 
 const suite = withPlaywright(
-  createSuite('createPointerhover')
+  createSuite('createPointerhover'),
+  withPlaywrightOptions
 )
 
 suite.before.each(async ({ playwright: { page } }) => {

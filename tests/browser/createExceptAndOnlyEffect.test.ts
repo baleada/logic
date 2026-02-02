@@ -1,9 +1,11 @@
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 
-const suite = withPuppeteer(
-  createSuite('createExceptAndOnlyEffect')
+const suite = withPlaywright(
+  createSuite('createExceptAndOnlyEffect'),
+  withPlaywrightOptions
 )
 
 suite.before(context => {
@@ -12,7 +14,7 @@ suite.before(context => {
   }
 })
 
-suite('doesn\'t guard when except and only are empty', async ({ puppeteer: { page } }) => {
+suite('doesn\'t guard when except and only are empty', async ({ playwright: { page } }) => {
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
@@ -31,11 +33,11 @@ suite('doesn\'t guard when except and only are empty', async ({ puppeteer: { pag
     document.body.removeEventListener('click', window.testState.effect)
     return window.testState.value
   })
-  
+
   assert.is(value, 1)
 })
 
-suite('doesn\'t guard for non-element targets when except and only are empty', async ({ puppeteer: { page } }) => {
+suite('doesn\'t guard for non-element targets when except and only are empty', async ({ playwright: { page } }) => {
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
@@ -54,11 +56,11 @@ suite('doesn\'t guard for non-element targets when except and only are empty', a
     document.removeEventListener('click', window.testState.effect)
     return window.testState.value
   })
-  
+
   assert.is(value, 1)
 })
 
-suite('guards against except when only is empty', async ({ puppeteer: { page } }) => {
+suite('guards against except when only is empty', async ({ playwright: { page } }) => {
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
@@ -77,11 +79,11 @@ suite('guards against except when only is empty', async ({ puppeteer: { page } }
     document.body.removeEventListener('click', window.testState.effect)
     return window.testState.value
   })
-  
+
   assert.is(value, 0)
 })
 
-suite('overrides except with only', async ({ puppeteer: { page } }) => {
+suite('overrides except with only', async ({ playwright: { page } }) => {
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
@@ -100,11 +102,11 @@ suite('overrides except with only', async ({ puppeteer: { page } }) => {
     document.body.removeEventListener('click', window.testState.effect)
     return window.testState.value
   })
-  
+
   assert.is(value, 1)
 })
 
-suite('guards against mismatches with only', async ({ puppeteer: { page } }) => {
+suite('guards against mismatches with only', async ({ playwright: { page } }) => {
   await page.evaluate(() => {
     window.testState = { value: 0 }
 
@@ -123,7 +125,7 @@ suite('guards against mismatches with only', async ({ puppeteer: { page } }) => 
     document.body.removeEventListener('click', window.testState.effect)
     return window.testState.value
   })
-  
+
   assert.is(value, 0)
 })
 

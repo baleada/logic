@@ -1,13 +1,15 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 import type {
   KeychordType,
   KeychordMetadata,
 } from '../../src/factories'
 
 const suite = withPlaywright(
-  createSuite('createKeychord')
+  createSuite('createKeychord'),
+  withPlaywrightOptions
 )
 
 suite('recognizes keychords', async ({ playwright: { page, reloadNext } }) => {
@@ -24,7 +26,7 @@ suite('recognizes keychords', async ({ playwright: { page, reloadNext } }) => {
   await page.keyboard.press('O')
   await page.keyboard.press('O')
   await page.keyboard.press('P')
-  
+
   const value = await page.evaluate(() => window.testState.listenable.recognizeable.status),
         expected = 'recognized'
 
@@ -47,7 +49,7 @@ suite('denies after max interval is exceeded', async ({ playwright: { page, relo
   await page.keyboard.press('O')
   await page.waitForTimeout(100)
   await page.keyboard.press('O')
-  
+
   const value = await page.evaluate(() => window.testState.listenable.recognizeable.status),
         expected = 'denied'
 
@@ -71,7 +73,7 @@ suite('recognizes keychords with modifier held down', async ({ playwright: { pag
   await page.keyboard.press('O')
   await page.keyboard.press('O')
   await page.keyboard.press('P')
-  
+
   const value = await page.evaluate(() => window.testState.listenable.recognizeable.status),
         expected = 'recognized'
 
@@ -101,7 +103,7 @@ suite('recognizes keychords with modifier released', async ({ playwright: { page
   await page.keyboard.up('Alt')
   await page.keyboard.down('Alt')
   await page.keyboard.press('P')
-  
+
   const value = await page.evaluate(() => window.testState.listenable.recognizeable.status),
         expected = 'recognized'
 
@@ -124,9 +126,9 @@ suite('stores played chord', async ({ playwright: { page, reloadNext } }) => {
   await page.keyboard.press('O')
   await page.keyboard.press('O')
   await page.keyboard.press('P')
-  
+
   const value = await page.evaluate(() => window.testState.listenable.recognizeable.metadata.played.map(({ keycombo }) => keycombo)),
-        expected = ['p', 'o', 'o', 'p']        
+        expected = ['p', 'o', 'o', 'p']
 
   assert.equal(value, expected)
 

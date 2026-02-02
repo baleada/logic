@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 import type {
   PointerpressType,
   PointerpressMetadata,
@@ -8,7 +9,8 @@ import type {
 import type { Listenable } from '../../src/classes/Listenable'
 
 const suite = withPlaywright(
-  createSuite('createterPointerpress')
+  createSuite('createterPointerpress'),
+  withPlaywrightOptions
 )
 
 suite('recognizes pointerpress', async ({ playwright: { page, reloadNext } }) => {

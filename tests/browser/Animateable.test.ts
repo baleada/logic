@@ -1,14 +1,17 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+
+import { withPlaywright } from '@baleada/prepare'
+import { withPlaywrightOptions } from '../fixtures/withPlaywrightOptions'
 import type { AnimateableKeyframe } from '../../src/classes'
 
 type Context = {
   keyframes: AnimateableKeyframe<any>[]
 }
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite<Context>('Animateable'),
+  withPlaywrightOptions
 )
 
 suite.before(context => {
@@ -18,7 +21,7 @@ suite.before(context => {
   ]
 })
 
-suite('initial playbackRate is 1', async ({ puppeteer: { page }, keyframes }) => {
+suite('initial playbackRate is 1', async ({ playwright: { page }, keyframes }) => {
   const value = await page.evaluate((keyframes: AnimateableKeyframe<any>[]) => {
     const instance = new window.Logic.Animateable(keyframes)
     return instance.playbackRate
@@ -27,7 +30,7 @@ suite('initial playbackRate is 1', async ({ puppeteer: { page }, keyframes }) =>
   assert.is(value, 1)
 })
 
-suite('assignment sets the playback rate', async ({ puppeteer: { page }, keyframes }) => {
+suite('assignment sets the playback rate', async ({ playwright: { page }, keyframes }) => {
   const value = await page.evaluate((keyframes: AnimateableKeyframe<any>[]) => {
     const instance = new window.Logic.Animateable(keyframes)
     instance.playbackRate = 2
@@ -37,7 +40,7 @@ suite('assignment sets the playback rate', async ({ puppeteer: { page }, keyfram
   assert.is(value, 2)
 })
 
-suite('setPlaybackRate sets the playback rate', async ({ puppeteer: { page }, keyframes }) => {
+suite('setPlaybackRate sets the playback rate', async ({ playwright: { page }, keyframes }) => {
   const value = await page.evaluate((keyframes: AnimateableKeyframe<any>[]) => {
     const instance = new window.Logic.Animateable(keyframes)
     return instance.setPlaybackRate(2).playbackRate
@@ -46,7 +49,7 @@ suite('setPlaybackRate sets the playback rate', async ({ puppeteer: { page }, ke
   assert.is(value, 2)
 })
 
-suite('status is "ready" after construction', async ({ puppeteer: { page }, keyframes }) => {
+suite('status is "ready" after construction', async ({ playwright: { page }, keyframes }) => {
   const value = await page.evaluate((keyframes: AnimateableKeyframe<any>[]) => {
     const instance = new window.Logic.Animateable(keyframes)
     return instance.status
