@@ -20,6 +20,7 @@
     "test:node": "npm run test:only . node",
     "test:browser": "npm run test:only . browser",
     "test": "npm run test:only .",
+    "test:concurrently": "npx concurrently -k \"npm run dev\" \"npm run test\" --names=dev,test",
     "lint": "eslint 'src/**'",
     "lint:fix": "eslint --fix 'src/**'",
     "dev": "vite"
