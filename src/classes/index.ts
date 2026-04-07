@@ -1,6 +1,6 @@
 export { Animateable } from './Animateable'
 export type { AnimateableKeyframe, AnimateableOptions, AnimateableStatus, AnimateFrame, AnimateFrameEffect, AnimateOptions } from './Animateable'
-export { linear, materialStandard, materialDecelerated, materialAccelerated, verouEase, verouEaseIn, verouEaseOut, verouEaseInOut, easingsNetInSine, easingsNetOutSine, easingsNetInOutSine, easingsNetInQuad, easingsNetOutQuad, easingsNetInOutQuad, easingsNetInCubic, easingsNetOutCubic, easingsNetInOutCubic, easingsNetInQuart, easingsNetInQuint, easingsNetOutQuint, easingsNetInOutQuint, easingsNetInExpo, easingsNetOutExpo, easingsNetInOutExpo, easingsNetInCirc, easingsNetOutCirc, easingsNetInOutCirc, easingsNetInBack, easingsNetOutBack, easingsNetInOutBack } from './Animateable'
+export { defineAnimateableKeyframes, linear, materialStandard, materialDecelerated, materialAccelerated, verouEase, verouEaseIn, verouEaseOut, verouEaseInOut, easingsNetInSine, easingsNetOutSine, easingsNetInOutSine, easingsNetInQuad, easingsNetOutQuad, easingsNetInOutQuad, easingsNetInCubic, easingsNetOutCubic, easingsNetInOutCubic, easingsNetInQuart, easingsNetInQuint, easingsNetOutQuint, easingsNetInOutQuint, easingsNetInExpo, easingsNetOutExpo, easingsNetInOutExpo, easingsNetInCirc, easingsNetOutCirc, easingsNetInOutCirc, easingsNetInBack, easingsNetOutBack, easingsNetInOutBack } from './Animateable'
 
 export { Broadcastable } from './Broadcastable'
 export type { BroadcastableOptions, BroadcastableStatus } from './Broadcastable'
@@ -37,6 +37,10 @@ export type { ListenableSupportedType, ListenableSupportedEventType, ListenableK
 export { Navigateable } from './Navigateable'
 export type { NavigateableOptions, NavigateableStatus } from './Navigateable'
 
+export { Operateable } from './Operateable'
+export type { OperateableOptions, OperateableStatus, OperationDescriptor, DefinedIDBObjectStore } from './Operateable'
+export { createDefineObjectStore } from './Operateable'
+
 export { Pickable } from './Pickable'
 export type { PickableOptions, PickableStatus, PickOptions } from './Pickable'
 
@@ -51,3 +55,6 @@ export type { ShareableOptions, ShareableStatus } from './Shareable'
 
 export { Storeable } from './Storeable'
 export type { StoreableOptions, StoreableStatus } from './Storeable'
+
+export { Transactable } from './Transactable'
+export type { TransactableOptions, TransactableStatus, OpenOptions, TransactOptions, TransactEffect } from './Transactable'

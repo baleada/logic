@@ -15,6 +15,9 @@ export type ListenableSupportedType = 'recognizeable'
   | ListenableMediaQuery
   | keyof Omit<HTMLElementEventMap, 'resize'>
   | keyof Omit<DocumentEventMap, 'resize'>
+  | keyof IDBEventMap
+
+export type IDBEventMap = IDBRequestEventMap & IDBTransactionEventMap & IDBOpenDBRequestEventMap & IDBDatabaseEventMap
 
 type ListenableMediaQuery = `(${string})`
 
@@ -46,6 +49,7 @@ export type ListenEffect<Type extends ListenableSupportedType> =
   Type extends ('keydown' | 'keyup') ? (event: ListenEffectParam<Type>) => any :
   Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? (event: ListenEffectParam<Type>) => any :
   Type extends keyof Omit<DocumentEventMap, 'resize'> ? (event: ListenEffectParam<Type>) => any :
+  Type extends keyof IDBEventMap ? (event: ListenEffectParam<Type>) => any :
   never
 
 export type ListenEffectParam<Type extends ListenableSupportedType> =
@@ -58,6 +62,7 @@ export type ListenEffectParam<Type extends ListenableSupportedType> =
   Type extends ListenableRightClick ? MouseEvent :
   Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? HTMLElementEventMap[Type] :
   Type extends keyof Omit<DocumentEventMap, 'resize'> ? DocumentEventMap[Type] :
+  Type extends keyof IDBEventMap ? IDBEventMap[Type] :
   never
 
 export type ListenOptions<Type extends ListenableSupportedType> =
@@ -69,18 +74,26 @@ export type ListenOptions<Type extends ListenableSupportedType> =
   Type extends ListenableMediaQuery ? { instantEffect?: (list: MediaQueryList) => any } :
   Type extends keyof Omit<HTMLElementEventMap, 'resize'> ? EventListenOptions :
   Type extends keyof Omit<DocumentEventMap, 'resize'> ? EventListenOptions :
+  Type extends keyof IDBEventMap ? EventListenOptions :
   never
 
 type ObservationListenOptions = { target?: Element }
 
 type EventListenOptions = {
-  target?: Element | Document | (Window & typeof globalThis)
+  target?: Element | Document | (Window & typeof globalThis) | IDB
   addEventListener?: AddEventListenerOptions,
   useCapture?: boolean,
   // Can support wantsUnstrusted if needed
   except?: string[],
   only?: string[],
 }
+
+type IDB = (
+  | IDBRequest
+  | IDBOpenDBRequest
+  | IDBTransaction
+  | IDBDatabase
+)
 
 export type ListenableActive<
   Type extends ListenableSupportedType,
