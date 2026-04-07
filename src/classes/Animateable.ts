@@ -1,3 +1,4 @@
+import type { EasingFunction } from 'bezier-easing'
 import BezierEasing from 'bezier-easing'
 import {
   filter,
@@ -97,8 +98,8 @@ export class Animateable<Value extends string | number | any[]> {
   private alternates: boolean
   private controlPoints: AnimateableControlPoints
   private reversedControlPoints: AnimateableControlPoints
-  private toAnimationProgress: BezierEasing.EasingFunction
-  private reversedToAnimationProgress: BezierEasing.EasingFunction
+  private toAnimationProgress: EasingFunction
+  private reversedToAnimationProgress: EasingFunction
   private playCache: { effect?: AnimateFrameEffect, options?: AnimateOptions }
   private reverseCache: { effect?: AnimateFrameEffect, options?: AnimateOptions }
   private pauseCache: { status?: 'playing' | 'reversing', timeProgress?: number }
@@ -833,7 +834,7 @@ export type Easeable = {
   value: { previous: string | number | any[], next: string | number | any[] },
   progress: { start: number, end: number },
   hasCustomTiming: boolean,
-  toAnimationProgress: BezierEasing.EasingFunction
+  toAnimationProgress: EasingFunction
 }
 
 type GetEaseables<Value extends string | number | any[]> = ({ properties, keyframes }: { properties: string[], keyframes: AnimateableKeyframe<Value>[] }) => Easeable[]
