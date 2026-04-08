@@ -1,5 +1,5 @@
 import ky from 'ky'
-import type { Options as KyOptions } from 'ky'
+import type { KyInstance, Options as KyOptions } from 'ky'
 import { predicateFunction } from '../extracted'
 import { Resolveable } from './Resolveable'
 
@@ -53,8 +53,8 @@ export class Fetchable<ResolveableValue> {
   get status () {
     return this.computedStatus
   }
-  private computedKy: ReturnType<typeof ky['create']>
-  get ky () {
+  private computedKy: KyInstance
+  get ky (): KyInstance {
     return this.computedKy
   }
   private computedAbortController: AbortController
