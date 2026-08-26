@@ -1,7 +1,6 @@
 // Many of these functions are preferable to Object.<something> for better type inference
 // on objects with no risk of type-unsafe keys being added dynamically
 import { merge } from 'dset/merge'
-import { createClone } from './any'
 
 type ObjectTransform<Type extends Record<any, any>, Transformed> = (transform: Type) => Transformed
 
@@ -98,10 +97,7 @@ export function createSome<Type extends Record<any, any>>(predicate: (key: keyof
  * [Docs](https://baleada.dev/docs/logic/pipes/deep-merge)
  */
 export function createDeepMerge<Type extends Record<any, any>>(override?: Type): ObjectTransform<Type, Type> {
-  return object => {
-    const merged: Type = createClone<typeof object>()(object)
-    return merge(merged, override || {})
-  }
+  return object => merge(object, override || {})
 }
 
 export type CreateFindOptions<Conditions extends any[]> = {
