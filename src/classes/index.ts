@@ -35,7 +35,7 @@ export { Listenable } from './Listenable'
 export type { ListenableSupportedType, ListenableSupportedEventType, ListenableKeycombo, ListenableMousecombo, ListenablePointercombo, ListenableOptions, ListenableStatus, ListenEffect, ListenEffectParam, ListenOptions, ListenableActive } from './Listenable'
 
 export { Navigateable } from './Navigateable'
-export type { NavigateableOptions, NavigateableStatus } from './Navigateable'
+export type { NavigateableOptions, NavigateableStatus, NextAndPreviousOptions } from './Navigateable'
 
 export { Operateable } from './Operateable'
 export type { OperateableOptions, OperateableStatus, OperationDescriptor, DefinedIDBObjectStore } from './Operateable'
